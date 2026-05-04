@@ -1367,28 +1367,19 @@ app.get('/player/:slug', async (req, res) => {
           const dur = Math.floor(m.gameDuration / 60) + 'm ' + (m.gameDuration % 60) + 's';
           const champImg = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${getChampImg({image: m.champion})}`;
           
-          // Items - Trinket (index 6) en posición 4, Misión de Carril en posición 8
+          // Items - Trinket en posición 4, Botas de carril en posición 8
           const BOOT_IDS = [1001, 3006, 3009, 3020, 3047, 3111, 3117, 3158, 2422];
-          const PINK_WARD_ID = 2055;
           const itmArr = m.items || [0,0,0,0,0,0,0,0];
           const mPos = (m.position || m.individualPosition || '').toUpperCase();
           const mIsADC  = mPos === 'BOTTOM' || (m.role||'') === 'DUO_CARRY' || (m.role||'') === 'CARRY';
           const mIsSupp = mPos === 'UTILITY' || (m.role||'') === 'DUO_SUPPORT' || (m.role||'') === 'SUPPORT';
-          const mLaneQuest = m.challenges?.laneQuestCompleted === 1;
 
           let mNormalItems = [itmArr[0], itmArr[1], itmArr[2], itmArr[3], itmArr[4], itmArr[5]];
-          let mMissionItem = itmArr[7] || 0;
+          let mMissionItem = 0;
 
-          if (mMissionItem === 0) {
-            if (mIsADC && mLaneQuest) {
-              const bootIdx = mNormalItems.findIndex(id => BOOT_IDS.includes(Number(id)));
-              if (bootIdx !== -1) { mMissionItem = mNormalItems[bootIdx]; mNormalItems[bootIdx] = 0; }
-              else { mMissionItem = 3006; }
-            } else if (mIsSupp && mLaneQuest) {
-              const pinkIdx = mNormalItems.findIndex(id => Number(id) === PINK_WARD_ID);
-              if (pinkIdx !== -1) { mMissionItem = mNormalItems[pinkIdx]; mNormalItems[pinkIdx] = 0; }
-              else { mMissionItem = PINK_WARD_ID; }
-            }
+          if (mIsADC || mIsSupp) {
+            const bootIdx = mNormalItems.findIndex(id => BOOT_IDS.includes(Number(id)));
+            if (bootIdx !== -1) { mMissionItem = mNormalItems[bootIdx]; mNormalItems[bootIdx] = 0; }
           }
 
           const reordered = [
