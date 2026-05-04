@@ -1616,6 +1616,30 @@ app.post('/player/:puuid/force-update', async (req, res) => {
   }
 });
 
+// Endpoint DEBUG: Ver items crudos de Riot para diagnosticar item7
+app.get('/api/debug/match/:matchId', async (req, res) => {
+  const { matchId } = req.params;
+  try {
+    const url = `https://americas.api.riotgames.com/lol/match/v5/matches/${matchId}?api_key=${API_KEY}`;
+    const response = await fetch(url);
+    if (!response.ok) return res.status(404).json({ error: 'Partida no encontrada' });
+    const data = await response.json();
+    const players = data.info.participants.map(p => ({
+      name: p.riotIdGameName || p.summonerName,
+      position: p.teamPosition,
+      role: p.role,
+      item0: p.item0, item1: p.item1, item2: p.item2,
+      item3: p.item3, item4: p.item4, item5: p.item5,
+      item6: p.item6, item7: p.item7,
+      questItemSlot: p.questItemSlot,
+      augments: p.augments
+    }));
+    res.json(players);
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Endpoint para obtener detalles de una partida específica (Scoreboard)
 app.get('/api/match/:matchId', async (req, res) => {
   const { matchId } = req.params;
