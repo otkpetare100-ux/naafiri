@@ -183,13 +183,14 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
     let normalItems = [itm[0], itm[1], itm[2], itm[3], itm[4], itm[5]];
     let missionItem = 0;
 
-    // Si es ADC o Support: buscar botas en inventario normal y moverlas al slot 8
-    if (isADC || isSupp) {
+    if (isADC) {
+      // ADC: mover botas al slot 8
       const bootIdx = normalItems.findIndex(id => BOOT_IDS.includes(Number(id)));
-      if (bootIdx !== -1) {
-        missionItem = normalItems[bootIdx];
-        normalItems[bootIdx] = 0;
-      }
+      if (bootIdx !== -1) { missionItem = normalItems[bootIdx]; normalItems[bootIdx] = 0; }
+    } else if (isSupp) {
+      // Support: mover Pink Ward (2055) al slot 8
+      const pinkIdx = normalItems.findIndex(id => Number(id) === 2055);
+      if (pinkIdx !== -1) { missionItem = normalItems[pinkIdx]; normalItems[pinkIdx] = 0; }
     }
 
     // Mapeo: [item0, item1, item2, Trinket, item3, item4, item5, Botas]
@@ -2002,12 +2003,12 @@ function renderTeamTable(title, players, teamClass, teamData, maxDmg, gameDurati
     let normalItems = [itm[0], itm[1], itm[2], itm[3], itm[4], itm[5]];
     let missionItem = 0;
 
-    if (isADC || isSupp) {
+    if (isADC) {
       const bootIdx = normalItems.findIndex(id => BOOT_IDS.includes(Number(id)));
-      if (bootIdx !== -1) {
-        missionItem = normalItems[bootIdx];
-        normalItems[bootIdx] = 0;
-      }
+      if (bootIdx !== -1) { missionItem = normalItems[bootIdx]; normalItems[bootIdx] = 0; }
+    } else if (isSupp) {
+      const pinkIdx = normalItems.findIndex(id => Number(id) === 2055);
+      if (pinkIdx !== -1) { missionItem = normalItems[pinkIdx]; normalItems[pinkIdx] = 0; }
     }
 
     const reordered = [

@@ -1377,9 +1377,12 @@ app.get('/player/:slug', async (req, res) => {
           let mNormalItems = [itmArr[0], itmArr[1], itmArr[2], itmArr[3], itmArr[4], itmArr[5]];
           let mMissionItem = 0;
 
-          if (mIsADC || mIsSupp) {
+          if (mIsADC) {
             const bootIdx = mNormalItems.findIndex(id => BOOT_IDS.includes(Number(id)));
             if (bootIdx !== -1) { mMissionItem = mNormalItems[bootIdx]; mNormalItems[bootIdx] = 0; }
+          } else if (mIsSupp) {
+            const pinkIdx = mNormalItems.findIndex(id => Number(id) === 2055);
+            if (pinkIdx !== -1) { mMissionItem = mNormalItems[pinkIdx]; mNormalItems[pinkIdx] = 0; }
           }
 
           const reordered = [
