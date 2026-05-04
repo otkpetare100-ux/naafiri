@@ -173,16 +173,16 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
     const queue = QUEUE_TYPES[m.queueId] || 'Partida';
     const champImg = 'https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/champion/' + getChampImageName(m.champion);
     
-    // Items - Trinket (index 6) va en la posición 4
-    const itm = m.items || [0,0,0,0,0,0,0];
+    // Items - Trinket (index 6) en posición 4, item7 (misión de rol) en posición 8
+    const itm = m.items || [0,0,0,0,0,0,0,0];
 
-    // Mapeo: [item0, item1, item2, Trinket, item3, item4, item5]
+    // Mapeo: [item0, item1, item2, Trinket, item3, item4, item5, Misión]
     const reordered = [
       itm[0], itm[1], itm[2], itm[6],
-      itm[3], itm[4], itm[5]
+      itm[3], itm[4], itm[5], itm[7] || 0
     ];
 
-    const itemsHTML = reordered.map(id => {
+    const itemsHTML = reordered.map((id, idx) => {
       if (!id || id === 0) return '<div class="mv2-item empty"></div>';
       return '<img class="mv2-item" src="https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/item/' + id + '.png" onerror="this.style.visibility=\'hidden\'" />';
     }).join('');
@@ -1976,13 +1976,13 @@ function renderTeamTable(title, players, teamClass, teamData, maxDmg, gameDurati
     
     html += '<td><div class="item-list">';
 
-    // Items - Trinket (index 6) va en la posición 4
-    const itm = p.items || [0,0,0,0,0,0,0];
+    // Items - Trinket (index 6) en posición 4, item7 (misión de rol) en posición 8
+    const itm = p.items || [0,0,0,0,0,0,0,0];
 
-    // Mapeo: [item0, item1, item2, Trinket, item3, item4, item5]
+    // Mapeo: [item0, item1, item2, Trinket, item3, item4, item5, Misión]
     const reordered = [
       itm[0], itm[1], itm[2], itm[6],
-      itm[3], itm[4], itm[5]
+      itm[3], itm[4], itm[5], itm[7] || 0
     ];
 
     reordered.forEach(id => {

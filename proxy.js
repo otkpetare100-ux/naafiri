@@ -1367,12 +1367,12 @@ app.get('/player/:slug', async (req, res) => {
           const dur = Math.floor(m.gameDuration / 60) + 'm ' + (m.gameDuration % 60) + 's';
           const champImg = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${getChampImg({image: m.champion})}`;
           
-          // Items - Trinket (index 6) va en la posición 4
-          const itmArr = m.items || [0,0,0,0,0,0,0];
+          // Items - Trinket (index 6) en posición 4, item7 (misión de rol) en posición 8
+          const itmArr = m.items || [0,0,0,0,0,0,0,0];
 
           const reordered = [
             itmArr[0], itmArr[1], itmArr[2], itmArr[6],
-            itmArr[3], itmArr[4], itmArr[5]
+            itmArr[3], itmArr[4], itmArr[5], itmArr[7] || 0
           ];
 
           const itemsHTML = reordered.map(id => {
