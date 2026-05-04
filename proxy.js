@@ -1377,23 +1377,37 @@ app.get('/player/:slug', async (req, res) => {
           const isSupp = pos === 'UTILITY' || pos === 'SUPPORT' || role === 'DUO_SUPPORT' || role === 'SUPPORT';
           const isBotlane = isADC || isSupp;
 
-          let extraItem = m.questItemSlot || 0;
+          let extraItem = itmArr[7] || 0;
+
+          // Nueva lógica Temporada 2026: Buscar en Augments y Pasivas (Buffs)
+          if (extraItem === 0) {
+            if (m.augments && Array.isArray(m.augments)) {
+              const bootInAugments = m.augments.find(id => BOOT_IDS.includes(Number(id)));
+              if (bootInAugments) extraItem = Number(bootInAugments);
+            }
+
+            if (extraItem === 0 && m.challenges) {
+              const hasMissionBuff = Object.keys(m.challenges).some(key => 
+                key.includes('AdcMissionSpeed') || key.includes('RoleBootsMovement')
+              );
+              if (hasMissionBuff) extraItem = 3006;
+            }
+          }
+
           let itemsOnly = itmArr.slice(0, 6).filter(id => {
             const nid = Number(id);
             if (nid === 0) return false;
 
-            if (extraItem > 0) return true;
-
-            if (isBotlane && extraItem === 0) {
-              if (isSupp && nid === PINK_WARD_ID) {
-                extraItem = nid;
-                return false;
-              }
-              if (BOOT_IDS.includes(nid)) {
-                extraItem = nid;
-                return false;
-              }
+            if (isADC && BOOT_IDS.includes(nid)) {
+              if (extraItem === 0) extraItem = nid;
+              return false;
             }
+            
+            if (isSupp && nid === PINK_WARD_ID) {
+              if (extraItem === 0) extraItem = nid;
+              return false;
+            }
+
             return true;
           });
           while(itemsOnly.length < 6) itemsOnly.push(0);
