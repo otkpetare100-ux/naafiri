@@ -114,6 +114,9 @@ function initBot(db) {
         return msg.channel.send(`<@${msg.author.id}> ⌛ Por favor, espera **${timeLeft} minuto(s)** para volver a usar el comando de ayuda.`);
       }
 
+      helpCooldowns.set(msg.author.id, now);
+      setTimeout(() => helpCooldowns.delete(msg.author.id), cooldownAmount);
+
       const embed = new EmbedBuilder()
         .setTitle('🐾 Centro de Ayuda - LAN Tracker')
         .setDescription('Pulsa el botón de abajo para ver la guía de comandos de forma privada.')
@@ -348,9 +351,9 @@ function initBot(db) {
 
       // Búsqueda robusta: exacto primero, luego parcial
       const findItem = (inv, name) => {
-        const exact = GACHA_ITEMS.find(i => i.name.toLowerCase() === name.toLowerCase() && inv.includes(i.id));
+        const exact = GACHA_ITEMS.find(i => i.name.toLowerCase() === name.toLowerCase() && inv.some(item => item.id === i.id));
         if (exact) return exact;
-        return GACHA_ITEMS.find(i => i.name.toLowerCase().includes(name.toLowerCase()) && inv.includes(i.id));
+        return GACHA_ITEMS.find(i => i.name.toLowerCase().includes(name.toLowerCase()) && inv.some(item => item.id === i.id));
       };
 
       const myItem = findItem(senderEco.inventory, parts[0]);
@@ -396,9 +399,13 @@ function initBot(db) {
 
     if (command === 'shame' || command === 'muro') {
       const accounts = await db.collection('accounts').find({}).toArray();
-      const losers = accounts.sort((a,b) => (a.soloQ?.wins / (a.soloQ?.wins + a.soloQ?.losses || 1)) - (b.soloQ?.wins / (b.soloQ?.wins + b.soloQ?.losses || 1))).slice(0, 5);
+      const losers = accounts.sort((a,b) => {
+        const wrA = a.soloQ ? a.soloQ.wins / (a.soloQ.wins + a.soloQ.losses) : 0;
+        const wrB = b.soloQ ? b.soloQ.wins / (b.soloQ.wins + b.soloQ.losses) : 0;
+        return wrA - wrB;
+      }).slice(0, 5);
       
-      const list = losers.map((a, i) => `${i+1}. **${a.gameName}** - WR: ${Math.round((a.soloQ?.wins / (a.soloQ?.wins + a.soloQ?.losses || 1)) * 100)}% 🤡`).join('\n');
+      const list = losers.map((a, i) => `${i+1}. **${a.gameName}** - WR: ${Math.round((a.soloQ ? a.soloQ.wins / (a.soloQ.wins + a.soloQ.losses) : 0) * 100)}% 🤡`).join('\n');
       
       const embed = new EmbedBuilder()
         .setTitle('🤡 El Muro de la Vergüenza')
@@ -455,70 +462,7 @@ function initBot(db) {
       msg.channel.send({ content: `<@${msg.author.id}>`,  embeds: [embed] });
     }
 
-    if (command === 'apostar') {
-      const isAnonymous = args.some(arg => arg.toLowerCase() === 'anonimo');
-      const filteredArgs = args.filter(arg => arg.toLowerCase() !== 'anonimo');
-      
-      const amount = parseInt(filteredArgs[0]);
-      const choice = filteredArgs[1]?.toLowerCase();
-      const targetSlug = filteredArgs.slice(2).join(' ');
 
-      if (isNaN(amount) || amount <= 0 || !['gana', 'pierde'].includes(choice) || !targetSlug) {
-        return msg.channel.send(`<@${msg.author.id}> ❌ Uso: \`!apostar [cantidad] [gana/pierde] Nombre#TAG [anonimo]\``);
-      }
-
-      const targetAcc = await findAccountBySlug(targetSlug);
-      if (!targetAcc) return msg.channel.send(`<@${msg.author.id}> ❌ Ese jugador no está registrado en el dashboard.`);
-
-      // 1. Calcular multiplicador dinámico basado en Winrate
-      let multiplier = 2.0;
-      if (targetAcc.soloQ && (targetAcc.soloQ.wins + targetAcc.soloQ.losses) > 0) {
-        const totalGames = targetAcc.soloQ.wins + targetAcc.soloQ.losses;
-        const wr = (targetAcc.soloQ.wins / totalGames) * 100;
-        if (wr > 60) multiplier = 1.5; // Favorito
-        else if (wr < 45) multiplier = 3.0; // Underdog
-      }
-
-      // 2. Validación de tiempo de apuesta (5 min desde el aviso en Discord)
-      if (targetAcc.liveGameStartedAt) {
-        const now = new Date();
-        const startedAt = new Date(targetAcc.liveGameStartedAt);
-        const diffMs = now - startedAt;
-        const diffMins = Math.floor(diffMs / 60000);
-
-        if (diffMins >= 5) {
-          return msg.channel.send(`<@${msg.author.id}> ❌ **Demasiado tarde.** El aviso de partida de **${targetAcc.gameName}** salió hace ${diffMins} minutos. Solo se permite apostar durante los primeros 5 minutos.`);
-        }
-      } else {
-        return msg.channel.send(`<@${msg.author.id}> ❌ No detecto que **${targetAcc.gameName}** esté en una partida activa ahora mismo.`);
-      }
-
-      const existingBet = await db.collection('bets').findOne({ discordId: msg.author.id, targetPuuid: targetAcc.puuid, status: 'open' });
-      if (existingBet) return msg.channel.send(`<@${msg.author.id}> ⚠️ Ya tienes una apuesta activa por este jugador en esta partida.`);
-
-      const user = await db.collection('economy').findOne({ discordId: msg.author.id });
-      if (!user || user.coins < amount) return msg.channel.send(`<@${msg.author.id}> ❌ No tienes suficientes Naafiri Coins.`);
-
-      // Guardar apuesta
-      if (isAnonymous) msg.delete().catch(() => {});
-      
-      await db.collection('bets').insertOne({
-        discordId: msg.author.id,
-        amount,
-        choice,
-        targetPuuid: targetAcc.puuid,
-        targetName: `${targetAcc.gameName}#${targetAcc.tagLine}`,
-        status: 'open',
-        anonymous: isAnonymous,
-        multiplier: multiplier,
-        date: new Date()
-      });
-
-      await db.collection('economy').updateOne({ discordId: msg.author.id }, { $inc: { coins: -amount } });
-      
-      const revealMsg = isAnonymous ? '¡La elección se revelará al final!' : `has apostado a que **${choice}**`;
-      msg.channel.send(`<@${msg.author.id}> ✅ Apuesta registrada ${isAnonymous ? '(Anónima)' : ''}: **${amount} coins** (Multiplicador: **${multiplier}x**). ${revealMsg} 🤡`);
-    }
 
     if (command === 'gacha' || command === 'tiro') {
       const COST = 10;
@@ -685,11 +629,16 @@ function initBot(db) {
         const amount = parseInt(args.find(a => !isNaN(a) && a !== ''));
         if (!target || isNaN(amount) || amount <= 0)
           return msg.channel.send(`<@${msg.author.id}> Uso: \`!admin_quitar @usuario cantidad\``);
+        
+        const targetEco = await db.collection('economy').findOne({ discordId: target.id });
+        const currentCoins = targetEco ? targetEco.coins : 0;
+        const finalAmount = Math.min(amount, currentCoins);
+
         await db.collection('economy').updateOne(
           { discordId: target.id },
-          { $inc: { coins: -amount } }
+          { $inc: { coins: -finalAmount } }
         );
-        return msg.channel.send(`<@${msg.author.id}> ✅ **-${amount} coins** quitados a ${target.username}.`);
+        return msg.channel.send(`<@${msg.author.id}> ✅ **-${finalAmount} coins** quitados a ${target.username}.`);
       }
 
       // !admin_setcoins @usuario cantidad
@@ -995,7 +944,7 @@ function initBot(db) {
               .addFields(
                 { name: '👤 Perfil y Rango', value: '`!perfil [N#T]` - Mira tu rango.\n`!stats [N#T]` - Estadísticas.\n`!ladder` - Top 10 Jugadores.\n`!shame` - Muro de la vergüenza.\n`!web` - Tu perfil privado.' },
                 { name: '💰 Economía', value: '`!monedas` - Tu saldo.\n`!diario` - 100 coins gratis.\n`!pagar @u cant` - Enviar coins.\n`!top_ricos` - Top 10 Ricos.' },
-                { name: '🎮 Diversión y Colección', value: '`!apostar` - Apuesta en vivo.\n`!ludopata` - Mira tus apuestas.\n`!gacha` - Nuevo campeón.\n`!mochila` - Tu colección.\n`!reroll` - Fusiona 3 repetidos.\n`!reciclar` - Desencanta repetidos.' }
+                { name: '🎮 Diversión y Colección', value: '`!ludopata` - Mira tus apuestas.\n`!gacha` - Nuevo campeón.\n`!mochila` - Tu colección.\n`!reroll` - Fusiona 3 repetidos.\n`!reciclar` - Desencanta repetidos.' }
               )
               .setColor(0x576bce)
               .setFooter({ text: 'Naafiri Bot' });
@@ -1117,6 +1066,7 @@ function initBot(db) {
           targetPuuid: puuid,
           targetName: `${targetAcc.gameName}#${targetAcc.tagLine}`,
           status: 'open',
+          anonymous: false,
           multiplier: multiplier,
           date: new Date()
         });
@@ -1154,15 +1104,19 @@ function initBot(db) {
           const sEco = await dbInstance.collection('economy').findOne({ discordId: senderId });
           const tEco = await dbInstance.collection('economy').findOne({ discordId: targetId });
 
-          if (!sEco.inventory.includes(myItemId) || !tEco.inventory.includes(suItemId)) {
+          if (!sEco.inventory.some(i => i.id === myItemId) || !tEco.inventory.some(i => i.id === suItemId)) {
             return interaction.editReply({ content: '❌ Uno de los items ya no está disponible.', embeds: [], components: [] });
           }
 
           // Realizar intercambio
-          const newSInv = sEco.inventory.filter(id => id !== myItemId);
-          newSInv.push(suItemId);
-          const newTInv = tEco.inventory.filter(id => id !== suItemId);
-          newTInv.push(myItemId);
+          const myItemObj = sEco.inventory.find(i => i.id === myItemId);
+          const suItemObj = tEco.inventory.find(i => i.id === suItemId);
+
+          const newSInv = sEco.inventory.filter(i => i.id !== myItemId);
+          newSInv.push({ ...suItemObj, date: new Date() });
+          
+          const newTInv = tEco.inventory.filter(i => i.id !== suItemId);
+          newTInv.push({ ...myItemObj, date: new Date() });
 
           await dbInstance.collection('economy').updateOne({ discordId: senderId }, { $set: { inventory: newSInv, discordTag: interaction.user.tag } });
           await dbInstance.collection('economy').updateOne({ discordId: targetId }, { $set: { inventory: newTInv, discordTag: interaction.user.tag } });
