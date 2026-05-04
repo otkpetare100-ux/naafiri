@@ -173,13 +173,44 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
     const queue = QUEUE_TYPES[m.queueId] || 'Partida';
     const champImg = 'https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/champion/' + getChampImageName(m.champion);
     
-    // Items - Trinket (index 6) en posición 4, item7 (misión de rol) en posición 8
+    // Items - Trinket (index 6) en posición 4, Misión de Carril en posición 8
+    const BOOT_IDS = [1001, 3006, 3009, 3020, 3047, 3111, 3117, 3158, 2422];
+    const PINK_WARD_ID = 2055;
     const itm = m.items || [0,0,0,0,0,0,0,0];
+    const pos = (m.position || m.individualPosition || '').toUpperCase();
+    const isADC  = pos === 'BOTTOM' || m.role === 'DUO_CARRY' || m.role === 'CARRY';
+    const isSupp = pos === 'UTILITY' || m.role === 'DUO_SUPPORT' || m.role === 'SUPPORT';
+    const laneQuestDone = m.challenges?.laneQuestCompleted === 1;
+
+    // Slots normales (0-5)
+    let normalItems = [itm[0], itm[1], itm[2], itm[3], itm[4], itm[5]];
+    let missionItem = itm[7] || 0;
+
+    if (missionItem === 0) {
+      if (isADC && laneQuestDone) {
+        // Buscar bota en inventario normal
+        const bootIdx = normalItems.findIndex(id => BOOT_IDS.includes(Number(id)));
+        if (bootIdx !== -1) {
+          missionItem = normalItems[bootIdx];
+          normalItems[bootIdx] = 0; // Sacarla del inventario normal
+        } else {
+          missionItem = 3006; // Bota ya absorbida al slot de misión
+        }
+      } else if (isSupp && laneQuestDone) {
+        const pinkIdx = normalItems.findIndex(id => Number(id) === PINK_WARD_ID);
+        if (pinkIdx !== -1) {
+          missionItem = normalItems[pinkIdx];
+          normalItems[pinkIdx] = 0;
+        } else {
+          missionItem = PINK_WARD_ID;
+        }
+      }
+    }
 
     // Mapeo: [item0, item1, item2, Trinket, item3, item4, item5, Misión]
     const reordered = [
-      itm[0], itm[1], itm[2], itm[6],
-      itm[3], itm[4], itm[5], itm[7] || 0
+      normalItems[0], normalItems[1], normalItems[2], itm[6],
+      normalItems[3], normalItems[4], normalItems[5], missionItem
     ];
 
     const itemsHTML = reordered.map((id, idx) => {
@@ -1976,13 +2007,41 @@ function renderTeamTable(title, players, teamClass, teamData, maxDmg, gameDurati
     
     html += '<td><div class="item-list">';
 
-    // Items - Trinket (index 6) en posición 4, item7 (misión de rol) en posición 8
+    // Items - Trinket (index 6) en posición 4, Misión de Carril en posición 8
+    const BOOT_IDS = [1001, 3006, 3009, 3020, 3047, 3111, 3117, 3158, 2422];
+    const PINK_WARD_ID = 2055;
     const itm = p.items || [0,0,0,0,0,0,0,0];
+    const pos = (p.teamPosition || p.individualPosition || '').toUpperCase();
+    const isADC  = pos === 'BOTTOM' || p.role === 'DUO_CARRY' || p.role === 'CARRY';
+    const isSupp = pos === 'UTILITY' || p.role === 'DUO_SUPPORT' || p.role === 'SUPPORT';
+    const laneQuestDone = p.challenges?.laneQuestCompleted === 1;
 
-    // Mapeo: [item0, item1, item2, Trinket, item3, item4, item5, Misión]
+    let normalItems = [itm[0], itm[1], itm[2], itm[3], itm[4], itm[5]];
+    let missionItem = itm[7] || 0;
+
+    if (missionItem === 0) {
+      if (isADC && laneQuestDone) {
+        const bootIdx = normalItems.findIndex(id => BOOT_IDS.includes(Number(id)));
+        if (bootIdx !== -1) {
+          missionItem = normalItems[bootIdx];
+          normalItems[bootIdx] = 0;
+        } else {
+          missionItem = 3006;
+        }
+      } else if (isSupp && laneQuestDone) {
+        const pinkIdx = normalItems.findIndex(id => Number(id) === PINK_WARD_ID);
+        if (pinkIdx !== -1) {
+          missionItem = normalItems[pinkIdx];
+          normalItems[pinkIdx] = 0;
+        } else {
+          missionItem = PINK_WARD_ID;
+        }
+      }
+    }
+
     const reordered = [
-      itm[0], itm[1], itm[2], itm[6],
-      itm[3], itm[4], itm[5], itm[7] || 0
+      normalItems[0], normalItems[1], normalItems[2], itm[6],
+      normalItems[3], normalItems[4], normalItems[5], missionItem
     ];
 
     reordered.forEach(id => {
