@@ -1643,18 +1643,32 @@ app.get('/api/debug/match/:matchId', async (req, res) => {
   try {
     const url = `https://americas.api.riotgames.com/lol/match/v5/matches/${matchId}?api_key=${API_KEY}`;
     const response = await fetch(url);
-    if (!response.ok) return res.status(404).json({ error: 'Partida no encontrada' });
+    if (!response.ok) return res.status(404).json({ error: 'Partida no encontrada', status: response.status });
     const data = await response.json();
-    const players = data.info.participants.map(p => ({
-      name: p.riotIdGameName || p.summonerName,
-      position: p.teamPosition,
-      role: p.role,
-      item0: p.item0, item1: p.item1, item2: p.item2,
-      item3: p.item3, item4: p.item4, item5: p.item5,
-      item6: p.item6, item7: p.item7,
-      questItemSlot: p.questItemSlot,
-      augments: p.augments
-    }));
+    const players = data.info.participants.map(p => {
+      const challengeKeys = Object.keys(p.challenges || {});
+      const missionRelated = challengeKeys.filter(k =>
+        k.toLowerCase().includes('quest') ||
+        k.toLowerCase().includes('lane') ||
+        k.toLowerCase().includes('boot') ||
+        k.toLowerCase().includes('mission') ||
+        k.toLowerCase().includes('role') ||
+        k.toLowerCase().includes('item7')
+      );
+      return {
+        name: p.riotIdGameName || p.summonerName,
+        position: p.teamPosition,
+        role: p.role,
+        items: [p.item0, p.item1, p.item2, p.item3, p.item4, p.item5, p.item6, p.item7],
+        questItemSlot: p.questItemSlot,
+        augments: p.augments,
+        // Claves de challenges relacionadas con misión
+        missionChallengeKeys: missionRelated,
+        missionChallengeValues: Object.fromEntries(missionRelated.map(k => [k, p.challenges[k]])),
+        // Para ADC/Supp: mostrar challenges completo
+        allChallenges: (p.teamPosition === 'BOTTOM' || p.teamPosition === 'UTILITY') ? p.challenges : '(no botlane)'
+      };
+    });
     res.json(players);
   } catch(e) {
     res.status(500).json({ error: e.message });
