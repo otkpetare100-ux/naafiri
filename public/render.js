@@ -173,69 +173,16 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
     const queue = QUEUE_TYPES[m.queueId] || 'Partida';
     const champImg = 'https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/champion/' + getChampImageName(m.champion);
     
-    // Items - Reordenar para poner Trinket (index 6) en la posición 4 (fin de primera fila)
-    let itm = m.items || [0,0,0,0,0,0,0];
-    const pos = (m.position || m.individualPosition || '').toUpperCase();
-    const isADC = pos === 'BOTTOM' || m.role === 'DUO_CARRY' || m.role === 'CARRY' || m.role === 'DUO';
-    const isSupp = pos === 'UTILITY' || pos === 'SUPPORT' || m.role === 'DUO_SUPPORT' || m.role === 'SUPPORT';
-    const isBotlane = isADC || isSupp || pos === 'BOTTOM' || pos === 'UTILITY';
+    // Items - Trinket (index 6) va en la posición 4
+    const itm = m.items || [0,0,0,0,0,0,0];
 
-    // Lista exhaustiva de IDs de botas
-    const BOOT_IDS = [1001, 3006, 3009, 3020, 3047, 3111, 3117, 3158, 3005, 3010, 3001, 3003, 3042, 3110, 2422];
-    const PINK_WARD_ID = 2055;
-    
-    let extraItem = itm[7] || 0;
-    
-    // Nueva lógica Temporada 2026: Buscar en Augments y Pasivas (Buffs)
-    if (extraItem === 0) {
-      // Buscar en Augments
-      if (m.augments && Array.isArray(m.augments)) {
-        const bootInAugments = m.augments.find(id => BOOT_IDS.includes(Number(id)));
-        if (bootInAugments) extraItem = Number(bootInAugments);
-      }
-      
-      // Buscar por nombre de pasiva en Challenges (Rastro de misión)
-      if (extraItem === 0 && m.challenges) {
-        const hasMissionBuff = Object.keys(m.challenges).some(key => 
-          key.includes('AdcMissionSpeed') || key.includes('RoleBootsMovement')
-        );
-        if (hasMissionBuff) extraItem = 3006; // Berserker's por defecto para la misión
-      }
-    }
-
-    // Logic already handled above
-
-    let itemsOnly = itm.slice(0, 6).filter(id => {
-      const nid = Number(id);
-      if (nid === 0) return false;
-
-      // Si es ADC, siempre filtramos las botas de los slots normales para moverlas al 8vo
-      if (isADC && BOOT_IDS.includes(nid)) {
-        if (extraItem === 0) extraItem = nid;
-        return false;
-      }
-      
-      // Si es Supp, siempre filtramos el Pink Ward de los slots normales
-      if (isSupp && nid === PINK_WARD_ID) {
-        if (extraItem === 0) extraItem = nid;
-        return false;
-      }
-
-      return true;
-    });
-    while(itemsOnly.length < 6) itemsOnly.push(0);
-
-    // Mapeo: [0, 1, 2, Trinket(6), 3, 4, 5, Extra(Botas o Pink)]
+    // Mapeo: [item0, item1, item2, Trinket, item3, item4, item5]
     const reordered = [
-      itemsOnly[0], itemsOnly[1], itemsOnly[2], itm[6],
-      itemsOnly[3], itemsOnly[4], itemsOnly[5], extraItem
+      itm[0], itm[1], itm[2], itm[6],
+      itm[3], itm[4], itm[5]
     ];
 
-    const itemsHTML = reordered.map((id, idx) => {
-      if (idx === 7) {
-        if (id > 0) return '<img class="mv2-item" src="https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/item/' + id + '.png" />';
-        return isBotlane ? '<div class="mv2-item empty adc-slot"></div>' : '<div class="mv2-item hidden-slot"></div>';
-      }
+    const itemsHTML = reordered.map(id => {
       if (!id || id === 0) return '<div class="mv2-item empty"></div>';
       return '<img class="mv2-item" src="https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/item/' + id + '.png" onerror="this.style.visibility=\'hidden\'" />';
     }).join('');
@@ -2028,70 +1975,17 @@ function renderTeamTable(title, players, teamClass, teamData, maxDmg, gameDurati
     html += '<td><span class="score-kda">' + (p.goldEarned/1000).toFixed(1) + 'k</span></td>';
     
     html += '<td><div class="item-list">';
-    
-    // En la API de Riot el campo puede ser teamPosition o individualPosition
-    const pos = (p.teamPosition || p.individualPosition || '').toUpperCase();
-    const isADC = pos === 'BOTTOM' || p.role === 'DUO_CARRY' || p.role === 'CARRY' || p.role === 'DUO';
-    const isSupp = pos === 'UTILITY' || p.role === 'SUPPORT' || p.role === 'DUO_SUPPORT' || p.role === 'SUPPORT';
-    const isBotlane = isADC || isSupp || pos === 'BOTTOM' || pos === 'UTILITY';
 
-    // Lista exhaustiva de IDs de botas
-    const BOOT_IDS = [1001, 3006, 3009, 3020, 3047, 3111, 3117, 3158, 3005, 3010, 3001, 3003, 3042, 3110, 2422];
-    const PINK_WARD_ID = 2055;
-    
-    const itm = p.items || [0,0,0,0,0,0,0,0];
-    let extraItem = itm[7] || 0;
+    // Items - Trinket (index 6) va en la posición 4
+    const itm = p.items || [0,0,0,0,0,0,0];
 
-    // Nueva lógica Temporada 2026: Buscar en Augments y Pasivas (Buffs)
-    if (extraItem === 0) {
-      if (p.augments && Array.isArray(p.augments)) {
-        const bootInAugments = p.augments.find(id => BOOT_IDS.includes(Number(id)));
-        if (bootInAugments) extraItem = Number(bootInAugments);
-      }
-
-      if (extraItem === 0 && p.challenges) {
-        const hasMissionBuff = Object.keys(p.challenges).some(key => 
-          key.includes('AdcMissionSpeed') || key.includes('RoleBootsMovement')
-        );
-        if (hasMissionBuff) extraItem = 3006;
-      }
-    }
-
-    // Logic already handled above
-
-    let itemsOnly = itm.slice(0, 6).filter(id => {
-      const nid = Number(id);
-      if (nid === 0) return false;
-
-      if (isADC && BOOT_IDS.includes(nid)) {
-        if (extraItem === 0) extraItem = nid;
-        return false;
-      }
-      
-      if (isSupp && nid === PINK_WARD_ID) {
-        if (extraItem === 0) extraItem = nid;
-        return false;
-      }
-
-      return true;
-    });
-    while(itemsOnly.length < 6) itemsOnly.push(0);
-
-    // Mapeo: [0, 1, 2, Trinket(6), 3, 4, 5, Extra]
+    // Mapeo: [item0, item1, item2, Trinket, item3, item4, item5]
     const reordered = [
-      itemsOnly[0], itemsOnly[1], itemsOnly[2], itm[6],
-      itemsOnly[3], itemsOnly[4], itemsOnly[5], extraItem
+      itm[0], itm[1], itm[2], itm[6],
+      itm[3], itm[4], itm[5]
     ];
 
-    reordered.forEach((id, idx) => {
-      if (idx === 7) {
-        if (id > 0) {
-          html += '<img src="https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/item/' + id + '.png" class="item-icon">';
-        } else if (isBotlane) {
-          html += '<div class="empty-item adc-slot"></div>';
-        }
-        return;
-      }
+    reordered.forEach(id => {
       if (id > 0) {
         html += '<img src="https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/item/' + id + '.png" class="item-icon">';
       } else {
