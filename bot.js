@@ -836,6 +836,12 @@ function initBot(db) {
           const champKey = Object.keys(champData.data).find(key => champData.data[key].key == me.championId); 
           const cName = champKey ? champData.data[champKey].name : 'Desconocido'; 
           
+          // Guardar timestamp para que las apuestas funcionen (igual que el flujo automático)
+          await db.collection('accounts').updateOne(
+            { puuid: acc.puuid },
+            { $set: { liveGameStartedAt: new Date(), lastLiveGameId: game.gameId } }
+          );
+
           const sentMsg = await notifyLiveGame(acc, { championName: cName, championId: champKey });
           
           if (sentMsg) {
