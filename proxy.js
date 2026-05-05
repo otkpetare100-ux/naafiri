@@ -5,7 +5,7 @@ const path       = require('path');
 const { MongoClient } = require('mongodb');
 
 try { require('dotenv').config(); } catch(e) {}
-const { initBot, notifyRankChange, notifyLiveGame, sendDailySummary, sendDailyMotivation, notifyBetResults, notifyRemake, notifyChallengeComplete, GACHA_ITEMS } = require('./bot.js');
+const { initBot, notifyRankChange, notifyLiveGame, sendDailySummary, sendDailyMotivation, sendChallengeReminder, sendMonthlyHallOfFame, notifyBetResults, notifyRemake, notifyChallengeComplete, GACHA_ITEMS } = require('./bot.js');
 
 // ---- Configuración y Variables Globales ----
 let DDRAGON_VERSION = '15.8.1'; 
@@ -118,6 +118,41 @@ async function connectDB() {
       const summaryHours = [18, 22];
       if (summaryHours.includes(hour) && minute === 0) {
         sendDailySummary(db);
+      }
+
+      // 3. Recordatorio de Retos (Lunes y Viernes a las 3:00 PM)
+      const challengeDays = [1, 5]; // 1: Lunes, 5: Viernes
+      const dayOfWeek = now.getDay();
+      if (challengeDays.includes(dayOfWeek) && hour === 15) {
+        try {
+          const todayStr = new Date().toISOString().split('T')[0];
+          const config = await db.collection('system_config').findOne({ key: 'last_challenge_reminder' });
+          if (!config || config.date !== todayStr) {
+            await sendChallengeReminder(db);
+            await db.collection('system_config').updateOne(
+              { key: 'last_challenge_reminder' },
+              { $set: { date: todayStr } },
+              { upsert: true }
+            );
+          }
+        } catch (e) { console.error('[Challenge Scheduling Error]', e); }
+      }
+
+      // 4. Salón de la Fama Mensual (Día 1 a las 10:00 AM)
+      const dayOfMonth = now.getDate();
+      if (dayOfMonth === 1 && hour === 10) {
+        try {
+          const monthStr = `${now.getFullYear()}-${now.getMonth() + 1}`;
+          const config = await db.collection('system_config').findOne({ key: 'last_halloffame' });
+          if (!config || config.month !== monthStr) {
+            await sendMonthlyHallOfFame(db);
+            await db.collection('system_config').updateOne(
+              { key: 'last_halloffame' },
+              { $set: { month: monthStr } },
+              { upsert: true }
+            );
+          }
+        } catch (e) { console.error('[Hall of Fame Scheduling Error]', e); }
       }
     }, 60 * 1000);
 

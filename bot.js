@@ -968,7 +968,27 @@ function initBot(db) {
           content += `\n⚠️ **Atención:** ${unlinkedMembers.map(m => `<@${m.id}>`).join(' ')} ¡Viculen sus cuentas con \`!vincular Nombre#TAG\`!`;
         }
 
-        return msg.channel.send({ content, embeds: [embed] });
+      if (command === 'retos') {
+        try {
+          const buffer = await generateChallengeImage();
+          const attachment = new AttachmentBuilder(buffer, { name: 'retos.png' });
+          return msg.channel.send({ content: `<@${msg.author.id}>`, files: [attachment] });
+        } catch (e) {
+          console.error('[Retos Command Error]', e);
+          return msg.channel.send(`<@${msg.author.id}> ❌ Error al generar la imagen de retos.`);
+        }
+      }
+
+      if (command === 'admin_testretos') {
+        if (!isAdmin(msg.author.id)) return;
+        await sendChallengeReminder(dbInstance);
+        return;
+      }
+
+      if (command === 'admin_testhall') {
+        if (!isAdmin(msg.author.id)) return;
+        await sendMonthlyHallOfFame(dbInstance);
+        return;
       }
     }
 
@@ -1009,7 +1029,7 @@ function initBot(db) {
                 { name: '🎒 Items e Inventario', value: '`!admin_daritem @u id`\n`!admin_clearinv @u`' },
                 { name: '📡 Monitoreo y Dashboard', value: '`!admin_scan` - Scan en vivo.\n`!admin_check N#T` - Forzar notif.\n`!admin_vinculos` - Auditoría y Pings.\n`!admin_cancelarapuestas N#T`' },
                 { name: '🎭 Sistema y Diagnóstico', value: '`!admin_syncroles` - Sincronizar roles.\n`!admin_stats` - Estadísticas.\n`!admin_debug_key` - Riot API.\n`!admin_purge [n]` - Borrar mensajes.' },
-                { name: '🧪 Comandos de Prueba (Manuales)', value: '`!admin_testdiario` - Recordatorio 12pm\n`!admin_testsummary` - Scoreboard 6/10pm\n`!admin_testlive` - Alerta de Partida\n`!admin_testbet` - Resultado Apuesta' }
+                { name: '🧪 Comandos de Prueba (Manuales)', value: '`!admin_testdiario` - Recordatorio 12pm\n`!admin_testsummary` - Scoreboard 6/10pm\n`!admin_testretos` - Imagen de Retos\n`!admin_testhall` - Salón de la Fama Mensual' }
               )
               .setColor(0xd93f3f)
               .setFooter({ text: 'Naafiri Admin' });
@@ -1525,11 +1545,22 @@ function getAbsoluteLP(tier, rank, lp) {
 // Resumen Diario
 async function sendDailySummary(db) {
   if (!client || !targetChannelId) return;
-  const channel = client.channels.cache.get(targetChannelId);
-  if (!channel) return;
 
-  const accounts = await db.collection('accounts').find({}).toArray();
-  if (!accounts.length) return;
+  try {
+    const channel = await client.channels.fetch(targetChannelId);
+    if (!channel) return;
+
+    // --- Borrar resumen anterior si existe en DB ---
+    try {
+      const config = await db.collection('system_config').findOne({ key: 'last_summary_msg' });
+      if (config && config.messageId) {
+        const oldMsg = await channel.messages.fetch(config.messageId).catch(() => null);
+        if (oldMsg) await oldMsg.delete().catch(() => {});
+      }
+    } catch (e) { console.error('[Summary Delete Error]', e); }
+
+    const accounts = await db.collection('accounts').find({}).toArray();
+    if (!accounts.length) return;
 
   const now = new Date();
   now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -1786,7 +1817,20 @@ async function sendDailySummary(db) {
     await browser.close();
 
     const attachment = new AttachmentBuilder(imageBuffer, { name: 'scoreboard.png' });
-    await channel.send({ files: [attachment] });
+    const sentMsg = await channel.send({ files: [attachment] });
+
+    // Guardar ID en DB para el siguiente borrado
+    await db.collection('system_config').updateOne(
+      { key: 'last_summary_msg' },
+      { $set: { messageId: sentMsg.id, sentAt: new Date() } },
+      { upsert: true }
+    );
+
+    // Auto-borrado tras 6 horas (por si acaso)
+    setTimeout(() => {
+      sentMsg.delete().catch(() => {});
+    }, 6 * 60 * 60 * 1000);
+
   } catch (e) {
     console.error('[Scoreboard Error]', e);
     channel.send('❌ Hubo un error generando la imagen del scoreboard.');
@@ -1893,6 +1937,156 @@ async function notifyChallengeComplete(targetName, challenges, coins) {
 }
 
 // Función para notificar al admin vía DM
+const CHALLENGES_LIST = [
+  { id: 'penta', name: '🏆 PENTAKILL', description: 'Realiza una Pentakill en una partida de SoloQ o Flex.', rarity: 'Legendario', reward: '1000 Coins', color: '#f1c40f', icon: 'https://static.wikia.nocookie.net/leagueoflegends.com/images/1/1b/Season_2023_-_Master_1.png' },
+  { id: 'butcher', name: '🔪 El Carnicero', description: 'Logra 15 o más asesinatos en una sola partida.', rarity: 'Épico', reward: '200 Coins', color: '#9b59b6', icon: 'https://static.wikia.nocookie.net/leagueoflegends.com/images/d/df/Collector_item_HD.png' },
+  { id: 'immortal', name: '😇 Inmortal', description: 'Gana la partida sin morir ni una sola vez.', rarity: 'Raro', reward: '150 Coins', color: '#3498db', icon: 'https://static.wikia.nocookie.net/leagueoflegends.com/images/7/77/Guardian_Angel_item_HD.png' },
+  { id: 'farmer', name: '🚜 Farm Machine', description: 'Consigue más de 8.5 CS por minuto (min. 20 min).', rarity: 'Común', reward: '100 Coins', color: '#95a5a6', icon: 'https://static.wikia.nocookie.net/leagueoflegends.com/images/1/11/Cull_item_HD.png' }
+];
+
+async function generateChallengeImage() {
+  let cardsHtml = '';
+  CHALLENGES_LIST.forEach(c => {
+    cardsHtml += `
+      <div class="card" style="border-left: 5px solid ${c.color}">
+        <img src="${c.icon}" class="icon">
+        <div class="details">
+          <div class="name">${c.name} <span class="rarity" style="color: ${c.color}">[${c.rarity}]</span></div>
+          <div class="desc">${c.description}</div>
+        </div>
+        <div class="reward">${c.reward}</div>
+      </div>
+    `;
+  });
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { margin: 0; padding: 40px; background: #0a0a0c; font-family: 'Inter', sans-serif; color: #fff; width: 800px; height: auto; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .header h1 { font-size: 32px; color: #d4af37; text-transform: uppercase; letter-spacing: 5px; margin: 0; }
+        .header p { color: rgba(255,255,255,0.6); margin-top: 5px; font-size: 14px; }
+        .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.2); border-radius: 12px; padding: 20px; display: flex; align-items: center; margin-bottom: 15px; }
+        .icon { width: 60px; height: 60px; border-radius: 8px; margin-right: 20px; }
+        .details { flex: 1; }
+        .name { font-size: 18px; font-weight: 900; margin-bottom: 5px; }
+        .rarity { font-size: 12px; margin-left: 10px; }
+        .desc { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.4; }
+        .reward { font-size: 20px; font-weight: 900; color: #f1c40f; text-shadow: 0 0 10px rgba(241,196,15,0.3); }
+        .footer { text-align: center; margin-top: 30px; font-size: 12px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 3px; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>TABLÓN DE CAZA</h1>
+        <p>Retos activos de la Perrera - Gana Naafiri Coins completándolos en Ranked</p>
+      </div>
+      ${cardsHtml}
+      <div class="footer">Generado por Naafiri Bot</div>
+    </body>
+    </html>
+  `;
+
+  const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
+  const page = await browser.newPage();
+  await page.setViewport({ width: 880, height: 100, deviceScaleFactor: 2 });
+  await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+  const bodyHeight = await page.evaluate(() => document.body.scrollHeight);
+  await page.setViewport({ width: 880, height: bodyHeight, deviceScaleFactor: 2 });
+  const buffer = await page.screenshot({ type: 'png' });
+  await browser.close();
+  return buffer;
+}
+
+async function sendChallengeReminder(db) {
+  if (!client || !targetChannelId) return;
+  const channel = await client.channels.fetch(targetChannelId);
+  if (!channel) return;
+
+  try {
+    const buffer = await generateChallengeImage();
+    const attachment = new AttachmentBuilder(buffer, { name: 'retos.png' });
+    const embed = new EmbedBuilder()
+      .setTitle('📢 ¡ATENCIÓN MANADA! Botines disponibles 🐾')
+      .setDescription('Si van a rankear hoy, recuerden que hay Naafiri Coins sobre la mesa. ¡A por ellos!')
+      .setImage('attachment://retos.png')
+      .setColor(0xd4af37);
+
+    await channel.send({ embeds: [embed], files: [attachment] });
+  } catch (e) { console.error('[Challenge Reminder Error]', e); }
+}
+
+async function sendMonthlyHallOfFame(db) {
+  if (!client || !targetChannelId) return;
+  const channel = await client.channels.fetch(targetChannelId);
+  if (!channel) return;
+
+  try {
+    const now = new Date();
+    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+
+    const activities = await db.collection('activities').find({
+      type: 'challenge_win',
+      timestamp: { $gte: lastMonth, $lte: endOfLastMonth }
+    }).toArray();
+
+    if (activities.length === 0) return;
+
+    const stats = {};
+    activities.forEach(a => {
+      const name = a.message.split('¡')[1].split(' ha')[0]; // Extraer nombre del mensaje
+      stats[name] = (stats[name] || 0) + 1;
+    });
+
+    const sorted = Object.entries(stats).sort((a,b) => b[1] - a[1]).slice(0, 5);
+    const monthName = lastMonth.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
+
+    let podiumHtml = '';
+    sorted.forEach((s, idx) => {
+      const color = idx === 0 ? '#ffd700' : idx === 1 ? '#c0c0c0' : idx === 2 ? '#cd7f32' : '#ffffff';
+      podiumHtml += `<div style="padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between;">
+        <span style="font-weight: 700; color: ${color}">${idx + 1}. ${s[0]}</span>
+        <span style="color: #f1c40f">${s[1]} Retos</span>
+      </div>`;
+    });
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <body style="background: #0a0a0c; color: #fff; font-family: 'Inter', sans-serif; padding: 40px; width: 600px;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h1 style="color: #d4af37; margin: 0; letter-spacing: 5px;">HALL OF FAME</h1>
+          <p style="opacity: 0.6; text-transform: uppercase;">Los mejores del mes: ${monthName}</p>
+        </div>
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid #d4af37; border-radius: 20px; padding: 30px;">
+          ${podiumHtml}
+        </div>
+      </body>
+      </html>
+    `;
+
+    const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
+    const page = await browser.newPage();
+    await page.setViewport({ width: 680, height: 400, deviceScaleFactor: 2 });
+    await page.setContent(htmlContent);
+    const buffer = await page.screenshot({ type: 'png' });
+    await browser.close();
+
+    const attachment = new AttachmentBuilder(buffer, { name: 'halloffame.png' });
+    const embed = new EmbedBuilder()
+      .setTitle(`🏆 Salón de la Fama - ${monthName}`)
+      .setDescription(`¡Felicidades a los mayores cazadores de retos del mes pasado! 🎉`)
+      .setImage('attachment://halloffame.png')
+      .setColor(0xd4af37);
+
+    await channel.send({ embeds: [embed], files: [attachment] });
+  } catch (e) { console.error('[Hall of Fame Error]', e); }
+}
+
 async function notifyAdmin(message) {
   if (!client || !process.env.ADMIN_DISCORD_ID) return;
   try {
@@ -1911,6 +2105,9 @@ module.exports = {
   notifyLiveGame, 
   sendDailySummary, 
   sendDailyMotivation, 
+  sendChallengeReminder,
+  sendMonthlyHallOfFame,
+  generateChallengeImage,
   notifyBetResults, 
   notifyRemake, 
   notifyChallengeComplete, 
