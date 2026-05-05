@@ -95,6 +95,56 @@ async function getMatchDetail(matchId) {
   return riotFetch(url);
 }
 
+async function getMatchTimeline(matchId) {
+  const url = `${ENDPOINTS.AMERICAS}/lol/match/v5/matches/${matchId}/timeline`;
+  return riotFetch(url);
+}
+
+function simulateInventoryAt15(timeline, participantId) {
+  let backpack = [];
+  if (!timeline || !timeline.info || !timeline.info.frames) return [0,0,0,0,0,0,0];
+
+  for (const frame of timeline.info.frames) {
+    if (frame.timestamp > 15 * 60 * 1000) break;
+    if (!frame.events) continue;
+    
+    for (const event of frame.events) {
+      if (event.participantId !== participantId) continue;
+      
+      if (event.type === 'ITEM_PURCHASED') {
+        backpack.push(event.itemId);
+      } else if (event.type === 'ITEM_SOLD' || event.type === 'ITEM_DESTROYED') {
+        const idx = backpack.lastIndexOf(event.itemId);
+        if (idx !== -1) backpack.splice(idx, 1);
+      } else if (event.type === 'ITEM_UNDO') {
+        if (event.beforeId) {
+          const idx = backpack.lastIndexOf(event.beforeId);
+          if (idx !== -1) backpack.splice(idx, 1);
+        }
+        if (event.afterId) {
+          backpack.push(event.afterId);
+        }
+      }
+    }
+  }
+  
+  let uniqueItems = [...new Set(backpack)];
+  const TRINKETS = [3340, 3364, 3363, 3330];
+  let trinketIdx = uniqueItems.findIndex(id => TRINKETS.includes(Number(id)));
+  
+  let trinketId = 0;
+  if (trinketIdx !== -1) {
+    trinketId = uniqueItems[trinketIdx];
+    uniqueItems.splice(trinketIdx, 1);
+  }
+  
+  let finalItems = uniqueItems.slice(-6);
+  while (finalItems.length < 6) finalItems.push(0);
+  finalItems.push(trinketId);
+  
+  return finalItems;
+}
+
 function getProfileIconUrl(iconId) {
   return `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${iconId}.png`;
 }
@@ -141,6 +191,14 @@ async function fetchMatchHistory(puuid, onProgress) {
         const match = await getMatchDetail(id);
         const p = match.info.participants.find(x => x.puuid === puuid);
         if (!p) continue;
+
+        let itemsAt15 = [p.item0, p.item1, p.item2, p.item3, p.item4, p.item5, p.item6];
+        try {
+          const timeline = await getMatchTimeline(match.metadata.matchId || id);
+          itemsAt15 = simulateInventoryAt15(timeline, p.participantId);
+        } catch(e) {
+          console.warn('Error fetching timeline:', e);
+        }
         
         details.push({
           matchId: match.metadata.matchId || id,
@@ -170,7 +228,7 @@ async function fetchMatchHistory(puuid, onProgress) {
           position: p.teamPosition || '',
           queueId: match.info.queueId,
           timestamp: match.info.gameCreation,
-          items: [p.item0, p.item1, p.item2, p.item3, p.item4, p.item5, p.item6],
+          items: itemsAt15,
           spells: [p.summoner1Id, p.summoner2Id],
           runes: [p.perks.styles[0].selections[0].perk, p.perks.styles[1].style],
           participants: match.info.participants.map(x => ({ champion: x.championName, win: x.win, puuid: x.puuid }))

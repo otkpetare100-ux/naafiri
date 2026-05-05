@@ -174,13 +174,10 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
     const champImg = 'https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/champion/' + getChampImageName(m.champion);
     
 
-    let normalItems = [itm[0], itm[1], itm[2], itm[3], itm[4], itm[5]];
-    let missionItem = 0;
-
-    // Mapeo: [item0, item1, item2, Trinket, item3, item4, item5, Botas]
+    // Mapeo simple de 7 elementos: [item0, item1, item2, Trinket(6), item3, item4, item5, vacío]
     const reordered = [
-      normalItems[0], normalItems[1], normalItems[2], itm[6],
-      normalItems[3], normalItems[4], normalItems[5], missionItem
+      itm[0], itm[1], itm[2], itm[6],
+      itm[3], itm[4], itm[5], 0
     ];
 
     const itemsHTML = reordered.map((id, idx) => {
@@ -1977,7 +1974,27 @@ function renderTeamTable(title, players, teamClass, teamData, maxDmg, gameDurati
     
     html += '<td><div class="item-list">';
 
+    const itm = p.items || [0,0,0,0,0,0,0,0];
+    const reordered = [
+      itm[0], itm[1], itm[2], itm[6],
+      itm[3], itm[4], itm[5], 0
+    ];
+
+    reordered.forEach(id => {
+      if (id > 0) {
+        html += '<img src="https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/item/' + id + '.png" class="item-icon">';
+      } else {
+        html += '<div class="empty-item"></div>';
+      }
+    });
+    html += '</div></td>';
     
+    html += '</tr>';
+  });
+
+  html += '</tbody></table></div>';
+  return html;
+}
 
 // --- Lógica del Modal de Historial (Solo Partidas) ---
 window.openHistoryModal = function(puuid) {

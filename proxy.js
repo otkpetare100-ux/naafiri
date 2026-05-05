@@ -1732,6 +1732,49 @@ app.get('/api/match/:matchId', async (req, res) => {
       const tRes = await fetch(tUrl);
       if (tRes.ok) {
         const tData = await tRes.json();
+        
+        // Simular inventario al minuto 15 para todos los participantes
+        const participantItemsAt15 = {};
+        for (let i = 1; i <= 10; i++) {
+           let backpack = [];
+           for (const frame of tData.info.frames) {
+             if (frame.timestamp > 15 * 60 * 1000) break;
+             if (!frame.events) continue;
+             for (const event of frame.events) {
+               if (event.participantId !== i) continue;
+               if (event.type === 'ITEM_PURCHASED') backpack.push(event.itemId);
+               else if (event.type === 'ITEM_SOLD' || event.type === 'ITEM_DESTROYED') {
+                 const idx = backpack.lastIndexOf(event.itemId);
+                 if (idx !== -1) backpack.splice(idx, 1);
+               } else if (event.type === 'ITEM_UNDO') {
+                 if (event.beforeId) {
+                   const idx = backpack.lastIndexOf(event.beforeId);
+                   if (idx !== -1) backpack.splice(idx, 1);
+                 }
+                 if (event.afterId) backpack.push(event.afterId);
+               }
+             }
+           }
+           let uniqueItems = [...new Set(backpack)];
+           const TRINKETS = [3340, 3364, 3363, 3330];
+           let trinketIdx = uniqueItems.findIndex(id => TRINKETS.includes(Number(id)));
+           let trinketId = 0;
+           if (trinketIdx !== -1) {
+             trinketId = uniqueItems[trinketIdx];
+             uniqueItems.splice(trinketIdx, 1);
+           }
+           let finalItems = uniqueItems.slice(-6);
+           while (finalItems.length < 6) finalItems.push(0);
+           finalItems.push(trinketId);
+           participantItemsAt15[i] = finalItems;
+        }
+
+        // Asignar los items simulados a la respuesta de participants
+        participants.forEach((p, idx) => {
+           // participantId suele ser idx + 1
+           p.items = participantItemsAt15[idx + 1] || p.items;
+        });
+
         // Solo enviamos los datos necesarios para reducir el tamaño
         timeline = tData.info.frames.map(f => {
           let blueGold = 0;
