@@ -1351,7 +1351,7 @@ async function sendDailySummary(db) {
   stats.sort((a, b) => b.absLp - a.absLp);
 
   // Colores ANSI para Discord
-  const ESC = '\\u001b[';
+  const ESC = '\u001b[';
   const RESET = `${ESC}0m`;
   const CYAN = `${ESC}1;36m`;
   const YELLOW = `${ESC}1;33m`;
