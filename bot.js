@@ -1,4 +1,5 @@
-const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
+const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, AttachmentBuilder } = require('discord.js');
+const puppeteer = require('puppeteer');
 const fetch = (...args) => import('node-fetch').then(({default: f}) => f(...args));
 
 let client = null;
@@ -1350,56 +1351,137 @@ async function sendDailySummary(db) {
 
   stats.sort((a, b) => b.absLp - a.absLp);
 
-  // Colores ANSI para Discord
-  const ESC = '\u001b[';
-  const RESET = `${ESC}0m`;
-  const CYAN = `${ESC}1;36m`;
-  const YELLOW = `${ESC}1;33m`;
-  const GREEN = `${ESC}1;32m`;
-  const RED = `${ESC}1;31m`;
-  const BLUE = `${ESC}1;34m`;
-  const MAGENTA = `${ESC}1;35m`;
-  const GRAY = `${ESC}1;30m`;
-  const WHITE = `${ESC}1;37m`;
-
-  let table = `${CYAN}Pos | Username           | Rank              | LP (24h) | LP (7d) | Games | WR${RESET}\n`;
-  table += `${GRAY}--------------------------------------------------------------------------------${RESET}\n`;
-  
+  // Generar filas HTML
+  let rowsHtml = '';
   stats.forEach((s, idx) => {
-    const rawPos = String(idx + 1).padStart(3, ' ');
-    const rawName = s.name.substring(0, 18).padEnd(18, ' ');
-    const rawRank = s.rank.substring(0, 17).padEnd(17, ' ');
-    
-    // Formatear LP con signo + si es positivo, y rellenar
-    const lp24Str = s.lp24h > 0 ? `+${s.lp24h}` : String(s.lp24h);
-    const lp7dStr = s.lp7d > 0 ? `+${s.lp7d}` : String(s.lp7d);
-    const rawLp24h = lp24Str.padStart(8, ' ');
-    const rawLp7d = lp7dStr.padStart(7, ' ');
-    
-    const rawGames = String(s.games).padStart(5, ' ');
-    const rawWr = String(s.wr).padStart(4, ' ');
+    let medal = `<span class="medal" style="color: #3498db;">${idx + 1}</span>`;
+    if (idx === 0) medal = '<span class="medal">🥇</span>';
+    else if (idx === 1) medal = '<span class="medal">🥈</span>';
+    else if (idx === 2) medal = '<span class="medal">🥉</span>';
 
-    // Aplicar colores
-    const cPos = `${BLUE}${rawPos}${RESET}`;
-    const cName = `${YELLOW}${rawName}${RESET}`;
-    const cRank = `${WHITE}${rawRank}${RESET}`;
-    
-    const cLp24h = s.lp24h > 0 ? `${GREEN}${rawLp24h}${RESET}` : (s.lp24h < 0 ? `${RED}${rawLp24h}${RESET}` : `${GRAY}${rawLp24h}${RESET}`);
-    const cLp7d = s.lp7d > 0 ? `${GREEN}${rawLp7d}${RESET}` : (s.lp7d < 0 ? `${RED}${rawLp7d}${RESET}` : `${GRAY}${rawLp7d}${RESET}`);
-    
-    const cGames = `${MAGENTA}${rawGames}${RESET}`;
-    const cWr = s.wr === '-' ? `${GRAY}${rawWr}${RESET}` : `${CYAN}${rawWr}${RESET}`;
+    const lp24Class = s.lp24h > 0 ? 'positive' : (s.lp24h < 0 ? 'negative' : 'neutral');
+    const lp7dClass = s.lp7d > 0 ? 'positive' : (s.lp7d < 0 ? 'negative' : 'neutral');
+    const lp24Str = s.lp24h > 0 ? `+${s.lp24h}` : `${s.lp24h}`;
+    const lp7dStr = s.lp7d > 0 ? `+${s.lp7d}` : `${s.lp7d}`;
 
-    table += `${cPos} | ${cName} | ${cRank} | ${cLp24h} | ${cLp7d} | ${cGames} | ${cWr}\n`;
+    rowsHtml += `
+      <div class="row">
+        <div class="col-pos">${medal}</div>
+        <div class="col-name">${s.name}</div>
+        <div class="col-rank">${s.rank}</div>
+        <div class="col-lp ${lp24Class}">${lp24Str}</div>
+        <div class="col-lp ${lp7dClass}">${lp7dStr}</div>
+        <div class="col-games">${s.games}</div>
+        <div class="col-wr">${s.wr}</div>
+      </div>
+    `;
   });
 
-  const embed = new EmbedBuilder()
-    .setTitle('📊 Resumen Diario de la Perrera')
-    .setDescription(`\`\`\`ansi\n${table}\n\`\`\``)
-    .setColor(0x576bce)
-    .setFooter({ text: 'Actualizado automáticamente' });
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        body {
+          margin: 0; padding: 0;
+          background-color: transparent;
+          font-family: 'Inter', sans-serif;
+          color: #ffffff;
+        }
+        #scoreboard {
+          width: 800px;
+          background: linear-gradient(145deg, #111111, #1a1a1a);
+          border: 2px solid #d4af37;
+          border-radius: 12px;
+          padding: 20px;
+          box-shadow: 0 8px 32px rgba(212, 175, 55, 0.15);
+        }
+        .header-title {
+          text-align: center;
+          font-size: 28px;
+          font-weight: 800;
+          color: #d4af37;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          margin-bottom: 20px;
+          text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+        }
+        .table-header {
+          display: flex;
+          background: rgba(212, 175, 55, 0.1);
+          padding: 10px 15px;
+          border-radius: 8px;
+          font-weight: 600;
+          color: #d4af37;
+          margin-bottom: 10px;
+          border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        .row {
+          display: flex;
+          padding: 12px 15px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          align-items: center;
+          transition: background 0.3s;
+        }
+        .row:nth-child(even) {
+          background: rgba(255, 255, 255, 0.02);
+        }
+        .col-pos { width: 50px; text-align: center; font-size: 20px; }
+        .col-name { width: 220px; font-weight: 600; letter-spacing: 0.5px; }
+        .col-rank { width: 180px; color: #aaaaaa; }
+        .col-lp { width: 90px; text-align: right; font-weight: 600; }
+        .col-games { width: 80px; text-align: center; color: #e67e22; font-weight: 600; }
+        .col-wr { width: 60px; text-align: right; color: #3498db; font-weight: 600; }
+        
+        .positive { color: #2ecc71; }
+        .negative { color: #e74c3c; }
+        .neutral { color: #7f8c8d; }
+      </style>
+    </head>
+    <body>
+      <div id="scoreboard">
+        <div class="header-title">Top Perrera Scoreboard</div>
+        <div class="table-header">
+          <div class="col-pos">Pos</div>
+          <div class="col-name">Username</div>
+          <div class="col-rank">Rank</div>
+          <div class="col-lp">LP (24h)</div>
+          <div class="col-lp">LP (7d)</div>
+          <div class="col-games">Games</div>
+          <div class="col-wr">WR</div>
+        </div>
+        ${rowsHtml}
+      </div>
+    </body>
+    </html>
+  `;
 
-  channel.send({ embeds: [embed] });
+  try {
+    const browser = await puppeteer.launch({
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+    const page = await browser.newPage();
+    await page.setViewport({ width: 850, height: 1000, deviceScaleFactor: 2 });
+    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+    
+    const element = await page.$('#scoreboard');
+    const imageBuffer = await element.screenshot();
+    await browser.close();
+
+    const attachment = new AttachmentBuilder(imageBuffer, { name: 'scoreboard.png' });
+    
+    const embed = new EmbedBuilder()
+      .setTitle('📊 Resumen Diario de la Perrera')
+      .setImage('attachment://scoreboard.png')
+      .setColor(0xd4af37)
+      .setFooter({ text: 'Actualizado automáticamente' });
+
+    await channel.send({ embeds: [embed], files: [attachment] });
+  } catch (e) {
+    console.error('[Scoreboard Error]', e);
+    channel.send('❌ Hubo un error generando la imagen del scoreboard.');
+  }
 }
 
 const QUEUE_NAMES = {
