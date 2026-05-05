@@ -967,16 +967,7 @@ function initBot(db) {
         if (unlinkedMembers.size > 0) {
           content += `\n⚠️ **Atención:** ${unlinkedMembers.map(m => `<@${m.id}>`).join(' ')} ¡Viculen sus cuentas con \`!vincular Nombre#TAG\`!`;
         }
-
-      if (command === 'retos') {
-        try {
-          const buffer = await generateChallengeImage();
-          const attachment = new AttachmentBuilder(buffer, { name: 'retos.png' });
-          return msg.channel.send({ content: `<@${msg.author.id}>`, files: [attachment] });
-        } catch (e) {
-          console.error('[Retos Command Error]', e);
-          return msg.channel.send(`<@${msg.author.id}> ❌ Error al generar la imagen de retos.`);
-        }
+        return msg.channel.send({ content, embeds: [embed] });
       }
 
       if (command === 'admin_testretos') {
@@ -1831,9 +1822,12 @@ async function sendDailySummary(db) {
       sentMsg.delete().catch(() => {});
     }, 6 * 60 * 60 * 1000);
 
-  } catch (e) {
-    console.error('[Scoreboard Error]', e);
-    channel.send('❌ Hubo un error generando la imagen del scoreboard.');
+    } catch (e) {
+      console.error('[Scoreboard Error]', e);
+      channel.send('❌ Hubo un error generando la imagen del scoreboard.');
+    }
+  } catch (err) {
+    console.error('[Daily Summary Global Error]', err);
   }
 }
 
