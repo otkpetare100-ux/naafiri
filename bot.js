@@ -1325,9 +1325,7 @@ async function sendDailySummary(db) {
     const absCurrent = getAbsoluteLP(current.tier, current.rank, current.leaguePoints);
     const snapshots = acc.snapshots || {};
     
-    // Si no hay snapshot de ayer, usar el de hoy (0 de diferencia)
     const snap24h = snapshots[yesterdayStr] || snapshots[todayStr] || current;
-    // Si no hay snapshot de 7 dias, usar el de ayer o de hoy
     const snap7d = snapshots[weekAgoStr] || snapshots[yesterdayStr] || snapshots[todayStr] || current;
 
     const abs24h = getAbsoluteLP(snap24h.tier, snap24h.rank, snap24h.leaguePoints);
@@ -1353,17 +1351,16 @@ async function sendDailySummary(db) {
 
   stats.sort((a, b) => b.absLp - a.absLp);
 
-  // Intentar cargar imagen de fondo (buscamos en varias rutas posibles)
   let bgBase64 = '';
   const possiblePaths = [
-    path.join(__dirname, 'public', 'bg.png'),
+    path.join(__dirname, 'public', 'pic', 'bg.jpg'),
+    path.join(__dirname, 'public', 'pic', 'bg.png'),
     path.join(__dirname, 'public', 'bg.jpg'),
-    path.join(__dirname, 'bg.png'),
-    path.join(__dirname, 'bg.jpg'),
-    path.join(process.cwd(), 'public', 'bg.png'),
+    path.join(__dirname, 'public', 'bg.png'),
+    path.join(process.cwd(), 'public', 'pic', 'bg.jpg'),
+    path.join(process.cwd(), 'public', 'pic', 'bg.png'),
     path.join(process.cwd(), 'public', 'bg.jpg'),
-    path.join(process.cwd(), 'bg.png'),
-    path.join(process.cwd(), 'bg.jpg')
+    path.join(process.cwd(), 'public', 'bg.png')
   ];
 
   for (const p of possiblePaths) {
@@ -1371,14 +1368,13 @@ async function sendDailySummary(db) {
       try {
         const bitmap = fs.readFileSync(p);
         const ext = path.extname(p).toLowerCase();
-        const mimeType = ext === '.png' ? 'image/png' : 'image/jpeg';
+        const mimeType = (ext === '.png') ? 'image/png' : 'image/jpeg';
         bgBase64 = `data:${mimeType};base64,${Buffer.from(bitmap).toString('base64')}`;
         break;
       } catch (e) { console.error(`Error leyendo ${p}:`, e); }
     }
   }
 
-  // Generar filas HTML
   let rowsHtml = '';
   stats.forEach((s, idx) => {
     let medalStyle = '';
@@ -1390,7 +1386,6 @@ async function sendDailySummary(db) {
     else if (idx === 2) medalStyle = 'color: #CD7F32; text-shadow: 0 0 10px rgba(205, 127, 50, 0.4); font-weight: 800;';
     else medalStyle = 'color: #ffffff; opacity: 0.8;';
 
-    // Racha Hot/Cold
     let streakTag = '';
     const wrVal = parseInt(s.wr) || 0;
     if (s.games >= 3) {
@@ -1430,13 +1425,13 @@ async function sendDailySummary(db) {
           display: flex;
           justify-content: center;
           align-items: center;
-          width: 850px;
+          width: 950px;
           height: auto;
           overflow: hidden;
           ${bgBase64 ? `background-image: url('${bgBase64}'); background-size: cover; background-position: center;` : 'background: linear-gradient(135deg, #0f0f11 0%, #1a1a1e 100%);'}
         }
         #container {
-          padding: 30px;
+          padding: 40px;
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -1445,75 +1440,75 @@ async function sendDailySummary(db) {
         }
         #scoreboard {
           width: 100%;
-          background: rgba(15, 15, 17, 0.85);
+          background: rgba(15, 15, 17, 0.9);
           backdrop-filter: blur(15px);
           -webkit-backdrop-filter: blur(15px);
-          border: 1px solid rgba(212, 175, 55, 0.3);
-          border-radius: 20px;
-          padding: 30px;
-          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+          border: 1px solid rgba(212, 175, 55, 0.4);
+          border-radius: 24px;
+          padding: 40px;
+          box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
           box-sizing: border-box;
         }
         .header-title {
           text-align: center;
-          font-size: 34px;
+          font-size: 38px;
           font-weight: 800;
           color: #d4af37;
           text-transform: uppercase;
-          letter-spacing: 4px;
-          margin-bottom: 30px;
+          letter-spacing: 6px;
+          margin-bottom: 40px;
           text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
         }
         .table-header {
           display: flex;
-          background: rgba(212, 175, 55, 0.2);
-          padding: 14px 15px;
-          border-radius: 12px;
+          background: rgba(212, 175, 55, 0.25);
+          padding: 18px 25px;
+          border-radius: 14px;
           font-weight: 800;
           color: #d4af37;
-          margin-bottom: 15px;
+          margin-bottom: 20px;
           text-transform: uppercase;
-          font-size: 14px;
-          letter-spacing: 1.5px;
+          font-size: 15px;
+          letter-spacing: 2px;
         }
         .row {
           display: flex;
-          padding: 16px 15px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+          padding: 20px 25px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
           align-items: center;
         }
         .leader-row {
-          background: rgba(212, 175, 55, 0.1);
-          border-left: 4px solid #d4af37;
-          border-radius: 6px;
+          background: rgba(212, 175, 55, 0.12);
+          border-left: 6px solid #d4af37;
+          border-radius: 8px;
         }
-        .col-pos { width: 50px; text-align: center; font-size: 24px; }
-        .col-name { width: 250px; font-weight: 700; display: flex; align-items: center; gap: 12px; font-size: 17px; }
-        .col-rank { width: 180px; color: #e2e8f0; font-size: 15px; }
-        .col-lp { width: 95px; text-align: right; font-weight: 800; font-family: monospace; font-size: 18px; }
-        .col-games { width: 85px; text-align: center; color: #fbd38d; font-weight: 800; font-size: 17px; }
-        .col-wr { width: 75px; text-align: right; color: #90cdf4; font-weight: 800; font-size: 17px; }
+        .col-pos { width: 60px; text-align: center; font-size: 28px; }
+        .col-name { width: 280px; font-weight: 700; display: flex; align-items: center; gap: 15px; font-size: 19px; }
+        .col-rank { width: 200px; color: #e2e8f0; font-size: 16px; }
+        .col-lp { width: 100px; text-align: right; font-weight: 800; font-family: monospace; font-size: 19px; }
+        .col-games { width: 90px; text-align: center; color: #fbd38d; font-weight: 800; font-size: 19px; }
+        .col-wr { width: 80px; text-align: right; color: #90cdf4; font-weight: 800; font-size: 19px; }
         
         .streak {
-          font-size: 11px;
-          padding: 3px 8px;
-          border-radius: 5px;
+          font-size: 12px;
+          padding: 4px 10px;
+          border-radius: 6px;
           font-weight: 900;
         }
-        .hot { background: #f56565; color: #fff; box-shadow: 0 0 10px rgba(245, 101, 101, 0.6); }
-        .cold { background: #4299e1; color: #fff; box-shadow: 0 0 10px rgba(66, 153, 225, 0.6); }
+        .hot { background: #f56565; color: #fff; box-shadow: 0 0 12px rgba(245, 101, 101, 0.6); }
+        .cold { background: #4299e1; color: #fff; box-shadow: 0 0 12px rgba(49, 130, 206, 0.6); }
         
         .positive { color: #68d391; }
         .negative { color: #feb2b2; }
         .neutral { color: #a0aec0; }
 
         .watermark {
-          margin-top: 20px;
-          font-size: 12px;
-          color: rgba(255, 255, 255, 0.4);
+          margin-top: 30px;
+          font-size: 14px;
+          color: rgba(255, 255, 255, 0.5);
           text-transform: uppercase;
-          letter-spacing: 3px;
-          font-weight: 700;
+          letter-spacing: 5px;
+          font-weight: 800;
         }
       </style>
     </head>
@@ -1544,21 +1539,17 @@ async function sendDailySummary(db) {
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     const page = await browser.newPage();
-    // Ajustamos el viewport al tamaño del contenido
-    await page.setViewport({ width: 850, height: 100, deviceScaleFactor: 3 }); 
+    await page.setViewport({ width: 950, height: 100, deviceScaleFactor: 3 }); 
     await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
     
-    // Auto-ajustar altura
     const height = await page.evaluate(() => document.getElementById('container').offsetHeight);
-    await page.setViewport({ width: 850, height: height, deviceScaleFactor: 3 });
+    await page.setViewport({ width: 950, height: height, deviceScaleFactor: 3 });
 
     const element = await page.$('#container');
     const imageBuffer = await element.screenshot({ type: 'png' });
     await browser.close();
 
     const attachment = new AttachmentBuilder(imageBuffer, { name: 'scoreboard.png' });
-    
-    // Enviamos solo el archivo, sin embed
     await channel.send({ files: [attachment] });
   } catch (e) {
     console.error('[Scoreboard Error]', e);
@@ -1664,7 +1655,7 @@ async function notifyChallengeComplete(targetName, challenges, coins) {
       { name: 'Recompensa', value: `${coins} Naafiri Coins 💰`, inline: true }
     )
     .setColor(0xf4c874)
-    .setThumbnail('https://static.wikia.nocookie.net/leagueoflegends/images/1/1b/Season_2023_-_Master_1.png')
+    .setThumbnail('https://static.wikia.nocookie.net/leagueoflegends.com/images/1/1b/Season_2023_-_Master_1.png')
     .setTimestamp();
 
   channel.send({ embeds: [embed] });
