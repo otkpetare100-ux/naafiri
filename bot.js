@@ -1357,16 +1357,22 @@ async function sendDailySummary(db) {
   let bgBase64 = '';
   const possiblePaths = [
     path.join(__dirname, 'public', 'bg.png'),
+    path.join(__dirname, 'public', 'bg.jpg'),
     path.join(__dirname, 'bg.png'),
+    path.join(__dirname, 'bg.jpg'),
     path.join(process.cwd(), 'public', 'bg.png'),
-    path.join(process.cwd(), 'bg.png')
+    path.join(process.cwd(), 'public', 'bg.jpg'),
+    path.join(process.cwd(), 'bg.png'),
+    path.join(process.cwd(), 'bg.jpg')
   ];
 
   for (const p of possiblePaths) {
     if (fs.existsSync(p)) {
       try {
         const bitmap = fs.readFileSync(p);
-        bgBase64 = `data:image/png;base64,${Buffer.from(bitmap).toString('base64')}`;
+        const ext = path.extname(p).toLowerCase();
+        const mimeType = ext === '.png' ? 'image/png' : 'image/jpeg';
+        bgBase64 = `data:${mimeType};base64,${Buffer.from(bitmap).toString('base64')}`;
         break;
       } catch (e) { console.error(`Error leyendo ${p}:`, e); }
     }
