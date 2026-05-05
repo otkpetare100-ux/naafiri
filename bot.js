@@ -769,7 +769,7 @@ function initBot(db) {
         const acc = await findAccountBySlug(slug);
         if (!acc) return msg.channel.send(`<@${msg.author.id}> ❌ Jugador no encontrado en el dashboard.`);
 
-        const url = `https://la1.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${acc.puuid.trim()}`;
+        const url = `https://la1.api.riotgames.com/lol/spectator/v5/active-games/by-puuid/${acc.puuid.trim()}`;
         const res = await fetch(url, {
           headers: { "X-Riot-Token": process.env.RIOT_API_KEY.trim() }
         });
