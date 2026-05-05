@@ -1350,37 +1350,25 @@ async function sendDailySummary(db) {
 
   stats.sort((a, b) => b.absLp - a.absLp);
 
-  let description = '';
+  let table = 'Pos | Username           | Rank              | LP (24h) | LP (7d) | Games | WR\n';
+  table += '--------------------------------------------------------------------------------\n';
   
   stats.forEach((s, idx) => {
-    let medal = '🔹';
-    if (idx === 0) medal = '🥇';
-    else if (idx === 1) medal = '🥈';
-    else if (idx === 2) medal = '🥉';
-    else if (idx < 10) medal = `**${idx + 1}.**`;
-
-    const wrText = s.games > 0 ? `(${s.games} Jugadas - ${s.wr})` : '*Sin actividad*';
-    const lp24Str = s.lp24h > 0 ? `+${s.lp24h} LP` : `${s.lp24h} LP`;
-    const lp7dStr = s.lp7d > 0 ? `+${s.lp7d} LP` : `${s.lp7d} LP`;
-
-    description += `${medal} **${s.name}** • \` ${s.rank} \`\n`;
-    if (s.games > 0) {
-      const icon = s.lp24h >= 0 ? '📈' : '📉';
-      description += `${icon} **Hoy:** \` ${lp24Str} \` ${wrText} | **Semana:** \` ${lp7dStr} \`\n\n`;
-    } else {
-      description += `💤 **Hoy:** *Sin actividad* | **Semana:** \` ${lp7dStr} \`\n\n`;
-    }
+    const pos = String(idx + 1).padStart(3, ' ');
+    const name = s.name.substring(0, 18).padEnd(18, ' ');
+    const rank = s.rank.substring(0, 17).padEnd(17, ' ');
+    const lp24h = String(s.lp24h).padStart(8, ' ');
+    const lp7d = String(s.lp7d).padStart(7, ' ');
+    const games = String(s.games).padStart(5, ' ');
+    const wr = String(s.wr).padStart(4, ' ');
+    
+    table += `${pos} | ${name} | ${rank} | ${lp24h} | ${lp7d} | ${games} | ${wr}\n`;
   });
 
-  // Limitar longitud por si hay muchos usuarios
-  if (description.length > 4096) {
-    description = description.substring(0, 4090) + '...';
-  }
-
   const embed = new EmbedBuilder()
-    .setTitle('🏆 Top Perrera Scoreboard')
-    .setDescription(description.trim() || 'No hay datos.')
-    .setColor(0xf1c40f)
+    .setTitle('📊 Resumen Diario de la Perrera')
+    .setDescription(`\`\`\`text\n${table}\n\`\`\``)
+    .setColor(0x576bce)
     .setFooter({ text: 'Actualizado automáticamente' });
 
   channel.send({ embeds: [embed] });
