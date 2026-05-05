@@ -1932,14 +1932,27 @@ async function notifyChallengeComplete(targetName, challenges, coins) {
 
 // Función para notificar al admin vía DM
 const CHALLENGES_LIST = [
-  { id: 'penta', name: '🏆 PENTAKILL', description: 'Realiza una Pentakill en una partida de SoloQ o Flex.', rarity: 'Legendario', reward: '1000 Coins', color: '#f1c40f', icon: 'https://static.wikia.nocookie.net/leagueoflegends.com/images/1/1b/Season_2023_-_Master_1.png' },
-  { id: 'butcher', name: '🔪 El Carnicero', description: 'Logra 15 o más asesinatos en una sola partida.', rarity: 'Épico', reward: '200 Coins', color: '#9b59b6', icon: 'https://static.wikia.nocookie.net/leagueoflegends.com/images/d/df/Collector_item_HD.png' },
-  { id: 'immortal', name: '😇 Inmortal', description: 'Gana la partida sin morir ni una sola vez.', rarity: 'Raro', reward: '150 Coins', color: '#3498db', icon: 'https://static.wikia.nocookie.net/leagueoflegends.com/images/7/77/Guardian_Angel_item_HD.png' },
-  { id: 'farmer', name: '🚜 Farm Machine', description: 'Consigue más de 8.5 CS por minuto (min. 20 min).', rarity: 'Común', reward: '100 Coins', color: '#95a5a6', icon: 'https://static.wikia.nocookie.net/leagueoflegends.com/images/1/11/Cull_item_HD.png' }
+  { id: 'penta', name: '🏆 PENTAKILL', description: 'Realiza una Pentakill en una partida de SoloQ o Flex.', rarity: 'Legendario', reward: '1000 Coins', color: '#f1c40f', icon: 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/item/3031.png' },
+  { id: 'butcher', name: '🔪 El Carnicero', description: 'Logra 15 o más asesinatos en una sola partida.', rarity: 'Épico', reward: '200 Coins', color: '#9b59b6', icon: 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/item/6676.png' },
+  { id: 'immortal', name: '😇 Inmortal', description: 'Gana la partida sin morir ni una sola vez.', rarity: 'Raro', reward: '150 Coins', color: '#3498db', icon: 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/item/3026.png' },
+  { id: 'farmer', name: '🚜 Farm Machine', description: 'Consigue más de 8.5 CS por minuto (min. 20 min).', rarity: 'Común', reward: '100 Coins', color: '#95a5a6', icon: 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/item/1083.png' }
 ];
 
 async function generateChallengeImage() {
   let cardsHtml = '';
+  
+  // Cargar imagen de fondo local
+  let bgUrl = '';
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const bgPath = path.join(process.cwd(), 'public', 'pic', 'bg.jpg');
+    if (fs.existsSync(bgPath)) {
+      const bgBase64 = fs.readFileSync(bgPath).toString('base64');
+      bgUrl = `data:image/jpeg;base64,${bgBase64}`;
+    }
+  } catch (e) { console.error('[BG Load Error]', e); }
+
   CHALLENGES_LIST.forEach(c => {
     cardsHtml += `
       <div class="card" style="border-left: 5px solid ${c.color}">
@@ -1959,37 +1972,71 @@ async function generateChallengeImage() {
     <head>
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { margin: 0; padding: 40px; background: #0a0a0c; font-family: 'Inter', sans-serif; color: #fff; width: 800px; height: auto; }
+        body { 
+          margin: 0; 
+          padding: 60px 40px; 
+          background: ${bgUrl ? `url(${bgUrl})` : '#0a0a0c'}; 
+          background-size: cover;
+          background-position: center;
+          font-family: 'Inter', sans-serif; 
+          color: #fff; 
+          width: 800px; 
+          height: auto; 
+          position: relative;
+        }
+        body::before {
+          content: '';
+          position: absolute;
+          top: 0; left: 0; right: 0; bottom: 0;
+          background: rgba(0, 0, 0, 0.85);
+          z-index: 0;
+        }
+        .content { position: relative; z-index: 1; }
         .header { text-align: center; margin-bottom: 40px; }
-        .header h1 { font-size: 32px; color: #d4af37; text-transform: uppercase; letter-spacing: 5px; margin: 0; }
-        .header p { color: rgba(255,255,255,0.6); margin-top: 5px; font-size: 14px; }
-        .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.2); border-radius: 12px; padding: 20px; display: flex; align-items: center; margin-bottom: 15px; }
-        .icon { width: 60px; height: 60px; border-radius: 8px; margin-right: 20px; }
+        .header h1 { font-size: 38px; color: #d4af37; text-transform: uppercase; letter-spacing: 8px; margin: 0; font-weight: 900; text-shadow: 0 0 20px rgba(212,175,55,0.4); }
+        .header p { color: rgba(255,255,255,0.6); margin-top: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; }
+        .card { 
+          background: rgba(255,255,255,0.03); 
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(212,175,55,0.15); 
+          border-radius: 12px; 
+          padding: 20px; 
+          display: flex; 
+          align-items: center; 
+          margin-bottom: 15px; 
+          transition: all 0.3s ease;
+        }
+        .icon { width: 65px; height: 65px; border-radius: 8px; margin-right: 20px; border: 2px solid rgba(212,175,55,0.3); }
         .details { flex: 1; }
-        .name { font-size: 18px; font-weight: 900; margin-bottom: 5px; }
-        .rarity { font-size: 12px; margin-left: 10px; }
-        .desc { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.4; }
-        .reward { font-size: 20px; font-weight: 900; color: #f1c40f; text-shadow: 0 0 10px rgba(241,196,15,0.3); }
-        .footer { text-align: center; margin-top: 30px; font-size: 12px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 3px; }
+        .name { font-size: 20px; font-weight: 900; margin-bottom: 5px; color: #fff; }
+        .rarity { font-size: 12px; margin-left: 10px; font-weight: 700; text-transform: uppercase; }
+        .desc { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.4; }
+        .reward { font-size: 22px; font-weight: 900; color: #f1c40f; text-shadow: 0 0 15px rgba(241,196,15,0.4); min-width: 140px; text-align: right; }
+        .footer { text-align: center; margin-top: 40px; font-size: 12px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 4px; font-weight: 700; }
       </style>
     </head>
     <body>
-      <div class="header">
-        <h1>TABLÓN DE CAZA</h1>
-        <p>Retos activos de la Perrera - Gana Naafiri Coins completándolos en Ranked</p>
+      <div class="content">
+        <div class="header">
+          <h1>TABLÓN DE CAZA</h1>
+          <p>Retos activos de la Perrera - Gana Naafiri Coins</p>
+        </div>
+        ${cardsHtml}
+        <div class="footer">Generado por Naafiri Bot</div>
       </div>
-      ${cardsHtml}
-      <div class="footer">Generado por Naafiri Bot</div>
     </body>
     </html>
   `;
 
-  const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
+  const browser = await puppeteer.launch({
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
   const page = await browser.newPage();
-  await page.setViewport({ width: 880, height: 100, deviceScaleFactor: 2 });
+  await page.setViewport({ width: 880, height: 100, deviceScaleFactor: 3 }); // Escala 3 para máxima nitidez
   await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
   const bodyHeight = await page.evaluate(() => document.body.scrollHeight);
-  await page.setViewport({ width: 880, height: bodyHeight, deviceScaleFactor: 2 });
+  await page.setViewport({ width: 880, height: bodyHeight, deviceScaleFactor: 3 });
   const buffer = await page.screenshot({ type: 'png' });
   await browser.close();
   return buffer;
