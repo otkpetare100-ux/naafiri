@@ -175,6 +175,7 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
     
 
     // Mapeo simple de 7 elementos: [item0, item1, item2, Trinket(6), item3, item4, item5, vacío]
+    const itm = m.items || [0,0,0,0,0,0,0,0];
     const reordered = [
       itm[0], itm[1], itm[2], itm[6],
       itm[3], itm[4], itm[5], 0
