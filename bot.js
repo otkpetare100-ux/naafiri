@@ -997,6 +997,11 @@ function initBot(db) {
 
         const parts_bet = interaction.customId.split('_');
         const act = parts_bet[0];
+
+        if (act === 'daily') {
+          return interaction.reply({ content: '💰 Para cobrar tus monedas, escribe **!diario** aquí mismo en el chat.', ephemeral: true });
+        }
+
         const choice = parts_bet[1];
         const puuid = parts_bet.slice(2).join('_');
 
@@ -1265,18 +1270,49 @@ async function notifyLiveGame(acc, gameData) {
   return await channel.send({ embeds: [embed], components: [row] });
 }
 
-// Recordatorio Primera Victoria
+// Recordatorio Primera Victoria (Mediodía)
 async function sendDailyMotivation(db) {
   if (!client || !targetChannelId) return;
   const channel = client.channels.cache.get(targetChannelId);
   if (!channel) return;
 
-  const embed = new EmbedBuilder()
-    .setTitle('☀️ ¡Buenos días, Perrera!')
-    .setDescription('¿Quién se va a sacar la primera victoria hoy? ⚔️\nUsen `!diario` para sus monedas.')
-    .setColor(0xf4c874);
+  const day = new Date().getDay(); // 0: Domingo, 1: Lunes...
+  const images = [
+    'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Kindred_0.jpg', // Domingo
+    'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Naafiri_0.jpg', // Lunes
+    'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Briar_0.jpg',   // Martes
+    'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Warwick_0.jpg', // Miércoles
+    'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Nasus_0.jpg',   // Jueves
+    'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Naafiri_1.jpg', // Viernes
+    'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/KogMaw_9.jpg',  // Sábado (PugMaw)
+  ];
 
-  channel.send({ embeds: [embed] });
+  const dailyMessages = [
+    '☀️ ¡Domingo de descanso en la perrera! No olvides tus coins.',
+    '🦴 ¡Lunes con hambre de victoria! Reclama tu diario.',
+    '🍖 ¡Martes de cacería! ¿Ya tienes tus monedas?',
+    '⚔️ ¡Miércoles mitad de semana! Hora de cobrar.',
+    '🔥 ¡Jueves casi fin de semana! No te quedes sin tus 100 coins.',
+    '🎉 ¡Viernes de perreo! Cobren y a rankear.',
+    '🍗 ¡Sábado de vicio! Asegura tus monedas diarias.'
+  ];
+
+  const embed = new EmbedBuilder()
+    .setTitle('🍽️ ¡Hora de almorzar en la Perrera!')
+    .setDescription(dailyMessages[day] + '\n\nEscribe `!diario` para recibir **100 Naafiri Coins** 💰')
+    .setImage(images[day])
+    .setColor(0xf4c874)
+    .setTimestamp()
+    .setFooter({ text: 'Naafiri Bot · Recordatorio de Mediodía' });
+
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId('daily_claim')
+      .setLabel('¿Cómo cobrar? 💰')
+      .setStyle(ButtonStyle.Success)
+  );
+
+  channel.send({ embeds: [embed], components: [row] });
 }
 
 function getAbsoluteLP(tier, rank, lp) {
