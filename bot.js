@@ -1,6 +1,8 @@
 const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, AttachmentBuilder } = require('discord.js');
 const puppeteer = require('puppeteer');
 const fetch = (...args) => import('node-fetch').then(({default: f}) => f(...args));
+const fs = require('fs');
+const path = require('path');
 
 let client = null;
 let dbInstance = null;
@@ -1351,13 +1353,35 @@ async function sendDailySummary(db) {
 
   stats.sort((a, b) => b.absLp - a.absLp);
 
+  // Intentar cargar imagen de fondo
+  let bgBase64 = '';
+  try {
+    const bgPath = path.join(process.cwd(), 'public', 'bg.png');
+    if (fs.existsSync(bgPath)) {
+      const bitmap = fs.readFileSync(bgPath);
+      bgBase64 = `data:image/png;base64,${Buffer.from(bitmap).toString('base64')}`;
+    }
+  } catch (e) { console.error('Error cargando bg.png:', e); }
+
   // Generar filas HTML
   let rowsHtml = '';
   stats.forEach((s, idx) => {
-    let medal = `<span class="medal" style="color: #3498db;">${idx + 1}</span>`;
-    if (idx === 0) medal = '<span class="medal">🥇</span>';
-    else if (idx === 1) medal = '<span class="medal">🥈</span>';
-    else if (idx === 2) medal = '<span class="medal">🥉</span>';
+    let medalStyle = '';
+    let posText = idx + 1;
+    let isLeader = idx === 0;
+    
+    if (idx === 0) medalStyle = 'color: #FFD700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.6); font-weight: 800;';
+    else if (idx === 1) medalStyle = 'color: #C0C0C0; text-shadow: 0 0 10px rgba(192, 192, 192, 0.4); font-weight: 800;';
+    else if (idx === 2) medalStyle = 'color: #CD7F32; text-shadow: 0 0 10px rgba(205, 127, 50, 0.4); font-weight: 800;';
+    else medalStyle = 'color: #ffffff; opacity: 0.8;';
+
+    // Racha Hot/Cold
+    let streakTag = '';
+    const wrVal = parseInt(s.wr) || 0;
+    if (s.games >= 3) {
+      if (wrVal >= 60) streakTag = '<span class="streak hot">🔥 HOT</span>';
+      else if (wrVal <= 40) streakTag = '<span class="streak cold">❄️ COLD</span>';
+    }
 
     const lp24Class = s.lp24h > 0 ? 'positive' : (s.lp24h < 0 ? 'negative' : 'neutral');
     const lp7dClass = s.lp7d > 0 ? 'positive' : (s.lp7d < 0 ? 'negative' : 'neutral');
@@ -1365,9 +1389,9 @@ async function sendDailySummary(db) {
     const lp7dStr = s.lp7d > 0 ? `+${s.lp7d}` : `${s.lp7d}`;
 
     rowsHtml += `
-      <div class="row">
-        <div class="col-pos">${medal}</div>
-        <div class="col-name">${s.name}</div>
+      <div class="row ${isLeader ? 'leader-row' : ''}">
+        <div class="col-pos" style="${medalStyle}">${posText}</div>
+        <div class="col-name">${s.name} ${streakTag}</div>
         <div class="col-rank">${s.rank}</div>
         <div class="col-lp ${lp24Class}">${lp24Str}</div>
         <div class="col-lp ${lp7dClass}">${lp7dStr}</div>
@@ -1385,73 +1409,112 @@ async function sendDailySummary(db) {
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
         body {
           margin: 0; padding: 0;
-          background-color: transparent;
+          background-color: #000;
           font-family: 'Inter', sans-serif;
           color: #ffffff;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          overflow: hidden;
+          ${bgBase64 ? `background-image: url('${bgBase64}'); background-size: cover; background-position: center;` : 'background: linear-gradient(135deg, #0f0f11 0%, #1a1a1e 100%);'}
+        }
+        #container {
+          padding: 40px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
         }
         #scoreboard {
-          width: 800px;
-          background: linear-gradient(145deg, #111111, #1a1a1a);
-          border: 2px solid #d4af37;
-          border-radius: 12px;
-          padding: 20px;
-          box-shadow: 0 8px 32px rgba(212, 175, 55, 0.15);
+          width: 850px;
+          background: rgba(15, 15, 17, 0.85);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border: 1px solid rgba(212, 175, 55, 0.3);
+          border-radius: 16px;
+          padding: 25px;
+          box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5);
+          position: relative;
         }
         .header-title {
           text-align: center;
-          font-size: 28px;
+          font-size: 32px;
           font-weight: 800;
           color: #d4af37;
           text-transform: uppercase;
-          letter-spacing: 2px;
-          margin-bottom: 20px;
-          text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+          letter-spacing: 3px;
+          margin-bottom: 25px;
+          text-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
         }
         .table-header {
           display: flex;
-          background: rgba(212, 175, 55, 0.1);
-          padding: 10px 15px;
-          border-radius: 8px;
-          font-weight: 600;
+          background: rgba(212, 175, 55, 0.15);
+          padding: 12px 15px;
+          border-radius: 10px;
+          font-weight: 700;
           color: #d4af37;
-          margin-bottom: 10px;
-          border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+          margin-bottom: 12px;
+          text-transform: uppercase;
+          font-size: 13px;
+          letter-spacing: 1px;
         }
         .row {
           display: flex;
-          padding: 12px 15px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          padding: 14px 15px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.03);
           align-items: center;
-          transition: background 0.3s;
         }
-        .row:nth-child(even) {
-          background: rgba(255, 255, 255, 0.02);
+        .leader-row {
+          background: rgba(212, 175, 55, 0.08);
+          border-left: 3px solid #d4af37;
+          border-radius: 4px;
         }
-        .col-pos { width: 50px; text-align: center; font-size: 20px; }
-        .col-name { width: 220px; font-weight: 600; letter-spacing: 0.5px; }
-        .col-rank { width: 180px; color: #aaaaaa; }
-        .col-lp { width: 90px; text-align: right; font-weight: 600; }
-        .col-games { width: 80px; text-align: center; color: #e67e22; font-weight: 600; }
-        .col-wr { width: 60px; text-align: right; color: #3498db; font-weight: 600; }
+        .col-pos { width: 50px; text-align: center; font-size: 22px; }
+        .col-name { width: 250px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+        .col-rank { width: 180px; color: #cbd5e0; font-size: 14px; }
+        .col-lp { width: 90px; text-align: right; font-weight: 700; font-family: monospace; font-size: 16px; }
+        .col-games { width: 80px; text-align: center; color: #f6ad55; font-weight: 700; }
+        .col-wr { width: 70px; text-align: right; color: #63b3ed; font-weight: 700; }
         
-        .positive { color: #2ecc71; }
-        .negative { color: #e74c3c; }
-        .neutral { color: #7f8c8d; }
+        .streak {
+          font-size: 10px;
+          padding: 2px 6px;
+          border-radius: 4px;
+          font-weight: 800;
+        }
+        .hot { background: #e53e3e; color: #fff; box-shadow: 0 0 8px rgba(229, 62, 62, 0.5); }
+        .cold { background: #3182ce; color: #fff; box-shadow: 0 0 8px rgba(49, 130, 206, 0.5); }
+        
+        .positive { color: #48bb78; }
+        .negative { color: #f56565; }
+        .neutral { color: #718096; }
+
+        .watermark {
+          margin-top: 15px;
+          font-size: 11px;
+          color: rgba(255, 255, 255, 0.3);
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          font-weight: 600;
+        }
       </style>
     </head>
     <body>
-      <div id="scoreboard">
-        <div class="header-title">Top Perrera Scoreboard</div>
-        <div class="table-header">
-          <div class="col-pos">Pos</div>
-          <div class="col-name">Username</div>
-          <div class="col-rank">Rank</div>
-          <div class="col-lp">LP (24h)</div>
-          <div class="col-lp">LP (7d)</div>
-          <div class="col-games">Games</div>
-          <div class="col-wr">WR</div>
+      <div id="container">
+        <div id="scoreboard">
+          <div class="header-title">Scoreboard de las Perritas</div>
+          <div class="table-header">
+            <div class="col-pos">Pos</div>
+            <div class="col-name">Username</div>
+            <div class="col-rank">Rank</div>
+            <div class="col-lp">LP (24h)</div>
+            <div class="col-lp">LP (7d)</div>
+            <div class="col-games">Games</div>
+            <div class="col-wr">WR</div>
+          </div>
+          ${rowsHtml}
         </div>
-        ${rowsHtml}
+        <div class="watermark">Generado por naafiri bot</div>
       </div>
     </body>
     </html>
@@ -1459,14 +1522,15 @@ async function sendDailySummary(db) {
 
   try {
     const browser = await puppeteer.launch({
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     const page = await browser.newPage();
-    await page.setViewport({ width: 850, height: 1000, deviceScaleFactor: 2 });
+    await page.setViewport({ width: 1000, height: 1200, deviceScaleFactor: 2 });
     await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
     
-    const element = await page.$('#scoreboard');
-    const imageBuffer = await element.screenshot();
+    const element = await page.$('#container');
+    const imageBuffer = await element.screenshot({ transparent: true });
     await browser.close();
 
     const attachment = new AttachmentBuilder(imageBuffer, { name: 'scoreboard.png' });
