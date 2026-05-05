@@ -936,6 +936,35 @@ function initBot(db) {
         }
         return msg.channel.send(`✅ Sincronización completada: **${success}/${accounts.length}** actualizados.`);
       }
+
+      // !admin_vinculos
+      if (command === 'admin_vinculos') {
+        const accounts = await db.collection('accounts').find({}).toArray();
+        const members = await msg.guild.members.fetch();
+        const linkedIds = accounts.filter(a => a.discordId).map(a => a.discordId);
+        
+        const linkedStr = accounts.filter(a => a.discordId).map(a => `✅ **${a.gameName}** -> <@${a.discordId}>`).join('\n') || 'Nadie vinculado.';
+        const unlinkedAccStr = accounts.filter(a => !a.discordId).map(a => `❌ **${a.gameName}#${a.tagLine}** (Sin Discord)`).join('\n');
+        
+        const unlinkedMembers = members.filter(m => !m.user.bot && !linkedIds.includes(m.id));
+        const mentionList = unlinkedMembers.map(m => `<@${m.id}>`).join(', ') || 'Todos vinculados.';
+
+        const embed = new EmbedBuilder()
+          .setTitle('🔗 Auditoría de Vinculación')
+          .addFields(
+            { name: 'Cuentas Vinculadas', value: linkedStr.length > 1024 ? linkedStr.substring(0, 1021) + '...' : linkedStr },
+            { name: 'Cuentas LoL sin Discord', value: unlinkedAccStr.length > 1024 ? unlinkedAccStr.substring(0, 1021) + '...' : (unlinkedAccStr || 'Ninguna') },
+            { name: 'Miembros Discord sin Vincular', value: mentionList.length > 1024 ? mentionList.substring(0, 1021) + '...' : mentionList }
+          )
+          .setColor(0x3498db);
+
+        let content = `<@${msg.author.id}>`;
+        if (unlinkedMembers.size > 0) {
+          content += `\n⚠️ **Atención:** ${unlinkedMembers.map(m => `<@${m.id}>`).join(' ')} ¡Viculen sus cuentas con \`!vincular Nombre#TAG\`!`;
+        }
+
+        return msg.channel.send({ content, embeds: [embed] });
+      }
     }
 
   });
@@ -973,8 +1002,8 @@ function initBot(db) {
               .addFields(
                 { name: '💰 Economía', value: '`!admin_dar @u cant`\n`!admin_quitar @u cant`\n`!admin_setcoins @u cant`\n`!admin_resetdiario @u`\n`!admin_resetall CONFIRMAR`' },
                 { name: '🎒 Items e Inventario', value: '`!admin_daritem @u id`\n`!admin_clearinv @u`' },
-                { name: '📡 Monitoreo y Dashboard', value: '`!admin_scan` - Scan en vivo.\n`!admin_check N#T` - Forzar notif.\n`!admin_cancelarapuestas N#T`\n`!admin_syncroles` - Sincronizar roles.' },
-                { name: '🎭 Sistema y Diagnóstico', value: '`!admin_stats` - Estadísticas.\n`!admin_debug_key` - Riot API.\n`!admin_anuncio [msg]`\n`!admin_purge [n]` - Borrar mensajes.' },
+                { name: '📡 Monitoreo y Dashboard', value: '`!admin_scan` - Scan en vivo.\n`!admin_check N#T` - Forzar notif.\n`!admin_vinculos` - Auditoría y Pings.\n`!admin_cancelarapuestas N#T`' },
+                { name: '🎭 Sistema y Diagnóstico', value: '`!admin_syncroles` - Sincronizar roles.\n`!admin_stats` - Estadísticas.\n`!admin_debug_key` - Riot API.\n`!admin_purge [n]` - Borrar mensajes.' },
                 { name: '🧪 Comandos de Prueba (Manuales)', value: '`!admin_testdiario` - Recordatorio 12pm\n`!admin_testsummary` - Scoreboard 6/10pm\n`!admin_testlive` - Alerta de Partida\n`!admin_testbet` - Resultado Apuesta' }
               )
               .setColor(0xd93f3f)
