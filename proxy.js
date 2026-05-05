@@ -94,9 +94,8 @@ async function connectDB() {
         sendDailyMotivation(db);
       }
 
-      // 2. Resumen de la Perrera cada 4h (Solo de 9:00 AM a 10:00 PM)
-      // Horas: 9:00, 13:00, 17:00, 21:00
-      const summaryHours = [9, 13, 17, 21];
+      // 2. Resumen de la Perrera (Horarios: 6:00 PM y 10:00 PM)
+      const summaryHours = [18, 22];
       if (summaryHours.includes(hour) && minute === 0) {
         sendDailySummary(db);
       }
