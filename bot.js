@@ -96,7 +96,12 @@ function initBot(db) {
   }
 
   client = new Client({
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
+    intents: [
+      GatewayIntentBits.Guilds, 
+      GatewayIntentBits.GuildMessages, 
+      GatewayIntentBits.MessageContent,
+      GatewayIntentBits.GuildMembers
+    ]
   });
 
   client.on('ready', () => {
