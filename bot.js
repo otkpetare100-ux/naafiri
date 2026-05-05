@@ -744,7 +744,7 @@ function initBot(db) {
         return msg.channel.send(`<@${msg.author.id}> 🔑 **Debug Key:**\n- Máscara: \`${masked}\`\n- Longitud: \`${key.length}\`\n- Variable ENV: \`${process.env.RIOT_API_KEY ? 'Detectada ✅' : 'No detectada ❌'}\``);
       }
 
-      if (command === 'admin_testnotif') {
+      if (command === 'admin_testlive') {
         const testAcc = { gameName: 'Jugador de Prueba', tagLine: 'LAN' };
         const testData = { championName: 'Naafiri', championId: 'Naafiri' };
         await notifyLiveGame(testAcc, testData);
@@ -753,7 +753,12 @@ function initBot(db) {
 
       if (command === 'admin_testsummary') {
         await sendDailySummary(db);
-        return msg.channel.send(`<@${msg.author.id}> ✅ Resumen diario de prueba enviado.`);
+        return msg.channel.send(`<@${msg.author.id}> ✅ Scoreboard diario de prueba enviado.`);
+      }
+
+      if (command === 'admin_testdiario') {
+        await sendDailyMotivation(db);
+        return msg.channel.send(`<@${msg.author.id}> ✅ Recordatorio diario de prueba enviado.`);
       }
 
             if (command === 'admin_testbet') {
@@ -970,7 +975,7 @@ function initBot(db) {
                 { name: '🎒 Items e Inventario', value: '`!admin_daritem @u id`\n`!admin_clearinv @u`' },
                 { name: '📡 Monitoreo y Dashboard', value: '`!admin_scan` - Scan en vivo.\n`!admin_check N#T` - Forzar notif.\n`!admin_cancelarapuestas N#T`\n`!admin_syncroles` - Sincronizar roles.' },
                 { name: '🎭 Sistema y Diagnóstico', value: '`!admin_stats` - Estadísticas.\n`!admin_debug_key` - Riot API.\n`!admin_anuncio [msg]`\n`!admin_purge [n]` - Borrar mensajes.' },
-                { name: '🧪 Comandos de Prueba', value: '`!admin_testnotif`, `!admin_testsummary`, `!admin_testbet`' }
+                { name: '🧪 Comandos de Prueba (Manuales)', value: '`!admin_testdiario` - Recordatorio 12pm\n`!admin_testsummary` - Scoreboard 6/10pm\n`!admin_testlive` - Alerta de Partida\n`!admin_testbet` - Resultado Apuesta' }
               )
               .setColor(0xd93f3f)
               .setFooter({ text: 'Naafiri Admin' });
