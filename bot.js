@@ -1004,7 +1004,26 @@ function initBot(db) {
         const act = parts_bet[0];
 
         if (act === 'daily') {
-          return interaction.reply({ content: '💰 Para cobrar tus monedas, escribe **!diario** aquí mismo en el chat.', ephemeral: true });
+          const now = new Date();
+          const user = await dbInstance.collection('economy').findOne({ discordId: interaction.user.id });
+          
+          if (user && user.lastDaily) {
+            const diff = now - new Date(user.lastDaily);
+            const waitTime = 24 * 60 * 60 * 1000;
+            if (diff < waitTime) {
+              const remaining = waitTime - diff;
+              const hours = Math.floor(remaining / (1000 * 60 * 60));
+              const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+              return interaction.reply({ content: `⌛ Ya reclamaste tus monedas hoy. Vuelve en **${hours}h ${minutes}m**.`, ephemeral: true });
+            }
+          }
+
+          await dbInstance.collection('economy').updateOne(
+            { discordId: interaction.user.id }, 
+            { $set: { lastDaily: new Date(), discordTag: interaction.user.tag }, $inc: { coins: 100 } }, 
+            { upsert: true }
+          );
+          return interaction.reply({ content: `💰 ¡Has cobrado tus **100 Naafiri Coins** diarias! Úsalas sabiamente.`, ephemeral: true });
         }
 
         const choice = parts_bet[1];
@@ -1304,7 +1323,7 @@ async function sendDailyMotivation(db) {
 
   const embed = new EmbedBuilder()
     .setTitle('🍽️ ¡Hora de almorzar en la Perrera!')
-    .setDescription(dailyMessages[day] + '\n\nEscribe `!diario` para recibir **100 Naafiri Coins** 💰')
+    .setDescription(dailyMessages[day])
     .setImage(images[day])
     .setColor(0xf4c874)
     .setTimestamp()
@@ -1313,7 +1332,7 @@ async function sendDailyMotivation(db) {
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId('daily_claim')
-      .setLabel('¿Cómo cobrar? 💰')
+      .setLabel('Cobrar 100 Coins 💰')
       .setStyle(ButtonStyle.Success)
   );
 
