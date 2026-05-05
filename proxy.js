@@ -251,7 +251,7 @@ async function settleBets(acc) {
     });
     const matchIds = await matchIdsRes.json();
     
-    if (!matchIds || matchIds.length === 0) {
+    if (!matchIds || !Array.isArray(matchIds) || matchIds.length === 0) {
       // Si no hay partidas nuevas tras 100seg, quizá fue un error de Riot
       // Limpiamos el cache tras 5 minutos de inactividad para no trabar
       return;
@@ -263,6 +263,11 @@ async function settleBets(acc) {
     });
     const match = await detailRes.json();
     
+    if (!match || !match.info) {
+      console.log(`[Bets] Error o partida no encontrada para ${acc.gameName}`);
+      return;
+    }
+
     // FILTRO: Solo liquidar apuestas y retos en Ranked SoloQ (420) y Ranked Flex (440)
     const allowedQueues = [420, 440];
     if (!allowedQueues.includes(match.info.queueId)) {
@@ -387,7 +392,7 @@ async function settleBets(acc) {
     );
     
     // IMPORTANTE: Limpiar cache para permitir nueva partida
-    clearCache();
+    liveCache.delete(acc.puuid);
 
     // --- NUEVO: Motor de Retos Automáticos ---
     await checkChallenges(acc, match);
