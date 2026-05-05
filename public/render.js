@@ -173,25 +173,9 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
     const queue = QUEUE_TYPES[m.queueId] || 'Partida';
     const champImg = 'https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/champion/' + getChampImageName(m.champion);
     
-    // Items - Trinket en posición 4, Botas de carril en posición 8
-    const BOOT_IDS = [1001, 3006, 3009, 3020, 3047, 3111, 3117, 3158, 2422];
-    const itm = m.items || [0,0,0,0,0,0,0,0];
-    const pos = (m.position || m.individualPosition || '').toUpperCase();
-    const isADC  = pos === 'BOTTOM' || m.role === 'DUO_CARRY' || m.role === 'CARRY';
-    const isSupp = pos === 'UTILITY' || m.role === 'DUO_SUPPORT' || m.role === 'SUPPORT';
 
     let normalItems = [itm[0], itm[1], itm[2], itm[3], itm[4], itm[5]];
     let missionItem = 0;
-
-    if (isADC) {
-      // ADC: mover botas al slot 8
-      const bootIdx = normalItems.findIndex(id => BOOT_IDS.includes(Number(id)));
-      if (bootIdx !== -1) { missionItem = normalItems[bootIdx]; normalItems[bootIdx] = 0; }
-    } else if (isSupp) {
-      // Support: mover Pink Ward (2055) al slot 8
-      const pinkIdx = normalItems.findIndex(id => Number(id) === 2055);
-      if (pinkIdx !== -1) { missionItem = normalItems[pinkIdx]; normalItems[pinkIdx] = 0; }
-    }
 
     // Mapeo: [item0, item1, item2, Trinket, item3, item4, item5, Botas]
     const reordered = [
@@ -1993,44 +1977,7 @@ function renderTeamTable(title, players, teamClass, teamData, maxDmg, gameDurati
     
     html += '<td><div class="item-list">';
 
-    // Items - Trinket en posición 4, Botas de carril en posición 8
-    const BOOT_IDS = [1001, 3006, 3009, 3020, 3047, 3111, 3117, 3158, 2422];
-    const itm = p.items || [0,0,0,0,0,0,0,0];
-    const pos = (p.teamPosition || p.individualPosition || '').toUpperCase();
-    const isADC  = pos === 'BOTTOM' || p.role === 'DUO_CARRY' || p.role === 'CARRY';
-    const isSupp = pos === 'UTILITY' || p.role === 'DUO_SUPPORT' || p.role === 'SUPPORT';
-
-    let normalItems = [itm[0], itm[1], itm[2], itm[3], itm[4], itm[5]];
-    let missionItem = 0;
-
-    if (isADC) {
-      const bootIdx = normalItems.findIndex(id => BOOT_IDS.includes(Number(id)));
-      if (bootIdx !== -1) { missionItem = normalItems[bootIdx]; normalItems[bootIdx] = 0; }
-    } else if (isSupp) {
-      const pinkIdx = normalItems.findIndex(id => Number(id) === 2055);
-      if (pinkIdx !== -1) { missionItem = normalItems[pinkIdx]; normalItems[pinkIdx] = 0; }
-    }
-
-    const reordered = [
-      normalItems[0], normalItems[1], normalItems[2], itm[6],
-      normalItems[3], normalItems[4], normalItems[5], missionItem
-    ];
-
-    reordered.forEach(id => {
-      if (id > 0) {
-        html += '<img src="https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/item/' + id + '.png" class="item-icon">';
-      } else {
-        html += '<div class="empty-item"></div>';
-      }
-    });
-    html += '</div></td>';
     
-    html += '</tr>';
-  });
-
-  html += '</tbody></table></div>';
-  return html;
-}
 
 // --- Lógica del Modal de Historial (Solo Partidas) ---
 window.openHistoryModal = function(puuid) {
