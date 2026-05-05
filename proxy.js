@@ -152,7 +152,11 @@ async function connectDB() {
               liveCache.add(acc.puuid); 
 
               if (acc.lastLiveGameId !== game.gameId) {
-                const me = game.participants.find(p => p.puuid === acc.puuid);
+                const me = game.participants.find(p => p.puuid === acc.puuid.trim());
+                if (!me) {
+                  console.log(`[Live] PUUID no encontrado en participantes para ${acc.gameName}`);
+                  continue;
+                }
                 const champKey = Object.keys(champData.data).find(key => champData.data[key].key == me.championId);
                 const champName = champKey ? champData.data[champKey].name : 'Desconocido';
                 
@@ -275,8 +279,11 @@ async function settleBets(acc) {
       return;
     }
     
-    const p = match.info.participants.find(x => x.puuid === acc.puuid);
-    if (!p) return;
+    const p = match.info.participants.find(x => x.puuid === acc.puuid.trim());
+    if (!p) {
+      console.log(`[Bets] Participante no encontrado en el resultado para ${acc.gameName}`);
+      return;
+    }
 
     // --- Funcionalidad: Seguro contra Remake (< 3.5 min) ---
     const isRemake = match.info.gameDuration < 210;

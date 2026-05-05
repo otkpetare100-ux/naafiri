@@ -779,8 +779,11 @@ function initBot(db) {
           // Obtener nombre del campeón
           const champRes = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/es_MX/champion.json`);
           const champData = await champRes.json();
-          const me = game.participants.find(p => p.puuid === acc.puuid);
-          const champName = me ? (Object.values(champData.data).find(c => c.key == me.championId)?.name || 'Desconocido') : 'Desconocido';
+          const me = game.participants.find(p => p.puuid === acc.puuid.trim());
+          if (!me) {
+            return msg.channel.send(`<@${msg.author.id}> ❌ Error: El jugador está en partida pero su PUUID no coincide de forma estricta (posible error de formato).`);
+          }
+          const champName = Object.values(champData.data).find(c => c.key == me.championId)?.name || 'Desconocido';
 
           const champKey = Object.keys(champData.data).find(key => champData.data[key].key == me.championId); 
           const cName = champKey ? champData.data[champKey].name : 'Desconocido'; 
