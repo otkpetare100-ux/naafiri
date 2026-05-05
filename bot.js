@@ -1491,8 +1491,8 @@ async function sendDailySummary(db) {
           border-left: 6px solid #d4af37;
           border-radius: 8px;
         }
-        .col-pos { width: 60px; text-align: center; font-size: 28px; }
-        .col-name { width: 280px; font-weight: 700; display: flex; align-items: center; gap: 15px; font-size: 19px; }
+        .col-pos { width: 80px; text-align: center; font-size: 24px; }
+        .col-name { width: 260px; font-weight: 700; display: flex; align-items: center; gap: 15px; font-size: 19px; }
         .col-rank { width: 200px; color: #e2e8f0; font-size: 16px; }
         .col-lp { width: 100px; text-align: right; font-weight: 800; font-family: monospace; font-size: 19px; }
         .col-games { width: 90px; text-align: center; color: #fbd38d; font-weight: 800; font-size: 19px; }
@@ -1527,7 +1527,7 @@ async function sendDailySummary(db) {
           <div class="header-title">Scoreboard de las Perritas</div>
           <div class="table-header">
             <div class="col-pos">Pos</div>
-            <div class="col-name">Username</div>
+            <div class="col-name">Niggers</div>
             <div class="col-rank">Rank</div>
             <div class="col-lp">LP (24h)</div>
             <div class="col-lp">LP (7d)</div>
