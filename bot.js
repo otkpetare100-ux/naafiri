@@ -1350,24 +1350,52 @@ async function sendDailySummary(db) {
 
   stats.sort((a, b) => b.absLp - a.absLp);
 
-  let table = 'Pos | Username           | Rank              | LP (24h) | LP (7d) | Games | WR\n';
-  table += '--------------------------------------------------------------------------------\n';
+  // Colores ANSI para Discord
+  const ESC = '\\u001b[';
+  const RESET = `${ESC}0m`;
+  const CYAN = `${ESC}1;36m`;
+  const YELLOW = `${ESC}1;33m`;
+  const GREEN = `${ESC}1;32m`;
+  const RED = `${ESC}1;31m`;
+  const BLUE = `${ESC}1;34m`;
+  const MAGENTA = `${ESC}1;35m`;
+  const GRAY = `${ESC}1;30m`;
+  const WHITE = `${ESC}1;37m`;
+
+  let table = `${CYAN}Pos | Username           | Rank              | LP (24h) | LP (7d) | Games | WR${RESET}\n`;
+  table += `${GRAY}--------------------------------------------------------------------------------${RESET}\n`;
   
   stats.forEach((s, idx) => {
-    const pos = String(idx + 1).padStart(3, ' ');
-    const name = s.name.substring(0, 18).padEnd(18, ' ');
-    const rank = s.rank.substring(0, 17).padEnd(17, ' ');
-    const lp24h = String(s.lp24h).padStart(8, ' ');
-    const lp7d = String(s.lp7d).padStart(7, ' ');
-    const games = String(s.games).padStart(5, ' ');
-    const wr = String(s.wr).padStart(4, ' ');
+    const rawPos = String(idx + 1).padStart(3, ' ');
+    const rawName = s.name.substring(0, 18).padEnd(18, ' ');
+    const rawRank = s.rank.substring(0, 17).padEnd(17, ' ');
     
-    table += `${pos} | ${name} | ${rank} | ${lp24h} | ${lp7d} | ${games} | ${wr}\n`;
+    // Formatear LP con signo + si es positivo, y rellenar
+    const lp24Str = s.lp24h > 0 ? `+${s.lp24h}` : String(s.lp24h);
+    const lp7dStr = s.lp7d > 0 ? `+${s.lp7d}` : String(s.lp7d);
+    const rawLp24h = lp24Str.padStart(8, ' ');
+    const rawLp7d = lp7dStr.padStart(7, ' ');
+    
+    const rawGames = String(s.games).padStart(5, ' ');
+    const rawWr = String(s.wr).padStart(4, ' ');
+
+    // Aplicar colores
+    const cPos = `${BLUE}${rawPos}${RESET}`;
+    const cName = `${YELLOW}${rawName}${RESET}`;
+    const cRank = `${WHITE}${rawRank}${RESET}`;
+    
+    const cLp24h = s.lp24h > 0 ? `${GREEN}${rawLp24h}${RESET}` : (s.lp24h < 0 ? `${RED}${rawLp24h}${RESET}` : `${GRAY}${rawLp24h}${RESET}`);
+    const cLp7d = s.lp7d > 0 ? `${GREEN}${rawLp7d}${RESET}` : (s.lp7d < 0 ? `${RED}${rawLp7d}${RESET}` : `${GRAY}${rawLp7d}${RESET}`);
+    
+    const cGames = `${MAGENTA}${rawGames}${RESET}`;
+    const cWr = s.wr === '-' ? `${GRAY}${rawWr}${RESET}` : `${CYAN}${rawWr}${RESET}`;
+
+    table += `${cPos} | ${cName} | ${cRank} | ${cLp24h} | ${cLp7d} | ${cGames} | ${cWr}\n`;
   });
 
   const embed = new EmbedBuilder()
     .setTitle('📊 Resumen Diario de la Perrera')
-    .setDescription(`\`\`\`text\n${table}\n\`\`\``)
+    .setDescription(`\`\`\`ansi\n${table}\n\`\`\``)
     .setColor(0x576bce)
     .setFooter({ text: 'Actualizado automáticamente' });
 
