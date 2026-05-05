@@ -1495,7 +1495,12 @@ async function sendDailyMotivation(db) {
         .setStyle(ButtonStyle.Success)
     );
 
-    await channel.send({ embeds: [embed], components: [row] });
+    const sentMsg = await channel.send({ embeds: [embed], components: [row] });
+
+    // Auto-borrado tras 6 horas
+    setTimeout(() => {
+      sentMsg.delete().catch(() => {});
+    }, 6 * 60 * 60 * 1000);
   } catch (e) {
     console.error('[Motivation Error]', e);
   }
