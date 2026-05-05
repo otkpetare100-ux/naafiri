@@ -1526,7 +1526,7 @@ async function sendDailySummary(db) {
         <div id="scoreboard">
           <div class="header-title">Scoreboard de las Perritas</div>
           <div class="table-header">
-            <div class="col-pos">Pos</div>
+            <div class="col-pos"></div>
             <div class="col-name">Niggers</div>
             <div class="col-rank">Rank</div>
             <div class="col-lp">LP (24h)</div>
