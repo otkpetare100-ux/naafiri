@@ -71,8 +71,16 @@ async function connectDB() {
     // --- Sistema de Notificaciones Periódicas ---
     setInterval(async () => {
       const now = new Date();
-      const hour = now.getHours();
-      const minute = now.getMinutes();
+      // Forzamos la zona horaria a Venezuela (-04:00) para que coincida con el usuario
+      const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/Caracas',
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: false
+      });
+      const parts = formatter.formatToParts(now);
+      const hour = parseInt(parts.find(p => p.type === 'hour').value);
+      const minute = parseInt(parts.find(p => p.type === 'minute').value);
 
       // 0. Snapshot Diario de Rango y LP
       try {
