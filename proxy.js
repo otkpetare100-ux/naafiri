@@ -5,7 +5,7 @@ const path       = require('path');
 const { MongoClient } = require('mongodb');
 
 try { require('dotenv').config(); } catch(e) {}
-const { initBot, notifyRankChange, notifyLiveGame, sendDailySummary, notifyBetResults, notifyRemake, notifyChallengeComplete, GACHA_ITEMS } = require('./bot.js');
+const { initBot, notifyRankChange, notifyLiveGame, sendDailySummary, sendDailyMotivation, notifyBetResults, notifyRemake, notifyChallengeComplete, GACHA_ITEMS } = require('./bot.js');
 
 // ---- Configuración y Variables Globales ----
 let DDRAGON_VERSION = '15.8.1'; 
@@ -97,9 +97,21 @@ async function connectDB() {
         }
       } catch (e) { console.error('[Snapshot Error]', e); }
 
-      // 1. Recordatorio matutino (Ahora a las 12:00 PM)
-      if (hour === 12 && minute === 0) {
-        sendDailyMotivation(db);
+      // 1. Recordatorio matutino (12:00 PM - 1:00 PM robusto)
+      if (hour === 12) {
+        try {
+          const todayStr = new Date().toISOString().split('T')[0];
+          const config = await db.collection('system_config').findOne({ key: 'last_motivation' });
+          if (!config || config.date !== todayStr) {
+            await sendDailyMotivation(db);
+            await db.collection('system_config').updateOne(
+              { key: 'last_motivation' },
+              { $set: { date: todayStr } },
+              { upsert: true }
+            );
+            console.log(`[Motivation] Notificación enviada para la fecha ${todayStr}`);
+          }
+        } catch (e) { console.error('[Motivation Error]', e); }
       }
 
       // 2. Resumen de la Perrera (Horarios: 6:00 PM y 10:00 PM)

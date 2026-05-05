@@ -1328,49 +1328,177 @@ async function notifyLiveGame(acc, gameData) {
   return await channel.send({ embeds: [embed], components: [row] });
 }
 
+const SKIN_THEMES = [
+  {
+    name: 'PROYECTO',
+    images: [
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yi_5.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Vayne_11.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ashe_11.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Katarina_1.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Lucian_1.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yasuo_1.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Zed_1.jpg'
+    ]
+  },
+  {
+    name: 'Flor Espiritual',
+    images: [
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ahri_27.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yasuo_35.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Kindred_12.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Teemo_27.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yone_1.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Cassiopeia_18.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Riven_23.jpg'
+    ]
+  },
+  {
+    name: 'Guardianas de las Estrellas',
+    images: [
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Lux_6.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Jinx_6.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ahri_7.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/KaiSa_29.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Akali_61.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Syndra_7.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Zoe_9.jpg'
+    ]
+  },
+  {
+    name: 'Luna de Sangre',
+    images: [
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aatrox_7.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Akali_5.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Diana_12.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Pyke_16.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Thresh_4.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yasuo_3.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Jhin_1.jpg'
+    ]
+  },
+  {
+    name: 'Solo ante el Peligro',
+    images: [
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Lucian_6.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Senna_1.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ashe_17.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yasuo_9.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Thresh_14.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Irelia_15.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Viktor_21.jpg'
+    ]
+  },
+  {
+    name: 'Fiesta en la Piscina',
+    images: [
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/LeeSin_10.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Leona_4.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Renekton_2.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Graves_6.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ziggs_1.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Caitlyn_19.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Zoe_2.jpg'
+    ]
+  },
+  {
+    name: 'Arcadia',
+    images: [
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ahri_7.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Corki_6.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ezreal_9.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Hecarim_3.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/MissFortune_5.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Sona_6.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Veigar_8.jpg'
+    ]
+  },
+  {
+    name: 'Academia de Combate',
+    images: [
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ezreal_18.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Jayce_4.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Katarina_15.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Lux_14.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yuumi_1.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Graves_15.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yone_19.jpg'
+    ]
+  },
+  {
+    name: 'K/DA',
+    images: [
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ahri_14.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Akali_14.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Evelynn_6.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/KaiSa_1.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Seraphine_1.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Akali_15.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ahri_28.jpg'
+    ]
+  },
+  {
+    name: 'Cósmicos',
+    images: [
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ashe_12.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Kassadin_6.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Lux_15.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/MasterYi_24.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Nidalee_27.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/XinZhao_13.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Lulu_26.jpg'
+    ]
+  }
+];
+
 // Recordatorio Primera Victoria (Mediodía)
 async function sendDailyMotivation(db) {
   if (!client || !targetChannelId) return;
-  const channel = client.channels.cache.get(targetChannelId);
-  if (!channel) return;
 
-  const day = new Date().getDay(); // 0: Domingo, 1: Lunes...
-  const images = [
-    'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Kindred_0.jpg', // Domingo
-    'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Naafiri_0.jpg', // Lunes
-    'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Briar_0.jpg',   // Martes
-    'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Warwick_0.jpg', // Miércoles
-    'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Nasus_0.jpg',   // Jueves
-    'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Naafiri_1.jpg', // Viernes
-    'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/KogMaw_9.jpg',  // Sábado (PugMaw)
-  ];
+  try {
+    const channel = await client.channels.fetch(targetChannelId);
+    if (!channel) return;
 
-  const dailyMessages = [
-    '☀️ ¡Domingo de descanso en la perrera! No olvides tus coins.',
-    '🦴 ¡Lunes con hambre de victoria! Reclama tu diario.',
-    '🍖 ¡Martes de cacería! ¿Ya tienes tus monedas?',
-    '⚔️ ¡Miércoles mitad de semana! Hora de cobrar.',
-    '🔥 ¡Jueves casi fin de semana! No te quedes sin tus 100 coins.',
-    '🎉 ¡Viernes de perreo! Cobren y a rankear.',
-    '🍗 ¡Sábado de vicio! Asegura tus monedas diarias.'
-  ];
+    const now = new Date();
+    // Cálculo de semana del año para rotación
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+    const pastDaysOfYear = (now - startOfYear) / 86400000;
+    const weekIndex = Math.floor((pastDaysOfYear + startOfYear.getDay() + 1) / 7);
+    const themeIndex = weekIndex % SKIN_THEMES.length;
+    const currentTheme = SKIN_THEMES[themeIndex];
+    
+    const day = now.getDay(); // 0: Domingo, 1: Lunes...
+    const splash = currentTheme.images[day] || currentTheme.images[0];
 
-  const embed = new EmbedBuilder()
-    .setTitle('🍽️ ¡Hora de almorzar en la Perrera!')
-    .setDescription(dailyMessages[day])
-    .setImage(images[day])
-    .setColor(0xf4c874)
-    .setTimestamp()
-    .setFooter({ text: 'Naafiri Bot · Recordatorio de Mediodía' });
+    const dailyMessages = [
+      '☀️ ¡Domingo de descanso en la perrera! No olvides tus coins.',
+      '🦴 ¡Lunes con hambre de victoria! Reclama tu diario.',
+      '🍖 ¡Martes de cacería! ¿Ya tienes tus monedas?',
+      '⚔️ ¡Miércoles mitad de semana! Hora de cobrar.',
+      '🔥 ¡Jueves casi fin de semana! No te quedes sin tus 100 coins.',
+      '🎉 ¡Viernes de perreo! Cobren y a rankear.',
+      '🍗 ¡Sábado de vicio! Asegura tus monedas diarias.'
+    ];
 
-  const row = new ActionRowBuilder().addComponents(
-    new ButtonBuilder()
-      .setCustomId('daily_claim')
-      .setLabel('Cobrar 100 Coins 💰')
-      .setStyle(ButtonStyle.Success)
-  );
+    const embed = new EmbedBuilder()
+      .setTitle(`🍽️ ¡Hora de almorzar! (Tema: ${currentTheme.name})`)
+      .setDescription(dailyMessages[day])
+      .setImage(splash)
+      .setColor(0xf4c874)
+      .setTimestamp()
+      .setFooter({ text: 'Naafiri Bot · Recordatorio de Mediodía' });
 
-  channel.send({ embeds: [embed], components: [row] });
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId('daily_claim')
+        .setLabel('Cobrar 100 Coins 💰')
+        .setStyle(ButtonStyle.Success)
+    );
+
+    await channel.send({ embeds: [embed], components: [row] });
+  } catch (e) {
+    console.error('[Motivation Error]', e);
+  }
 }
 
 function getAbsoluteLP(tier, rank, lp) {
@@ -1777,6 +1905,7 @@ module.exports = {
   notifyRankChange, 
   notifyLiveGame, 
   sendDailySummary, 
+  sendDailyMotivation, 
   notifyBetResults, 
   notifyRemake, 
   notifyChallengeComplete, 
