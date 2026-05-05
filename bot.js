@@ -28,6 +28,12 @@ const RANK_COLORS = {
   GRANDMASTER: 0xd93f3f, CHALLENGER: 0xf4c874
 };
 
+const TIER_SHORT = {
+  IRON: 'Hierro', BRONZE: 'Bronce', SILVER: 'Plata', GOLD: 'Oro',
+  PLATINUM: 'Plat', EMERALD: 'Esme', DIAMOND: 'Diam', MASTER: 'Maestro',
+  GRANDMASTER: 'GM', CHALLENGER: 'Chall'
+};
+
 const TIER_ORDER = {
   CHALLENGER: 9, GRANDMASTER: 8, MASTER: 7,
   DIAMOND: 6, EMERALD: 5, PLATINUM: 4,
@@ -1338,9 +1344,12 @@ async function sendDailySummary(db) {
     const winsToday = current.wins - snap24h.wins;
     const wr = gamesPlayed > 0 ? Math.round((winsToday / gamesPlayed) * 100) + '%' : '-';
 
+    const shortTier = TIER_SHORT[current.tier.toUpperCase()] || current.tier;
+    const rankLabel = `${shortTier} ${current.rank}`;
+
     return {
-      name: `${acc.gameName}#${acc.tagLine}`,
-      rank: `${current.tier} ${current.rank} ${current.leaguePoints} LP`,
+      name: acc.gameName,
+      rank: `${rankLabel} - ${current.leaguePoints} LP`,
       lp24h,
       lp7d,
       games: gamesPlayed,
@@ -1522,7 +1531,7 @@ async function sendDailySummary(db) {
             <div class="col-rank">Rank</div>
             <div class="col-lp">LP (24h)</div>
             <div class="col-lp">LP (7d)</div>
-            <div class="col-games">Games</div>
+            <div class="col-games">G</div>
             <div class="col-wr">WR</div>
           </div>
           ${rowsHtml}
@@ -1562,11 +1571,6 @@ const QUEUE_NAMES = {
   440: 'Flex'
 };
 
-const TIER_SHORT = {
-  IRON: 'Hierro', BRONZE: 'Bronce', SILVER: 'Plata', GOLD: 'Oro',
-  PLATINUM: 'Plat', EMERALD: 'Esme', DIAMOND: 'Diam', MASTER: 'Maestro',
-  GRANDMASTER: 'GM', CHALLENGER: 'Chall'
-};
 
 // Notificación de resultados de apuestas
 async function notifyBetResults(targetName, result, winners, profileIconId, championId, lpData, kda, version, totalBets = 0, queueId = 420, highlights = null) {
