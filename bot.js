@@ -1353,15 +1353,24 @@ async function sendDailySummary(db) {
 
   stats.sort((a, b) => b.absLp - a.absLp);
 
-  // Intentar cargar imagen de fondo
+  // Intentar cargar imagen de fondo (buscamos en varias rutas posibles)
   let bgBase64 = '';
-  try {
-    const bgPath = path.join(process.cwd(), 'public', 'bg.png');
-    if (fs.existsSync(bgPath)) {
-      const bitmap = fs.readFileSync(bgPath);
-      bgBase64 = `data:image/png;base64,${Buffer.from(bitmap).toString('base64')}`;
+  const possiblePaths = [
+    path.join(__dirname, 'public', 'bg.png'),
+    path.join(__dirname, 'bg.png'),
+    path.join(process.cwd(), 'public', 'bg.png'),
+    path.join(process.cwd(), 'bg.png')
+  ];
+
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p)) {
+      try {
+        const bitmap = fs.readFileSync(p);
+        bgBase64 = `data:image/png;base64,${Buffer.from(bitmap).toString('base64')}`;
+        break;
+      } catch (e) { console.error(`Error leyendo ${p}:`, e); }
     }
-  } catch (e) { console.error('Error cargando bg.png:', e); }
+  }
 
   // Generar filas HTML
   let rowsHtml = '';
@@ -1415,87 +1424,90 @@ async function sendDailySummary(db) {
           display: flex;
           justify-content: center;
           align-items: center;
-          height: 100vh;
+          width: 850px;
+          height: auto;
           overflow: hidden;
           ${bgBase64 ? `background-image: url('${bgBase64}'); background-size: cover; background-position: center;` : 'background: linear-gradient(135deg, #0f0f11 0%, #1a1a1e 100%);'}
         }
         #container {
-          padding: 40px;
+          padding: 30px;
           display: flex;
           flex-direction: column;
           align-items: center;
+          width: 100%;
+          box-sizing: border-box;
         }
         #scoreboard {
-          width: 850px;
+          width: 100%;
           background: rgba(15, 15, 17, 0.85);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
+          backdrop-filter: blur(15px);
+          -webkit-backdrop-filter: blur(15px);
           border: 1px solid rgba(212, 175, 55, 0.3);
-          border-radius: 16px;
-          padding: 25px;
-          box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5);
-          position: relative;
+          border-radius: 20px;
+          padding: 30px;
+          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+          box-sizing: border-box;
         }
         .header-title {
           text-align: center;
-          font-size: 32px;
+          font-size: 34px;
           font-weight: 800;
           color: #d4af37;
           text-transform: uppercase;
-          letter-spacing: 3px;
-          margin-bottom: 25px;
-          text-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+          letter-spacing: 4px;
+          margin-bottom: 30px;
+          text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
         }
         .table-header {
           display: flex;
-          background: rgba(212, 175, 55, 0.15);
-          padding: 12px 15px;
-          border-radius: 10px;
-          font-weight: 700;
+          background: rgba(212, 175, 55, 0.2);
+          padding: 14px 15px;
+          border-radius: 12px;
+          font-weight: 800;
           color: #d4af37;
-          margin-bottom: 12px;
+          margin-bottom: 15px;
           text-transform: uppercase;
-          font-size: 13px;
-          letter-spacing: 1px;
+          font-size: 14px;
+          letter-spacing: 1.5px;
         }
         .row {
           display: flex;
-          padding: 14px 15px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+          padding: 16px 15px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.04);
           align-items: center;
         }
         .leader-row {
-          background: rgba(212, 175, 55, 0.08);
-          border-left: 3px solid #d4af37;
-          border-radius: 4px;
+          background: rgba(212, 175, 55, 0.1);
+          border-left: 4px solid #d4af37;
+          border-radius: 6px;
         }
-        .col-pos { width: 50px; text-align: center; font-size: 22px; }
-        .col-name { width: 250px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
-        .col-rank { width: 180px; color: #cbd5e0; font-size: 14px; }
-        .col-lp { width: 90px; text-align: right; font-weight: 700; font-family: monospace; font-size: 16px; }
-        .col-games { width: 80px; text-align: center; color: #f6ad55; font-weight: 700; }
-        .col-wr { width: 70px; text-align: right; color: #63b3ed; font-weight: 700; }
+        .col-pos { width: 50px; text-align: center; font-size: 24px; }
+        .col-name { width: 250px; font-weight: 700; display: flex; align-items: center; gap: 12px; font-size: 17px; }
+        .col-rank { width: 180px; color: #e2e8f0; font-size: 15px; }
+        .col-lp { width: 95px; text-align: right; font-weight: 800; font-family: monospace; font-size: 18px; }
+        .col-games { width: 85px; text-align: center; color: #fbd38d; font-weight: 800; font-size: 17px; }
+        .col-wr { width: 75px; text-align: right; color: #90cdf4; font-weight: 800; font-size: 17px; }
         
         .streak {
-          font-size: 10px;
-          padding: 2px 6px;
-          border-radius: 4px;
-          font-weight: 800;
+          font-size: 11px;
+          padding: 3px 8px;
+          border-radius: 5px;
+          font-weight: 900;
         }
-        .hot { background: #e53e3e; color: #fff; box-shadow: 0 0 8px rgba(229, 62, 62, 0.5); }
-        .cold { background: #3182ce; color: #fff; box-shadow: 0 0 8px rgba(49, 130, 206, 0.5); }
+        .hot { background: #f56565; color: #fff; box-shadow: 0 0 10px rgba(245, 101, 101, 0.6); }
+        .cold { background: #4299e1; color: #fff; box-shadow: 0 0 10px rgba(66, 153, 225, 0.6); }
         
-        .positive { color: #48bb78; }
-        .negative { color: #f56565; }
-        .neutral { color: #718096; }
+        .positive { color: #68d391; }
+        .negative { color: #feb2b2; }
+        .neutral { color: #a0aec0; }
 
         .watermark {
-          margin-top: 15px;
-          font-size: 11px;
-          color: rgba(255, 255, 255, 0.3);
+          margin-top: 20px;
+          font-size: 12px;
+          color: rgba(255, 255, 255, 0.4);
           text-transform: uppercase;
-          letter-spacing: 2px;
-          font-weight: 600;
+          letter-spacing: 3px;
+          font-weight: 700;
         }
       </style>
     </head>
@@ -1526,22 +1538,22 @@ async function sendDailySummary(db) {
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     const page = await browser.newPage();
-    await page.setViewport({ width: 1000, height: 1200, deviceScaleFactor: 2 });
+    // Ajustamos el viewport al tamaño del contenido
+    await page.setViewport({ width: 850, height: 100, deviceScaleFactor: 3 }); 
     await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
     
+    // Auto-ajustar altura
+    const height = await page.evaluate(() => document.getElementById('container').offsetHeight);
+    await page.setViewport({ width: 850, height: height, deviceScaleFactor: 3 });
+
     const element = await page.$('#container');
-    const imageBuffer = await element.screenshot({ transparent: true });
+    const imageBuffer = await element.screenshot({ type: 'png' });
     await browser.close();
 
     const attachment = new AttachmentBuilder(imageBuffer, { name: 'scoreboard.png' });
     
-    const embed = new EmbedBuilder()
-      .setTitle('📊 Resumen Diario de la Perrera')
-      .setImage('attachment://scoreboard.png')
-      .setColor(0xd4af37)
-      .setFooter({ text: 'Actualizado automáticamente' });
-
-    await channel.send({ embeds: [embed], files: [attachment] });
+    // Enviamos solo el archivo, sin embed
+    await channel.send({ files: [attachment] });
   } catch (e) {
     console.error('[Scoreboard Error]', e);
     channel.send('❌ Hubo un error generando la imagen del scoreboard.');
