@@ -74,6 +74,21 @@ async function connectDB() {
       const hour = now.getHours();
       const minute = now.getMinutes();
 
+      // 0. Snapshot Diario de Rango y LP
+      try {
+        const config = await db.collection('system_config').findOne({ key: 'last_snapshot' });
+        const todayStr = new Date().toISOString().split('T')[0];
+        if (!config || config.date !== todayStr) {
+          await takeDailySnapshots(db);
+          await db.collection('system_config').updateOne(
+            { key: 'last_snapshot' },
+            { $set: { date: todayStr } },
+            { upsert: true }
+          );
+          console.log(`[Snapshot] Se ha guardado el estado de LP de la fecha ${todayStr}`);
+        }
+      } catch (e) { console.error('[Snapshot Error]', e); }
+
       // 1. Recordatorio matutino (Ahora a las 12:00 PM)
       if (hour === 12 && minute === 0) {
         sendDailyMotivation(db);
@@ -203,6 +218,42 @@ async function connectDB() {
     console.error('❌ Error conectando a MongoDB:', e);
     console.log('Reintentando en 5 segundos...');
     setTimeout(connectDB, 5000);
+  }
+}
+
+async function takeDailySnapshots(db) {
+  const accounts = await db.collection('accounts').find({}).toArray();
+  // Se obtiene la fecha local para evitar desfases de horario
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  const todayStr = now.toISOString().split('T')[0];
+  
+  for (const acc of accounts) {
+    if (acc.soloQ) {
+      await db.collection('accounts').updateOne(
+        { puuid: acc.puuid },
+        { $set: { [`snapshots.${todayStr}`]: acc.soloQ } }
+      );
+    }
+  }
+  
+  // Limpieza de snapshots antiguos (más de 8 días)
+  const oldDate = new Date();
+  oldDate.setDate(oldDate.getDate() - 8);
+  oldDate.setMinutes(oldDate.getMinutes() - oldDate.getTimezoneOffset());
+  const oldDateStr = oldDate.toISOString().split('T')[0];
+  
+  for (const acc of accounts) {
+    if (acc.snapshots) {
+      for (const date in acc.snapshots) {
+        if (date < oldDateStr) {
+          await db.collection('accounts').updateOne(
+            { puuid: acc.puuid },
+            { $unset: { [`snapshots.${date}`]: "" } }
+          );
+        }
+      }
+    }
   }
 }
 

@@ -1270,6 +1270,22 @@ async function sendDailyMotivation(db) {
   channel.send({ embeds: [embed] });
 }
 
+function getAbsoluteLP(tier, rank, lp) {
+  if (!tier || !rank) return 0;
+  const tiers = ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'EMERALD', 'DIAMOND', 'MASTER', 'GRANDMASTER', 'CHALLENGER'];
+  const ranks = ['IV', 'III', 'II', 'I'];
+  
+  const tierIdx = tiers.indexOf(tier.toUpperCase());
+  if (tierIdx === -1) return 0;
+  
+  if (tierIdx >= 7) {
+    return (7 * 400) + lp;
+  }
+  
+  const rankIdx = ranks.indexOf(rank.toUpperCase());
+  return (tierIdx * 400) + (rankIdx * 100) + lp;
+}
+
 // Resumen Diario
 async function sendDailySummary(db) {
   if (!client || !targetChannelId) return;
@@ -1279,17 +1295,79 @@ async function sendDailySummary(db) {
   const accounts = await db.collection('accounts').find({}).toArray();
   if (!accounts.length) return;
 
-  const topWinrate = accounts.sort((a,b) => {
-    const wrA = a.soloQ ? a.soloQ.wins / (a.soloQ.wins + a.soloQ.losses) : 0;
-    const wrB = b.soloQ ? b.soloQ.wins / (b.soloQ.wins + b.soloQ.losses) : 0;
-    return wrB - wrA;
-  })[0];
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  
+  const getDateStr = (daysAgo) => {
+    const d = new Date(now);
+    d.setDate(d.getDate() - daysAgo);
+    return d.toISOString().split('T')[0];
+  };
+
+  const todayStr = getDateStr(0);
+  const yesterdayStr = getDateStr(1);
+  const weekAgoStr = getDateStr(7);
+
+  const stats = accounts.map(acc => {
+    const current = acc.soloQ;
+    if (!current) {
+      return { 
+        name: acc.gameName ? `${acc.gameName}#${acc.tagLine}` : 'Desconocido', 
+        rank: 'Unranked', 
+        lp24h: 0, lp7d: 0, games: 0, wr: '-', 
+        absLp: -1 
+      };
+    }
+
+    const absCurrent = getAbsoluteLP(current.tier, current.rank, current.leaguePoints);
+    const snapshots = acc.snapshots || {};
+    
+    // Si no hay snapshot de ayer, usar el de hoy (0 de diferencia)
+    const snap24h = snapshots[yesterdayStr] || snapshots[todayStr] || current;
+    // Si no hay snapshot de 7 dias, usar el de ayer o de hoy
+    const snap7d = snapshots[weekAgoStr] || snapshots[yesterdayStr] || snapshots[todayStr] || current;
+
+    const abs24h = getAbsoluteLP(snap24h.tier, snap24h.rank, snap24h.leaguePoints);
+    const abs7d = getAbsoluteLP(snap7d.tier, snap7d.rank, snap7d.leaguePoints);
+
+    const lp24h = absCurrent - abs24h;
+    const lp7d = absCurrent - abs7d;
+
+    const gamesPlayed = (current.wins - snap24h.wins) + (current.losses - snap24h.losses);
+    const winsToday = current.wins - snap24h.wins;
+    const wr = gamesPlayed > 0 ? Math.round((winsToday / gamesPlayed) * 100) + '%' : '-';
+
+    return {
+      name: `${acc.gameName}#${acc.tagLine}`,
+      rank: `${current.tier} ${current.rank} ${current.leaguePoints} LP`,
+      lp24h,
+      lp7d,
+      games: gamesPlayed,
+      wr,
+      absLp: absCurrent
+    };
+  });
+
+  stats.sort((a, b) => b.absLp - a.absLp);
+
+  let table = 'Pos | Username           | Rank              | LP (24h) | LP (7d) | Games | WR\n';
+  table += '--------------------------------------------------------------------------------\n';
+  
+  stats.forEach((s, idx) => {
+    const pos = String(idx + 1).padStart(3, ' ');
+    const name = s.name.substring(0, 18).padEnd(18, ' ');
+    const rank = s.rank.substring(0, 17).padEnd(17, ' ');
+    const lp24h = String(s.lp24h).padStart(8, ' ');
+    const lp7d = String(s.lp7d).padStart(7, ' ');
+    const games = String(s.games).padStart(5, ' ');
+    const wr = String(s.wr).padStart(4, ' ');
+    
+    table += `${pos} | ${name} | ${rank} | ${lp24h} | ${lp7d} | ${games} | ${wr}\n`;
+  });
 
   const embed = new EmbedBuilder()
-    .setTitle('📊 Resumen Diario de la Perrera')
-    .addFields(
-      { name: '🔥 El más tryhard', value: `${topWinrate.gameName} (${Math.round((topWinrate.soloQ.wins/(topWinrate.soloQ.wins+topWinrate.soloQ.losses))*100)}% WR)`, inline: false }
-    )
+    .setTitle('📊 Resumen de la Perrera')
+    .setDescription(`\`\`\`text\n${table}\n\`\`\``)
     .setColor(0x576bce)
     .setFooter({ text: 'Actualizado automáticamente' });
 
