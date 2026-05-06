@@ -96,7 +96,29 @@ const GACHA_ITEMS = [
   { id: 'Malphite', name: 'Malphite', rarity: 'Común', weight: 70, img: 'Malphite_0' },
   { id: 'Amumu', name: 'Amumu', rarity: 'Común', weight: 70, img: 'Amumu_0' },
   { id: 'Annie', name: 'Annie', rarity: 'Común', weight: 70, img: 'Annie_0' },
-  { id: 'COINS_50', name: 'Bolsa de 50 Coins', rarity: 'Común', weight: 50, type: 'coins', amount: 50 }
+  { id: 'COINS_50', name: 'Bolsa de 50 Coins', rarity: 'Común', weight: 50, type: 'coins', amount: 50 },
+
+  // --- PRO PLAYERS (Añadidos) ---
+  { id: 'pro_faker', name: 'Faker', team: 'T1', rarity: 'Legendario', weight: 2, type: 'pro', img: 'https://static.wikia.nocookie.net/lolesports_gamepedia/images/1/1b/T1_Faker_2024_Split_1.png' },
+  { id: 'pro_uzi', name: 'Uzi', team: 'Leyenda', rarity: 'Legendario', weight: 2, type: 'pro', img: 'https://static.wikia.nocookie.net/lolesports_gamepedia/images/2/2f/RNG_Uzi_2019_Split_2.png' },
+  { id: 'pro_caps', name: 'Caps', team: 'G2 Esports', rarity: 'Épico', weight: 8, type: 'pro', img: 'https://static.wikia.nocookie.net/lolesports_gamepedia/images/5/5e/G2_Caps_2024_Split_1.png' },
+  { id: 'pro_chovy', name: 'Chovy', team: 'Gen.G', rarity: 'Épico', weight: 8, type: 'pro', img: 'https://static.wikia.nocookie.net/lolesports_gamepedia/images/b/b3/GEN_Chovy_2024_Split_1.png' },
+  { id: 'pro_showmaker', name: 'ShowMaker', team: 'Dplus KIA', rarity: 'Épico', weight: 8, type: 'pro', img: 'https://static.wikia.nocookie.net/lolesports_gamepedia/images/3/30/DK_ShowMaker_2024_Split_1.png' },
+  { id: 'pro_gumayusi', name: 'Gumayusi', team: 'T1', rarity: 'Épico', weight: 8, type: 'pro', img: 'https://static.wikia.nocookie.net/lolesports_gamepedia/images/9/90/T1_Gumayusi_2024_Split_1.png' },
+  { id: 'pro_keria', name: 'Keria', team: 'T1', rarity: 'Épico', weight: 8, type: 'pro', img: 'https://static.wikia.nocookie.net/lolesports_gamepedia/images/1/16/T1_Keria_2024_Split_1.png' },
+  { id: 'pro_zeus', name: 'Zeus', team: 'T1', rarity: 'Épico', weight: 8, type: 'pro', img: 'https://static.wikia.nocookie.net/lolesports_gamepedia/images/a/a9/T1_Zeus_2024_Split_1.png' },
+  { id: 'pro_knight', name: 'Knight', team: 'BLG', rarity: 'Épico', weight: 8, type: 'pro', img: 'https://static.wikia.nocookie.net/lolesports_gamepedia/images/3/3b/BLG_knight_2024_Split_1.png' },
+  { id: 'pro_bin', name: 'Bin', team: 'BLG', rarity: 'Épico', weight: 8, type: 'pro', img: 'https://static.wikia.nocookie.net/lolesports_gamepedia/images/3/34/BLG_Bin_2024_Split_1.png' },
+  { id: 'pro_ruler', name: 'Ruler', team: 'JDG', rarity: 'Épico', weight: 8, type: 'pro', img: 'https://static.wikia.nocookie.net/lolesports_gamepedia/images/b/b1/JDG_Ruler_2024_Split_1.png' },
+  { id: 'pro_xpeke', name: 'xPeke', team: 'Leyenda', rarity: 'Épico', weight: 8, type: 'pro', img: 'https://static.wikia.nocookie.net/lolesports_gamepedia/images/e/e0/OG_xPeke_2016_Split_1.png' },
+  { id: 'pro_madlife', name: 'MadLife', team: 'Leyenda', rarity: 'Épico', weight: 8, type: 'pro', img: 'https://static.wikia.nocookie.net/lolesports_gamepedia/images/d/d4/CJ_MadLife_2016_Split_1.png' },
+  { id: 'pro_jankos', name: 'Jankos', team: 'Team Heretics', rarity: 'Raro', weight: 20, type: 'pro', img: 'https://static.wikia.nocookie.net/lolesports_gamepedia/images/4/4b/TH_Jankos_2024_Split_1.png' },
+  { id: 'pro_rekkles', name: 'Rekkles', team: 'T1 Academy', rarity: 'Raro', weight: 20, type: 'pro', img: 'https://static.wikia.nocookie.net/lolesports_gamepedia/images/6/69/T1A_Rekkles_2024_Split_1.png' },
+  { id: 'pro_perkz', name: 'Perkz', team: 'Leyenda', rarity: 'Raro', weight: 20, type: 'pro', img: 'https://static.wikia.nocookie.net/lolesports_gamepedia/images/a/a2/TH_Perkz_2024_Split_1.png' },
+  { id: 'pro_doublelift', name: 'Doublelift', team: 'Leyenda', rarity: 'Raro', weight: 20, type: 'pro', img: 'https://static.wikia.nocookie.net/lolesports_gamepedia/images/a/af/100_Doublelift_2023_Split_2.png' },
+  { id: 'pro_corejj', name: 'CoreJJ', team: 'Team Liquid', rarity: 'Raro', weight: 20, type: 'pro', img: 'https://static.wikia.nocookie.net/lolesports_gamepedia/images/f/f6/TL_CoreJJ_2024_Split_1.png' },
+  { id: 'pro_impact', name: 'Impact', team: 'Team Liquid', rarity: 'Raro', weight: 20, type: 'pro', img: 'https://static.wikia.nocookie.net/lolesports_gamepedia/images/9/91/TL_Impact_2024_Split_1.png' },
+  { id: 'pro_elyoya', name: 'Elyoya', team: 'MAD Lions KOI', rarity: 'Épico', weight: 8, type: 'pro', img: 'https://static.wikia.nocookie.net/lolesports_gamepedia/images/7/77/MDK_Elyoya_2024_Split_1.png' }
 ];
 
 
@@ -2160,10 +2182,13 @@ async function generateGachaCard(selected, balance) {
     'Común': '#95a5a6'
   };
   const color = colorMap[selected.rarity] || '#ffffff';
+  const isPro = selected.type === 'pro';
   
-  const imgUrl = selected.type === 'coins' 
-    ? 'https://static.wikia.nocookie.net/leagueoflegends/images/1/1b/Gold_icon.png' 
-    : `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${selected.img}.jpg`;
+  const imgUrl = isPro 
+    ? selected.img 
+    : (selected.type === 'coins' 
+        ? 'https://static.wikia.nocookie.net/leagueoflegends/images/1/1b/Gold_icon.png' 
+        : `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${selected.img}.jpg`);
 
   const htmlContent = `
     <!DOCTYPE html>
@@ -2174,21 +2199,37 @@ async function generateGachaCard(selected, balance) {
         body { margin: 0; padding: 0; background: #000; font-family: 'Inter', sans-serif; width: 600px; height: 350px; overflow: hidden; }
         .card { 
           width: 600px; height: 350px; position: relative; 
-          background: url('${imgUrl}') center center; background-size: cover;
+          background: ${isPro ? `linear-gradient(45deg, #050505, #1a1a1a)` : `url('${imgUrl}') center center`}; 
+          background-size: cover;
           display: flex; flex-direction: column; justify-content: flex-end;
+          overflow: hidden;
         }
+        ${isPro ? `
+        .pro-img {
+          position: absolute; right: -20px; bottom: 0;
+          height: 110%; z-index: 1;
+          filter: drop-shadow(0 0 20px rgba(0,0,0,0.8));
+        }
+        .team-logo {
+          position: absolute; top: 30px; right: 30px;
+          font-size: 14px; font-weight: 900; color: rgba(255,255,255,0.2);
+          text-transform: uppercase; letter-spacing: 5px; z-index: 0;
+        }
+        ` : ''}
         .overlay {
           position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-          background: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.4) 100%);
+          background: ${isPro ? `linear-gradient(90deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 40%, rgba(0,0,0,0) 100%)` : `linear-gradient(0deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.4) 100%)`};
           border: 8px solid ${color}; box-sizing: border-box;
+          z-index: 2;
         }
-        .content { position: relative; z-index: 10; padding: 30px; }
+        .content { position: relative; z-index: 10; padding: 30px; max-width: 70%; }
         .rarity { 
           display: inline-block; padding: 4px 12px; border-radius: 40px; 
           background: ${color}; color: #000; font-weight: 900; font-size: 12px; 
           text-transform: uppercase; margin-bottom: 10px; 
         }
-        .name { font-size: 32px; font-weight: 900; color: #fff; margin: 0; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .name { font-size: ${isPro ? '42px' : '32px'}; font-weight: 900; color: #fff; margin: 0; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .team-name { font-size: 18px; color: ${color}; font-weight: 700; margin-top: 5px; text-transform: uppercase; letter-spacing: 2px; }
         .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
         .balance { font-size: 14px; color: rgba(255,255,255,0.6); }
         .balance span { color: #f1c40f; font-weight: 700; }
@@ -2205,10 +2246,13 @@ async function generateGachaCard(selected, balance) {
     </head>
     <body>
       <div class="card">
+        ${isPro ? `<div class="team-logo">${selected.team}</div>` : ''}
+        ${isPro ? `<img src="${imgUrl}" class="pro-img">` : ''}
         <div class="overlay"></div>
         <div class="content">
-          <div class="rarity">${selected.rarity}</div>
+          <div class="rarity">${isPro ? 'PRO PLAYER' : selected.rarity}</div>
           <h1 class="name">${selected.name}</h1>
+          ${isPro ? `<div class="team-name">${selected.team} · ${selected.rarity}</div>` : ''}
           <div class="footer">
             <div class="balance">Saldo restante: <span>${balance} 💰</span></div>
             <div class="brand">Gachapon La Perrera</div>
@@ -2224,6 +2268,8 @@ async function generateGachaCard(selected, balance) {
     args: ['--no-sandbox', '--disable-setuid-sandbox'] 
   });
   const page = await browser.newPage();
+  // Establecer User-Agent para evitar bloqueos de wikia
+  await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
   await page.setViewport({ width: 600, height: 350, deviceScaleFactor: 2 });
   await page.setContent(htmlContent);
   const buffer = await page.screenshot({ type: 'png' });
