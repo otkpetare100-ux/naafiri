@@ -612,14 +612,21 @@ function initBot(db) {
 
     if (command === 'admin_testitem') {
       if (!isAdmin(msg.author.id)) return;
-      const itemId = args[0];
-      const selected = GACHA_ITEMS.find(i => i.id === itemId);
-      if (!selected) return msg.reply('❌ ID de item no encontrado.');
+      const query = args.join(' ').toLowerCase();
+      // Buscar por ID exacto o por nombre parcial
+      const selected = GACHA_ITEMS.find(i => i.id.toLowerCase() === query || i.name.toLowerCase().includes(query));
       
-      msg.channel.send('🧪 Generando item específico...');
-      const buffer = await generateGachaCard(selected, 0);
-      const attachment = new AttachmentBuilder(buffer, { name: 'test.png' });
-      return msg.channel.send({ content: `🧪 **TEST ITEM:** ${selected.name}`, files: [attachment] });
+      if (!selected) return msg.reply('❌ No encontré ningún item con ese ID o nombre.');
+      
+      msg.channel.send(`⏳ Generando **${selected.name}**...`);
+      try {
+        const buffer = await generateGachaCard(selected, 0);
+        const attachment = new AttachmentBuilder(buffer, { name: 'test.png' });
+        return msg.channel.send({ content: `🧪 **TEST ITEM:** ${selected.name} (${selected.rarity})`, files: [attachment] });
+      } catch (err) {
+        console.error(err);
+        msg.reply('❌ Error al generar la carta. Revisa la consola.');
+      }
     }
 
     if (command === 'mochila' || command === 'inv') {
@@ -2238,11 +2245,18 @@ async function generateGachaCard(selected, balance) {
   let base64Img = '';
   try {
     const response = await fetch(imgUrl, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' }
+      headers: { 
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+        'Referer': 'https://lol.fandom.com/'
+      }
     });
     if (response.ok) {
       const buffer = await response.buffer();
       base64Img = `data:image/png;base64,${buffer.toString('base64')}`;
+      console.log(`[Gacha] Imagen cargada con éxito: ${selected.name}`);
+    } else {
+      console.error(`[Gacha] Error de descarga (${response.status}): ${imgUrl}`);
     }
   } catch (e) {
     console.error('[Gacha Image Fetch Error]', e);
