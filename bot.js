@@ -2210,14 +2210,14 @@ async function generateGachaCard(selected, balance) {
     <html>
     <head>
       <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { margin: 0; padding: 0; background: transparent; font-family: 'Inter', sans-serif; width: 350px; height: 500px; display: flex; justify-content: center; align-items: center; }
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap');
+        body { margin: 0; padding: 0; background: transparent; font-family: 'Outfit', sans-serif; width: 350px; height: 500px; display: flex; justify-content: center; align-items: center; }
         .card { 
           width: 320px; height: 460px; position: relative; 
-          background: #000; border-radius: 24px; 
+          background: #000; border-radius: 28px; 
           overflow: hidden;
-          box-shadow: 0 10px 40px rgba(0,0,0,0.8), 0 0 20px ${color}44;
-          border: 2px solid ${color}88;
+          box-shadow: 0 20px 50px rgba(0,0,0,0.9), 0 0 30px ${color}33;
+          border: 1px solid rgba(255,255,255,0.1);
         }
         .full-art {
           position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -2241,29 +2241,40 @@ async function generateGachaCard(selected, balance) {
         .holographic-sheen {
           position: absolute; top: 0; left: -100%; width: 200%; height: 100%;
           background: linear-gradient(105deg, 
-            transparent 30%, 
-            rgba(255,255,255,0.1) 40%, 
+            transparent 35%, 
+            rgba(255,255,255,0.05) 40%, 
             rgba(255,255,255,0.4) 50%, 
-            rgba(255,255,255,0.1) 60%, 
-            transparent 70%
+            rgba(255,255,255,0.05) 60%, 
+            transparent 65%
           );
-          z-index: 2; transform: skewX(-20deg);
-          animation: shine 4s infinite linear;
+          z-index: 5; transform: skewX(-25deg);
+          animation: shine 5s infinite linear;
+          mix-blend-mode: overlay;
         }
-        @keyframes shine {
-          0% { left: -150%; }
-          100% { left: 150%; }
+        .iridescence {
+          position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+          background: linear-gradient(45deg, ${color}11, transparent, ${color}11);
+          z-index: 4; opacity: 0.5;
+        }
+        .texture-overlay {
+          position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+          opacity: 0.08; z-index: 6; pointer-events: none; mix-blend-mode: overlay;
         }
         .inner-frame {
-          position: absolute; top: 12px; left: 12px; right: 12px; bottom: 12px;
-          border: 2.5px solid ${color}aa; border-radius: 16px;
-          z-index: 4; pointer-events: none;
-          box-shadow: 0 0 15px ${color}44, inset 0 0 10px ${color}22;
+          position: absolute; top: 15px; left: 15px; right: 15px; bottom: 15px;
+          border: 1.5px solid ${color}88; border-radius: 20px;
+          z-index: 7; pointer-events: none;
+          box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
         }
-        .inner-frame::after {
-          content: ''; position: absolute; top: -4px; left: -4px; right: -4px; bottom: -4px;
-          border: 1px solid ${color}44; border-radius: 20px;
+        .corner {
+          position: absolute; width: 10px; height: 10px;
+          border: 2px solid ${color}; z-index: 8;
         }
+        .top-left { top: 10px; left: 10px; border-right: 0; border-bottom: 0; }
+        .top-right { top: 10px; right: 10px; border-left: 0; border-bottom: 0; }
+        .bottom-left { bottom: 10px; left: 10px; border-right: 0; border-top: 0; }
+        .bottom-right { bottom: 10px; right: 10px; border-left: 0; border-top: 0; }
         .bottom-gradient {
           position: absolute; bottom: 0; left: 0; width: 100%; height: 60%;
           background: linear-gradient(0deg, 
@@ -2299,29 +2310,41 @@ async function generateGachaCard(selected, balance) {
         .brand { font-size: 8px; font-weight: 700; color: rgba(255,255,255,0.2); text-transform: uppercase; letter-spacing: 2px; }
 
         ${selected.rarity === 'Legendario' ? `
-        .card { border-color: ${color}; box-shadow: 0 0 40px ${color}66, inset 0 0 20px ${color}33; animation: legendary-card-pulse 2s infinite alternate; }
-        @keyframes legendary-card-pulse {
-          from { box-shadow: 0 0 20px ${color}44; }
-          to { box-shadow: 0 0 50px ${color}88; }
+        .card { border-color: ${color}; box-shadow: 0 0 50px ${color}55; animation: legendary-pulse 3s infinite alternate; }
+        @keyframes legendary-pulse {
+          from { transform: scale(1); box-shadow: 0 0 30px ${color}44; }
+          to { transform: scale(1.02); box-shadow: 0 0 60px ${color}88; }
         }
-        .holographic-sheen { opacity: 0.9; animation-duration: 2.5s; background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.2) 45%, #fff 50%, rgba(255,255,255,0.2) 55%, transparent 70%); }
+        .holographic-sheen { 
+          background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.2) 45%, #fff 50%, rgba(255,255,255,0.2) 55%, transparent 70%); 
+          animation-duration: 2s;
+        }
         ` : ''}
       </style>
     </head>
     <body>
       <div class="card">
         <div class="full-art"></div>
+        <div class="iridescence"></div>
         <div class="inner-frame"></div>
+        <div class="corner top-left"></div>
+        <div class="corner top-right"></div>
+        <div class="corner bottom-left"></div>
+        <div class="corner bottom-right"></div>
+        <div class="texture-overlay"></div>
         ${isPro ? `<img src="${imgUrl}" class="pro-photo">` : ''}
         ${isCoins ? `<img src="${imgUrl}" class="coins-photo">` : ''}
         <div class="holographic-sheen"></div>
         <div class="bottom-gradient"></div>
         <div class="content-container">
-          <div class="rarity-tag">${selected.rarity}</div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div class="rarity-tag">${selected.rarity}</div>
+            <div style="font-size: 8px; color: rgba(255,255,255,0.4); font-weight: 900; letter-spacing: 1px;">ID: #${Math.floor(Math.random() * 9999).toString().padStart(4, '0')}</div>
+          </div>
           <h1 class="name">${selected.name}</h1>
           <div class="info-row">
             <div class="sub-info">${isPro ? `TEAM: <span>${selected.team}</span>` : (isCoins ? `BONUS: <span>CURRENCY</span>` : `TYPE: <span>CHAMPION</span>`)}</div>
-            <div class="brand">NAAFIRI·BOT</div>
+            <div class="brand">LIMITED EDITION</div>
           </div>
         </div>
       </div>
