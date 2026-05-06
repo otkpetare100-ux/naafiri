@@ -2195,7 +2195,7 @@ async function generateGachaCard(selected, balance) {
     ? selected.img 
     : (selected.type === 'coins' 
         ? 'https://static.wikia.nocookie.net/leagueoflegends/images/1/1b/Gold_icon.png' 
-        : `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${selected.img}.jpg`);
+        : `https://ddragon.leagueoflegends.com/cdn/img/champion/centered/${selected.img}.jpg`);
 
   const htmlContent = `
     <!DOCTYPE html>
