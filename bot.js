@@ -2210,14 +2210,13 @@ async function generateGachaCard(selected, balance) {
     <html>
     <head>
       <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { margin: 0; padding: 0; background: transparent; font-family: 'Inter', sans-serif; width: 350px; height: 500px; display: flex; justify-content: center; align-items: center; }
         .card { 
-          width: 320px; height: 460px; position: relative; 
-          background: #000; border-radius: 24px; 
+          width: 310px; height: 440px; position: relative; 
+          background: #1a0f0a; border-radius: 20px; 
           overflow: hidden;
-          box-shadow: 0 10px 40px rgba(0,0,0,0.8), 0 0 20px ${color}44;
-          border: 2px solid ${color}88;
+          box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+          border: 6px solid #4a3b2c;
         }
         .full-art {
           position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -2225,78 +2224,65 @@ async function generateGachaCard(selected, balance) {
           background-size: cover;
           z-index: 1;
         }
-        .pro-photo {
-          position: absolute; bottom: 0; right: -50px;
-          height: 100%; z-index: 2;
-          filter: drop-shadow(0 0 20px rgba(0,0,0,0.8));
-          display: ${isPro ? 'block' : 'none'};
+        .ornate-frame {
+          position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+          border: 12px solid transparent;
+          border-image: linear-gradient(to bottom, #7d7d7d, #333) 1;
+          box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
+          z-index: 5; pointer-events: none;
         }
-        .coins-photo {
-          position: absolute; top: 50%; left: 50%;
-          transform: translate(-50%, -60%);
-          width: 150px; z-index: 2;
-          filter: drop-shadow(0 0 30px rgba(241,196,15,0.5));
-          display: ${isCoins ? 'block' : 'none'};
+        .mana-crystal {
+          position: absolute; top: -10px; left: -10px;
+          width: 75px; height: 75px;
+          background: #3498db;
+          clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+          display: flex; justify-content: center; align-items: center;
+          font-size: 34px; font-weight: 900; color: #fff; z-index: 20;
+          border: 4px solid #fff;
+          box-shadow: 0 5px 15px rgba(0,0,0,0.6);
+          background: radial-gradient(circle, #5dade2, #2e86c1);
         }
-        .holographic-sheen {
-          position: absolute; top: 0; left: -100%; width: 200%; height: 100%;
-          background: linear-gradient(105deg, 
-            transparent 30%, 
-            rgba(255,255,255,0.1) 40%, 
-            rgba(255,255,255,0.4) 50%, 
-            rgba(255,255,255,0.1) 60%, 
-            transparent 70%
-          );
-          z-index: 2; transform: skewX(-20deg);
-          animation: shine 4s infinite linear;
+        .rarity-gem-top {
+          position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+          width: 40px; height: 25px;
+          background: ${color};
+          clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+          z-index: 21; border: 2px solid #fff;
+          box-shadow: 0 0 15px ${color};
         }
-        @keyframes shine {
-          0% { left: -150%; }
-          100% { left: 150%; }
+        .name-banner-hs {
+          position: absolute; bottom: 85px; left: 50%; transform: translateX(-50%);
+          width: 240px; height: 35px; background: #000;
+          border: 3px solid #7d7d7d; border-radius: 4px;
+          display: flex; justify-content: center; align-items: center;
+          color: #fff; font-weight: 900; font-size: 16px;
+          z-index: 10; text-transform: uppercase;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.8);
         }
-        .inner-frame {
-          position: absolute; top: 12px; left: 12px; right: 12px; bottom: 12px;
-          border: 2.5px solid ${color}aa; border-radius: 16px;
-          z-index: 4; pointer-events: none;
-          box-shadow: 0 0 15px ${color}44, inset 0 0 10px ${color}22;
+        .bottom-stat-l {
+          position: absolute; bottom: -15px; left: -15px;
+          width: 70px; height: 70px; background: #f1c40f;
+          border-radius: 50%; border: 4px solid #fff;
+          z-index: 20; display: flex; justify-content: center; align-items: center;
+          font-weight: 900; font-size: 28px; color: #000;
+          box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
-        .inner-frame::after {
-          content: ''; position: absolute; top: -4px; left: -4px; right: -4px; bottom: -4px;
-          border: 1px solid ${color}44; border-radius: 20px;
+        .bottom-stat-r {
+          position: absolute; bottom: -15px; right: -15px;
+          width: 70px; height: 70px; background: #e74c3c;
+          border-radius: 50%; border: 4px solid #fff;
+          z-index: 20; display: flex; justify-content: center; align-items: center;
+          font-weight: 900; font-size: 28px; color: #fff;
+          box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
-        .bottom-gradient {
-          position: absolute; bottom: 0; left: 0; width: 100%; height: 60%;
-          background: linear-gradient(0deg, 
-            rgba(0,0,0,0.95) 0%, 
-            ${color}22 30%,
-            rgba(0,0,0,0.5) 60%, 
-            transparent 100%
-          );
-          z-index: 3;
+        .description-box-hs {
+          position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%);
+          width: 260px; height: 80px; background: #e5d1b3;
+          border: 4px solid #4a3b2c; border-radius: 8px;
+          z-index: 4; display: flex; flex-direction: column; 
+          justify-content: center; align-items: center; text-align: center;
+          color: #2a1b12; padding: 5px; box-sizing: border-box;
         }
-        .content-container {
-          position: absolute; bottom: 30px; left: 20px; right: 20px;
-          z-index: 10;
-        }
-        .rarity-tag {
-          display: inline-block; padding: 4px 10px; border-radius: 6px;
-          background: ${color}; color: #000; font-weight: 900;
-          font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
-          margin-bottom: 8px;
-        }
-        .name {
-          font-size: 32px; font-weight: 900; color: #fff;
-          margin: 0; line-height: 1; text-transform: uppercase;
-          text-shadow: 0 4px 10px rgba(0,0,0,0.5), 0 0 10px ${color}aa;
-        }
-        .info-row {
-          display: flex; justify-content: space-between; align-items: flex-end;
-          margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);
-          padding-top: 10px;
-        }
-        .sub-info { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; }
-        .sub-info span { color: ${color}; }
-        .brand { font-size: 8px; font-weight: 700; color: rgba(255,255,255,0.2); text-transform: uppercase; letter-spacing: 2px; }
 
         ${selected.rarity === 'Legendario' ? `
         .card { border-color: ${color}; box-shadow: 0 0 40px ${color}66, inset 0 0 20px ${color}33; animation: legendary-card-pulse 2s infinite alternate; }
@@ -2310,20 +2296,19 @@ async function generateGachaCard(selected, balance) {
     </head>
     <body>
       <div class="card">
+        <div class="mana-crystal">10</div>
+        <div class="rarity-gem-top"></div>
         <div class="full-art"></div>
-        <div class="inner-frame"></div>
-        ${isPro ? `<img src="${imgUrl}" class="pro-photo">` : ''}
-        ${isCoins ? `<img src="${imgUrl}" class="coins-photo">` : ''}
-        <div class="holographic-sheen"></div>
-        <div class="bottom-gradient"></div>
-        <div class="content-container">
-          <div class="rarity-tag">${selected.rarity}</div>
-          <h1 class="name">${selected.name}</h1>
-          <div class="info-row">
-            <div class="sub-info">${isPro ? `TEAM: <span>${selected.team}</span>` : (isCoins ? `BONUS: <span>CURRENCY</span>` : `TYPE: <span>CHAMPION</span>`)}</div>
-            <div class="brand">NAAFIRI·BOT</div>
-          </div>
+        <div class="ornate-frame"></div>
+        ${isPro ? `<img src="${imgUrl}" style="position:absolute; bottom:0; right:-40px; height:100%; z-index:2; filter:drop-shadow(0 0 20px rgba(0,0,0,0.8));">` : ''}
+        ${isCoins ? `<img src="${imgUrl}" style="position:absolute; top:45%; left:50%; transform:translate(-50%,-50%); width:140px; z-index:2; filter:drop-shadow(0 0 30px rgba(241,196,15,0.5));">` : ''}
+        <div class="name-banner-hs">${selected.name}</div>
+        <div class="description-box-hs">
+          <div style="font-weight:900; font-size:14px; color:${color};">${selected.rarity}</div>
+          <div style="font-size:11px; font-weight:700; margin-top:5px;">${isPro ? selected.team : 'CHAMPION CARD'}</div>
         </div>
+        <div class="bottom-stat-l">${isPro ? 'A' : '7'}</div>
+        <div class="bottom-stat-r">${isPro ? 'S' : '7'}</div>
       </div>
     </body>
     </html>
