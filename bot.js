@@ -2198,12 +2198,22 @@ async function generateGachaCard(selected, balance) {
         ? 'https://static.wikia.nocookie.net/leagueoflegends/images/1/1b/Gold_icon.png' 
         : `https://ddragon.leagueoflegends.com/cdn/img/champion/centered/${selected.img}.jpg`);
 
-  // Proxy para evitar bloqueos de Wikia en fotos de Pros y Coins
-  if (isPro || isCoins) {
-    const cleanUrl = imgUrl.replace(/^https?:\/\//, '');
-    // Añadimos parámetros extras al proxy para forzar la carga y un fallback
-    imgUrl = `https://images.weserv.nl/?url=${encodeURIComponent(cleanUrl)}&default=https://static.wikia.nocookie.net/leagueoflegends/images/1/1b/Gold_icon.png&noproxy=1`;
+  // DESCARGA INTERNA Y CONVERSIÓN A BASE64 PARA EVITAR BLOQUEOS
+  let base64Img = '';
+  try {
+    const response = await fetch(imgUrl, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' }
+    });
+    if (response.ok) {
+      const buffer = await response.buffer();
+      base64Img = `data:image/png;base64,${buffer.toString('base64')}`;
+    }
+  } catch (e) {
+    console.error('[Gacha Image Fetch Error]', e);
   }
+
+  // Fallback si falla la descarga
+  if (!base64Img) base64Img = imgUrl; 
 
   const htmlContent = `
     <!DOCTYPE html>
@@ -2221,7 +2231,7 @@ async function generateGachaCard(selected, balance) {
         }
         .full-art {
           position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-          background: ${isPro || isCoins ? 'linear-gradient(45deg, #1a1a1a, #000)' : `url('${imgUrl}') center center`}; 
+          background: ${isPro || isCoins ? 'linear-gradient(45deg, #1a1a1a, #000)' : `url('${base64Img}') center center`}; 
           background-size: cover;
           z-index: 1;
         }
@@ -2332,8 +2342,8 @@ async function generateGachaCard(selected, balance) {
         <div class="corner bottom-left"></div>
         <div class="corner bottom-right"></div>
         <div class="texture-overlay"></div>
-        ${isPro ? `<img src="${imgUrl}" class="pro-photo">` : ''}
-        ${isCoins ? `<img src="${imgUrl}" class="coins-photo">` : ''}
+        ${isPro ? `<img src="${base64Img}" class="pro-photo">` : ''}
+        ${isCoins ? `<img src="${base64Img}" class="coins-photo">` : ''}
         <div class="holographic-sheen"></div>
         <div class="bottom-gradient"></div>
         <div class="content-container">
