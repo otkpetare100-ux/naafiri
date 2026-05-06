@@ -2241,28 +2241,41 @@ async function generateGachaCard(selected, balance) {
         ? 'https://static.wikia.nocookie.net/leagueoflegends/images/1/1b/Gold_icon.png' 
         : `https://ddragon.leagueoflegends.com/cdn/img/champion/centered/${selected.img}.jpg`);
 
-  // DESCARGA INTERNA Y CONVERSIÓN A BASE64 PARA EVITAR BLOQUEOS
+  // SISTEMA DE CACHÉ LOCAL EN public/pic
+  const picDir = path.join(__dirname, 'public', 'pic');
+  if (!fs.existsSync(picDir)) fs.mkdirSync(picDir, { recursive: true });
+
+  const localPath = path.join(picDir, `${selected.id}.png`);
   let base64Img = '';
+
   try {
-    const response = await fetch(imgUrl, {
-      headers: { 
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-        'Referer': 'https://lol.fandom.com/'
-      }
-    });
-    if (response.ok) {
-      const buffer = await response.buffer();
+    if (fs.existsSync(localPath)) {
+      // Si ya existe localmente, leer del disco
+      const buffer = fs.readFileSync(localPath);
       base64Img = `data:image/png;base64,${buffer.toString('base64')}`;
-      console.log(`[Gacha] Imagen cargada con éxito: ${selected.name}`);
+      console.log(`[Gacha] Cargando imagen desde caché local: ${selected.id}`);
     } else {
-      console.error(`[Gacha] Error de descarga (${response.status}): ${imgUrl}`);
+      // Si no existe, descargar y guardar
+      console.log(`[Gacha] Descargando imagen por primera vez: ${selected.id}`);
+      const response = await fetch(imgUrl, {
+        headers: { 
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Referer': 'https://lol.fandom.com/'
+        }
+      });
+      if (response.ok) {
+        const buffer = await response.buffer();
+        fs.writeFileSync(localPath, buffer);
+        base64Img = `data:image/png;base64,${buffer.toString('base64')}`;
+      } else {
+        console.error(`[Gacha] Error descarga (${response.status}): ${imgUrl}`);
+      }
     }
   } catch (e) {
-    console.error('[Gacha Image Fetch Error]', e);
+    console.error('[Gacha Image Cache Error]', e);
   }
 
-  // Fallback si falla la descarga
+  // Fallback si falla todo
   if (!base64Img) base64Img = imgUrl; 
 
   const htmlContent = `
