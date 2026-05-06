@@ -1891,31 +1891,35 @@ async function sendDailySummary(db) {
       executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
-    const page = await browser.newPage();
-    await page.setViewport({ width: 950, height: 100, deviceScaleFactor: 3 }); 
-    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-    
-    const height = await page.evaluate(() => document.getElementById('container').offsetHeight);
-    await page.setViewport({ width: 950, height: height, deviceScaleFactor: 3 });
 
-    const element = await page.$('#container');
-    const imageBuffer = await element.screenshot({ type: 'png' });
-    await browser.close();
+    try {
+      const page = await browser.newPage();
+      await page.setViewport({ width: 950, height: 100, deviceScaleFactor: 3 }); 
+      await page.setContent(htmlContent, { waitUntil: 'networkidle0', timeout: 30000 });
+      
+      const height = await page.evaluate(() => document.getElementById('container').offsetHeight);
+      await page.setViewport({ width: 950, height: height, deviceScaleFactor: 3 });
 
-    const attachment = new AttachmentBuilder(imageBuffer, { name: 'scoreboard.png' });
-    const sentMsg = await channel.send({ files: [attachment] });
+      const element = await page.$('#container');
+      const imageBuffer = await element.screenshot({ type: 'png' });
 
-    // Guardar ID en DB para el siguiente borrado
-    await db.collection('system_config').updateOne(
-      { key: 'last_summary_msg' },
-      { $set: { messageId: sentMsg.id, sentAt: new Date() } },
-      { upsert: true }
-    );
+      const attachment = new AttachmentBuilder(imageBuffer, { name: 'scoreboard.png' });
+      const sentMsg = await channel.send({ files: [attachment] });
 
-    // Auto-borrado tras 6 horas (por si acaso)
-    setTimeout(() => {
-      sentMsg.delete().catch(() => {});
-    }, 6 * 60 * 60 * 1000);
+      // Guardar ID en DB para el siguiente borrado
+      await db.collection('system_config').updateOne(
+        { key: 'last_summary_msg' },
+        { $set: { messageId: sentMsg.id, sentAt: new Date() } },
+        { upsert: true }
+      );
+
+      // Auto-borrado tras 6 horas (por si acaso)
+      setTimeout(() => {
+        sentMsg.delete().catch(() => {});
+      }, 6 * 60 * 60 * 1000);
+    } finally {
+      await browser.close().catch(() => {});
+    }
 
     } catch (e) {
       console.error('[Scoreboard Error]', e);
@@ -2127,14 +2131,16 @@ async function generateChallengeImage() {
     executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
-  const page = await browser.newPage();
-  await page.setViewport({ width: 880, height: 100, deviceScaleFactor: 3 }); // Escala 3 para máxima nitidez
-  await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-  const bodyHeight = await page.evaluate(() => document.body.scrollHeight);
-  await page.setViewport({ width: 880, height: bodyHeight, deviceScaleFactor: 3 });
-  const buffer = await page.screenshot({ type: 'png' });
-  await browser.close();
-  return buffer;
+  try {
+    const page = await browser.newPage();
+    await page.setViewport({ width: 880, height: 100, deviceScaleFactor: 3 }); 
+    await page.setContent(htmlContent, { waitUntil: 'networkidle0', timeout: 30000 });
+    const bodyHeight = await page.evaluate(() => document.body.scrollHeight);
+    await page.setViewport({ width: 880, height: bodyHeight, deviceScaleFactor: 3 });
+    return await page.screenshot({ type: 'png' });
+  } finally {
+    await browser.close().catch(() => {});
+  }
 }
 
 async function sendChallengeReminder(db) {
@@ -2214,21 +2220,24 @@ async function sendMonthlyHallOfFame(db, isMock = false) {
     `;
 
     const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
-    const page = await browser.newPage();
-    await page.setViewport({ width: 680, height: 400, deviceScaleFactor: 2 });
-    await page.setContent(htmlContent);
-    const buffer = await page.screenshot({ type: 'png' });
-    await browser.close();
+    try {
+      const page = await browser.newPage();
+      await page.setViewport({ width: 680, height: 400, deviceScaleFactor: 2 });
+      await page.setContent(htmlContent, { timeout: 30000 });
+      const buffer = await page.screenshot({ type: 'png' });
+      
+      const attachment = new AttachmentBuilder(buffer, { name: 'halloffame.png' });
+      const embed = new EmbedBuilder()
+        .setTitle(`🏆 Salón de la Fama - ${monthName}`)
+        .setDescription(`¡Felicidades a los mayores cazadores de retos del mes pasado! 🎉`)
+        .setImage('attachment://halloffame.png')
+        .setColor(0xd4af37);
 
-    const attachment = new AttachmentBuilder(buffer, { name: 'halloffame.png' });
-    const embed = new EmbedBuilder()
-      .setTitle(`🏆 Salón de la Fama - ${monthName}`)
-      .setDescription(`¡Felicidades a los mayores cazadores de retos del mes pasado! 🎉`)
-      .setImage('attachment://halloffame.png')
-      .setColor(0xd4af37);
-
-    await channel.send({ embeds: [embed], files: [attachment] });
-    return true;
+      await channel.send({ embeds: [embed], files: [attachment] });
+      return true;
+    } finally {
+      await browser.close().catch(() => {});
+    }
   } catch (e) { 
     console.error('[Hall of Fame Error]', e); 
     return false;
@@ -2450,22 +2459,24 @@ async function generateGachaCard(selected, balance) {
     executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
     args: ['--no-sandbox', '--disable-setuid-sandbox'] 
   });
-  const page = await browser.newPage();
-  await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-  await page.setViewport({ width: 350, height: 500, deviceScaleFactor: 2 });
-  await page.setContent(htmlContent);
-  
-  // Esperar a que las imágenes carguen antes de capturar
-  await page.evaluate(() => {
-    return Promise.all(Array.from(document.images).map(img => {
-      if (img.complete) return Promise.resolve();
-      return new Promise(resolve => { img.onload = img.onerror = resolve; });
-    }));
-  });
+  try {
+    const page = await browser.newPage();
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+    await page.setViewport({ width: 350, height: 500, deviceScaleFactor: 2 });
+    await page.setContent(htmlContent, { timeout: 30000 });
+    
+    // Esperar a que las imágenes carguen antes de capturar
+    await page.evaluate(() => {
+      return Promise.all(Array.from(document.images).map(img => {
+        if (img.complete) return Promise.resolve();
+        return new Promise(resolve => { img.onload = img.onerror = resolve; });
+      }));
+    });
 
-  const buffer = await page.screenshot({ type: 'png', omitBackground: true });
-  await browser.close();
-  return buffer;
+    return await page.screenshot({ type: 'png', omitBackground: true });
+  } finally {
+    await browser.close().catch(() => {});
+  }
 }
 
 async function notifyAdmin(message) {
