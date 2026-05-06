@@ -2253,6 +2253,15 @@ async function generateGachaCard(selected, balance) {
           0% { left: -150%; }
           100% { left: 150%; }
         }
+        .inner-frame {
+          position: absolute; top: 12px; left: 12px; right: 12px; bottom: 12px;
+          border: 1px solid ${color}44; border-radius: 16px;
+          z-index: 4; pointer-events: none;
+        }
+        .inner-frame::after {
+          content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
+          border: 1px solid ${color}22; border-radius: 18px;
+        }
         .bottom-gradient {
           position: absolute; bottom: 0; left: 0; width: 100%; height: 60%;
           background: linear-gradient(0deg, 
@@ -2309,6 +2318,7 @@ async function generateGachaCard(selected, balance) {
       <div class="card">
         <div class="cost-badge">10</div>
         <div class="full-art"></div>
+        <div class="inner-frame"></div>
         ${isPro ? `<img src="${imgUrl}" class="pro-photo">` : ''}
         ${isCoins ? `<img src="${imgUrl}" class="coins-photo">` : ''}
         <div class="holographic-sheen"></div>
