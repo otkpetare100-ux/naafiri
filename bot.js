@@ -2190,10 +2190,11 @@ async function generateGachaCard(selected, balance) {
   };
   const color = colorMap[selected.rarity] || '#ffffff';
   const isPro = selected.type === 'pro';
+  const isCoins = selected.type === 'coins';
   
   const imgUrl = isPro 
     ? selected.img 
-    : (selected.type === 'coins' 
+    : (isCoins 
         ? 'https://static.wikia.nocookie.net/leagueoflegends/images/1/1b/Gold_icon.png' 
         : `https://ddragon.leagueoflegends.com/cdn/img/champion/centered/${selected.img}.jpg`);
 
@@ -2213,7 +2214,7 @@ async function generateGachaCard(selected, balance) {
         }
         .full-art {
           position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-          background: ${isPro ? 'linear-gradient(45deg, #1a1a1a, #000)' : `url('${imgUrl}') center center`}; 
+          background: ${isPro || isCoins ? 'linear-gradient(45deg, #1a1a1a, #000)' : `url('${imgUrl}') center center`}; 
           background-size: cover;
           z-index: 1;
         }
@@ -2222,6 +2223,13 @@ async function generateGachaCard(selected, balance) {
           height: 100%; z-index: 2;
           filter: drop-shadow(0 0 20px rgba(0,0,0,0.8));
           display: ${isPro ? 'block' : 'none'};
+        }
+        .coins-photo {
+          position: absolute; top: 50%; left: 50%;
+          transform: translate(-50%, -60%);
+          width: 150px; z-index: 2;
+          filter: drop-shadow(0 0 30px rgba(241,196,15,0.5));
+          display: ${isCoins ? 'block' : 'none'};
         }
         .holographic-sheen {
           position: absolute; top: 0; left: -100%; width: 200%; height: 100%;
@@ -2287,13 +2295,14 @@ async function generateGachaCard(selected, balance) {
         <div class="cost-badge">10</div>
         <div class="full-art"></div>
         ${isPro ? `<img src="${imgUrl}" class="pro-photo">` : ''}
+        ${isCoins ? `<img src="${imgUrl}" class="coins-photo">` : ''}
         <div class="holographic-sheen"></div>
         <div class="bottom-gradient"></div>
         <div class="content-container">
           <div class="rarity-tag">${selected.rarity}</div>
           <h1 class="name">${selected.name}</h1>
           <div class="info-row">
-            <div class="sub-info">${isPro ? `TEAM: <span>${selected.team}</span>` : `TYPE: <span>CHAMPION</span>`}</div>
+            <div class="sub-info">${isPro ? `TEAM: <span>${selected.team}</span>` : (isCoins ? `BONUS: <span>CURRENCY</span>` : `TYPE: <span>CHAMPION</span>`)}</div>
             <div class="brand">NAAFIRI·BOT</div>
           </div>
         </div>
