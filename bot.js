@@ -45,8 +45,10 @@ function isAdmin(userId) {
   return userId === process.env.ADMIN_DISCORD_ID;
 }
 
-// Cooldown para !help (5 minutos)
+// Cooldowns
 const helpCooldowns = new Map();
+const gachaCooldowns = new Map();
+const lastMiddayMotivation = new Map();
 
 // --- SISTEMA DE GACHAPON ---
 const GACHA_ITEMS = [
@@ -526,6 +528,11 @@ function initBot(db) {
 
 
     if (command === 'gacha' || command === 'tiro') {
+      const now = Date.now();
+      const lastUsed = gachaCooldowns.get(msg.author.id) || 0;
+      if (now - lastUsed < 2000) return; // Cooldown de 2 segundos silenciado o aviso corto
+      gachaCooldowns.set(msg.author.id, now);
+
       const COST = 10;
       const userEco = await db.collection('economy').findOne({ discordId: msg.author.id });
 
@@ -2206,9 +2213,15 @@ async function generateGachaCard(selected, balance) {
         }
         .full-art {
           position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-          background: url('${imgUrl}') center center; background-size: cover;
-          ${isPro ? 'background-position: top center;' : ''}
+          background: ${isPro ? 'linear-gradient(45deg, #1a1a1a, #000)' : `url('${imgUrl}') center center`}; 
+          background-size: cover;
           z-index: 1;
+        }
+        .pro-photo {
+          position: absolute; bottom: 0; right: -50px;
+          height: 100%; z-index: 2;
+          filter: drop-shadow(0 0 20px rgba(0,0,0,0.8));
+          display: ${isPro ? 'block' : 'none'};
         }
         .holographic-sheen {
           position: absolute; top: 0; left: -100%; width: 200%; height: 100%;
@@ -2273,6 +2286,7 @@ async function generateGachaCard(selected, balance) {
       <div class="card">
         <div class="cost-badge">10</div>
         <div class="full-art"></div>
+        ${isPro ? `<img src="${imgUrl}" class="pro-photo">` : ''}
         <div class="holographic-sheen"></div>
         <div class="bottom-gradient"></div>
         <div class="content-container">
@@ -2296,6 +2310,15 @@ async function generateGachaCard(selected, balance) {
   await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
   await page.setViewport({ width: 350, height: 500, deviceScaleFactor: 2 });
   await page.setContent(htmlContent);
+  
+  // Esperar a que las imágenes carguen antes de capturar
+  await page.evaluate(() => {
+    return Promise.all(Array.from(document.images).map(img => {
+      if (img.complete) return Promise.resolve();
+      return new Promise(resolve => { img.onload = img.onerror = resolve; });
+    }));
+  });
+
   const buffer = await page.screenshot({ type: 'png', omitBackground: true });
   await browser.close();
   return buffer;
