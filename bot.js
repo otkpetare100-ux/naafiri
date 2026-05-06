@@ -979,7 +979,10 @@ function initBot(db) {
       if (command === 'admin_testhall') {
         if (!isAdmin(msg.author.id)) return;
         const sent = await sendMonthlyHallOfFame(dbInstance);
-        if (!sent) return msg.channel.send('❌ No hay retos registrados del mes pasado para generar el Hall of Fame.');
+        if (!sent) {
+          await msg.channel.send('⚠️ No hay datos reales del mes pasado. Generando un **Ejemplo Visual** con datos ficticios...');
+          await sendMonthlyHallOfFame(dbInstance, true); // Pasar true para usar datos mock
+        }
         return;
       }
     }
@@ -2061,7 +2064,7 @@ async function sendChallengeReminder(db) {
   } catch (e) { console.error('[Challenge Reminder Error]', e); }
 }
 
-async function sendMonthlyHallOfFame(db) {
+async function sendMonthlyHallOfFame(db, isMock = false) {
   if (!client || !targetChannelId) return;
   const channel = await client.channels.fetch(targetChannelId);
   if (!channel) return;
@@ -2070,22 +2073,30 @@ async function sendMonthlyHallOfFame(db) {
     const now = new Date();
     const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
-
-    const activities = await db.collection('activities').find({
-      type: 'challenge_win',
-      timestamp: { $gte: lastMonth, $lte: endOfLastMonth }
-    }).toArray();
-
-    if (activities.length === 0) return false;
-
-    const stats = {};
-    activities.forEach(a => {
-      const name = a.message.split('¡')[1].split(' ha')[0]; // Extraer nombre del mensaje
-      stats[name] = (stats[name] || 0) + 1;
-    });
-
-    const sorted = Object.entries(stats).sort((a,b) => b[1] - a[1]).slice(0, 5);
     const monthName = lastMonth.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
+
+    let sorted = [];
+
+    if (isMock) {
+      sorted = [['Jugador Legendario', 25], ['Cazador Pro', 18], ['Main Naafiri', 12], ['RitoGamer', 8], ['NoobMaster69', 5]];
+    } else {
+      const activities = await db.collection('activities').find({
+        type: 'challenge_win',
+        timestamp: { $gte: lastMonth, $lte: endOfLastMonth }
+      }).toArray();
+
+      if (activities.length === 0) return false;
+
+      const stats = {};
+      activities.forEach(a => {
+        // Intentar extraer nombre del mensaje o usar discordId
+        let name = a.message ? a.message.split('¡')[1]?.split(' ha')[0] : 'Desconocido';
+        if (!name) name = a.discordId || 'Desconocido';
+        stats[name] = (stats[name] || 0) + 1;
+      });
+
+      sorted = Object.entries(stats).sort((a,b) => b[1] - a[1]).slice(0, 5);
+    }
 
     let podiumHtml = '';
     sorted.forEach((s, idx) => {
