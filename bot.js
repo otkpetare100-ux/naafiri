@@ -2241,8 +2241,8 @@ async function generateGachaCard(selected, balance) {
         ? 'https://static.wikia.nocookie.net/leagueoflegends/images/1/1b/Gold_icon.png' 
         : `https://ddragon.leagueoflegends.com/cdn/img/champion/centered/${selected.img}.jpg`);
 
-  // SISTEMA DE CACHÉ LOCAL EN public/pic
-  const picDir = path.join(__dirname, 'public', 'pic');
+  // SISTEMA DE CACHÉ LOCAL EN public/pic/gacha
+  const picDir = path.join(__dirname, 'public', 'pic', 'gacha');
   if (!fs.existsSync(picDir)) fs.mkdirSync(picDir, { recursive: true });
 
   const localPath = path.join(picDir, `${selected.id}.png`);
