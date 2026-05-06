@@ -617,19 +617,26 @@ function initBot(db) {
     if (command === 'admin_testitem') {
       if (!isAdmin(msg.author.id)) return;
       const query = args.join(' ').toLowerCase();
-      // Buscar por ID exacto o por nombre parcial
-      const selected = GACHA_ITEMS.find(i => i.id.toLowerCase() === query || i.name.toLowerCase().includes(query));
+      if (!query) return msg.channel.send('❌ Debes escribir el nombre o ID del item.');
+
+      // Buscar item
+      const selected = GACHA_ITEMS.find(i => 
+        i.id.toLowerCase() === query || 
+        i.name.toLowerCase().includes(query)
+      );
       
-      if (!selected) return msg.reply('❌ No encontré ningún item con ese ID o nombre.');
+      if (!selected) return msg.channel.send(`❌ No encontré ningún item que coincida con "${query}".`);
       
-      msg.channel.send(`⏳ Generando **${selected.name}**...`);
+      console.log(`[Admin Test] Item seleccionado: ${selected.name} (ID: ${selected.id})`);
+      msg.channel.send(`✅ Item encontrado: **${selected.name}**. Generando carta...`);
+
       try {
         const buffer = await generateGachaCard(selected, 0);
         const attachment = new AttachmentBuilder(buffer, { name: 'test.png' });
         return msg.channel.send({ content: `🧪 **TEST ITEM:** ${selected.name} (${selected.rarity})`, files: [attachment] });
       } catch (err) {
-        console.error(err);
-        msg.reply('❌ Error al generar la carta. Revisa la consola.');
+        console.error(`[Admin Test Error] ${err.message}`);
+        return msg.channel.send(`❌ **ERROR AL GENERAR:**\n\`\`\`${err.message}\`\`\``);
       }
     }
 
