@@ -38,9 +38,28 @@
                 const version = versions[0];
 
                 const inventory = data.inventory || [];
-                const inventoryHtml = inventory.length > 0 
-                    ? inventory.map(itemObj => {
-                        // Buscar info extendida en GACHA_ITEMS (usando el ID guardado en el objeto del inventario)
+                
+                // DEFINIR ORDEN DE RAREZA
+                const rarityOrder = { 'Legendario': 1, 'Épico': 2, 'Raro': 3, 'Común': 4 };
+
+                // AGRUPAR ITEMS DUPLICADOS
+                const groupedMap = {};
+                inventory.forEach(item => {
+                    const id = item.id;
+                    if (!groupedMap[id]) {
+                        groupedMap[id] = { ...item, count: 1 };
+                    } else {
+                        groupedMap[id].count++;
+                    }
+                });
+
+                // CONVERTIR A ARRAY Y ORDENAR POR RAREZA
+                const sortedItems = Object.values(groupedMap).sort((a, b) => {
+                    return (rarityOrder[a.rarity] || 5) - (rarityOrder[b.rarity] || 5);
+                });
+
+                const inventoryHtml = sortedItems.length > 0 
+                    ? sortedItems.map(itemObj => {
                         const item = GACHA_ITEMS.find(i => i.id === itemObj.id) || itemObj;
                         
                         let imgUrl = 'https://ddragon.leagueoflegends.com/cdn/' + version + '/img/profileicon/29.png';
@@ -48,15 +67,22 @@
                         if (item.type === 'coins') {
                             imgUrl = 'https://cdn-icons-png.flaticon.com/512/2489/2489756.png';
                         } else if (item.img) {
-                            // Si tiene img (ej: Naafiri_1), usamos splash/loading
-                            imgUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${item.img}.jpg`;
+                            if (item.type === 'pro') {
+                                // Usar el proxy para las fotos de pros
+                                const cleanUrl = item.img.replace(/^https?:\/\//, '');
+                                imgUrl = `https://images.weserv.nl/?url=${encodeURIComponent(cleanUrl)}&w=300&h=450&fit=cover`;
+                            } else {
+                                imgUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${item.img}.jpg`;
+                            }
                         } else {
-                            // Fallback al icono cuadrado por ID
                             imgUrl = `https://ddragon.leagueoflegends.com/cdn/${version}/img/champion/${item.id}.png`;
                         }
                         
+                        const countBadge = itemObj.count > 1 ? `<div class="item-count">x${itemObj.count}</div>` : '';
+                        
                         return `
                             <div class="item-card card-${item.rarity}">
+                                ${countBadge}
                                 <div class="item-img-container">
                                     <img src="${imgUrl}" alt="${item.name}" class="item-img" onerror="this.src='https://ddragon.leagueoflegends.com/cdn/${version}/img/profileicon/29.png'">
                                 </div>

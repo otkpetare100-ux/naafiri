@@ -695,6 +695,22 @@ body {
   padding: 10px;
   text-align: center;
   transition: var(--transition);
+  position: relative;
+}
+
+.item-count {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: rgba(200, 155, 60, 0.9);
+  color: #000;
+  font-weight: 900;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 6px;
+  z-index: 10;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.2);
 }
 
 .item-card:hover {
