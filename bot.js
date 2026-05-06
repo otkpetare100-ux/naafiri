@@ -1495,12 +1495,12 @@ const SKIN_THEMES = [
   {
     name: 'PROYECTO',
     images: [
-      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/MasterYi_5.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yi_5.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Vayne_11.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ashe_11.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Katarina_1.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Lucian_1.jpg',
-      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yasuo_2.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yasuo_1.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Zed_1.jpg'
     ]
   },
@@ -1567,7 +1567,7 @@ const SKIN_THEMES = [
   {
     name: 'Arcadia',
     images: [
-      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ahri_6.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ahri_7.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Corki_6.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ezreal_9.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Hecarim_3.jpg',
@@ -1622,6 +1622,15 @@ async function sendDailyMotivation(db) {
     const channel = await client.channels.fetch(targetChannelId);
     if (!channel) return;
 
+    // --- Borrar motivación anterior si existe ---
+    try {
+      const config = await db.collection('system_config').findOne({ key: 'last_motivation_msg' });
+      if (config && config.messageId) {
+        const oldMsg = await channel.messages.fetch(config.messageId).catch(() => null);
+        if (oldMsg) await oldMsg.delete().catch(() => {});
+      }
+    } catch (e) { console.error('[Motivation Delete Error]', e); }
+
     const now = new Date();
     // Cálculo de semana del año para rotación
     const startOfYear = new Date(now.getFullYear(), 0, 1);
@@ -1634,33 +1643,44 @@ async function sendDailyMotivation(db) {
     const splash = currentTheme.images[day] || currentTheme.images[0];
 
     const dailyMessages = [
-      '☀️ ¡Domingo de descanso en la perrera! No olvides tus coins.',
-      '🦴 ¡Lunes con hambre de victoria! Reclama tu diario.',
-      '🍖 ¡Martes de cacería! ¿Ya tienes tus monedas?',
-      '⚔️ ¡Miércoles mitad de semana! Hora de cobrar.',
-      '🔥 ¡Jueves casi fin de semana! No te quedes sin tus 100 coins.',
-      '🎉 ¡Viernes de perreo! Cobren y a rankear.',
-      '🍗 ¡Sábado de vicio! Asegura tus monedas diarias.'
+      '✨ **¡DOMINGO DE RELAX EN LA MANADA!** ✨\nNo olvides asegurar tus coins antes de que termine el día.',
+      '⚔️ **¡LUNES DE CONQUISTA!** ⚔️\nEmpieza la semana con hambre de victoria. ¡Reclama tu botín!',
+      '🔥 **¡MARTES DE CACERÍA!** 🔥\nLas presas no se atraparán solas. ¿Ya cobraste tu diario?',
+      '🛡️ **¡MIÉRCOLES DE PODER!** 🛡️\nMitad de semana, no bajes el ritmo. Tus 100 coins te esperan.',
+      '⚡ **¡JUEVES DE IMPACTO!** ⚡\nCasi es fin de semana. Asegura el oro para el Gachapon.',
+      '🎉 **¡VIERNES DE PERREO Y RANKEDS!** 🎉\nCobra tus coins y demuestra quién manda en la grieta.',
+      '🍗 **¡SÁBADO DE GLORIA!** 🍗\nDía de vicio intensivo. ¡No te quedes sin tus monedas!'
     ];
 
-    const attachment = new AttachmentBuilder(splash, { name: 'splash.jpg' });
-
     const embed = new EmbedBuilder()
-      .setTitle(`🍽️ ¡Hora de almorzar! (Tema: ${currentTheme.name})`)
+      .setTitle(`✨ LA PERRERA: MENÚ DEL DÍA ✨`)
       .setDescription(dailyMessages[day])
-      .setImage('attachment://splash.jpg')
-      .setColor(0xf4c874)
+      .setImage(splash)
+      .addFields(
+        { name: '🌟 Tema de la Semana', value: `\`${currentTheme.name}\``, inline: true },
+        { name: '💰 Botín Disponible', value: '`100 Naafiri Coins`', inline: true },
+        { name: '⏱️ Disponibilidad', value: '`6 Horas`', inline: true }
+      )
+      .setThumbnail('https://static.wikia.nocookie.net/leagueoflegends.com/images/1/1b/Season_2023_-_Master_1.png')
+      .setColor(0xd4af37)
       .setTimestamp()
-      .setFooter({ text: 'Naafiri Bot · Recordatorio de Mediodía' });
+      .setFooter({ text: 'Naafiri Bot • Premium Collector Edition', iconURL: client.user.displayAvatarURL() });
 
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId('daily_claim')
-        .setLabel('Cobrar 100 Coins 💰')
+        .setLabel('Cobrar Botín Diario 💰')
         .setStyle(ButtonStyle.Success)
     );
 
-    const sentMsg = await channel.send({ embeds: [embed], files: [attachment], components: [row] });
+    const sentMsg = await channel.send({ embeds: [embed], components: [row] });
+
+    // Guardar ID en DB para el siguiente borrado
+    await db.collection('system_config').updateOne(
+      { key: 'last_motivation_msg' },
+      { $set: { messageId: sentMsg.id, sentAt: new Date() } },
+      { upsert: true }
+    );
 
     // Auto-borrado tras 6 horas
     setTimeout(() => {
