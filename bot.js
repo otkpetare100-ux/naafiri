@@ -604,10 +604,14 @@ function initBot(db) {
       if (!isAdmin(msg.author.id)) return;
       const pros = GACHA_ITEMS.filter(i => i.type === 'pro');
       const selected = pros[Math.floor(Math.random() * pros.length)];
-      msg.channel.send('🧪 Generando pro player de prueba...');
-      const buffer = await generateGachaCard(selected, 0);
-      const attachment = new AttachmentBuilder(buffer, { name: 'test.png' });
-      return msg.channel.send({ content: `🧪 **TEST PRO:** ${selected.name} (${selected.team})`, files: [attachment] });
+      msg.channel.send('⏳ Generando pro player de prueba...');
+      try {
+        const buffer = await generateGachaCard(selected, 0);
+        const attachment = new AttachmentBuilder(buffer, { name: 'test.png' });
+        return msg.channel.send({ content: `🧪 **TEST PRO:** ${selected.name} (${selected.team})`, files: [attachment] });
+      } catch (err) {
+        return msg.reply(`❌ **ERROR DE GENERACIÓN:**\n\`\`\`${err.message}\`\`\``);
+      }
     }
 
     if (command === 'admin_testitem') {
@@ -2276,11 +2280,12 @@ async function generateGachaCard(selected, balance) {
         base64Img = `data:image/png;base64,${buffer.toString('base64')}`;
         console.log(`[Gacha] Descarga exitosa y guardada: ${selected.id}`);
       } else {
-        console.error(`[Gacha] Error de red (${response.status}): ${response.statusText}`);
+        throw new Error(`Wikia respondió con error ${response.status}: ${response.statusText}`);
       }
     }
   } catch (e) {
-    console.error(`[Gacha] Error crítico en caché/descarga: ${e.message}`);
+    console.error(`[Gacha] Error crítico: ${e.message}`);
+    throw new Error(`Fallo al obtener imagen: ${e.message}`);
   }
 
   // Fallback si falla todo
