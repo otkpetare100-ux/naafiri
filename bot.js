@@ -2213,75 +2213,79 @@ async function generateGachaCard(selected, balance) {
         body { margin: 0; padding: 0; background: transparent; font-family: 'Inter', sans-serif; width: 350px; height: 500px; display: flex; justify-content: center; align-items: center; }
         .card { 
           width: 310px; height: 440px; position: relative; 
-          background: #1a0f0a; border-radius: 20px; 
+          background: #1a0f0a; border-radius: 40px; 
           overflow: hidden;
           box-shadow: 0 10px 40px rgba(0,0,0,0.9);
-          border: 6px solid #4a3b2c;
+          border: 8px solid #4a3b2c;
         }
-        .full-art {
-          position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-          background: ${isPro || isCoins ? 'linear-gradient(45deg, #1a1a1a, #000)' : `url('${imgUrl}') center center`}; 
-          background-size: cover;
-          z-index: 1;
+        .full-art-container {
+          position: absolute; top: 25px; left: 35px; width: 240px; height: 260px;
+          clip-path: ellipse(50% 50% at 50% 50%);
+          z-index: 2; border: 6px solid #d4af37; box-sizing: border-box;
+          background: #000;
+        }
+        .full-art-img {
+          width: 100%; height: 100%; object-fit: cover;
+          ${isPro ? 'object-position: top center;' : ''}
         }
         .ornate-frame {
           position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-          border: 12px solid transparent;
-          border-image: linear-gradient(to bottom, #7d7d7d, #333) 1;
-          box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
-          z-index: 5; pointer-events: none;
+          border: 15px solid transparent;
+          border-image: linear-gradient(to bottom, #7d7d7d, #222) 1;
+          box-shadow: inset 0 0 50px rgba(0,0,0,0.9);
+          z-index: 5; pointer-events: none; border-radius: 40px;
         }
         .mana-crystal {
-          position: absolute; top: -10px; left: -10px;
-          width: 75px; height: 75px;
-          background: #3498db;
-          clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+          position: absolute; top: -5px; left: -5px;
+          width: 80px; height: 80px;
+          background: radial-gradient(circle at 30% 30%, #5dade2, #2e86c1);
+          border-radius: 50%; border: 4px solid #fff;
           display: flex; justify-content: center; align-items: center;
-          font-size: 34px; font-weight: 900; color: #fff; z-index: 20;
-          border: 4px solid #fff;
+          font-size: 36px; font-weight: 900; color: #fff; z-index: 20;
           box-shadow: 0 5px 15px rgba(0,0,0,0.6);
-          background: radial-gradient(circle, #5dade2, #2e86c1);
+          text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
         .rarity-gem-top {
-          position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-          width: 40px; height: 25px;
-          background: ${color};
-          clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
-          z-index: 21; border: 2px solid #fff;
-          box-shadow: 0 0 15px ${color};
+          position: absolute; top: 5px; left: 50%; transform: translateX(-50%);
+          width: 35px; height: 35px;
+          background: radial-gradient(circle, ${color}, #000);
+          border-radius: 50%; z-index: 21; border: 2px solid #fff;
+          box-shadow: 0 0 20px ${color};
         }
         .name-banner-hs {
-          position: absolute; bottom: 85px; left: 50%; transform: translateX(-50%);
-          width: 240px; height: 35px; background: #000;
-          border: 3px solid #7d7d7d; border-radius: 4px;
+          position: absolute; top: 250px; left: 50%; transform: translateX(-50%);
+          width: 260px; height: 45px; background: #1a0f0a;
+          border: 3px solid #d4af37; border-radius: 50px;
           display: flex; justify-content: center; align-items: center;
-          color: #fff; font-weight: 900; font-size: 16px;
+          color: #fff; font-weight: 900; font-size: 18px;
           z-index: 10; text-transform: uppercase;
-          box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+          box-shadow: 0 6px 15px rgba(0,0,0,0.9);
+          text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
         .bottom-stat-l {
-          position: absolute; bottom: -15px; left: -15px;
-          width: 70px; height: 70px; background: #f1c40f;
+          position: absolute; bottom: -5px; left: -5px;
+          width: 75px; height: 75px; background: radial-gradient(circle at 30% 30%, #f1c40f, #c89b3c);
           border-radius: 50%; border: 4px solid #fff;
           z-index: 20; display: flex; justify-content: center; align-items: center;
-          font-weight: 900; font-size: 28px; color: #000;
+          font-weight: 900; font-size: 32px; color: #000;
           box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
         .bottom-stat-r {
-          position: absolute; bottom: -15px; right: -15px;
-          width: 70px; height: 70px; background: #e74c3c;
+          position: absolute; bottom: -5px; right: -5px;
+          width: 75px; height: 75px; background: radial-gradient(circle at 30% 30%, #e74c3c, #922b21);
           border-radius: 50%; border: 4px solid #fff;
           z-index: 20; display: flex; justify-content: center; align-items: center;
-          font-weight: 900; font-size: 28px; color: #fff;
+          font-weight: 900; font-size: 32px; color: #fff;
           box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
         .description-box-hs {
-          position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%);
-          width: 260px; height: 80px; background: #e5d1b3;
-          border: 4px solid #4a3b2c; border-radius: 8px;
+          position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+          width: 240px; height: 90px; background: #e5d1b3;
+          border: 4px solid #4a3b2c; border-radius: 15px;
           z-index: 4; display: flex; flex-direction: column; 
           justify-content: center; align-items: center; text-align: center;
-          color: #2a1b12; padding: 5px; box-sizing: border-box;
+          color: #2a1b12; padding: 10px; box-sizing: border-box;
+          box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
         }
 
         ${selected.rarity === 'Legendario' ? `
@@ -2298,10 +2302,12 @@ async function generateGachaCard(selected, balance) {
       <div class="card">
         <div class="mana-crystal">10</div>
         <div class="rarity-gem-top"></div>
-        <div class="full-art"></div>
+        
+        <div class="full-art-container">
+          <img src="${imgUrl}" class="full-art-img">
+        </div>
+        
         <div class="ornate-frame"></div>
-        ${isPro ? `<img src="${imgUrl}" style="position:absolute; bottom:0; right:-40px; height:100%; z-index:2; filter:drop-shadow(0 0 20px rgba(0,0,0,0.8));">` : ''}
-        ${isCoins ? `<img src="${imgUrl}" style="position:absolute; top:45%; left:50%; transform:translate(-50%,-50%); width:140px; z-index:2; filter:drop-shadow(0 0 30px rgba(241,196,15,0.5));">` : ''}
         <div class="name-banner-hs">${selected.name}</div>
         <div class="description-box-hs">
           <div style="font-weight:900; font-size:14px; color:${color};">${selected.rarity}</div>
