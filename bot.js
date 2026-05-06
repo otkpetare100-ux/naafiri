@@ -567,7 +567,7 @@ function initBot(db) {
         const buffer = await generateGachaCard(selected, finalBalance);
         const attachment = new AttachmentBuilder(buffer, { name: 'gacha.png' });
         
-        let content = `<@${msg.author.id}> 🎰 **¡GACHAPON DE LA PERRERA!**`;
+        let content = `<@${msg.author.id}> 🎰 **¡GACHAPON DE LA PERRERA!**\n💰 Saldo restante: **${finalBalance} Naafiri Coins**`;
         if (selected.rarity === 'Legendario') {
           content += `\n🎊 ¡ATENCIÓN! **${msg.author.username}** consiguió algo **LEGENDARIO**! 🎊`;
         }
@@ -2222,7 +2222,7 @@ async function generateGachaCard(selected, balance) {
           border: 8px solid ${color}; box-sizing: border-box;
           z-index: 2;
         }
-        .content { position: relative; z-index: 10; padding: 30px; max-width: 70%; }
+        .content { position: relative; z-index: 10; padding: 30px; max-width: 80%; }
         .rarity { 
           display: inline-block; padding: 4px 12px; border-radius: 40px; 
           background: ${color}; color: #000; font-weight: 900; font-size: 12px; 
@@ -2230,10 +2230,8 @@ async function generateGachaCard(selected, balance) {
         }
         .name { font-size: ${isPro ? '42px' : '32px'}; font-weight: 900; color: #fff; margin: 0; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
         .team-name { font-size: 18px; color: ${color}; font-weight: 700; margin-top: 5px; text-transform: uppercase; letter-spacing: 2px; }
-        .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
-        .balance { font-size: 14px; color: rgba(255,255,255,0.6); }
-        .balance span { color: #f1c40f; font-weight: 700; }
-        .brand { font-size: 10px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 3px; }
+        .footer { display: flex; justify-content: flex-end; align-items: center; margin-top: 20px; }
+        .brand { font-size: 10px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 3px; font-weight: 700; }
         
         ${selected.rarity === 'Legendario' ? `
         .overlay { animation: glow 2s infinite alternate; }
@@ -2254,7 +2252,6 @@ async function generateGachaCard(selected, balance) {
           <h1 class="name">${selected.name}</h1>
           ${isPro ? `<div class="team-name">${selected.team} · ${selected.rarity}</div>` : ''}
           <div class="footer">
-            <div class="balance">Saldo restante: <span>${balance} 💰</span></div>
             <div class="brand">Gachapon La Perrera</div>
           </div>
         </div>
