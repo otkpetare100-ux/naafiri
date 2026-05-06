@@ -2192,11 +2192,17 @@ async function generateGachaCard(selected, balance) {
   const isPro = selected.type === 'pro';
   const isCoins = selected.type === 'coins';
   
-  const imgUrl = isPro 
+  let imgUrl = isPro 
     ? selected.img 
     : (isCoins 
         ? 'https://static.wikia.nocookie.net/leagueoflegends/images/1/1b/Gold_icon.png' 
         : `https://ddragon.leagueoflegends.com/cdn/img/champion/centered/${selected.img}.jpg`);
+
+  // Proxy para evitar bloqueos de Wikia en fotos de Pros y Coins
+  if (isPro || isCoins) {
+    const cleanUrl = imgUrl.replace(/^https?:\/\//, '');
+    imgUrl = `https://images.weserv.nl/?url=${encodeURIComponent(cleanUrl)}&default=https://static.wikia.nocookie.net/leagueoflegends/images/1/1b/Gold_icon.png`;
+  }
 
   const htmlContent = `
     <!DOCTYPE html>
