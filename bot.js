@@ -2243,36 +2243,44 @@ async function generateGachaCard(selected, balance) {
 
   // SISTEMA DE CACHÉ LOCAL EN public/pic/gacha
   const picDir = path.join(__dirname, 'public', 'pic', 'gacha');
-  if (!fs.existsSync(picDir)) fs.mkdirSync(picDir, { recursive: true });
+  try {
+    if (!fs.existsSync(picDir)) {
+      console.log(`[Gacha] Creando directorio de caché: ${picDir}`);
+      fs.mkdirSync(picDir, { recursive: true });
+    }
+  } catch (err) {
+    console.error(`[Gacha] Error creando directorio: ${err.message}`);
+  }
 
   const localPath = path.join(picDir, `${selected.id}.png`);
   let base64Img = '';
 
   try {
     if (fs.existsSync(localPath)) {
-      // Si ya existe localmente, leer del disco
       const buffer = fs.readFileSync(localPath);
       base64Img = `data:image/png;base64,${buffer.toString('base64')}`;
-      console.log(`[Gacha] Cargando imagen desde caché local: ${selected.id}`);
+      console.log(`[Gacha] Usando caché local para: ${selected.id}`);
     } else {
-      // Si no existe, descargar y guardar
-      console.log(`[Gacha] Descargando imagen por primera vez: ${selected.id}`);
+      console.log(`[Gacha] Intentando descargar: ${selected.id} desde ${imgUrl}`);
       const response = await fetch(imgUrl, {
         headers: { 
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
           'Referer': 'https://lol.fandom.com/'
-        }
+        },
+        timeout: 10000 // 10 segundos de límite
       });
+
       if (response.ok) {
         const buffer = await response.buffer();
         fs.writeFileSync(localPath, buffer);
         base64Img = `data:image/png;base64,${buffer.toString('base64')}`;
+        console.log(`[Gacha] Descarga exitosa y guardada: ${selected.id}`);
       } else {
-        console.error(`[Gacha] Error descarga (${response.status}): ${imgUrl}`);
+        console.error(`[Gacha] Error de red (${response.status}): ${response.statusText}`);
       }
     }
   } catch (e) {
-    console.error('[Gacha Image Cache Error]', e);
+    console.error(`[Gacha] Error crítico en caché/descarga: ${e.message}`);
   }
 
   // Fallback si falla todo
