@@ -183,21 +183,25 @@ async function connectDB() {
       } catch (e) { console.error('[API Monitor Error]', e); }
     }, 60 * 1000);
 
-    // --- Escaneo de Partidas en Vivo cada 1 min ---
+    // --- Escaneo de Partidas en Vivo cada 1 min
+    const cooldown403 = new Map();
+
     setInterval(async () => {
       try {
         const accounts = await db.collection('accounts').find({}).toArray();
         if (accounts.length === 0) return;
+        const nowTime = Date.now();
 
         // Cargar datos de campeones para el mapeo
         const champRes = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/es_MX/champion.json`);
         const champData = await champRes.json();
-        const champMap = {};
-        for (const c of Object.values(champData.data)) {
-          champMap[c.key] = c.name;
-        }
 
         for (const acc of accounts) {
+          // Si está en cooldown por 403, saltar escaneo
+          if (cooldown403.has(acc.puuid)) {
+            if (nowTime < cooldown403.get(acc.puuid)) continue;
+            else cooldown403.delete(acc.puuid);
+          }
           const url = `https://la1.api.riotgames.com/lol/spectator/v5/active-games/by-puuid/${acc.puuid.trim()}`;
           const res = await fetch(url, {
             headers: {
@@ -258,8 +262,10 @@ async function connectDB() {
               await db.collection('accounts').updateOne({ puuid: acc.puuid }, { $unset: { liveGameStartedAt: "" } });
               settleBets(acc);
             }
-          } else if (res.status === 429) {
-            console.warn(`[Live RateLimit] Riot nos está limitando (429). Saltando escaneo para ${acc.gameName}`);
+          } else if (res.status === 403) {
+            // Si es 403, poner en cooldown de 10 minutos para no saturar
+            cooldown403.set(acc.puuid, nowTime + 10 * 60 * 1000);
+            console.warn(`[Live API] Acceso denegado (403) para ${acc.gameName}. Reintentando en 10 min.`);
           } else {
             console.error(`[Live API Error] Código ${res.status} para ${acc.gameName}. Ignorando.`);
           }
