@@ -2275,10 +2275,11 @@ async function generateGachaCard(selected, balance) {
       });
 
       if (response.ok) {
-        const buffer = await response.buffer();
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
         fs.writeFileSync(localPath, buffer);
         base64Img = `data:image/png;base64,${buffer.toString('base64')}`;
-        console.log(`[Gacha] Descarga exitosa y guardada: ${selected.id}`);
+        console.log(`[Gacha] Descarga exitosa y guardada en: ${localPath}`);
       } else {
         throw new Error(`Wikia respondió con error ${response.status}: ${response.statusText}`);
       }
