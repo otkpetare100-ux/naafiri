@@ -2199,73 +2199,89 @@ async function generateGachaCard(selected, balance) {
         body { margin: 0; padding: 0; background: transparent; font-family: 'Inter', sans-serif; width: 350px; height: 500px; display: flex; justify-content: center; align-items: center; }
         .card { 
           width: 320px; height: 460px; position: relative; 
-          background: #2a1b12; border-radius: 30px; 
-          border: 4px solid #1a0f0a; overflow: hidden;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+          background: #000; border-radius: 24px; 
+          overflow: hidden;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+          border: 2px solid rgba(255,255,255,0.1);
         }
-        .portrait-container {
-          position: absolute; top: 30px; left: 35px;
-          width: 250px; height: 280px;
-          clip-path: ellipse(50% 50% at 50% 50%);
-          border: 8px solid #d4af37; box-sizing: border-box;
-          z-index: 1; background: #000;
+        .full-art {
+          position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+          background: url('${imgUrl}') center center; background-size: cover;
+          ${isPro ? 'background-position: top center;' : ''}
+          z-index: 1;
         }
-        .portrait-img {
-          width: 100%; height: 100%; object-fit: cover;
-          ${isPro ? 'object-position: top center;' : ''}
+        .holographic-sheen {
+          position: absolute; top: 0; left: -100%; width: 200%; height: 100%;
+          background: linear-gradient(105deg, 
+            transparent 30%, 
+            rgba(255,255,255,0.1) 40%, 
+            rgba(255,255,255,0.4) 50%, 
+            rgba(255,255,255,0.1) 60%, 
+            transparent 70%
+          );
+          z-index: 2; transform: skewX(-20deg);
+          animation: shine 4s infinite linear;
         }
-        .mana-crystal {
-          position: absolute; top: -5px; left: -5px;
-          width: 70px; height: 70px; background: radial-gradient(circle, #3498db, #2980b9);
-          border-radius: 50%; border: 3px solid #fff;
-          display: flex; justify-content: center; align-items: center;
-          font-size: 32px; font-weight: 900; color: #fff; z-index: 10;
-          box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        @keyframes shine {
+          0% { left: -150%; }
+          100% { left: 150%; }
         }
-        .name-banner {
-          position: absolute; top: 270px; left: 10px; width: 300px;
-          background: #1a0f0a; color: #fff; text-align: center;
-          padding: 8px 0; font-size: 18px; font-weight: 900;
-          text-transform: uppercase; border: 3px solid #d4af37;
-          border-radius: 5px; z-index: 5; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        .bottom-gradient {
+          position: absolute; bottom: 0; left: 0; width: 100%; height: 60%;
+          background: linear-gradient(0deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 50%, transparent 100%);
+          z-index: 3;
         }
-        .rarity-gem {
-          position: absolute; top: 305px; left: 145px;
-          width: 30px; height: 40px; background: ${color};
-          clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-          border: 2px solid #fff; z-index: 6;
+        .cost-badge {
+          position: absolute; top: 15px; left: 15px;
+          background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px);
+          width: 45px; height: 45px; border-radius: 12px;
+          border: 2px solid ${color}; display: flex;
+          justify-content: center; align-items: center;
+          font-weight: 900; color: #fff; font-size: 20px; z-index: 10;
         }
-        .description-box {
-          position: absolute; bottom: 20px; left: 30px; width: 260px; height: 110px;
-          background: #f3e5ab; border-radius: 10px; border: 4px solid #8b4513;
-          padding: 10px; box-sizing: border-box; display: flex;
-          flex-direction: column; justify-content: center; align-items: center;
-          text-align: center; color: #2a1b12; z-index: 2;
+        .content-container {
+          position: absolute; bottom: 30px; left: 20px; right: 20px;
+          z-index: 10;
         }
-        .rarity-label { font-weight: 900; font-size: 14px; text-transform: uppercase; margin-bottom: 5px; color: ${color}; filter: brightness(0.6); }
-        .type-label { font-weight: 700; font-size: 11px; opacity: 0.7; }
-        
+        .rarity-tag {
+          display: inline-block; padding: 4px 10px; border-radius: 6px;
+          background: ${color}; color: #000; font-weight: 900;
+          font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
+          margin-bottom: 8px;
+        }
+        .name {
+          font-size: 32px; font-weight: 900; color: #fff;
+          margin: 0; line-height: 1; text-transform: uppercase;
+          text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        .info-row {
+          display: flex; justify-content: space-between; align-items: flex-end;
+          margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);
+          padding-top: 10px;
+        }
+        .sub-info { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; }
+        .sub-info span { color: ${color}; }
+        .brand { font-size: 8px; font-weight: 700; color: rgba(255,255,255,0.2); text-transform: uppercase; letter-spacing: 2px; }
+
         ${selected.rarity === 'Legendario' ? `
-        .card { animation: legendary-glow 2s infinite alternate; }
-        @keyframes legendary-glow {
-          from { border-color: #d4af37; box-shadow: 0 0 20px rgba(212,175,55,0.4); }
-          to { border-color: #fff; box-shadow: 0 0 50px rgba(212,175,55,0.8); }
-        }
+        .card { border-color: ${color}; box-shadow: 0 0 30px rgba(241,196,15,0.3); }
+        .holographic-sheen { opacity: 0.8; animation-duration: 2s; }
         ` : ''}
       </style>
     </head>
     <body>
       <div class="card">
-        <div class="mana-crystal">10</div>
-        <div class="portrait-container">
-          <img src="${imgUrl}" class="portrait-img">
-        </div>
-        <div class="name-banner">${selected.name}</div>
-        <div class="rarity-gem"></div>
-        <div class="description-box">
-          <div class="rarity-label">${selected.rarity}</div>
-          <div class="type-label">${isPro ? 'ESPORTS LEGEND' : 'CHAMPION CARD'}</div>
-          ${isPro ? `<div style="font-weight: 900; font-size: 14px; margin-top: 5px;">${selected.team}</div>` : ''}
+        <div class="cost-badge">10</div>
+        <div class="full-art"></div>
+        <div class="holographic-sheen"></div>
+        <div class="bottom-gradient"></div>
+        <div class="content-container">
+          <div class="rarity-tag">${selected.rarity}</div>
+          <h1 class="name">${selected.name}</h1>
+          <div class="info-row">
+            <div class="sub-info">${isPro ? `TEAM: <span>${selected.team}</span>` : `TYPE: <span>CHAMPION</span>`}</div>
+            <div class="brand">NAAFIRI·BOT</div>
+          </div>
         </div>
       </div>
     </body>
