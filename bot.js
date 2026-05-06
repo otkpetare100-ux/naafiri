@@ -1495,12 +1495,12 @@ const SKIN_THEMES = [
   {
     name: 'PROYECTO',
     images: [
-      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yi_5.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/MasterYi_5.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Vayne_11.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ashe_11.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Katarina_1.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Lucian_1.jpg',
-      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yasuo_1.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yasuo_2.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Zed_1.jpg'
     ]
   },
@@ -1567,7 +1567,7 @@ const SKIN_THEMES = [
   {
     name: 'Arcadia',
     images: [
-      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ahri_7.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ahri_6.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Corki_6.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ezreal_9.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Hecarim_3.jpg',
@@ -1643,10 +1643,12 @@ async function sendDailyMotivation(db) {
       '🍗 ¡Sábado de vicio! Asegura tus monedas diarias.'
     ];
 
+    const attachment = new AttachmentBuilder(splash, { name: 'splash.jpg' });
+
     const embed = new EmbedBuilder()
       .setTitle(`🍽️ ¡Hora de almorzar! (Tema: ${currentTheme.name})`)
       .setDescription(dailyMessages[day])
-      .setImage(splash)
+      .setImage('attachment://splash.jpg')
       .setColor(0xf4c874)
       .setTimestamp()
       .setFooter({ text: 'Naafiri Bot · Recordatorio de Mediodía' });
@@ -1658,7 +1660,7 @@ async function sendDailyMotivation(db) {
         .setStyle(ButtonStyle.Success)
     );
 
-    const sentMsg = await channel.send({ embeds: [embed], components: [row] });
+    const sentMsg = await channel.send({ embeds: [embed], files: [attachment], components: [row] });
 
     // Auto-borrado tras 6 horas
     setTimeout(() => {
