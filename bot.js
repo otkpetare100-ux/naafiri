@@ -2201,7 +2201,8 @@ async function generateGachaCard(selected, balance) {
   // Proxy para evitar bloqueos de Wikia en fotos de Pros y Coins
   if (isPro || isCoins) {
     const cleanUrl = imgUrl.replace(/^https?:\/\//, '');
-    imgUrl = `https://images.weserv.nl/?url=${encodeURIComponent(cleanUrl)}&default=https://static.wikia.nocookie.net/leagueoflegends/images/1/1b/Gold_icon.png`;
+    // Añadimos parámetros extras al proxy para forzar la carga y un fallback
+    imgUrl = `https://images.weserv.nl/?url=${encodeURIComponent(cleanUrl)}&default=https://static.wikia.nocookie.net/leagueoflegends/images/1/1b/Gold_icon.png&noproxy=1`;
   }
 
   const htmlContent = `
@@ -2255,12 +2256,13 @@ async function generateGachaCard(selected, balance) {
         }
         .inner-frame {
           position: absolute; top: 12px; left: 12px; right: 12px; bottom: 12px;
-          border: 1px solid ${color}44; border-radius: 16px;
+          border: 2.5px solid ${color}aa; border-radius: 16px;
           z-index: 4; pointer-events: none;
+          box-shadow: 0 0 15px ${color}44, inset 0 0 10px ${color}22;
         }
         .inner-frame::after {
-          content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
-          border: 1px solid ${color}22; border-radius: 18px;
+          content: ''; position: absolute; top: -4px; left: -4px; right: -4px; bottom: -4px;
+          border: 1px solid ${color}44; border-radius: 20px;
         }
         .bottom-gradient {
           position: absolute; bottom: 0; left: 0; width: 100%; height: 60%;
