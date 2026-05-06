@@ -50,28 +50,53 @@ const helpCooldowns = new Map();
 
 // --- SISTEMA DE GACHAPON ---
 const GACHA_ITEMS = [
-  { id: 'Naafiri', name: 'Naafiri (Base)', rarity: 'Común', weight: 70, img: 'Naafiri_0' },
+  // --- LEGENDARIOS (Peso 2) ---
+  { id: 'Elemental_Lux', name: 'Lux Elementalista', rarity: 'Legendario', weight: 2, img: 'Lux_7' },
+  { id: 'Golden_Naafiri', name: 'Naafiri Dorada', rarity: 'Legendario', weight: 2, img: 'Naafiri_0' },
+  { id: 'Teemo_Satan', name: 'Teemo Pequeño Demonio', rarity: 'Legendario', weight: 2, img: 'Teemo_8' },
+  { id: 'Ahri_Spirit', name: 'Ahri Flor Espiritual', rarity: 'Legendario', weight: 2, img: 'Ahri_27' },
+  { id: 'Yasuo_Night', name: 'Yasuo Portador del Anochecer', rarity: 'Legendario', weight: 2, img: 'Yasuo_9' },
+  { id: 'Riven_Dawn', name: 'Riven Portadora del Amanecer', rarity: 'Legendario', weight: 2, img: 'Riven_7' },
+  { id: 'Lee_Storm', name: 'Lee Sin Dragón de la Tormenta', rarity: 'Legendario', weight: 2, img: 'LeeSin_31' },
+  { id: 'COINS_1000', name: 'Tesoro de 1000 Coins', rarity: 'Legendario', weight: 2, type: 'coins', amount: 1000 },
+
+  // --- ÉPICOS (Peso 8) ---
+  { id: 'Jhin_Dark', name: 'Jhin Estrella Oscura', rarity: 'Épico', weight: 8, img: 'Jhin_5' },
+  { id: 'Naafiri_Soul', name: 'Naafiri Soul Fighter', rarity: 'Épico', weight: 8, img: 'Naafiri_1' },
+  { id: 'Vayne_Project', name: 'Vayne PROYECTO', rarity: 'Épico', weight: 8, img: 'Vayne_11' },
+  { id: 'Kaisa_KDA', name: 'Kai\'Sa K/DA', rarity: 'Épico', weight: 8, img: 'KaiSa_1' },
+  { id: 'Lucian_Project', name: 'Lucian PROYECTO', rarity: 'Épico', weight: 8, img: 'Lucian_1' },
+  { id: 'Zed_Project', name: 'Zed PROYECTO', rarity: 'Épico', weight: 8, img: 'Zed_1' },
+  { id: 'Lux_Star', name: 'Lux Guardiana Estelar', rarity: 'Épico', weight: 8, img: 'Lux_6' },
+  { id: 'Akali_KDA', name: 'Akali K/DA', rarity: 'Épico', weight: 8, img: 'Akali_14' },
+  { id: 'Ahri_KDA', name: 'Ahri K/DA', rarity: 'Épico', weight: 8, img: 'Ahri_14' },
+  { id: 'Seraphine_KDA', name: 'Seraphine K/DA All Out', rarity: 'Épico', weight: 8, img: 'Seraphine_1' },
+
+  // --- RAROS (Peso 20) ---
+  { id: 'Lux_Cosmic', name: 'Lux Cósmica', rarity: 'Raro', weight: 20, img: 'Lux_15' },
+  { id: 'Lee_God', name: 'Lee Sin Puño de Dios', rarity: 'Raro', weight: 20, img: 'LeeSin_11' },
+  { id: 'Ezreal_Academia', name: 'Ezreal Academia de Combate', rarity: 'Raro', weight: 20, img: 'Ezreal_18' },
+  { id: 'Lee_Muay', name: 'Muay Thai Lee Sin', rarity: 'Raro', weight: 20, img: 'LeeSin_4' },
+  { id: 'Yasuo_High', name: 'Yasuo Solo ante el Peligro', rarity: 'Raro', weight: 20, img: 'Yasuo_1' },
+  { id: 'Jayce_Academia', name: 'Jayce Academia de Combate', rarity: 'Raro', weight: 20, img: 'Jayce_4' },
+  { id: 'Thresh_Blood', name: 'Thresh Luna de Sangre', rarity: 'Raro', weight: 20, img: 'Thresh_4' },
+  { id: 'Graves_Pool', name: 'Pool Party Graves', rarity: 'Raro', weight: 20, img: 'Graves_6' },
+  { id: 'Ezreal_Base_Skin', name: 'Ezreal de Notthingham', rarity: 'Raro', weight: 20, img: 'Ezreal_1' },
+  { id: 'COINS_250', name: 'Cofre de 250 Coins', rarity: 'Raro', weight: 15, type: 'coins', amount: 250 },
+
+  // --- COMUNES (Peso 70) ---
+  { id: 'Naafiri', name: 'Naafiri', rarity: 'Común', weight: 70, img: 'Naafiri_0' },
   { id: 'Aatrox', name: 'Aatrox', rarity: 'Común', weight: 70, img: 'Aatrox_0' },
   { id: 'Yasuo', name: 'Yasuo', rarity: 'Común', weight: 70, img: 'Yasuo_0' },
   { id: 'Zed', name: 'Zed', rarity: 'Común', weight: 70, img: 'Zed_0' },
-  { id: 'COINS_50', name: 'Bolsa de 50 Coins', rarity: 'Común', weight: 50, type: 'coins', amount: 50 },
-  { id: 'Lux', name: 'Lux Cosmic', rarity: 'Raro', weight: 20, img: 'Lux_15' },
-  { id: 'LeeSin', name: 'Lee Sin God Fist', rarity: 'Raro', weight: 20, img: 'LeeSin_11' },
-  { id: 'COINS_250', name: 'Cofre de 250 Coins', rarity: 'Raro', weight: 15, type: 'coins', amount: 250 },
-  { id: 'Jhin', name: 'Jhin Dark Star', rarity: 'Épico', weight: 8, img: 'Jhin_5' },
-  { id: 'Naafiri_Soul', name: 'Naafiri Soul Fighter', rarity: 'Épico', weight: 8, img: 'Naafiri_1' },
-  { id: 'COINS_1000', name: 'Tesoro de 1000 Coins', rarity: 'Legendario', weight: 2, type: 'coins', amount: 1000 },
-  { id: 'Elemental_Lux', name: 'Lux Elementalista', rarity: 'Legendario', weight: 2, img: 'Lux_7' },
-  { id: 'Golden_Naafiri', name: 'Naafiri Dorada (Exclusiva)', rarity: 'Legendario', weight: 2, img: 'Naafiri_0' },
-  // Agregados del perfil web para compatibilidad
-  { id: 'Garen', name: 'Garen', rarity: 'Común', weight: 0 },
-  { id: 'Ashe', name: 'Ashe', rarity: 'Común', weight: 0 },
-  { id: 'Lux_Base', name: 'Lux', rarity: 'Común', weight: 0 },
-  { id: 'MasterYi', name: 'Master Yi', rarity: 'Común', weight: 0 },
-  { id: 'Ezreal', name: 'Ezreal', rarity: 'Raro', weight: 0 },
-  { id: 'Vayne', name: 'Vayne', rarity: 'Épico', weight: 0 },
-  { id: 'Kaisa', name: 'Kai\'Sa', rarity: 'Épico', weight: 0 },
-  { id: 'Teemo', name: 'Teemo Satán', rarity: 'Legendario', weight: 0 }
+  { id: 'Garen', name: 'Garen', rarity: 'Común', weight: 70, img: 'Garen_0' },
+  { id: 'Ashe', name: 'Ashe', rarity: 'Común', weight: 70, img: 'Ashe_0' },
+  { id: 'Lux', name: 'Lux', rarity: 'Común', weight: 70, img: 'Lux_0' },
+  { id: 'MasterYi', name: 'Master Yi', rarity: 'Común', weight: 70, img: 'MasterYi_0' },
+  { id: 'Malphite', name: 'Malphite', rarity: 'Común', weight: 70, img: 'Malphite_0' },
+  { id: 'Amumu', name: 'Amumu', rarity: 'Común', weight: 70, img: 'Amumu_0' },
+  { id: 'Annie', name: 'Annie', rarity: 'Común', weight: 70, img: 'Annie_0' },
+  { id: 'COINS_50', name: 'Bolsa de 50 Coins', rarity: 'Común', weight: 50, type: 'coins', amount: 50 }
 ];
 
 
@@ -486,18 +511,7 @@ function initBot(db) {
         return msg.channel.send(`<@${msg.author.id}> ❌ No tienes suficientes coins. El tiro de Gachapon cuesta **${COST} 💰**.`);
       }
 
-      // Sistema de Pesos para Probabilidades
       const totalWeight = GACHA_ITEMS.reduce((sum, item) => sum + item.weight, 0);
-      
-      // Calcular porcentajes por rareza
-      const rarityWeights = {};
-      GACHA_ITEMS.forEach(item => {
-        rarityWeights[item.rarity] = (rarityWeights[item.rarity] || 0) + item.weight;
-      });
-      const probabilitiesStr = Object.entries(rarityWeights)
-        .map(([rarity, weight]) => `**${rarity}:** ${((weight / totalWeight) * 100).toFixed(1)}%`)
-        .join('  ·  ');
-
       let random = Math.random() * totalWeight;
       let selected = GACHA_ITEMS[0];
 
@@ -510,7 +524,9 @@ function initBot(db) {
       }
 
       // Guardar Recompensa
+      let finalBalance = userEco.coins - COST;
       if (selected.type === 'coins') {
+        finalBalance += selected.amount;
         await db.collection('economy').updateOne(
           { discordId: msg.author.id },
           { $inc: { coins: -COST + selected.amount } }
@@ -525,27 +541,19 @@ function initBot(db) {
         );
       }
 
-      const color = selected.rarity === 'Legendario' ? 0xf1c40f : selected.rarity === 'Épico' ? 0x9b59b6 : selected.rarity === 'Raro' ? 0x3498db : 0x95a5a6;
+      try {
+        const buffer = await generateGachaCard(selected, finalBalance);
+        const attachment = new AttachmentBuilder(buffer, { name: 'gacha.png' });
+        
+        let content = `<@${msg.author.id}> 🎰 **¡GACHAPON DE LA PERRERA!**`;
+        if (selected.rarity === 'Legendario') {
+          content += `\n🎊 ¡ATENCIÓN! **${msg.author.username}** consiguió algo **LEGENDARIO**! 🎊`;
+        }
 
-      // Probabilidades de monedas por separado
-      const coinItems = GACHA_ITEMS.filter(i => i.type === 'coins');
-      const coinsStr = coinItems.map(i => `**${i.name}:** ${((i.weight / totalWeight) * 100).toFixed(1)}%`).join('  ·  ');
-
-      const embedGacha = new EmbedBuilder()
-        .setTitle(`🎰 ¡GACHAPON DE LA PERRERA!`)
-        .setDescription(`¡Has obtenido **${selected.name}**!\n\n✨ Rareza: **${selected.rarity}**${selected.type === 'coins' ? `\n💰 ¡Has ganado **${selected.amount} coins**!` : ''}`)
-        .addFields(
-          { name: '📈 Probabilidades por Rareza', value: probabilitiesStr },
-          { name: '💰 Probabilidades de Monedas', value: coinsStr }
-        )
-        .setImage(selected.type === 'coins' ? 'https://static.wikia.nocookie.net/leagueoflegends/images/1/1b/Gold_icon.png' : `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${selected.img}.jpg`)
-        .setColor(color)
-        .setFooter({ text: `Gastaste ${COST} coins · Saldo restante: ${userEco.coins - COST + (selected.type === 'coins' ? selected.amount : 0)} 💰 · Naafiri Bot` });
-
-      msg.channel.send({ content: `<@${msg.author.id}>`,  embeds: [embedGacha] });
-
-      if (selected.rarity === 'Legendario') {
-        msg.channel.send(`🎊 ¡ATENCIÓN! **${msg.author.username}** acaba de conseguir un objeto **LEGENDARIO**: **${selected.name}**! 🎊`);
+        return msg.channel.send({ content, files: [attachment] });
+      } catch (e) {
+        console.error('[Gacha Image Error]', e);
+        return msg.channel.send(`<@${msg.author.id}> 🎰 ¡Has obtenido **${selected.name}** (${selected.rarity})! 💰 Saldo: ${finalBalance}`);
       }
     }
 
@@ -2142,6 +2150,85 @@ async function sendMonthlyHallOfFame(db, isMock = false) {
     console.error('[Hall of Fame Error]', e); 
     return false;
   }
+}
+
+async function generateGachaCard(selected, balance) {
+  const colorMap = {
+    'Legendario': '#f1c40f',
+    'Épico': '#9b59b6',
+    'Raro': '#3498db',
+    'Común': '#95a5a6'
+  };
+  const color = colorMap[selected.rarity] || '#ffffff';
+  
+  const imgUrl = selected.type === 'coins' 
+    ? 'https://static.wikia.nocookie.net/leagueoflegends/images/1/1b/Gold_icon.png' 
+    : `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${selected.img}.jpg`;
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { margin: 0; padding: 0; background: #000; font-family: 'Inter', sans-serif; width: 600px; height: 350px; overflow: hidden; }
+        .card { 
+          width: 600px; height: 350px; position: relative; 
+          background: url('${imgUrl}') center center; background-size: cover;
+          display: flex; flex-direction: column; justify-content: flex-end;
+        }
+        .overlay {
+          position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+          background: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.4) 100%);
+          border: 8px solid ${color}; box-sizing: border-box;
+        }
+        .content { position: relative; z-index: 10; padding: 30px; }
+        .rarity { 
+          display: inline-block; padding: 4px 12px; border-radius: 40px; 
+          background: ${color}; color: #000; font-weight: 900; font-size: 12px; 
+          text-transform: uppercase; margin-bottom: 10px; 
+        }
+        .name { font-size: 32px; font-weight: 900; color: #fff; margin: 0; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
+        .balance { font-size: 14px; color: rgba(255,255,255,0.6); }
+        .balance span { color: #f1c40f; font-weight: 700; }
+        .brand { font-size: 10px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 3px; }
+        
+        ${selected.rarity === 'Legendario' ? `
+        .overlay { animation: glow 2s infinite alternate; }
+        @keyframes glow {
+          from { box-shadow: inset 0 0 20px rgba(241,196,15,0.4), 0 0 20px rgba(241,196,15,0.4); }
+          to { box-shadow: inset 0 0 60px rgba(241,196,15,0.8), 0 0 40px rgba(241,196,15,0.6); }
+        }
+        ` : ''}
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <div class="overlay"></div>
+        <div class="content">
+          <div class="rarity">${selected.rarity}</div>
+          <h1 class="name">${selected.name}</h1>
+          <div class="footer">
+            <div class="balance">Saldo restante: <span>${balance} 💰</span></div>
+            <div class="brand">Gachapon La Perrera</div>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const browser = await puppeteer.launch({ 
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
+    args: ['--no-sandbox', '--disable-setuid-sandbox'] 
+  });
+  const page = await browser.newPage();
+  await page.setViewport({ width: 600, height: 350, deviceScaleFactor: 2 });
+  await page.setContent(htmlContent);
+  const buffer = await page.screenshot({ type: 'png' });
+  await browser.close();
+  return buffer;
 }
 
 async function notifyAdmin(message) {
