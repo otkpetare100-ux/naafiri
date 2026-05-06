@@ -1606,7 +1606,7 @@ const SKIN_THEMES = [
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ashe_12.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Kassadin_6.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Lux_15.jpg',
-      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/MasterYi_24.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/MasterYi_11.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Nidalee_27.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/XinZhao_13.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Lulu_26.jpg'
@@ -1661,10 +1661,11 @@ async function sendDailyMotivation(db) {
         { name: '💰 Botín Disponible', value: '`100 Naafiri Coins`', inline: true },
         { name: '⏱️ Disponibilidad', value: '`6 Horas`', inline: true }
       )
-      .setThumbnail('https://static.wikia.nocookie.net/leagueoflegends.com/images/1/1b/Season_2023_-_Master_1.png')
       .setColor(0xd4af37)
       .setTimestamp()
-      .setFooter({ text: 'Naafiri Bot • Premium Collector Edition', iconURL: client.user.displayAvatarURL() });
+      .setFooter({ text: 'Naafiri Bot • Premium Collector Edition' });
+
+    console.log(`[Motivation] Enviando notificación con splash: ${splash}`);
 
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
