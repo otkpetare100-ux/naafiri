@@ -586,6 +586,42 @@ function initBot(db) {
       }
     }
 
+    // --- COMANDOS DE ADMIN PARA PRUEBAS DE GACHAPON ---
+    if (command === 'admin_testgacha') {
+      if (!isAdmin(msg.author.id)) return;
+      const rarity = args[0];
+      const items = GACHA_ITEMS.filter(i => i.rarity.toLowerCase() === rarity?.toLowerCase());
+      if (items.length === 0) return msg.reply('❌ Rareza no encontrada. Usa: Común, Raro, Épico, Legendario');
+      
+      const selected = items[Math.floor(Math.random() * items.length)];
+      msg.channel.send('🧪 Generando carta de prueba...');
+      const buffer = await generateGachaCard(selected, 0);
+      const attachment = new AttachmentBuilder(buffer, { name: 'test.png' });
+      return msg.channel.send({ content: `🧪 **TEST GACHA:** ${selected.name} (${selected.rarity})`, files: [attachment] });
+    }
+
+    if (command === 'admin_testpro') {
+      if (!isAdmin(msg.author.id)) return;
+      const pros = GACHA_ITEMS.filter(i => i.type === 'pro');
+      const selected = pros[Math.floor(Math.random() * pros.length)];
+      msg.channel.send('🧪 Generando pro player de prueba...');
+      const buffer = await generateGachaCard(selected, 0);
+      const attachment = new AttachmentBuilder(buffer, { name: 'test.png' });
+      return msg.channel.send({ content: `🧪 **TEST PRO:** ${selected.name} (${selected.team})`, files: [attachment] });
+    }
+
+    if (command === 'admin_testitem') {
+      if (!isAdmin(msg.author.id)) return;
+      const itemId = args[0];
+      const selected = GACHA_ITEMS.find(i => i.id === itemId);
+      if (!selected) return msg.reply('❌ ID de item no encontrado.');
+      
+      msg.channel.send('🧪 Generando item específico...');
+      const buffer = await generateGachaCard(selected, 0);
+      const attachment = new AttachmentBuilder(buffer, { name: 'test.png' });
+      return msg.channel.send({ content: `🧪 **TEST ITEM:** ${selected.name}`, files: [attachment] });
+    }
+
     if (command === 'mochila' || command === 'inv') {
       const userEco = await db.collection('economy').findOne({ discordId: msg.author.id });
       if (!userEco || !userEco.inventory || userEco.inventory.length === 0) {
