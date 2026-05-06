@@ -2272,14 +2272,6 @@ async function generateGachaCard(selected, balance) {
           );
           z-index: 3;
         }
-        .cost-badge {
-          position: absolute; top: 15px; left: 15px;
-          background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px);
-          width: 45px; height: 45px; border-radius: 12px;
-          border: 2px solid ${color}; display: flex;
-          justify-content: center; align-items: center;
-          font-weight: 900; color: #fff; font-size: 20px; z-index: 10;
-        }
         .content-container {
           position: absolute; bottom: 30px; left: 20px; right: 20px;
           z-index: 10;
@@ -2316,7 +2308,6 @@ async function generateGachaCard(selected, balance) {
     </head>
     <body>
       <div class="card">
-        <div class="cost-badge">10</div>
         <div class="full-art"></div>
         <div class="inner-frame"></div>
         ${isPro ? `<img src="${imgUrl}" class="pro-photo">` : ''}
