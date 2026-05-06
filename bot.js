@@ -1099,26 +1099,28 @@ function initBot(db) {
               .setTitle('🐾 Guía de Comandos - LAN Tracker')
               .setDescription('¡Bienvenido a la perrera! Aquí tienes todo lo que puedes hacer:')
               .addFields(
-                { name: '👤 Perfil y Rango', value: '`!perfil [N#T]` - Mira tu rango.\n`!stats [N#T]` - Estadísticas.\n`!ladder` - Top 10 Jugadores.\n`!shame` - Muro de la vergüenza.\n`!web` - Tu perfil privado.' },
-                { name: '💰 Economía', value: '`!monedas` - Tu saldo.\n`!diario` - 100 coins gratis.\n`!pagar @u cant` - Enviar coins.\n`!top_ricos` - Top 10 Ricos.' },
-                { name: '🎮 Diversión y Colección', value: '`!ludopata` - Mira tus apuestas.\n`!gacha` - Nuevo campeón.\n`!mochila` - Tu colección.\n`!reroll` - Fusiona 3 repetidos.\n`!reciclar` - Desencanta repetidos.' }
+                { name: '👤 Perfil y Rango', value: '`!perfil [Nombre#TAG]` - Mira tu rango y racha.\n`!stats [Nombre#TAG]` - Estadísticas detalladas.\n`!ladder` - Top 10 Jugadores del servidor.\n`!shame` - Muro de la vergüenza 🤡.\n`!web` - Enlace a tu perfil web privado.' },
+                { name: '💰 Economía', value: '`!monedas` - Consulta tu saldo actual.\n`!diario` - Reclama tu bono diario (100 coins).\n`!pagar @usuario [cant]` - Envía coins a un amigo.\n`!top_ricos` - Ranking de millonarios.' },
+                { name: '🎮 Colección y Gachapon', value: '`!gacha` - Tira el Gachapon (10 coins) 🎰.\n`!mochila` - Mira tu colección de cartas.\n`!trade @usuario MiItem, SuItem` - Intercambia cartas 🤝.\n`!reroll [Rareza]` - Fusiona 3 repetidos para mejorar.\n`!reciclar` - Convierte repetidos en coins instantáneamente.' },
+                { name: '🎰 Apuestas', value: '`!ludopata` - Mira tu historial y winrate de apuestas.\n*(Para apostar, usa los botones que aparecen cuando alguien entra en partida)*' }
               )
               .setColor(0x576bce)
-              .setFooter({ text: 'Naafiri Bot' });
+              .setFooter({ text: 'Naafiri Bot · LAN Tracker' });
 
             await interaction.reply({ embeds: [helpEmbed], ephemeral: true });
           } else if (typeHelp === 'admin') {
             const adminEmbed = new EmbedBuilder()
-              .setTitle('🛠️ Panel de Administración')
+              .setTitle('🛠️ Panel de Administración - LAN Tracker')
               .addFields(
-                { name: '💰 Economía', value: '`!admin_dar @u cant`\n`!admin_quitar @u cant`\n`!admin_setcoins @u cant`\n`!admin_resetdiario @u`\n`!admin_resetall CONFIRMAR`' },
-                { name: '🎒 Items e Inventario', value: '`!admin_daritem @u id`\n`!admin_clearinv @u`' },
-                { name: '📡 Monitoreo y Dashboard', value: '`!admin_scan` - Scan en vivo.\n`!admin_check N#T` - Forzar notif.\n`!admin_vinculos` - Auditoría y Pings.\n`!admin_cancelarapuestas N#T`' },
-                { name: '🎭 Sistema y Diagnóstico', value: '`!admin_syncroles` - Sincronizar roles.\n`!admin_stats` - Estadísticas.\n`!admin_debug_key` - Riot API.\n`!admin_purge [n]` - Borrar mensajes.' },
-                { name: '🧪 Comandos de Prueba (Manuales)', value: '`!admin_testdiario` - Recordatorio 12pm\n`!admin_testsummary` - Scoreboard 6/10pm\n`!admin_testretos` - Imagen de Retos\n`!admin_testhall` - Salón de la Fama Mensual' }
+                { name: '💰 Gestión de Economía', value: '`!admin_dar @u [cant]`\n`!admin_quitar @u [cant]`\n`!admin_setcoins @u [cant]`\n`!admin_resetdiario @u`\n`!admin_resetall CONFIRMAR`' },
+                { name: '🎒 Gestión de Inventario', value: '`!admin_daritem @u [id]`\n`!admin_clearinv @u`' },
+                { name: '📡 Monitoreo y Auditoría', value: '`!admin_scan` - Forzar escaneo en vivo.\n`!admin_vinculos` - Ver quién no se ha vinculado.\n`!admin_cancelarapuestas N#T`' },
+                { name: '🎭 Sistema y Herramientas', value: '`!admin_syncroles` - Sincronizar roles de Discord.\n`!admin_debug_key` - Estado API de Riot.\n`!admin_purge [n]` - Borrar mensajes del canal.' },
+                { name: '🧪 Pruebas Premium (Collector Edition)', value: '`!admin_testitem [Nombre]` - Probar una carta específica.\n`!admin_testgacha [Rareza]` - Probar diseño por rareza.\n`!admin_testpro` - Probar diseño de Pro Player aleatorio.' },
+                { name: '📅 Pruebas de Notificaciones', value: '`!admin_testdiario` - Recordatorio 12pm.\n`!admin_testsummary` - Scoreboard diario.\n`!admin_testretos` - Imagen de Retos.\n`!admin_testhall` - Salón de la Fama.' }
               )
               .setColor(0xd93f3f)
-              .setFooter({ text: 'Naafiri Admin' });
+              .setFooter({ text: 'Naafiri Admin Console' });
 
             await interaction.reply({ embeds: [adminEmbed], ephemeral: true });
           }
