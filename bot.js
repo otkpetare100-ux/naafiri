@@ -323,12 +323,70 @@ function initBot(db) {
     }
 
     if (command === 'vincular') {
-      const slug = args.join(' '); // Soporta nombres con espacios
-      if (!slug) return msg.channel.send(`<@${msg.author.id}> Uso: \`!vincular Nombre#TAG\``);
-      const acc = await findAccountBySlug(slug);
-      if (!acc) return msg.channel.send(`<@${msg.author.id}> ❌ No encontré esa cuenta en el dashboard.`);
+      const slug = args.join(' ');
+      if (!slug || !slug.includes('#')) return msg.channel.send(`<@${msg.author.id}> ❌ Uso: \`!vincular Nombre#TAG\``);
+      
+      let acc = await findAccountBySlug(slug);
+      let isNew = false;
 
-      const res = await db.collection('accounts').updateOne(
+      if (!acc) {
+        // INTENTAR REGISTRO AUTOMÁTICO DESDE RIOT
+        const [name, tag] = slug.split('#').map(s => s.trim());
+        const RIOT_API_KEY = process.env.RIOT_API_KEY;
+        
+        if (!RIOT_API_KEY) return msg.channel.send('❌ El sistema no tiene configurada la Riot API Key.');
+
+        const statusMsg = await msg.channel.send(`🔍 Buscando a **${name}#${tag}** en los servidores de Riot...`);
+
+        try {
+          // 1. Obtener PUUID (Americas)
+          const accountUrl = `https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(name)}/${encodeURIComponent(tag)}?api_key=${RIOT_API_KEY}`;
+          const accountRes = await fetch(accountUrl);
+          
+          if (!accountRes.ok) {
+            statusMsg.delete().catch(() => {});
+            return msg.channel.send(`<@${msg.author.id}> ❌ No pude encontrar a **${name}#${tag}** en Riot. Revisa si el nombre y tag son correctos.`);
+          }
+
+          const accountData = await accountRes.json();
+          const puuid = accountData.puuid;
+
+          // 2. Obtener Summoner Data (LA1)
+          const summonerUrl = `https://la1.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${puuid}?api_key=${RIOT_API_KEY}`;
+          const summonerRes = await fetch(summonerUrl);
+          const summonerData = summonerRes.ok ? await summonerRes.json() : {};
+
+          // 3. Obtener Rango inicial (LA1)
+          const leagueUrl = `https://la1.api.riotgames.com/lol/league/v4/entries/by-puuid/${puuid}?api_key=${RIOT_API_KEY}`;
+          const leagueRes = await fetch(leagueUrl);
+          const leagues = leagueRes.ok ? await leagueRes.json() : [];
+          const soloQ = leagues.find(l => l.queueType === 'RANKED_SOLO_5x5') || null;
+
+          // 4. Crear cuenta en DB
+          acc = {
+            puuid: puuid,
+            gameName: accountData.gameName,
+            tagLine: accountData.tagLine,
+            summonerId: summonerData.id || '',
+            profileIconId: summonerData.profileIconId || 0,
+            summonerLevel: summonerData.summonerLevel || 0,
+            soloQ: soloQ,
+            addedAt: new Date(),
+            snapshots: {}
+          };
+
+          await db.collection('accounts').insertOne(acc);
+          isNew = true;
+          statusMsg.delete().catch(() => {});
+        } catch (err) {
+          console.error('[Vincular/Riot Error]', err);
+          statusMsg.delete().catch(() => {});
+          return msg.channel.send(`<@${msg.author.id}> ❌ Error técnico al consultar Riot API.`);
+        }
+      }
+
+      // VINCULAR
+      await db.collection('accounts').updateOne(
         { puuid: acc.puuid },
         { $set: { discordId: msg.author.id } }
       );
@@ -339,11 +397,8 @@ function initBot(db) {
         { upsert: true }
       );
 
-      if (res.modifiedCount > 0 || res.upsertedCount > 0) {
-        msg.channel.send(`<@${msg.author.id}> ✅ ¡Cuenta vinculada! Ahora eres oficialmente **${acc.gameName}#${acc.tagLine}**.`);
-      } else {
-        msg.channel.send(`<@${msg.author.id}> ❌ No encontré esa cuenta en el dashboard.`);
-      }
+      const welcomePrefix = isNew ? '✨ ¡Bienvenido a la perrera! Nueva cuenta registrada y vinculada:' : '✅ ¡Cuenta vinculada!';
+      msg.channel.send(`<@${msg.author.id}> ${welcomePrefix} **${acc.gameName}#${acc.tagLine}**.`);
     }
 
     if (command === 'monedas' || command === 'bal') {
