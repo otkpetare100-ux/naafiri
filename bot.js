@@ -569,7 +569,7 @@ function initBot(db) {
         
         let content = `<@${msg.author.id}> 🎰 **¡GACHAPON DE LA PERRERA!**\n💰 Saldo restante: **${finalBalance} Naafiri Coins**`;
         if (selected.rarity === 'Legendario') {
-          content += `\n🎊 ¡ATENCIÓN! **${msg.author.username}** consiguió algo **LEGENDARIO**! 🎊`;
+          content = `@everyone 🎊 ¡ATENCIÓN! **${msg.author.username}** consiguió un objeto **LEGENDARIO**! 🎊\n💰 Saldo: **${finalBalance}**`;
         }
 
         return msg.channel.send({ content, files: [attachment] });
@@ -2196,64 +2196,76 @@ async function generateGachaCard(selected, balance) {
     <head>
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { margin: 0; padding: 0; background: #000; font-family: 'Inter', sans-serif; width: 600px; height: 350px; overflow: hidden; }
+        body { margin: 0; padding: 0; background: transparent; font-family: 'Inter', sans-serif; width: 350px; height: 500px; display: flex; justify-content: center; align-items: center; }
         .card { 
-          width: 600px; height: 350px; position: relative; 
-          background: ${isPro ? `linear-gradient(45deg, #050505, #1a1a1a)` : `url('${imgUrl}') center center`}; 
-          background-size: cover;
-          display: flex; flex-direction: column; justify-content: flex-end;
-          overflow: hidden;
+          width: 320px; height: 460px; position: relative; 
+          background: #2a1b12; border-radius: 30px; 
+          border: 4px solid #1a0f0a; overflow: hidden;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
-        ${isPro ? `
-        .pro-img {
-          position: absolute; right: -20px; bottom: 0;
-          height: 110%; z-index: 1;
-          filter: drop-shadow(0 0 20px rgba(0,0,0,0.8));
+        .portrait-container {
+          position: absolute; top: 30px; left: 35px;
+          width: 250px; height: 280px;
+          clip-path: ellipse(50% 50% at 50% 50%);
+          border: 8px solid #d4af37; box-sizing: border-box;
+          z-index: 1; background: #000;
         }
-        .team-logo {
-          position: absolute; top: 30px; right: 30px;
-          font-size: 14px; font-weight: 900; color: rgba(255,255,255,0.2);
-          text-transform: uppercase; letter-spacing: 5px; z-index: 0;
+        .portrait-img {
+          width: 100%; height: 100%; object-fit: cover;
+          ${isPro ? 'object-position: top center;' : ''}
         }
-        ` : ''}
-        .overlay {
-          position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-          background: ${isPro ? `linear-gradient(90deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 40%, rgba(0,0,0,0) 100%)` : `linear-gradient(0deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.4) 100%)`};
-          border: 8px solid ${color}; box-sizing: border-box;
-          z-index: 2;
+        .mana-crystal {
+          position: absolute; top: -5px; left: -5px;
+          width: 70px; height: 70px; background: radial-gradient(circle, #3498db, #2980b9);
+          border-radius: 50%; border: 3px solid #fff;
+          display: flex; justify-content: center; align-items: center;
+          font-size: 32px; font-weight: 900; color: #fff; z-index: 10;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
-        .content { position: relative; z-index: 10; padding: 30px; max-width: 80%; }
-        .rarity { 
-          display: inline-block; padding: 4px 12px; border-radius: 40px; 
-          background: ${color}; color: #000; font-weight: 900; font-size: 12px; 
-          text-transform: uppercase; margin-bottom: 10px; 
+        .name-banner {
+          position: absolute; top: 270px; left: 10px; width: 300px;
+          background: #1a0f0a; color: #fff; text-align: center;
+          padding: 8px 0; font-size: 18px; font-weight: 900;
+          text-transform: uppercase; border: 3px solid #d4af37;
+          border-radius: 5px; z-index: 5; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
-        .name { font-size: ${isPro ? '42px' : '32px'}; font-weight: 900; color: #fff; margin: 0; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .team-name { font-size: 18px; color: ${color}; font-weight: 700; margin-top: 5px; text-transform: uppercase; letter-spacing: 2px; }
-        .footer { display: flex; justify-content: flex-end; align-items: center; margin-top: 20px; }
-        .brand { font-size: 10px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 3px; font-weight: 700; }
+        .rarity-gem {
+          position: absolute; top: 305px; left: 145px;
+          width: 30px; height: 40px; background: ${color};
+          clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+          border: 2px solid #fff; z-index: 6;
+        }
+        .description-box {
+          position: absolute; bottom: 20px; left: 30px; width: 260px; height: 110px;
+          background: #f3e5ab; border-radius: 10px; border: 4px solid #8b4513;
+          padding: 10px; box-sizing: border-box; display: flex;
+          flex-direction: column; justify-content: center; align-items: center;
+          text-align: center; color: #2a1b12; z-index: 2;
+        }
+        .rarity-label { font-weight: 900; font-size: 14px; text-transform: uppercase; margin-bottom: 5px; color: ${color}; filter: brightness(0.6); }
+        .type-label { font-weight: 700; font-size: 11px; opacity: 0.7; }
         
         ${selected.rarity === 'Legendario' ? `
-        .overlay { animation: glow 2s infinite alternate; }
-        @keyframes glow {
-          from { box-shadow: inset 0 0 20px rgba(241,196,15,0.4), 0 0 20px rgba(241,196,15,0.4); }
-          to { box-shadow: inset 0 0 60px rgba(241,196,15,0.8), 0 0 40px rgba(241,196,15,0.6); }
+        .card { animation: legendary-glow 2s infinite alternate; }
+        @keyframes legendary-glow {
+          from { border-color: #d4af37; box-shadow: 0 0 20px rgba(212,175,55,0.4); }
+          to { border-color: #fff; box-shadow: 0 0 50px rgba(212,175,55,0.8); }
         }
         ` : ''}
       </style>
     </head>
     <body>
       <div class="card">
-        ${isPro ? `<div class="team-logo">${selected.team}</div>` : ''}
-        ${isPro ? `<img src="${imgUrl}" class="pro-img">` : ''}
-        <div class="overlay"></div>
-        <div class="content">
-          <div class="rarity">${isPro ? 'PRO PLAYER' : selected.rarity}</div>
-          <h1 class="name">${selected.name}</h1>
-          ${isPro ? `<div class="team-name">${selected.team} · ${selected.rarity}</div>` : ''}
-          <div class="footer">
-            <div class="brand">Gachapon La Perrera</div>
-          </div>
+        <div class="mana-crystal">10</div>
+        <div class="portrait-container">
+          <img src="${imgUrl}" class="portrait-img">
+        </div>
+        <div class="name-banner">${selected.name}</div>
+        <div class="rarity-gem"></div>
+        <div class="description-box">
+          <div class="rarity-label">${selected.rarity}</div>
+          <div class="type-label">${isPro ? 'ESPORTS LEGEND' : 'CHAMPION CARD'}</div>
+          ${isPro ? `<div style="font-weight: 900; font-size: 14px; margin-top: 5px;">${selected.team}</div>` : ''}
         </div>
       </div>
     </body>
@@ -2265,11 +2277,10 @@ async function generateGachaCard(selected, balance) {
     args: ['--no-sandbox', '--disable-setuid-sandbox'] 
   });
   const page = await browser.newPage();
-  // Establecer User-Agent para evitar bloqueos de wikia
   await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-  await page.setViewport({ width: 600, height: 350, deviceScaleFactor: 2 });
+  await page.setViewport({ width: 350, height: 500, deviceScaleFactor: 2 });
   await page.setContent(htmlContent);
-  const buffer = await page.screenshot({ type: 'png' });
+  const buffer = await page.screenshot({ type: 'png', omitBackground: true });
   await browser.close();
   return buffer;
 }
