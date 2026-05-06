@@ -978,7 +978,8 @@ function initBot(db) {
 
       if (command === 'admin_testhall') {
         if (!isAdmin(msg.author.id)) return;
-        await sendMonthlyHallOfFame(dbInstance);
+        const sent = await sendMonthlyHallOfFame(dbInstance);
+        if (!sent) return msg.channel.send('❌ No hay retos registrados del mes pasado para generar el Hall of Fame.');
         return;
       }
     }
@@ -2075,7 +2076,7 @@ async function sendMonthlyHallOfFame(db) {
       timestamp: { $gte: lastMonth, $lte: endOfLastMonth }
     }).toArray();
 
-    if (activities.length === 0) return;
+    if (activities.length === 0) return false;
 
     const stats = {};
     activities.forEach(a => {
@@ -2125,7 +2126,11 @@ async function sendMonthlyHallOfFame(db) {
       .setColor(0xd4af37);
 
     await channel.send({ embeds: [embed], files: [attachment] });
-  } catch (e) { console.error('[Hall of Fame Error]', e); }
+    return true;
+  } catch (e) { 
+    console.error('[Hall of Fame Error]', e); 
+    return false;
+  }
 }
 
 async function notifyAdmin(message) {
