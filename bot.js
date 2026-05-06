@@ -2215,8 +2215,8 @@ async function generateGachaCard(selected, balance) {
           width: 320px; height: 460px; position: relative; 
           background: #000; border-radius: 24px; 
           overflow: hidden;
-          box-shadow: 0 20px 40px rgba(0,0,0,0.8);
-          border: 2px solid rgba(255,255,255,0.1);
+          box-shadow: 0 10px 40px rgba(0,0,0,0.8), 0 0 20px ${color}44;
+          border: 2px solid ${color}88;
         }
         .full-art {
           position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -2255,7 +2255,12 @@ async function generateGachaCard(selected, balance) {
         }
         .bottom-gradient {
           position: absolute; bottom: 0; left: 0; width: 100%; height: 60%;
-          background: linear-gradient(0deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 50%, transparent 100%);
+          background: linear-gradient(0deg, 
+            rgba(0,0,0,0.95) 0%, 
+            ${color}22 30%,
+            rgba(0,0,0,0.5) 60%, 
+            transparent 100%
+          );
           z-index: 3;
         }
         .cost-badge {
@@ -2279,7 +2284,7 @@ async function generateGachaCard(selected, balance) {
         .name {
           font-size: 32px; font-weight: 900; color: #fff;
           margin: 0; line-height: 1; text-transform: uppercase;
-          text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+          text-shadow: 0 4px 10px rgba(0,0,0,0.5), 0 0 10px ${color}aa;
         }
         .info-row {
           display: flex; justify-content: space-between; align-items: flex-end;
@@ -2291,8 +2296,12 @@ async function generateGachaCard(selected, balance) {
         .brand { font-size: 8px; font-weight: 700; color: rgba(255,255,255,0.2); text-transform: uppercase; letter-spacing: 2px; }
 
         ${selected.rarity === 'Legendario' ? `
-        .card { border-color: ${color}; box-shadow: 0 0 30px rgba(241,196,15,0.3); }
-        .holographic-sheen { opacity: 0.8; animation-duration: 2s; }
+        .card { border-color: ${color}; box-shadow: 0 0 40px ${color}66, inset 0 0 20px ${color}33; animation: legendary-card-pulse 2s infinite alternate; }
+        @keyframes legendary-card-pulse {
+          from { box-shadow: 0 0 20px ${color}44; }
+          to { box-shadow: 0 0 50px ${color}88; }
+        }
+        .holographic-sheen { opacity: 0.9; animation-duration: 2.5s; background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.2) 45%, #fff 50%, rgba(255,255,255,0.2) 55%, transparent 70%); }
         ` : ''}
       </style>
     </head>
