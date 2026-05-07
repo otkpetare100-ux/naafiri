@@ -1154,7 +1154,7 @@ function initBot(db) {
               .setTitle('🐾 Guía de Comandos - LAN Tracker')
               .setDescription('¡Bienvenido a la perrera! Aquí tienes todo lo que puedes hacer:')
               .addFields(
-                { name: '👤 Perfil y Rango', value: '`!perfil [Nombre#TAG]` - Mira tu rango y racha.\n`!stats [Nombre#TAG]` - Estadísticas detalladas.\n`!ladder` - Top 10 Jugadores del servidor.\n`!shame` - Muro de la vergüenza 🤡.\n`!web` - Enlace a tu perfil web privado.' },
+                { name: '👤 Perfil y Rango', value: '`!perfil [Nombre#TAG]` - Mira tu rango y racha.\n`!ladder` - Top 10 Jugadores del servidor.\n`!shame` - Muro de la vergüenza 🤡.\n`!web` - Enlace a tu perfil web privado.' },
                 { name: '💰 Economía', value: '`!monedas` - Consulta tu saldo actual.\n`!diario` - Reclama tu bono diario (100 coins).\n`!pagar @usuario [cant]` - Envía coins a un amigo.\n`!top_ricos` - Ranking de millonarios.' },
                 { name: '🎮 Colección y Gachapon', value: '`!gacha` - Tira el Gachapon (10 coins) 🎰.\n`!mochila` - Mira tu colección de cartas.\n`!trade @usuario MiItem, SuItem` - Intercambia cartas 🤝.\n`!reroll [Rareza]` - Fusiona 3 repetidos para mejorar.\n`!reciclar` - Convierte repetidos en coins instantáneamente.' },
                 { name: '🎰 Apuestas', value: '`!ludopata` - Mira tu historial y winrate de apuestas.\n*(Para apostar, usa los botones que aparecen cuando alguien entra en partida)*' }
