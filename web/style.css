@@ -1,0 +1,233 @@
+:root {
+  --bg-dark: #0a0a0c;
+  --bg-card: rgba(255, 255, 255, 0.03);
+  --gold-primary: #d4af37;
+  --gold-secondary: #aa8a2e;
+  --text-main: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.6);
+  --accent-green: #4ade80;
+  --glass-border: rgba(212, 175, 55, 0.15);
+  --font-family: 'Outfit', sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  font-family: var(--font-family);
+  min-height: 100vh;
+  background-image: 
+    radial-gradient(circle at 20% 20%, rgba(212, 175, 55, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(212, 175, 55, 0.03) 0%, transparent 40%);
+  background-attachment: fixed;
+}
+
+#app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Header Styles */
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4rem;
+}
+
+.logo {
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: 0.2rem;
+}
+
+.gold-text {
+  color: var(--gold-primary);
+}
+
+.search-container {
+  display: flex;
+  gap: 1rem;
+}
+
+input {
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  padding: 0.8rem 1.5rem;
+  border-radius: 50px;
+  color: white;
+  width: 300px;
+  font-family: inherit;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--gold-primary);
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+}
+
+button {
+  background: var(--gold-primary);
+  color: #000;
+  border: none;
+  padding: 0.8rem 2rem;
+  border-radius: 50px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background: var(--gold-secondary);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+}
+
+/* Section Header */
+.section-header {
+  margin-bottom: 2.5rem;
+}
+
+h1 {
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5rem;
+  color: var(--text-muted);
+  font-weight: 300;
+  margin-bottom: 0.5rem;
+}
+
+.header-line {
+  height: 1px;
+  background: linear-gradient(90deg, var(--gold-primary) 0%, transparent 100%);
+  width: 100%;
+  opacity: 0.3;
+}
+
+/* Ladder Card Styles */
+.ladder-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.player-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 1.5rem 2.5rem;
+  display: grid;
+  grid-template-columns: 50px 80px 1fr 120px 150px;
+  align-items: center;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: slideIn 0.5s ease forwards;
+}
+
+.player-card:hover {
+  border-color: var(--gold-primary);
+  background: rgba(255, 255, 255, 0.06);
+  transform: scale(1.01) translateX(10px);
+}
+
+.rank-number {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--gold-primary);
+  opacity: 0.8;
+}
+
+.player-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid var(--gold-primary);
+  padding: 3px;
+  object-fit: cover;
+}
+
+.player-info {
+  padding-left: 1rem;
+}
+
+.player-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tag {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent-green);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--accent-green);
+}
+
+.rank-emblem {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+}
+
+.stats-container {
+  text-align: right;
+}
+
+.lp-text {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--gold-primary);
+}
+
+.wr-text {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+
+.loading {
+  text-align: center;
+  padding: 5rem;
+  color: var(--gold-primary);
+  font-weight: 600;
+  letter-spacing: 0.2rem;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse {
+  0% { opacity: 0.4; }
+  50% { opacity: 1; }
+  100% { opacity: 0.4; }
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .player-card {
+    grid-template-columns: 40px 60px 1fr 80px 100px;
+    padding: 1rem;
+  }
+  .player-avatar { width: 45px; height: 45px; }
+  .rank-emblem { width: 50px; height: 50px; }
+  input { width: 200px; }
+}
