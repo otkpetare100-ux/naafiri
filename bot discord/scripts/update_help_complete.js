@@ -1,5 +1,5 @@
 const fs = require('fs');
-const path = 'c:/Users/Nanami/Desktop/s/bot.js';
+const path = 'c:/Users/Nanami/Desktop/s/bot discord/bot.js';
 let content = fs.readFileSync(path, 'utf8');
 
 const updatedHelp = `        .addFields(

@@ -5,7 +5,7 @@ const path       = require('path');
 const { MongoClient } = require('mongodb');
 
 try { require('dotenv').config(); } catch(e) {}
-const { initBot, notifyRankChange, notifyLiveGame, sendDailySummary, sendDailyMotivation, sendChallengeReminder, sendMonthlyHallOfFame, notifyBetResults, notifyRemake, notifyChallengeComplete, GACHA_ITEMS } = require('./bot.js');
+const { initBot, notifyRankChange, notifyLiveGame, sendDailySummary, sendDailyMotivation, sendChallengeReminder, sendMonthlyHallOfFame, notifyBetResults, notifyRemake, notifyChallengeComplete, GACHA_ITEMS } = require('./bot discord/bot.js');
 
 // ---- Configuración y Variables Globales ----
 let DDRAGON_VERSION = '15.8.1'; 

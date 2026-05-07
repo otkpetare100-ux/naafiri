@@ -1802,10 +1802,10 @@ async function sendDailySummary(db) {
 
   let bgBase64 = '';
   const possiblePaths = [
-    path.join(__dirname, 'public', 'pic', 'bg.jpg'),
-    path.join(__dirname, 'public', 'pic', 'bg.png'),
-    path.join(__dirname, 'public', 'bg.jpg'),
-    path.join(__dirname, 'public', 'bg.png'),
+    path.join(__dirname, '..', 'public', 'pic', 'bg.jpg'),
+    path.join(__dirname, '..', 'public', 'pic', 'bg.png'),
+    path.join(__dirname, '..', 'public', 'bg.jpg'),
+    path.join(__dirname, '..', 'public', 'bg.png'),
     path.join(process.cwd(), 'public', 'pic', 'bg.jpg'),
     path.join(process.cwd(), 'public', 'pic', 'bg.png'),
     path.join(process.cwd(), 'public', 'bg.jpg'),
@@ -2358,7 +2358,7 @@ async function generateGachaCard(selected, balance) {
         : `https://ddragon.leagueoflegends.com/cdn/img/champion/centered/${selected.img}.jpg`);
 
   // SISTEMA DE CACHÉ LOCAL EN public/pic/gacha
-  const picDir = path.join(__dirname, 'public', 'pic', 'gacha');
+  const picDir = path.join(__dirname, '..', 'public', 'pic', 'gacha');
   try {
     if (!fs.existsSync(picDir)) {
       console.log(`[Gacha] Creando directorio de caché: ${picDir}`);
