@@ -1794,3 +1794,77 @@ body {
 .history-btn:active {
   transform: translateY(0) scale(0.96);
 }
+
+/* --- Historial de Partidas Premium (Mini) --- */
+.match-mini-row {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.2s ease;
+  margin-bottom: 8px;
+}
+
+.match-mini-row:hover {
+  transform: translateX(4px);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.match-mini-row.win { border-left: 4px solid #4a90e2; }
+.match-mini-row.loss { border-left: 4px solid #d93f3f; }
+
+.match-main-info {
+  padding: 10px 15px;
+  flex: 1;
+}
+
+.match-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.match-type { font-size: 0.7rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; }
+.match-res { font-size: 0.75rem; font-weight: 800; }
+.win .match-res { color: #4a90e2; }
+.loss .match-res { color: #d93f3f; }
+
+.match-details {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.match-champ-wrap { position: relative; }
+.match-champ-avatar { width: 45px; height: 45px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.1); }
+.match-champ-level {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  background: #000;
+  color: #fff;
+  font-size: 0.6rem;
+  padding: 1px 4px;
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.match-stats-wrap { min-width: 80px; }
+.match-kda-line { font-size: 0.9rem; font-weight: 700; color: #fff; }
+.match-kda-line .k { color: #fff; }
+.match-kda-line .d { color: #d93f3f; }
+.match-kda-line .a { color: #aaa; }
+.match-meta { font-size: 0.7rem; color: #888; margin-top: 2px; }
+
+.match-items-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 22px);
+  gap: 3px;
+  margin-left: auto;
+}
+
+.match-item-icon { width: 22px; height: 22px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); }
+.match-item-empty { width: 22px; height: 22px; background: rgba(0,0,0,0.2); border-radius: 4px; }
+

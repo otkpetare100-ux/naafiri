@@ -73,6 +73,16 @@ async function getRankedEntriesBySummonerId(summonerId) {
   return riotFetch(url);
 }
 
+async function getMatchIds(puuid, count = 5) {
+  const url = `${ENDPOINTS.AMERICAS}/lol/match/v5/matches/by-puuid/${puuid}/ids?start=0&count=${count}`;
+  return riotFetch(url);
+}
+
+async function getMatch(matchId) {
+  const url = `${ENDPOINTS.AMERICAS}/lol/match/v5/matches/${matchId}`;
+  return riotFetch(url);
+}
+
 async function getRankedEntriesByPuuid(puuid) {
   const url = `${ENDPOINTS.LAN}/lol/league/v4/entries/by-puuid/${puuid}`;
   return riotFetch(url);

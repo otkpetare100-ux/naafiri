@@ -392,8 +392,9 @@ window.openPlayerModal = function(puuid, event) {
   document.body.classList.add('modal-open');
   requestAnimationFrame(() => modal.classList.add('player-modal--open'));
 
-  // Cargar historial de rangos asincrónicamente
+  // Cargar historial de rangos y partidas asincrónicamente
   loadRankHistoryUI(puuid);
+  loadMatchHistoryUI(puuid);
 
   const escHandler = (e) => {
     if (e.key === 'Escape') {
@@ -441,8 +442,15 @@ function buildPlayerModalHTML(acc) {
         
         <div class="rank-history-section" style="width: 100%; margin-top: 20px;">
           <div style="color:var(--gold-primary); margin-bottom:10px; text-transform:uppercase; font-size:0.8rem; letter-spacing:1px; font-weight:800;">Historial de Divisiones</div>
-          <div id="rank-history-${acc.puuid}" class="rank-history-container" style="background: rgba(0,0,0,0.3); border-radius:12px; padding:15px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 30px;">
+          <div id="rank-history-${acc.puuid}" class="rank-history-container" style="background: rgba(0,0,0,0.3); border-radius:12px; padding:15px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px;">
             <div class="empty-stats">Cargando historial...</div>
+          </div>
+        </div>
+
+        <div class="match-history-section" style="width: 100%; margin-top: 20px;">
+          <div style="color:var(--gold-primary); margin-bottom:10px; text-transform:uppercase; font-size:0.8rem; letter-spacing:1px; font-weight:800;">Últimas 5 Partidas</div>
+          <div id="match-history-${acc.puuid}" class="match-history-container" style="display: flex; flex-direction: column; gap: 8px;">
+            <div class="empty-stats">Buscando partidas...</div>
           </div>
         </div>
       </div>
