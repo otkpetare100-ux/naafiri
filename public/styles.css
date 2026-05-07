@@ -1762,31 +1762,32 @@ body {
   }
 }
 
-/* --- Botón Historial Premium --- */
+/* --- Botón Historial Premium (Dorado Sólido) --- */
 .history-btn {
-  background: rgba(200, 155, 60, 0.08);
-  border: 1px solid rgba(200, 155, 60, 0.2);
-  color: var(--gold-primary);
-  padding: 6px 14px;
+  background: var(--gold-primary);
+  border: 1px solid var(--gold-primary);
+  color: #000;
+  padding: 6px 16px;
   border-radius: 8px;
   cursor: pointer;
   font-size: 0.72rem;
-  font-weight: 800;
+  font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 1px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   font-family: var(--font-title);
   margin-right: 5px;
+  box-shadow: 0 4px 10px rgba(200, 155, 60, 0.2);
 }
 
 .history-btn:hover {
-  background: var(--gold-primary);
+  background: #fff;
   color: #000;
-  border-color: var(--gold-primary);
-  box-shadow: 0 0 20px rgba(200, 155, 60, 0.35);
+  border-color: #fff;
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.4);
   transform: translateY(-2px);
 }
 
