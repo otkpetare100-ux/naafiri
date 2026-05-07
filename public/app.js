@@ -218,18 +218,12 @@ async function handleRemoveAccount(puuid) {
 if (accountsGrid) {
   accountsGrid.addEventListener('click', async (e) => {
     const refreshBtn = e.target.closest('.refresh-btn');
-    const noteBtn    = e.target.closest('.note-btn');
     const removeBtn  = e.target.closest('.remove-btn');
     const row        = e.target.closest('.scoreboard-row');
 
     if (refreshBtn) {
       e.preventDefault(); e.stopPropagation();
       handleRefresh(refreshBtn.dataset.puuid);
-      return;
-    }
-    if (noteBtn) {
-      e.preventDefault(); e.stopPropagation();
-      if (typeof openNoteModal === 'function') openNoteModal(noteBtn.dataset.puuid);
       return;
     }
     if (removeBtn) {
@@ -382,33 +376,5 @@ async function saveRankHistoryIfNeeded(acc, newSoloQ, prevSoloQ) {
       streak: acc.streak || 0
     };
     await postRankHistory(entry);
-  }
-}
-
-/* ---- Notas por Cuenta ---- */
-async function saveNote(puuid) {
-  const textarea = document.getElementById(`note-textarea-${puuid}`);
-  if (!textarea) return;
-  
-  const text = textarea.value.trim().substring(0, 200);
-  const acc = accounts.find(a => a.puuid === puuid);
-  if (!acc) return;
-  
-  acc.notes = text;
-  
-  const btn = document.querySelector(`.note-save`);
-  if (btn) { btn.textContent = 'Guardando...'; btn.disabled = true; }
-  
-  const ok = await updateAccount(acc);
-  
-  if (ok) {
-    accounts = accounts.map(a => a.puuid === puuid ? acc : a);
-    updateGlobalRef();
-    if (typeof closeNoteModal === 'function') closeNoteModal();
-    applyFilters();
-    showToast('📝 Nota guardada', 'toast-up');
-  } else {
-    showError('Error al guardar la nota');
-    if (btn) { btn.textContent = 'Guardar'; btn.disabled = false; }
   }
 }

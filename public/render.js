@@ -273,7 +273,6 @@ function buildCardHTML(acc, position) {
         ${streakText ? `<span class="streak-badge ${acc.streak > 0 ? 'win' : 'loss'}">${streakText}</span>` : ''}
         <div class="score-btn-group" style="margin-left: 10px;">
           <button class="refresh-btn" data-puuid="${acc.puuid}" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:var(--gold-primary); cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Actualizar">↻</button>
-          <button class="note-btn" data-puuid="${acc.puuid}" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:var(--gold-primary); cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Notas">📝</button>
           <button class="remove-btn" data-puuid="${acc.puuid}" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:#d93f3f; cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Eliminar">✕</button>
         </div>
       </div>
@@ -543,67 +542,6 @@ async function loadRankHistoryUI(puuid) {
   }
 }
 
-/* --- Funcionalidad 1: Notas por cuenta --- */
-window.openNoteModal = function(puuid) {
-  const acc = window._accounts_ref?.find(a => a.puuid === puuid);
-  if (!acc) return;
-
-  const modal = document.createElement('div');
-  modal.id = 'note-modal';
-  modal.className = 'note-modal';
-  
-  const currentNote = escapeHTML(acc.notes || '');
-  
-  modal.innerHTML = `
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 style="margin:0;">Notas: ${escapeHTML(acc.gameName)}</h2>
-        <button class="modal-close" onclick="closeNoteModal()">✕</button>
-      </div>
-      <div class="modal-body" style="display:flex; flex-direction:column; gap:15px;">
-        <textarea id="note-textarea-${puuid}" style="width:100%; height:120px; background:rgba(0,0,0,0.3); border:1px solid var(--gold-dark); color:#fff; padding:15px; border-radius:8px; resize:none; outline:none;" maxlength="200" placeholder="Añade una nota sobre este jugador (máx 200 caracteres)...">${currentNote}</textarea>
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <span id="note-counter-${puuid}" style="color:var(--gold-primary); font-size:0.8rem;">${currentNote.length}/200</span>
-          <div style="display:flex; gap:10px;">
-            <button onclick="closeNoteModal()" style="background:transparent; border:1px solid #d93f3f; color:#d93f3f; padding:8px 15px; border-radius:6px; cursor:pointer;">Cancelar</button>
-            <button class="note-save" onclick="saveNote('${puuid}')" style="background:var(--gold-primary); border:none; color:#000; padding:8px 15px; border-radius:6px; font-weight:800; cursor:pointer;">Guardar</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(modal);
-  document.body.classList.add('modal-open');
-  requestAnimationFrame(() => modal.classList.add('note-modal--open'));
-
-  const textarea = document.getElementById(`note-textarea-${puuid}`);
-  const counter = document.getElementById(`note-counter-${puuid}`);
-  
-  if (textarea && counter) {
-    textarea.focus();
-    textarea.addEventListener('input', () => {
-      counter.textContent = `${textarea.value.length}/200`;
-    });
-  }
-
-  const escHandler = (e) => {
-    if (e.key === 'Escape') {
-      closeNoteModal();
-      document.removeEventListener('keydown', escHandler);
-    }
-  };
-  document.addEventListener('keydown', escHandler);
-};
-
-window.closeNoteModal = function() {
-  const modal = document.getElementById('note-modal');
-  if (modal) {
-    modal.classList.remove('note-modal--open');
-    document.body.classList.remove('modal-open');
-    setTimeout(() => modal.remove(), 300);
-  }
-};
 
 window.openTournamentModal = async function() {
   const modal = document.createElement('div');
