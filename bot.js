@@ -1495,7 +1495,7 @@ const SKIN_THEMES = [
   {
     name: 'PROYECTO',
     images: [
-      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yi_5.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/MasterYi_5.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Vayne_11.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ashe_11.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Katarina_1.jpg',
@@ -1522,8 +1522,8 @@ const SKIN_THEMES = [
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Lux_6.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Jinx_6.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ahri_7.jpg',
-      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/KaiSa_29.jpg',
-      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Akali_61.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/KaiSa_14.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Akali_15.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Syndra_7.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Zoe_9.jpg'
     ]
@@ -1594,7 +1594,7 @@ const SKIN_THEMES = [
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ahri_14.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Akali_14.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Evelynn_6.jpg',
-      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/KaiSa_1.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/KaiSa_14.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Seraphine_1.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Akali_15.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ahri_28.jpg'
