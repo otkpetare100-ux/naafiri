@@ -551,12 +551,8 @@ async function loadRankHistoryUI(puuid) {
       }
     });
   } else if (canvas && history.length <= 1) {
-    canvas.insertAdjacentHTML('afterend', '<div class="empty-stats" style="/* --- Funcionalidad 1: Notas por cuenta --- */ color:#aaa; margin-top:5px;">${sub}</div>
-      </div>
-    `;
+    canvas.insertAdjacentHTML('afterend', '<div class="empty-stats" style="color:#aaa; margin-top:5px;">Datos insuficientes para la gráfica</div>');
   }
-
-  return renderCard(val);
 }
 
 /* --- Funcionalidad 1: Notas por cuenta --- */
