@@ -241,17 +241,6 @@ function buildCardHTML(acc, position) {
   const rankClass = rankNum <= 3 ? `rank-${rankNum}` : '';
 
 
-  // --- Rework: Item Principal ---
-  let mainItemHTML = '';
-  if (acc.mainItem) {
-    mainItemHTML = `
-      <div class="score-main-item" title="${escapeHTML(acc.mainItem.name)}">
-        <div class="main-item-glow"></div>
-        <div class="main-item-badge">${acc.mainItem.rarity || 'ITEM'}</div>
-        <img class="main-item-img" src="${acc.mainItem.img}" alt="${escapeHTML(acc.mainItem.name)}" />
-      </div>
-    `;
-  }
 
   return `
     <div class="scoreboard-row" id="card-${acc.puuid}" data-url="${profileUrl}">
@@ -270,7 +259,6 @@ function buildCardHTML(acc, position) {
           </div>
           <span class="score-tag">#${escapeHTML(acc.tagLine)}</span>
         </div>
-        ${mainItemHTML}
       </div>
       
       <div class="score-stats">

@@ -24,10 +24,6 @@
             const content = document.getElementById('profile-content');
 
             try {
-                // Cargar items dinámicamente
-                const itemsRes = await fetch('/api/items');
-                const GACHA_ITEMS = await itemsRes.json();
-
                 const response = await fetch(`/api/profile/${discordId}`);
                 if (!response.ok) throw new Error('Perfil no encontrado');
                 const data = await response.json();
@@ -36,64 +32,6 @@
                 const vRes = await fetch('https://ddragon.leagueoflegends.com/api/versions.json');
                 const versions = await vRes.json();
                 const version = versions[0];
-
-                const inventory = data.inventory || [];
-                
-                // DEFINIR ORDEN DE RAREZA
-                const rarityOrder = { 'Legendario': 1, 'Épico': 2, 'Raro': 3, 'Común': 4 };
-
-                // AGRUPAR ITEMS DUPLICADOS
-                const groupedMap = {};
-                inventory.forEach(item => {
-                    const id = item.id;
-                    if (!groupedMap[id]) {
-                        groupedMap[id] = { ...item, count: 1 };
-                    } else {
-                        groupedMap[id].count++;
-                    }
-                });
-
-                // CONVERTIR A ARRAY Y ORDENAR POR RAREZA
-                const sortedItems = Object.values(groupedMap).sort((a, b) => {
-                    return (rarityOrder[a.rarity] || 5) - (rarityOrder[b.rarity] || 5);
-                });
-
-                const inventoryHtml = sortedItems.length > 0 
-                    ? sortedItems.map(itemObj => {
-                        const item = GACHA_ITEMS.find(i => i.id === itemObj.id) || itemObj;
-                        
-                        let imgUrl = 'https://ddragon.leagueoflegends.com/cdn/' + version + '/img/profileicon/29.png';
-                        
-                        if (item.type === 'coins') {
-                            imgUrl = 'https://cdn-icons-png.flaticon.com/512/2489/2489756.png';
-                        } else if (item.img) {
-                            if (item.type === 'pro') {
-                                // Usar el proxy para las fotos de pros
-                                const cleanUrl = item.img.replace(/^https?:\/\//, '');
-                                imgUrl = `https://images.weserv.nl/?url=${encodeURIComponent(cleanUrl)}&w=300&h=450&fit=cover`;
-                            } else {
-                                imgUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${item.img}.jpg`;
-                            }
-                        } else {
-                            imgUrl = `https://ddragon.leagueoflegends.com/cdn/${version}/img/champion/${item.id}.png`;
-                        }
-                        
-                        const countBadge = itemObj.count > 1 ? `<div class="item-count">x${itemObj.count}</div>` : '';
-                        const isMain = data.linkedAcc && data.linkedAcc.mainItem && data.linkedAcc.mainItem.id === item.id;
-                        
-                        return `
-                            <div class="item-card card-${item.rarity} selectable ${isMain ? 'is-main' : ''}" 
-                                 onclick="selectMainItem('${data.linkedAcc ? data.linkedAcc.puuid : ''}', ${JSON.stringify(item).replace(/"/g, '&quot;')})">
-                                ${countBadge}
-                                <div class="item-img-container">
-                                    <img src="${imgUrl}" alt="${item.name}" class="item-img" onerror="this.src='https://ddragon.leagueoflegends.com/cdn/${version}/img/profileicon/29.png'">
-                                </div>
-                                <span class="item-name">${item.name}</span>
-                                <span class="item-rarity rarity-${item.rarity}">${item.rarity}</span>
-                            </div>
-                        `;
-                    }).join('')
-                    : '<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: #a09b8c;">La mochila está vacía... por ahora.</p>';
 
                 const displayName = data.linkedAcc 
                     ? `${data.linkedAcc.gameName}#${data.linkedAcc.tagLine}`
@@ -115,20 +53,7 @@
                                     <span class="stat-value">${data.coins.toLocaleString()}</span>
                                     <span class="stat-label">Naafiri Coins</span>
                                 </div>
-                                <div class="stat-item">
-                                    <span class="stat-value">${inventory.length}</span>
-                                    <span class="stat-label">Campeones</span>
-                                </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <div class="inventory-section">
-                        <div class="section-title">
-                            <i>🎒</i> Mi Mochila de Campeones
-                        </div>
-                        <div class="items-grid">
-                            ${inventoryHtml}
                         </div>
                     </div>
                 `;
@@ -140,33 +65,6 @@
                         <a href="/" style="color: var(--premium-gold); text-decoration: none;">Volver al inicio</a>
                     </div>
                 `;
-            }
-        }
-
-        async function selectMainItem(puuid, item) {
-            if (!puuid) {
-                alert('Debes vincular tu cuenta de LoL en Discord para elegir un item principal.');
-                return;
-            }
-
-            try {
-                // Si el item ya era el principal, lo desmarcamos (enviando null)
-                // Pero por ahora, simplemente lo seleccionamos.
-                
-                const res = await fetch(`/accounts/${puuid}/main-item`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ item: item })
-                });
-
-                if (res.ok) {
-                    // Recargar perfil para mostrar cambios
-                    loadProfile();
-                } else {
-                    console.error('Error al guardar item principal');
-                }
-            } catch (e) {
-                console.error(e);
             }
         }
 
