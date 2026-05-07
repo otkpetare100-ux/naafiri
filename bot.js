@@ -1631,7 +1631,23 @@ async function sendDailyMotivation(db) {
       }
     } catch (e) { console.error('[Motivation Delete Error]', e); }
 
-    const now = new Date();
+    // Ajuste de Zona Horaria (Caracas)
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Caracas',
+      year: 'numeric', month: 'numeric', day: 'numeric',
+      hour: 'numeric', minute: 'numeric', second: 'numeric',
+      hour12: false
+    });
+    const parts = formatter.formatToParts(new Date());
+    const now = new Date(
+      parts.find(p => p.type === 'year').value,
+      parts.find(p => p.type === 'month').value - 1,
+      parts.find(p => p.type === 'day').value,
+      parts.find(p => p.type === 'hour').value,
+      parts.find(p => p.type === 'minute').value,
+      parts.find(p => p.type === 'second').value
+    );
+
     // Cálculo de semana del año para rotación
     const startOfYear = new Date(now.getFullYear(), 0, 1);
     const pastDaysOfYear = (now - startOfYear) / 86400000;
