@@ -28,7 +28,6 @@
         </div>
       </div>
       <div class="topnav-actions">
-        <button onclick="openLeaderboard()">🏆 Récords</button>
         <button onclick="openBackpackPrompt()">🎒 Mochila</button>
         <button onclick="window.location.href='hall-of-fame.html'">👑 HOF</button>
         <button class="add-account-btn" onclick="openAddAccountModal()">Agregar Cuenta</button>
@@ -71,20 +70,12 @@
   </aside>
 
   <!-- Scripts -->
-  <script src="chart.min.js"></script>
   <script src="render.js?v=3.0.2"></script>
   <script src="storage.js?v=3.0.2"></script>
   <script src="api.js?v=3.0.2"></script>
   <script src="app.js?v=3.0.2"></script>
-  <script src="compare.js?v=3.0.2"></script>
-
-  <!-- Modal de Detalles -->
-  <div id="matchModal" class="modal-overlay" onclick="closeMatchModal(event)">
-    <div class="modal-content" onclick="event.stopPropagation()">
-      <span class="modal-close" onclick="closeMatchModal(event)">×</span>
-      <div id="modalBody"></div>
-    </div>
-  </div>
+  <script src="api.js?v=3.0.2"></script>
+  <script src="app.js?v=3.0.2"></script>
 
   <!-- Diálogo Personalizado (Premium Alert/Confirm/Prompt) -->
   <div id="customDialog" class="modal-overlay" style="z-index: 10000;">

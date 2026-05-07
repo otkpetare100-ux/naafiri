@@ -109,22 +109,6 @@ async function handleSearch() {
   }
 }
 
-/* ---- Helpers para actualizar campeones desde historial ---- */
-function championsFromMatches(matches) {
-  if (!matches || matches.length === 0) return null;
-  const champCount = {};
-  for (const m of matches) {
-    if (!champCount[m.champion]) champCount[m.champion] = 0;
-    champCount[m.champion]++;
-  }
-  return Object.entries(champCount)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 3)
-    .map(function([name]) {
-      return { name: name, image: name };
-    });
-}
-
 /* ---- Refresh ---- */
 async function handleRefresh(puuid, silent = false, bypassCooldown = false) {
   const acc = accounts.find(a => a.puuid === puuid);
@@ -167,25 +151,10 @@ async function handleRefresh(puuid, silent = false, bypassCooldown = false) {
     // Siempre intentamos obtener el historial de partidas para tener las 20 últimas
     if (btn) btn.classList.remove('spinning');
     
-    const history = await fetchMatchHistory(acc.puuid, (curr, total) => {
-      if (btn) {
-        btn.classList.add('refresh-btn--loading');
-        btn.innerHTML = `<span class="refresh-progress">${curr}/${total}</span>`;
-      }
-    });
-
-    if (history && history.matches) {
-      updated.matches      = history.matches;
-      updated.streak       = history.streak;
-      updated.mainPosition = history.mainPosition;
-      const champs = championsFromMatches(history.matches);
-      if (champs) updated.recentChampions = champs;
-    } else {
-      updated.matches      = acc.matches || [];
-      updated.streak       = acc.streak  || 0;
-      updated.mainPosition = acc.mainPosition || '—';
-      updated.recentChampions = acc.recentChampions || [];
-    }
+    updated.matches      = acc.matches || [];
+    updated.streak       = acc.streak  || 0;
+    updated.mainPosition = acc.mainPosition || '—';
+    updated.recentChampions = acc.recentChampions || [];
 
     await updateAccount(updated);
     
@@ -231,39 +200,6 @@ async function handleRefresh(puuid, silent = false, bypassCooldown = false) {
 }
 
 
-/* ---- Global Actions ---- */
-async function handleHistoryModal(puuid) {
-  const acc = accounts.find(a => a.puuid === puuid);
-  if (!acc) return;
-
-  if (!acc.matches || acc.matches.length === 0) {
-    const btn = document.querySelector(`.history-btn-mini[data-puuid="${puuid}"]`);
-    const originalHTML = btn ? btn.innerHTML : '';
-    if (btn) btn.innerHTML = '⚔ Cargando...';
-
-    try {
-      const history = await fetchMatchHistory(puuid);
-      acc.matches      = history.matches;
-      acc.streak       = history.streak;
-      acc.mainPosition = history.mainPosition;
-      const champs = championsFromMatches(history.matches);
-      if (champs) acc.recentChampions = champs;
-      
-      accounts = accounts.map(a => a.puuid === puuid ? acc : a);
-      updateGlobalRef();
-      await updateAccount(acc);
-      
-      if (btn) btn.innerHTML = originalHTML;
-      openHistoryModal(puuid);
-    } catch(e) {
-      if (btn) btn.innerHTML = originalHTML;
-      showError('Error cargando historial: ' + e.message);
-    }
-    return;
-  }
-  openHistoryModal(puuid);
-}
-
 async function handleRemoveAccount(puuid) {
   const ok = await showCustomConfirm('Eliminar Cuenta', '¿Estás seguro de que deseas dejar de rastrear a este jugador?');
   if (ok) {
@@ -281,17 +217,11 @@ async function handleRemoveAccount(puuid) {
 /* ---- Event delegation ---- */
 if (accountsGrid) {
   accountsGrid.addEventListener('click', async (e) => {
-    const historyBtn = e.target.closest('.history-btn-mini');
     const refreshBtn = e.target.closest('.refresh-btn');
     const noteBtn    = e.target.closest('.note-btn');
     const removeBtn  = e.target.closest('.remove-btn');
     const row        = e.target.closest('.scoreboard-row');
 
-    if (historyBtn) {
-      e.preventDefault(); e.stopPropagation();
-      handleHistoryModal(historyBtn.dataset.puuid);
-      return;
-    }
     if (refreshBtn) {
       e.preventDefault(); e.stopPropagation();
       handleRefresh(refreshBtn.dataset.puuid);

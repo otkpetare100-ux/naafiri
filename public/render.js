@@ -94,19 +94,6 @@ function getStreakInfo(streak) {
   return { class: '', glow: '' };
 }
 
-function getSpecialistInfo(matches) {
-  if (!matches || matches.length < 10) return { name: null, class: '' };
-  const counts = {};
-  for (let i = 0; i < matches.length; i++) {
-    const name = matches[i].champion;
-    counts[name] = (counts[name] || 0) + 1;
-  }
-  for (const name in counts) {
-    if (counts[name] >= 10) return { name: name, class: 'specialist-card' };
-  }
-  return { name: null, class: '' };
-}
-
 function titleCase(str) {
   return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : '';
 }
@@ -161,74 +148,6 @@ function timeAgo(timestamp) {
   return `Hace ${mins} m`;
 }
 
-function buildMatchHistoryHTML(matches, playerPuuid) {
-  if (!matches || matches.length === 0) return '<div class="match-empty">Sin partidas registradas</div>';
-  
-  return '<div class="match-history-v2">' + matches.map(function(m) {
-    const isWin = m.win;
-    const cls = isWin ? 'mv2-win' : 'mv2-loss';
-    const kda = m.kills + '<span class="kda-slash">/</span>' + m.deaths + '<span class="kda-slash">/</span>' + m.assists;
-    const dur = Math.floor(m.gameDuration / 60) + 'min ' + (m.gameDuration % 60) + 's';
-    const time = timeAgo(m.timestamp);
-    const queue = QUEUE_TYPES[m.queueId] || 'Partida';
-    const champImg = 'https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/champion/' + getChampImageName(m.champion);
-    
-
-    // Mapeo simple de 7 elementos: [item0, item1, item2, Trinket(6), item3, item4, item5, vacío]
-    const itm = m.items || [0,0,0,0,0,0,0,0];
-    const reordered = [
-      itm[0], itm[1], itm[2], itm[6],
-      itm[3], itm[4], itm[5], 0
-    ];
-
-    const itemsHTML = reordered.map((id, idx) => {
-      if (!id || id === 0) return '<div class="mv2-item empty"></div>';
-      return '<img class="mv2-item" src="https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/item/' + id + '.png" onerror="this.style.visibility=\'hidden\'" />';
-    }).join('');
-
-    // Participants
-    const parts = m.participants || [];
-    let participantsHTML = '';
-    if (parts.length >= 10) {
-      const team1 = parts.slice(0, 5);
-      const team2 = parts.slice(5, 10);
-      const renderPart = (p) => {
-        const isMe = p.puuid === playerPuuid;
-        const pImg = 'https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/champion/' + getChampImageName(p.champion);
-        return '<div class="mv2-p-icon ' + (isMe ? 'me' : '') + '"><img src="' + pImg + '" title="' + escapeHTML(p.champion) + '" /></div>';
-      };
-      participantsHTML = '<div class="mv2-participants"><div class="mv2-p-col team-blue">' + team1.map(renderPart).join('') + '</div><div class="mv2-p-col team-red">' + team2.map(renderPart).join('') + '</div></div>';
-    }
-
-    const shortQueue = queue.replace('Clasificatoria ', '').replace('Normal (Recluta)', 'Draft').replace('Normal (Oculta)', 'Blind');
-
-    const resultLabel = isWin ? 'Victoria' : 'Derrota';
-
-    return '<div class="match-v2-row ' + cls + '" onclick="event.stopPropagation(); openMatchModal(\'' + m.matchId + '\')">' +
-      '<div class="m-row-meta">' +
-        '<div class="m-queue">' + shortQueue + '</div>' +
-        '<div class="m-time">' + time + '</div>' +
-        '<div class="m-divider"></div>' +
-        '<div class="m-result">' + resultLabel + '</div>' +
-        '<div class="m-duration">' + dur + '</div>' +
-      '</div>' +
-      '<div class="m-row-champ">' +
-        '<img class="m-champ-icon" src="' + champImg + '" />' +
-      '</div>' +
-      '<div class="m-row-kda">' +
-        '<div class="m-kda">' + kda + '</div>' +
-        '<div class="m-cs">' + (m.cs || 0) + ' CS</div>' +
-      '</div>' +
-      '<div class="m-row-items">' +
-        itemsHTML +
-      '</div>' +
-      '<div class="m-row-participants">' +
-        participantsHTML +
-      '</div>' +
-    '</div>';
-  }).join('') + '</div>';
-}
-
 function buildTopChampsHTML(topChampions, puuid) {
   if (!topChampions || topChampions.length === 0) return '';
   return topChampions.map(function(c) {
@@ -238,17 +157,6 @@ function buildTopChampsHTML(topChampions, puuid) {
       '<img src="' + img + '" alt="' + escapeHTML(c.name) + '" onerror="this.style.display=\'none\'" />' +
     '</div>';
   }).join('');
-}
-
-function buildMatchDots(matches) {
-  if (!matches || matches.length === 0) return '';
-  return '<div class="match-dots" style="display:flex; gap:4px; margin-top:5px;">' +
-    matches.slice(0, 5).map(function(m) {
-      const cls = m.win ? 'dot-win' : 'dot-loss';
-      const mId = m.matchId || m.gameId;
-      return `<span class="dot ${cls}" style="cursor:pointer;" title="${m.win ? 'Victoria' : 'Derrota'} · ${escapeHTML(m.champion || '')}" onclick="event.stopPropagation(); openMatchModal('${mId}')"></span>`;
-    }).join('') +
-  '</div>';
 }
 
 /* ---- Funcionalidad: Reacciones Visuales ---- */
@@ -361,11 +269,7 @@ function buildCardHTML(acc, position) {
       
       <div class="score-actions">
         ${streakText ? `<span class="streak-badge ${acc.streak > 0 ? 'win' : 'loss'}">${streakText}</span>` : ''}
-        ${buildMatchDots(acc.matches)}
         <div class="score-btn-group" style="margin-left: 10px;">
-          <button class="history-btn-mini" data-puuid="${acc.puuid}">
-            <span class="history-icon">⚔</span> Historial
-          </button>
           <button class="refresh-btn" data-puuid="${acc.puuid}" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:var(--gold-primary); cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Actualizar">↻</button>
           <button class="note-btn" data-puuid="${acc.puuid}" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:var(--gold-primary); cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Notas">📝</button>
           <button class="remove-btn" data-puuid="${acc.puuid}" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:#d93f3f; cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Eliminar">✕</button>
@@ -451,247 +355,6 @@ function showDeleteConfirm(accountName, onConfirm) {
 }
 
 // --- Lógica del Modal de Campeones ---
-window.openChampModal = function(puuid, champName) {
-  const acc = window._accounts_ref?.find(a => a.puuid === puuid);
-  if (!acc) return;
-
-  const modal = document.createElement('div');
-  modal.id = 'champ-modal';
-  modal.className = 'champ-modal';
-  modal.innerHTML = buildChampModalHTML(acc, champName);
-  
-  document.body.appendChild(modal);
-  document.body.classList.add('modal-open');
-  requestAnimationFrame(() => modal.classList.add('champ-modal--open'));
-
-  // Cerrar con Escape
-  const escHandler = (e) => {
-    if (e.key === 'Escape') {
-      closeChampModal();
-      document.removeEventListener('keydown', escHandler);
-    }
-  };
-  document.addEventListener('keydown', escHandler);
-};
-
-window.closeChampModal = function() {
-  const modal = document.getElementById('champ-modal');
-  if (modal) {
-    modal.classList.remove('champ-modal--open');
-    document.body.classList.remove('modal-open');
-    setTimeout(() => modal.remove(), 300);
-  }
-};
-
-window.switchChampModal = function(puuid, champName) {
-  const modal = document.getElementById('champ-modal');
-  if (modal) {
-    const acc = window._accounts_ref?.find(a => a.puuid === puuid);
-    if (acc) {
-      modal.innerHTML = buildChampModalHTML(acc, champName);
-    }
-  }
-};
-
-function buildChampModalHTML(acc, champName) {
-  const champMatches = acc.matches.filter(m => m.champion === champName);
-  const stats = calculateChampStats(champMatches);
-  const top3 = acc.topChampions || [];
-
-  const tabsHTML = top3.map(c => {
-    const active = c.name === champName ? 'champ-tab--active' : '';
-    return `<div class="champ-tab ${active}" onclick="switchChampModal('${acc.puuid}', '${escapeHTML(c.name)}')">
-      <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${getChampImageName(c.name)}" />
-      <div class="champ-tab-info">
-        <span class="champ-tab-name">${escapeHTML(c.name)}</span>
-        <span class="champ-tab-points">${(c.points || 0).toLocaleString()} pts</span>
-      </div>
-    </div>`;
-  }).join('');
-
-  const statsGrid = stats ? `
-    <div class="stats-source-hint" style="color:var(--gold-primary); text-transform:uppercase; font-size:0.8rem; margin-bottom:15px;">Basado en las últimas ${stats.total} partidas</div>
-    <div style="display:flex; flex-wrap:wrap; gap:30px;">
-      <!-- Columna Izquierda: Estadísticas Básicas e Impacto -->
-      <div style="flex:1; min-width:300px;">
-        <div style="color:#fff; font-family:var(--font-title); margin-bottom:10px;">Rendimiento y Básicas</div>
-        <div class="player-stats-grid">
-          <div class="pstat-card">
-            <div class="pstat-label">Winrate</div>
-            <div class="pstat-value ${stats.winrate >= 50 ? 'text-win' : 'text-loss'}">${stats.winrate}%</div>
-            <div class="pstat-sub">${stats.total} partidas</div>
-          </div>
-          <div class="pstat-card">
-            <div class="pstat-label">KDA Promedio</div>
-            <div class="pstat-value">${stats.kda}</div>
-            <div class="pstat-sub">${stats.kills} / ${stats.deaths} / ${stats.assists}</div>
-          </div>
-          <div class="pstat-card">
-            <div class="pstat-label">CS por Minuto</div>
-            <div class="pstat-value">${stats.csMin}</div>
-          </div>
-          <div class="pstat-card">
-            <div class="pstat-label">Visión</div>
-            <div class="pstat-value">${stats.vision}</div>
-          </div>
-        </div>
-
-        <div style="color:#fff; font-family:var(--font-title); margin:15px 0 10px 0;">Impacto y Objetivos</div>
-        <div class="player-stats-grid">
-          <div class="pstat-card">
-            <div class="pstat-label">Daño / Partida</div>
-            <div class="pstat-value">${stats.damage.toLocaleString()}</div>
-          </div>
-          <div class="pstat-card">
-            <div class="pstat-label">Daño a Torres</div>
-            <div class="pstat-value">${stats.dmgTurret.toLocaleString()}</div>
-          </div>
-          <div class="pstat-card">
-            <div class="pstat-label">Objetivos Robados</div>
-            <div class="pstat-value">${stats.objStolen}</div>
-          </div>
-          <div class="pstat-card">
-            <div class="pstat-label">Solo Kills</div>
-            <div class="pstat-value">${stats.soloKills}</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Columna Derecha: Economía y Logros -->
-      <div style="flex:1; min-width:300px;">
-        <div style="color:#fff; font-family:var(--font-title); margin-bottom:10px;">Economía y Early Game</div>
-        <div class="player-stats-grid">
-          <div class="pstat-card">
-            <div class="pstat-label">Oro por Minuto</div>
-            <div class="pstat-value">${stats.goldMin}</div>
-          </div>
-          <div class="pstat-card">
-            <div class="pstat-label">Ventaja Oro @15</div>
-            <div class="pstat-value ${stats.goldDiff15 >= 0 ? 'text-win' : 'text-loss'}">${stats.goldDiff15 > 0 ? '+' : ''}${stats.goldDiff15}</div>
-          </div>
-          <div class="pstat-card">
-            <div class="pstat-label">Ventaja CS @10</div>
-            <div class="pstat-value ${stats.csDiff10 >= 0 ? 'text-win' : 'text-loss'}">${stats.csDiff10 > 0 ? '+' : ''}${stats.csDiff10}</div>
-          </div>
-          <div class="pstat-card">
-            <div class="pstat-label">Consumibles</div>
-            <div class="pstat-value">${stats.consumables}</div>
-          </div>
-        </div>
-
-        <div style="color:#fff; font-family:var(--font-title); margin:15px 0 10px 0;">Logros y Datos de Impacto</div>
-        <div class="player-stats-grid">
-          <div class="pstat-card">
-            <div class="pstat-label">Pentakills</div>
-            <div class="pstat-value" style="color:#f4c874">${stats.penta}</div>
-          </div>
-          <div class="pstat-card">
-            <div class="pstat-label">Perfect Games</div>
-            <div class="pstat-value" style="color:#f4c874">${stats.perfectGames}</div>
-          </div>
-          <div class="pstat-card">
-            <div class="pstat-label">Racha Máxima</div>
-            <div class="pstat-value" style="color:#00C65E">${stats.maxWinStreak}</div>
-          </div>
-          <div class="pstat-card">
-            <div class="pstat-label">Duración Prom.</div>
-            <div class="pstat-value">${stats.avgDuration} min</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  ` : '<div class="empty-stats">Sin datos suficientes en el historial reciente</div>';
-
-  return `
-    <div class="modal-content">
-      <div class="modal-header">
-        <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${getChampImageName(champName)}" />
-        <div class="names-wrap" style="flex:1;">
-          <h2>${escapeHTML(champName)}</h2>
-        </div>
-        <button class="modal-close" onclick="closeChampModal()">✕</button>
-      </div>
-      <div style="display:flex; gap:10px; margin-bottom:20px; overflow-x:auto;">${tabsHTML}</div>
-      <div>${statsGrid}</div>
-    </div>
-  `;
-}
-
-function calculateChampStats(matches) {
-  if (!matches || matches.length === 0) return null;
-  const t = matches.length;
-  const s = matches.reduce((acc, m) => {
-    acc.k += m.kills || 0;
-    acc.d += m.deaths || 0;
-    acc.a += m.assists || 0;
-    acc.cs += m.cs || 0;
-    acc.dmg += m.damage || 0;
-    acc.dmgT += m.damageTaken || 0;
-    acc.dmgObj += m.dmgObj || 0;
-    acc.dmgTurret += m.dmgTurret || 0;
-    acc.objStolen += m.objStolen || 0;
-    acc.firstBlood += m.firstBlood ? 1 : 0;
-    acc.penta += m.penta || 0;
-    acc.quadra += m.quadra || 0;
-    acc.killingSpree = Math.max(acc.killingSpree, m.killingSpree || 0);
-    acc.goldDiff15 += m.goldDiff15 || 0;
-    acc.csDiff10 += m.csDiff10 || 0;
-    acc.consumables += m.consumables || 0;
-    acc.solo += m.soloKills || 0;
-    acc.vision += m.vision || 0;
-    acc.gold += m.gold || 0;
-    acc.kp += m.kp || 0;
-    acc.dur += m.gameDuration || 0;
-    acc.wins += m.win ? 1 : 0;
-    
-    // Racha actual de victorias
-    if (m.win) {
-      acc.currStreak++;
-      acc.maxStreak = Math.max(acc.maxStreak, acc.currStreak);
-    } else {
-      acc.currStreak = 0;
-    }
-
-    if (m.deaths === 0 && m.win) acc.perfect++;
-    if (m.gameDuration > 2100 && m.win) acc.lateWins++; // > 35 min
-
-    return acc;
-  }, { k:0, d:0, a:0, cs:0, dmg:0, dmgT:0, dmgObj:0, dmgTurret:0, objStolen:0, firstBlood:0, penta:0, quadra:0, killingSpree:0, goldDiff15:0, csDiff10:0, consumables:0, solo:0, vision:0, gold:0, kp:0, dur:0, wins:0, maxStreak:0, currStreak:0, perfect:0, lateWins:0 });
-
-  const deaths = s.d || 1;
-  const durMin = s.dur / 60;
-  return {
-    total: t,
-    winrate: Math.round((s.wins / t) * 100),
-    kda: ((s.k + s.a) / deaths).toFixed(2),
-    kills: (s.k / t).toFixed(1),
-    deaths: (s.d / t).toFixed(1),
-    assists: (s.a / t).toFixed(1),
-    csMin: (s.cs / durMin).toFixed(1),
-    damage: Math.round(s.dmg / t),
-    damageTaken: Math.round(s.dmgT / t),
-    soloKills: (s.solo / t).toFixed(1),
-    vision: (s.vision / t).toFixed(1),
-    goldMin: (s.gold / durMin).toFixed(0),
-    kp: Math.round(s.kp / t),
-    // Nuevas
-    dmgObj: Math.round(s.dmgObj / t),
-    dmgTurret: Math.round(s.dmgTurret / t),
-    objStolen: s.objStolen,
-    firstBlood: s.firstBlood,
-    penta: s.penta,
-    quadra: s.quadra,
-    killingSpree: s.killingSpree,
-    goldDiff15: Math.round(s.goldDiff15 / t),
-    csDiff10: (s.csDiff10 / t).toFixed(1),
-    consumables: (s.consumables / t).toFixed(1),
-    avgDuration: Math.round(durMin),
-    maxWinStreak: s.maxStreak,
-    perfectGames: s.perfect,
-    lateWins: s.lateWins
-  };
-}
-
 // --- Lógica del Modal de Jugador (Perfil Detallado) ---
 window.openPlayerModal = function(puuid, event) {
   // Si el clic fue en un botón o en un icono de campeón, no abrimos este modal
@@ -737,7 +400,6 @@ window.closePlayerModal = function() {
 };
 
 function buildPlayerModalHTML(acc) {
-  const stats = calculateGlobalStats(acc.matches);
   const r = getRankInfo(acc);
   const noDivisionTiers = ['MASTER', 'GRANDMASTER', 'CHALLENGER', 'UNRANKED'];
   const rankStr = noDivisionTiers.includes(r.tier) 
@@ -745,138 +407,21 @@ function buildPlayerModalHTML(acc) {
     : `${r.tier} ${r.division || ''}`;
   const color = RANK_COLORS[r.tier] || '#fff';
   
-  // --- Funcionalidad: Badge de Especialista (Idea 7) ---
-  let specialistChamp = null;
-  if (acc.matches && acc.matches.length >= 10) {
-    const counts = {};
-    acc.matches.forEach(m => {
-      counts[m.champion] = (counts[m.champion] || 0) + 1;
-    });
-    for (const champ in counts) {
-      if (counts[champ] >= 10) {
-        specialistChamp = champ;
-        break;
-      }
-    }
-  }
-  const specialistHTML = specialistChamp 
-    ? '<div class="specialist-badge" title="Especialista en ' + escapeHTML(specialistChamp) + '"><span>OTP</span> ' + escapeHTML(specialistChamp) + '</div>' 
-    : '';
-
-  const statsHTML = stats ? `
-    <div class="player-stats-grid">
-      <div class="pstat-card">
-        <div class="pstat-label">Winrate Global</div>
-        <div class="pstat-value ${stats.winrate >= 50 ? 'text-win' : 'text-loss'}">${stats.winrate}%</div>
-        <div class="pstat-sub">${stats.total} partidas analizadas</div>
-        ${stats.winrateTrend ? `<div class="trend-indicator ${stats.winrateTrend > 0 ? 'trend-up' : 'trend-down'}">${stats.winrateTrend > 0 ? '▲' : '▼'} ${Math.abs(stats.winrateTrend)}%</div>` : ''}
-      </div>
-      <div class="pstat-card">
-        <div class="pstat-label">KDA Promedio</div>
-        <div class="pstat-value">${stats.kda}</div>
-        <div class="pstat-sub">${stats.kills} / ${stats.deaths} / ${stats.assists}</div>
-        ${stats.kdaTrend ? `<div class="trend-indicator ${stats.kdaTrend > 0 ? 'trend-up' : 'trend-down'}">${stats.kdaTrend > 0 ? '▲' : '▼'} ${Math.abs(stats.kdaTrend)}</div>` : ''}
-      </div>
-      <div class="pstat-card">
-        <div class="pstat-label">Oro por Minuto</div>
-        <div class="pstat-value">${stats.goldMin}</div>
-        <div class="pstat-sub">Eficiencia de farmeo</div>
-      </div>
-      <div class="pstat-card">
-        <div class="pstat-label">Mejores Rachas</div>
-        <div class="pstat-value text-win">W: ${acc.records?.maxWinStreak || 0}</div>
-        <div class="pstat-value text-loss">L: ${acc.records?.maxLossStreak || 0}</div>
-        <div class="pstat-sub">Récords históricos</div>
-      </div>
-      <div class="pstat-card">
-        <div class="pstat-label">Daño / Partida</div>
-        <div class="pstat-value">${stats.damage.toLocaleString()}</div>
-        <div class="pstat-sub">Daño infligido total</div>
-      </div>
-      <div class="pstat-card">
-        <div class="pstat-label">Participación Kills</div>
-        <div class="pstat-value">${stats.kp}%</div>
-        <div class="pstat-sub">Presencia en el mapa</div>
-      </div>
-    </div>
-    <div class="cstat-group-title" style="margin-top: 12px;">Predicción de Temporada</div>
-    ${renderPredictionHTML(acc, stats)}
-  ` : '<div class="empty-stats">Actualiza la cuenta para ver estadísticas detalladas</div>';
-
-  // --- Funcionalidad 4: Mapa de calor de posiciones ---
-  let heatMapHTML = '';
-  if (acc.matches && acc.matches.length > 0) {
-    const posCount = { TOP: 0, JUNGLE: 0, MIDDLE: 0, BOTTOM: 0, UTILITY: 0 };
-    acc.matches.forEach(m => {
-      let p = (m.position || m.teamPosition || '').toUpperCase();
-      if (p === 'UTILITY') p = 'SUPPORT'; // Normalizar
-      if (posCount[p] !== undefined) posCount[p]++;
-      else if (p === 'SUPPORT') posCount.UTILITY++;
-    });
-    
-    const totalPos = Object.values(posCount).reduce((a, b) => a + b, 0) || 1;
-    const maxPos = Math.max(...Object.values(posCount), 1);
-    
-    heatMapHTML = `
-      <div class="heatmap-section">
-        <div class="cstat-group-title">Roles Jugados</div>
-        <div class="heatmap-container">
-          ${Object.entries(posCount).map(([pos, count]) => {
-            const pct = (count / totalPos) * 100;
-            const heightPct = (count / maxPos) * 100; // Altura relativa al rol más jugado
-            const iconMap = {
-              TOP: '/pic/roll/top_roll.png',
-              JUNGLE: '/pic/roll/jungle_roll.png',
-              MIDDLE: '/pic/roll/middle_roll.png',
-              BOTTOM: '/pic/roll/adc_roll.png',
-              UTILITY: '/pic/roll/supp_roll.png'
-            };
-            const iconUrl = iconMap[pos] || '/pic/roll/all_roll.png';
-            const icon = `<img src="${iconUrl}" class="heat-role-icon">`;
-            return `
-              <div class="heat-col" title="${pos}: ${count} partidas (${Math.round(pct)}%)">
-                <div class="heat-bar-bg">
-                  <div class="heat-bar-fill" style="height: ${heightPct}%; opacity: ${0.4 + (heightPct/100)*0.6}; background: #d77aa8;"></div>
-                </div>
-                <div class="heat-icon">${icon}</div>
-              </div>
-            `;
-          }).join('')}
-        </div>
-      </div>
-    `;
-  }
-  // ----------------------------------------------------
-
-  let centeredSplashUrl = '';
-  if (acc.topChampions && acc.topChampions.length > 0 && acc.topChampions[0].name) {
-    const cName = getChampImageName(acc.topChampions[0].name).replace('.png', '');
-    centeredSplashUrl = 'https://ddragon.leagueoflegends.com/cdn/img/champion/centered/' + cName + '_0.jpg';
-  }
-
   return `
     <div class="modal-content">
       <div class="modal-header">
         <img src="${getProfileIconUrl(acc.profileIconId)}" onerror="this.src='${FALLBACK_ICON_URL}'" />
         <div class="names-wrap" style="flex: 1;">
           <h2>${escapeHTML(acc.gameName)} <span style="font-size:1rem; opacity:0.7;">#${escapeHTML(acc.tagLine)}</span></h2>
-          ${specialistHTML}
           <p style="color:${color}; margin:0; font-weight:700;">${rankStr} - ${r.lp} LP</p>
         </div>
         <button class="modal-close" onclick="closePlayerModal()">✕</button>
       </div>
-      <div class="modal-body" style="display: flex; flex-wrap: wrap; gap: 30px;">
-        <div style="flex: 1; min-width: 300px;">
-          <div style="margin-bottom:15px; color:var(--gold-primary); text-transform:uppercase; font-size:0.8rem; letter-spacing:1px; font-weight:800;">Desempeño SoloQ (Últimas 20)</div>
-          ${statsHTML}
-        </div>
-        <div style="flex: 1; min-width: 300px;">
-          ${heatMapHTML}
-          <div class="rank-history-section" style="margin-top: 20px;">
-            <div style="color:var(--gold-primary); margin-bottom:10px; text-transform:uppercase; font-size:0.8rem; letter-spacing:1px; font-weight:800;">Progresión de LP</div>
-            <div class="lp-chart-wrapper" style="height: 180px; background: rgba(0,0,0,0.3); border-radius:12px; padding:10px;">
-              <canvas id="lpChart-${acc.puuid}" class="lp-chart-canvas"></canvas>
-            </div>
+      <div class="modal-body">
+        <div class="rank-history-section">
+          <div style="color:var(--gold-primary); margin-bottom:10px; text-transform:uppercase; font-size:0.8rem; letter-spacing:1px; font-weight:800;">Progresión de LP</div>
+          <div class="lp-chart-wrapper" style="height: 180px; background: rgba(0,0,0,0.3); border-radius:12px; padding:10px;">
+            <canvas id="lpChart-${acc.puuid}" class="lp-chart-canvas"></canvas>
           </div>
         </div>
         
@@ -886,7 +431,6 @@ function buildPlayerModalHTML(acc) {
             <div class="empty-stats">Cargando historial...</div>
           </div>
         </div>
-
       </div>
     </div>
   `;
@@ -983,193 +527,7 @@ async function loadRankHistoryUI(puuid) {
       }
     });
   } else if (canvas && history.length <= 1) {
-    canvas.insertAdjacentHTML('afterend', '<div class="empty-stats" style="margin-bottom:12px;">Actualiza la cuenta varias veces para ver tu progresión en gráfica</div>');
-  }
-}
-
-
-
-function calculateGlobalStats(matches) {
-  if (!matches || matches.length === 0) return null;
-  const t = matches.length;
-  const s = matches.reduce((acc, m) => {
-    acc.k += m.kills || 0;
-    acc.d += m.deaths || 0;
-    acc.a += m.assists || 0;
-    acc.cs += m.cs || 0;
-    acc.dmg += m.damage || 0;
-    acc.vision += m.vision || 0;
-    acc.gold += m.gold || 0;
-    acc.kp += m.kp || 0;
-    acc.dur += m.gameDuration || 0;
-    acc.wins += m.win ? 1 : 0;
-    return acc;
-  }, { k:0, d:0, a:0, cs:0, dmg:0, vision:0, gold:0, kp:0, dur:0, wins:0 });
-
-  const deaths = s.d || 1;
-  const totalMin = s.dur / 60;
-
-  // Cálculo de tendencia (primera mitad vs segunda mitad)
-  let wrTrend = 0;
-  let kdaTrend = 0;
-  if (t >= 6) {
-    const half = Math.floor(t / 2);
-    const m1 = matches.slice(0, half);
-    const m2 = matches.slice(half);
-    
-    const s1 = m1.reduce((a, x) => ({ w: a.w + (x.win?1:0), k: a.k+x.kills, d: a.d+x.deaths, a: a.a+x.assists }), {w:0, k:0, d:0, a:0});
-    const s2 = m2.reduce((a, x) => ({ w: a.w + (x.win?1:0), k: a.k+x.kills, d: a.d+x.deaths, a: a.a+x.assists }), {w:0, k:0, d:0, a:0});
-    
-    const wr1 = (s1.w / m1.length) * 100;
-    const wr2 = (s2.w / m2.length) * 100;
-    wrTrend = Math.round(wr1 - wr2); // Tendencia positiva si los recientes (m1) son mejores
-
-    const k1 = (s1.k + s1.a) / (s1.d || 1);
-    const k2 = (s2.k + s2.a) / (s2.d || 1);
-    kdaTrend = parseFloat((k1 - k2).toFixed(2));
-  }
-
-  return {
-    total: t,
-    winrate: Math.round((s.wins / t) * 100),
-    winrateTrend: wrTrend,
-    kda: ((s.k + s.a) / deaths).toFixed(2),
-    kdaTrend: kdaTrend,
-    kills: (s.k / t).toFixed(1),
-    deaths: (s.d / t).toFixed(1),
-    assists: (s.a / t).toFixed(1),
-    vision: (s.vision / t).toFixed(1),
-    goldMin: (s.gold / totalMin).toFixed(0),
-    damage: Math.round(s.dmg / t),
-    kp: Math.round(s.kp / t)
-  };
-}
-
-/* --- Récords Globales (Muro de la Fama) --- */
-window.openLeaderboard = function() {
-  const accounts = window._accounts_ref || [];
-  if (!accounts.length) return;
-
-  const modal = document.createElement('div');
-  modal.id = 'leaderboard-modal';
-  modal.className = 'leaderboard-modal';
-  
-  const records = calculateGlobalRecords(accounts);
-  
-  modal.innerHTML = `
-    <div class="modal-content">
-      <div class="leaderboard-header">
-        <div class="leaderboard-title-group">
-          <h2>Récords de la Perrera</h2>
-          <button class="history-btn-mini" onclick="refreshLeaderboard()">↻ Actualizar</button>
-        </div>
-        <button class="modal-close" onclick="closeLeaderboard()">✕</button>
-      </div>
-      <div class="leaderboard-body" id="leaderboard-body-grid">
-        <div class="leader-grid">
-          ${renderLeaderGridHTML(records)}
-        </div>
-        <h3 style="font-family: var(--font-title); color: #d93f3f; margin: 30px 0 15px 0;">🤡 Salón de la Vergüenza</h3>
-        <div class="leader-grid">
-          ${renderLeaderCard('El Imán de Balas', records.maxDeaths, 'Más Muertes Promedio')}
-          ${renderLeaderCard('El Topo', records.minVision, 'Menos Visión Promedio')}
-          ${renderLeaderCard('El Autofill', records.maxChamps, 'Más Campeones Usados')}
-        </div>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(modal);
-  document.body.classList.add('modal-open');
-  requestAnimationFrame(() => modal.classList.add('leaderboard-modal--open'));
-};
-
-window.closeLeaderboard = function() {
-  const modal = document.getElementById('leaderboard-modal');
-  if (modal) {
-    modal.classList.remove('leaderboard-modal--open');
-    document.body.classList.remove('modal-open');
-    setTimeout(() => modal.remove(), 300);
-  }
-};
-
-window.refreshLeaderboard = function() {
-  const accounts = window._accounts_ref || [];
-  const container = document.querySelector('#leaderboard-body-grid');
-  if (!container) return;
-  
-  const records = calculateGlobalRecords(accounts);
-  container.innerHTML = `
-    <div class="leader-grid">
-      ${renderLeaderGridHTML(records)}
-    </div>
-    <h3 style="font-family: var(--font-title); color: #d93f3f; margin: 30px 0 15px 0;">🤡 Salón de la Vergüenza</h3>
-    <div class="leader-grid">
-      ${renderLeaderCard('El Imán de Balas', records.maxDeaths, 'Más Muertes Promedio')}
-      ${renderLeaderCard('El Topo', records.minVision, 'Menos Visión Promedio')}
-      ${renderLeaderCard('El Autofill', records.maxChamps, 'Más Campeones Usados')}
-    </div>
-  `;
-};
-
-function renderLeaderGridHTML(records) {
-  return `
-    ${renderLeaderCard('El Verdugo', records.topKills, 'Kills Promedio')}
-    ${renderLeaderCard('Ojos de Halcón', records.topVision, 'Visión Promedio')}
-    ${renderLeaderCard('El Rico', records.topGold, 'Oro / Minuto')}
-    ${renderLeaderCard('El Más Suertudo', records.topWinrate, 'Winrate Global')}
-    ${renderLeaderCard('El Cañón Pulso de Fuego', records.topDamage, 'Daño a Campeones')}
-    ${renderLeaderCard('Racha Legendaria', records.topStreak, 'Victorias Consecutivas')}
-  `;
-}
-
-function calculateGlobalRecords(accounts) {
-  const stats = accounts.map(acc => {
-    const s = calculateGlobalStats(acc.matches);
-    return { acc, s };
-  }).filter(x => x.s !== null);
-
-  if (!stats.length) return {};
-
-  return {
-    topKills: stats.sort((a,b) => b.s.kills - a.s.kills)[0],
-    topVision: stats.sort((a,b) => b.s.vision - a.s.vision)[0],
-    topGold: stats.sort((a,b) => b.s.goldMin - a.s.goldMin)[0],
-    topWinrate: stats.sort((a,b) => b.s.winrate - a.s.winrate)[0],
-    topDamage: stats.sort((a,b) => b.s.damage - a.s.damage)[0],
-    minDeaths: stats.sort((a,b) => a.s.deaths - b.s.deaths)[0],
-    // Shame
-    maxDeaths: stats.sort((a,b) => b.s.deaths - a.s.deaths)[0],
-    minVision: stats.sort((a,b) => a.s.vision - b.s.vision)[0],
-    topStreak: stats.sort((a,b) => (b.acc.records?.maxWinStreak || 0) - (a.acc.records?.maxWinStreak || 0))[0],
-    maxChamps: stats.map(x => {
-      const unique = new Set(x.acc.matches.map(m => m.champion)).size;
-      return { ...x, unique };
-    }).sort((a,b) => b.unique - a.unique)[0]
-  };
-}
-
-function renderLeaderCard(title, data, sub) {
-  if (!data) return '';
-  const val = title === 'El Rico' ? data.s.goldMin : 
-              title === 'El Más Suertudo' ? data.s.winrate + '%' :
-              title === 'El Cañón Pulso de Fuego' ? data.s.damage.toLocaleString() :
-              title === 'Ojos de Halcón' ? data.s.vision :
-              title === 'El Topo' ? data.s.vision :
-              title === 'El Autofill' ? data.unique + ' champs' :
-              title === 'Racha Legendaria' ? data.acc.records?.maxWinStreak || 0 : data.s.deaths;
-  
-  if (title === 'El Verdugo') return renderCard(data.s.kills);
-  if (title === 'El Imán de Balas') return renderCard(data.s.deaths);
-
-  function renderCard(displayVal) {
-    return `
-      <div class="leader-item">
-        <div class="leader-label">${title}</div>
-        <img style="width:50px; height:50px; border-radius:10px; margin: 10px 0; border: 1px solid var(--gold-dark);" src="${getProfileIconUrl(data.acc.profileIconId)}" onerror="this.src='${FALLBACK_ICON_URL}'" />
-        <div class="leader-name">${escapeHTML(data.acc.gameName)}</div>
-        <div class="leader-value">${displayVal}</div>
-        <div style="font-size:0.7rem; color:#aaa; margin-top:5px;">${sub}</div>
+    canvas.insertAdjacentHTML('afterend', '<div class="empty-stats" style="/* --- Funcionalidad 1: Notas por cuenta --- */ color:#aaa; margin-top:5px;">${sub}</div>
       </div>
     `;
   }
@@ -1238,86 +596,6 @@ window.closeNoteModal = function() {
     setTimeout(() => modal.remove(), 300);
   }
 };
-
-function renderPredictionHTML(acc, stats) {
-  if (!stats) return '';
-  // Ajustado según el tiempo real del split actual
-  const seasonEnd = new Date('2026-04-29T03:12:00'); 
-  const now = new Date();
-  const diffMs = seasonEnd - now;
-  const daysLeft = Math.max(0, diffMs / (24 * 60 * 60 * 1000));
-  const hoursLeft = Math.max(0, diffMs / (60 * 60 * 1000));
-  
-  // Si queda menos de un día, el cálculo cambia a "Último empujón"
-  let totalGames = 0;
-  let timeDesc = '';
-  
-  if (daysLeft > 7) {
-    const weeks = Math.ceil(daysLeft / 7);
-    totalGames = weeks * 10; // 10 partidas/semana
-    timeDesc = `${weeks} semanas`;
-  } else if (daysLeft >= 1) {
-    totalGames = Math.floor(daysLeft * 3); // 3 partidas/día
-    timeDesc = `${Math.floor(daysLeft)} días`;
-  } else {
-    totalGames = Math.floor(hoursLeft / 0.75); // Partidas de 45min
-    timeDesc = `${Math.floor(hoursLeft)} horas`;
-  }
-  
-  const netWins = (stats.winrate / 100 - 0.5) * 2 * totalGames;
-  const lpChange = Math.round(netWins * 22);
-  
-  const currentLP = acc.soloQ?.leaguePoints || 0;
-  const projectedLP = currentLP + lpChange;
-  
-  // Lógica de rango predicho (simplificada)
-  const tiers = ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'EMERALD', 'DIAMOND', 'MASTER', 'GRANDMASTER', 'CHALLENGER'];
-  let currentTierIdx = tiers.indexOf(acc.soloQ?.tier || 'SILVER');
-  if (currentTierIdx === -1) currentTierIdx = 2; // Default Silver
-  let finalTierIdx = currentTierIdx + Math.floor(projectedLP / 400);
-  finalTierIdx = Math.max(0, Math.min(tiers.length - 1, finalTierIdx));
-  const finalTier = tiers[finalTierIdx];
-
-  const messages = {
-    high: [
-      "¡Estás imparable! El elo inflado es real, ¡aprovéchalo!",
-      "Dominando la grieta como un profesional. ¡Sigue así!",
-      "Tu desempeño es excepcional. La cima está cerca.",
-      "Vas por excelente camino, ¡estás smurfeando!"
-    ],
-    mid: [
-      "Mantén la consistencia y el ascenso será inevitable.",
-      "Buen ritmo. Un par de victorias más y rompes la liga.",
-      "Estás en el punto de equilibrio. ¡Es hora de dar el 110%!",
-      "Jugando sólido. El diamante no se va a subir solo."
-    ],
-    low: [
-      "No te rindas, cada derrota es una lección aprendida.",
-      "Con un poco más de enfoque llegarás lejos. ¡A por ello!",
-      "El camino al éxito está lleno de baches. ¡Tú puedes remontar!",
-      "Ánimo, hasta los mejores tienen rachas malas. ¡A por la siguiente!"
-    ]
-  };
-
-  let msgPool = messages.mid;
-  if (stats.winrate >= 53) msgPool = messages.high;
-  else if (stats.winrate <= 48) msgPool = messages.low;
-  
-  const randomMsg = msgPool[Math.floor(Math.random() * msgPool.length)];
-
-  return `
-    <div class="prediction-box">
-      <div class="prediction-rank">
-        <img src="/pic/ranks/${finalTier.toLowerCase()}.png" class="prediction-icon" />
-        <div class="prediction-info">
-          <div class="prediction-title">Rango Final Predicho: ${finalTier}</div>
-          <div class="prediction-desc">Basado en tu winrate de ${stats.winrate}% y ${timeDesc} restantes.</div>
-        </div>
-      </div>
-      <div class="prediction-message">"${randomMsg}"</div>
-    </div>
-  `;
-}
 
 window.openTournamentModal = async function() {
   const modal = document.createElement('div');
