@@ -269,6 +269,11 @@ body {
   animation: slide-up-premium 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Evitar que el glow del Top 1 sobreescriba la animación de entrada */
+.scoreboard-row.show:has(.rank-1) {
+  animation: slide-up-premium 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards, glow-gold 3s ease-in-out infinite 0.6s;
+}
+
 @keyframes slide-up-premium {
   from { opacity: 0; transform: translateY(30px) scale(0.98); }
   to { opacity: 1; transform: translateY(0) scale(1); }
@@ -292,7 +297,7 @@ body {
   border-color: rgba(255, 215, 0, 0.45);
   background: linear-gradient(90deg, rgba(255, 215, 0, 0.07) 0%, var(--bg-card) 60%);
   box-shadow: 0 0 18px rgba(255, 215, 0, 0.15), inset 0 0 30px rgba(255, 215, 0, 0.04);
-  animation: glow-gold 3s ease-in-out infinite;
+  /* La animación se define arriba para evitar conflictos con .show */
 }
 
 .scoreboard-row:has(.rank-2) {
