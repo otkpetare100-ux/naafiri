@@ -36,7 +36,6 @@ app.get('/api/ladder', async (req, res) => {
   try {
     const accounts = await db.collection('accounts').find({}).toArray();
     
-    // Función para calcular LP absoluto (copiada de la lógica del bot)
     const getAbsoluteLP = (tier, rank, lp) => {
       if (!tier || !rank) return 0;
       const tiers = ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'EMERALD', 'DIAMOND', 'MASTER', 'GRANDMASTER', 'CHALLENGER'];
@@ -58,12 +57,13 @@ app.get('/api/ladder', async (req, res) => {
         gameName: acc.gameName,
         tagLine: acc.tagLine,
         profileIconId: acc.profileIconId,
+        summonerLevel: acc.summonerLevel || 0,
         tier: soloQ.tier,
         rank: soloQ.rank,
         lp: soloQ.leaguePoints,
         winRate: `${winRate}%`,
         absLp: getAbsoluteLP(soloQ.tier, soloQ.rank, soloQ.leaguePoints),
-        isLive: false // Se podría integrar con el caché del bot más adelante
+        isLive: acc.liveGameStartedAt ? true : false
       };
     });
 
@@ -74,7 +74,7 @@ app.get('/api/ladder', async (req, res) => {
   }
 });
 
-// Servir activos del bot (emblemas, etc)
+// Servir activos del bot
 app.use('/assets', express.static(path.join(__dirname, 'bot discord', 'assets')));
 
 app.listen(PORT, () => {

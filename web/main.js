@@ -2,8 +2,6 @@ import './style.css'
 
 const API_BASE = 'http://localhost:3001/api';
 const ASSETS_BASE = 'http://localhost:3001/assets';
-
-// Datos de la versión de DDragon (podría venir de la API)
 const DDRAGON_VERSION = '15.8.1';
 
 async function fetchLadder() {
@@ -17,7 +15,7 @@ async function fetchLadder() {
     renderLadder(players);
   } catch (error) {
     console.error('API Error:', error);
-    container.innerHTML = `<div class="error">⚠️ No se pudo conectar con el servidor de la Grieta.</div>`;
+    container.innerHTML = `<div class="error">⚠️ Error al conectar con la API de Naafiri.</div>`;
   }
 }
 
@@ -26,35 +24,48 @@ function renderLadder(players) {
   container.innerHTML = '';
 
   if (players.length === 0) {
-    container.innerHTML = `<div class="empty">No hay invocadores registrados todavía.</div>`;
+    container.innerHTML = `<div class="empty">No hay perros en la jauría aún.</div>`;
     return;
   }
 
   players.forEach((player, index) => {
+    const rankNum = index + 1;
     const card = document.createElement('div');
-    card.className = 'player-card';
-    card.style.animationDelay = `${index * 0.1}s`;
-
-    // Ruta del emblema de rango
+    card.className = `player-card rank-${rankNum}`;
+    
+    // Ruta del emblema
     const tier = player.tier.toLowerCase();
     const emblemUrl = `${ASSETS_BASE}/ranks/${tier}.png`;
     
-    // Icono del invocador de DDragon
+    // Icono de invocador
     const avatarUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${player.profileIconId}.png`;
 
     card.innerHTML = `
-      <div class="rank-number">${index + 1}</div>
-      <img src="${avatarUrl}" class="player-avatar" alt="${player.gameName}" />
-      <div class="player-info">
-        <div class="player-name">
-          ${player.gameName} <span class="tag">#${player.tagLine}</span>
-          ${player.isLive ? '<span class="status-dot"></span>' : ''}
-        </div>
+      <div class="rank-text">#${rankNum}</div>
+      
+      <div class="avatar-wrapper">
+        <img src="${avatarUrl}" class="player-avatar" alt="${player.gameName}" />
+        <div class="level-tag">${player.summonerLevel}</div>
       </div>
-      <img src="${emblemUrl}" class="rank-emblem" alt="${player.tier}" onerror="this.style.opacity='0'" />
-      <div class="stats-container">
-        <div class="lp-text">${player.lp} LP</div>
-        <div class="wr-text">${player.tier} ${player.rank} • ${player.winRate} WR</div>
+
+      <div class="player-main-info">
+        <div class="player-name-row">
+          <span class="name">${player.gameName}</span>
+          <span class="status-dot ${player.isLive ? 'online' : ''}"></span>
+        </div>
+        <div class="tag">#${player.tagLine}</div>
+      </div>
+
+      <div class="rank-data">
+        <img src="${emblemUrl}" class="rank-emblem" alt="${player.tier}" onerror="this.style.opacity='0'" />
+        <div class="rank-info-text">
+          <div class="tier-text">${player.tier} ${player.rank}</div>
+          <div class="rank-stats">
+            <span class="lp">${player.lp} LP</span>
+            <span class="separator">·</span>
+            <span class="wr">${player.winRate} WR</span>
+          </div>
+        </div>
       </div>
     `;
 
@@ -62,16 +73,21 @@ function renderLadder(players) {
   });
 }
 
-// Manejo de búsqueda / agregar
-const addBtn = document.getElementById('add-player-btn');
+// Búsqueda (Filtro local por ahora)
 const searchInput = document.getElementById('search-input');
-
-addBtn.addEventListener('click', () => {
-  const query = searchInput.value.trim();
-  if (!query) return;
+searchInput.addEventListener('input', (e) => {
+  const term = e.target.value.toLowerCase();
+  const cards = document.querySelectorAll('.player-card');
   
-  alert(`Buscando a ${query}... (Función en desarrollo)`);
-  // Aquí se llamaría a la API para agregar el jugador
+  cards.forEach(card => {
+    const name = card.querySelector('.name').textContent.toLowerCase();
+    const tag = card.querySelector('.tag').textContent.toLowerCase();
+    if (name.includes(term) || tag.includes(term)) {
+      card.style.display = 'flex';
+    } else {
+      card.style.display = 'none';
+    }
+  });
 });
 
 // Carga inicial

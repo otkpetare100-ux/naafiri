@@ -4,33 +4,40 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LAN Tracker | Premium Dashboard</title>
+    <title>LAS PERRAS DE NAAFIRI | Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   </head>
   <body>
     <div id="app">
       <header class="main-header">
-        <div class="logo">
-          <span class="gold-text">LAN</span>TRACKER
-        </div>
-        <div class="search-container">
-          <input type="text" id="search-input" placeholder="Agregar jugador (Nombre#Tag)..." />
-          <button id="add-player-btn">Agregar</button>
+        <div class="header-content">
+          <div class="brand">
+            <img src="http://localhost:3001/assets/estetica/logo.png" class="nav-logo" alt="Logo" />
+            <img src="http://localhost:3001/assets/estetica/texto.png" class="nav-text" alt="Las Perras de Naafiri" />
+          </div>
         </div>
       </header>
 
       <main class="content">
         <section class="ladder-section">
           <div class="section-header">
-            <h1>ladderboard</h1>
-            <div class="header-line"></div>
+            <div class="header-left">
+              <span class="trophy-icon">🏆</span>
+              <h1>Leaderboard</h1>
+            </div>
+            <div class="header-right">
+              <div class="search-box">
+                <input type="text" id="search-input" placeholder="Buscar jugador..." />
+                <span class="search-icon">🔍</span>
+              </div>
+            </div>
           </div>
           
           <div id="ladder-container" class="ladder-list">
-            <!-- Los jugadores se cargarán aquí dinámicamente -->
-            <div class="loading">Cargando la grieta...</div>
+            <!-- Cargando... -->
+            <div class="loading">Invocando a la jauría...</div>
           </div>
         </section>
       </main>
