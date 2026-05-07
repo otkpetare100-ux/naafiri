@@ -3,6 +3,9 @@ const puppeteer = require('puppeteer');
 const fetch = (...args) => import('node-fetch').then(({default: f}) => f(...args));
 const fs = require('fs');
 const path = require('path');
+const { MongoClient } = require('mongodb');
+
+try { require('dotenv').config(); } catch(e) {}
 
 let client = null;
 let dbInstance = null;
@@ -1802,10 +1805,10 @@ async function sendDailySummary(db) {
 
   let bgBase64 = '';
   const possiblePaths = [
-    path.join(__dirname, '..', 'public', 'pic', 'bg.jpg'),
-    path.join(__dirname, '..', 'public', 'pic', 'bg.png'),
-    path.join(__dirname, '..', 'public', 'bg.jpg'),
-    path.join(__dirname, '..', 'public', 'bg.png'),
+    path.join(__dirname, 'assets', 'pic', 'bg.jpg'),
+    path.join(__dirname, 'assets', 'pic', 'bg.png'),
+    path.join(__dirname, 'assets', 'bg.jpg'),
+    path.join(__dirname, 'assets', 'bg.png'),
     path.join(process.cwd(), 'public', 'pic', 'bg.jpg'),
     path.join(process.cwd(), 'public', 'pic', 'bg.png'),
     path.join(process.cwd(), 'public', 'bg.jpg'),
@@ -2141,7 +2144,7 @@ async function generateChallengeImage() {
   try {
     const fs = require('fs');
     const path = require('path');
-    const bgPath = path.join(process.cwd(), 'public', 'pic', 'bg.jpg');
+    const bgPath = path.join(__dirname, 'assets', 'pic', 'bg.jpg');
     if (fs.existsSync(bgPath)) {
       const bgBase64 = fs.readFileSync(bgPath).toString('base64');
       bgUrl = `data:image/jpeg;base64,${bgBase64}`;
@@ -2358,7 +2361,7 @@ async function generateGachaCard(selected, balance) {
         : `https://ddragon.leagueoflegends.com/cdn/img/champion/centered/${selected.img}.jpg`);
 
   // SISTEMA DE CACHÉ LOCAL EN public/pic/gacha
-  const picDir = path.join(__dirname, '..', 'public', 'pic', 'gacha');
+  const picDir = path.join(__dirname, 'assets', 'pic', 'gacha');
   try {
     if (!fs.existsSync(picDir)) {
       console.log(`[Gacha] Creando directorio de caché: ${picDir}`);
@@ -2602,3 +2605,236 @@ module.exports = {
   notifyAdmin,
   GACHA_ITEMS 
 };
+
+// --- Variables para el Monitor de Partidas ---
+const liveCache = new Set();
+const cooldown403 = new Map();
+
+// --- Funciones de Utilidad del Backend ---
+async function takeDailySnapshots(db) {
+  const accounts = await db.collection('accounts').find({}).toArray();
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  const todayStr = now.toISOString().split('T')[0];
+  
+  for (const acc of accounts) {
+    if (acc.soloQ) {
+      await db.collection('accounts').updateOne(
+        { puuid: acc.puuid },
+        { $set: { [`snapshots.${todayStr}`]: acc.soloQ } }
+      );
+    }
+  }
+  
+  const oldDate = new Date();
+  oldDate.setDate(oldDate.getDate() - 8);
+  oldDate.setMinutes(oldDate.getMinutes() - oldDate.getTimezoneOffset());
+  const oldDateStr = oldDate.toISOString().split('T')[0];
+  
+  for (const acc of accounts) {
+    if (acc.snapshots) {
+      for (const date in acc.snapshots) {
+        if (date < oldDateStr) {
+          await db.collection('accounts').updateOne(
+            { puuid: acc.puuid },
+            { $unset: { [`snapshots.${date}`]: "" } }
+          );
+        }
+      }
+    }
+  }
+}
+
+function calculateMatchHighlights(match) {
+  const participants = match.info.participants;
+  if (!participants || participants.length === 0) return null;
+
+  let mvp = participants[0];
+  let maxScore = -999;
+  let topDamage = participants[0];
+  let topVision = participants[0];
+  let topGold = participants[0];
+
+  participants.forEach(p => {
+    const score = (p.kills * 4) + (p.assists * 2.5) - (p.deaths * 3) + (p.totalDamageDealtToChampions / 1500) + (p.visionScore / 1.5) + (p.goldEarned / 1000);
+    if (score > maxScore) { maxScore = score; mvp = p; }
+    if (p.totalDamageDealtToChampions > topDamage.totalDamageDealtToChampions) topDamage = p;
+    if (p.visionScore > topVision.visionScore) topVision = p;
+    if (p.goldEarned > topGold.goldEarned) topGold = p;
+  });
+
+  const getName = (p) => p.riotIdGameName || p.summonerName || 'Desconocido';
+  return {
+    mvp: { name: getName(mvp), champion: mvp.championName },
+    topDamage: { name: getName(topDamage), champion: topDamage.championName, value: topDamage.totalDamageDealtToChampions },
+    topVision: { name: getName(topVision), champion: topVision.championName, value: topVision.visionScore },
+    topGold: { name: getName(topGold), champion: topGold.championName, value: topGold.goldEarned }
+  };
+}
+
+async function settleBets(acc) {
+  try {
+    console.log(`[Bets] Processing results for ${acc.gameName}...`);
+    await new Promise(r => setTimeout(r, 120000));
+    const API_KEY = process.env.RIOT_API_KEY;
+
+    const matchUrl = `https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/${acc.puuid.trim()}/ids?count=1`;
+    const matchIdsRes = await fetch(matchUrl, { headers: { "X-Riot-Token": API_KEY.trim() } });
+    const matchIds = await matchIdsRes.json();
+    
+    if (!matchIds || !Array.isArray(matchIds) || matchIds.length === 0) return;
+
+    const detailUrl = `https://americas.api.riotgames.com/lol/match/v5/matches/${matchIds[0]}`;
+    const detailRes = await fetch(detailUrl, { headers: { "X-Riot-Token": API_KEY.trim() } });
+    const match = await detailRes.json();
+    
+    if (!match || !match.info) return;
+
+    const allowedQueues = [420, 440];
+    if (!allowedQueues.includes(match.info.queueId)) return;
+    
+    const p = match.info.participants.find(x => x.puuid === acc.puuid.trim());
+    if (!p) return;
+
+    const isRemake = match.info.gameDuration < 210;
+    if (isRemake) {
+      const allBets = await dbInstance.collection('bets').find({ targetPuuid: acc.puuid, status: 'open' }).toArray();
+      for (const bet of allBets) {
+        await dbInstance.collection('economy').updateOne({ discordId: bet.discordId }, { $inc: { coins: bet.amount } });
+        await dbInstance.collection('bets').updateOne({ _id: bet._id }, { $set: { status: 'refunded' } });
+      }
+      notifyRemake(acc.gameName);
+      return;
+    }
+
+    const gameResult = p.win ? 'gana' : 'pierde';
+    const openBets = await dbInstance.collection('bets').find({ targetPuuid: acc.puuid, status: 'open' }).toArray();
+    const winners = [];
+    for (const bet of openBets) {
+      if (bet.choice === gameResult) {
+        const prize = Math.floor(bet.amount * (bet.multiplier || 2.0));
+        await dbInstance.collection('economy').updateOne({ discordId: bet.discordId }, { $inc: { coins: prize } });
+        winners.push(bet);
+        await dbInstance.collection('bets').updateOne({ _id: bet._id }, { $set: { status: 'won' } });
+      } else {
+        await dbInstance.collection('bets').updateOne({ _id: bet._id }, { $set: { status: 'lost' } });
+      }
+    }
+
+    const kda = `${p.kills}/${p.deaths}/${p.assists}`;
+    let lpDataObj = null;
+    
+    if (match.info.queueId === 420 || match.info.queueId === 440) {
+      let attempts = 0;
+      while (attempts < 3) {
+        try {
+          const leagueUrl = `https://la1.api.riotgames.com/lol/league/v4/entries/by-puuid/${acc.puuid}?api_key=${API_KEY}`;
+          const leagues = await (await fetch(leagueUrl)).json();
+          const targetQueueType = match.info.queueId === 420 ? 'RANKED_SOLO_5x5' : 'RANKED_FLEX_SR';
+          const soloQ = leagues.find(l => l.queueType === targetQueueType);
+          if (soloQ) {
+            await dbInstance.collection('accounts').updateOne({ puuid: acc.puuid }, { $set: { soloQ: soloQ } });
+            lpDataObj = { tier: soloQ.tier, rank: soloQ.rank, lp: soloQ.leaguePoints, diff: soloQ.leaguePoints - (acc.soloQ?.leaguePoints || 0) };
+            break;
+          }
+        } catch (e) {}
+        attempts++;
+        if (attempts < 3) await new Promise(r => setTimeout(r, 45000));
+      }
+    }
+
+    const highlights = calculateMatchHighlights(match);
+    notifyBetResults(acc.gameName, gameResult, winners, p.profileIcon, p.championName, lpDataObj, kda, DDRAGON_VERSION, openBets.length, match.info.queueId, highlights);
+    liveCache.delete(acc.puuid);
+    await checkChallenges(acc, match);
+  } catch (e) {
+    console.error(`[Bets Error]`, e);
+    liveCache.delete(acc.puuid);
+  }
+}
+
+async function checkChallenges(acc, match) {
+  try {
+    const participant = match.info.participants.find(p => p.puuid === acc.puuid);
+    if (!participant) return;
+    const challengesFound = [];
+    let totalCoins = 0;
+    if (participant.pentakills > 0) { challengesFound.push('🏆 PENTAKILL (Legendario)'); totalCoins += 1000; }
+    if (participant.kills >= 15) { challengesFound.push('🔪 El Carnicero (Épico)'); totalCoins += 200; }
+    if (participant.deaths === 0 && participant.win) { challengesFound.push('😇 Inmortal (Raro)'); totalCoins += 150; }
+    const csPerMin = (participant.totalMinionsKilled + participant.neutralMinionsKilled) / (match.info.gameDuration / 60);
+    if (csPerMin >= 8.5 && match.info.gameDuration > 1200) { challengesFound.push('🚜 Farm Machine (Raro)'); totalCoins += 100; }
+    if (challengesFound.length > 0) {
+      await dbInstance.collection('economy').updateOne({ discordId: acc.discordId }, { $inc: { coins: totalCoins } }, { upsert: true });
+      notifyChallengeComplete(acc.gameName, challengesFound, totalCoins);
+    }
+  } catch (e) { console.error('Error procesando retos:', e); }
+}
+
+// --- Conexión a MongoDB e Inicio ---
+async function startBot() {
+  const MONGO_URI = process.env.MONGO_URI;
+  if (!MONGO_URI) { console.error('❌ Falta MONGO_URI'); process.exit(1); }
+
+  try {
+    const clientMongo = new MongoClient(MONGO_URI);
+    await clientMongo.connect();
+    const db = clientMongo.db('lan-tracker');
+    console.log('✅ MongoDB conectado');
+    
+    // Inicializar lógica del bot
+    initBot(db);
+
+    // Temporizadores de Notificaciones
+    setInterval(async () => {
+      const now = new Date();
+      const formatter = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Caracas', hour: 'numeric', minute: 'numeric', hour12: false });
+      const parts = formatter.formatToParts(now);
+      const hour = parseInt(parts.find(p => p.type === 'hour').value);
+      const minute = parseInt(parts.find(p => p.type === 'minute').value);
+
+      // Snapshots y Notificaciones
+      if (minute === 0) {
+        if (hour === 12) sendDailyMotivation(db);
+        if ([18, 22].includes(hour)) sendDailySummary(db);
+      }
+    }, 60 * 1000);
+
+    // Escaneo de Partidas en Vivo
+    setInterval(async () => {
+      try {
+        const accounts = await db.collection('accounts').find({}).toArray();
+        const champRes = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/es_MX/champion.json`);
+        const champData = await champRes.json();
+        const nowTime = Date.now();
+
+        for (const acc of accounts) {
+          if (cooldown403.has(acc.puuid) && nowTime < cooldown403.get(acc.puuid)) continue;
+          
+          const res = await fetch(`https://la1.api.riotgames.com/lol/spectator/v5/active-games/by-puuid/${acc.puuid.trim()}?api_key=${process.env.RIOT_API_KEY}`);
+          if (res.ok) {
+            const game = await res.json();
+            if ([420, 440].includes(game.gameQueueConfigId) && !liveCache.has(acc.puuid)) {
+              liveCache.add(acc.puuid);
+              const me = game.participants.find(p => p.puuid === acc.puuid.trim());
+              const champKey = Object.keys(champData.data).find(key => champData.data[key].key == me.championId);
+              notifyLiveGame(acc, { championName: champKey, championId: champKey, profileIconId: me.profileIconId, version: DDRAGON_VERSION });
+            }
+          } else if (res.status === 404 && liveCache.has(acc.puuid)) {
+            liveCache.delete(acc.puuid);
+            settleBets(acc);
+          } else if (res.status === 403) {
+            cooldown403.set(acc.puuid, nowTime + 10 * 60 * 1000);
+          }
+        }
+      } catch (e) {}
+    }, 60 * 1000);
+
+  } catch (e) {
+    console.error('❌ Error:', e);
+    setTimeout(startBot, 5000);
+  }
+}
+
+startBot();
+
