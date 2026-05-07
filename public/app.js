@@ -232,10 +232,10 @@ if (accountsGrid) {
       return;
     }
 
-    // Navegación de la fila
+    // Abrir modal de detalles al hacer click en la fila
     if (row && !e.target.closest('button')) {
-      const url = row.dataset.url;
-      if (url) window.location.href = url;
+      const puuid = row.id.replace('card-', '');
+      if (typeof openPlayerModal === 'function') openPlayerModal(puuid, e);
     }
   });
 }
