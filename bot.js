@@ -1523,7 +1523,7 @@ const SKIN_THEMES = [
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Jinx_6.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ahri_7.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Kaisa_29.jpg',
-      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Akali_61.jpg',
+      'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Akali_15.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Syndra_7.jpg',
       'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Zoe_9.jpg'
     ]
