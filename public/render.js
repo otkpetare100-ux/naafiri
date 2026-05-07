@@ -240,6 +240,19 @@ function buildCardHTML(acc, position) {
   const rankNum = position + 1;
   const rankClass = rankNum <= 3 ? `rank-${rankNum}` : '';
 
+
+  // --- Rework: Item Principal ---
+  let mainItemHTML = '';
+  if (acc.mainItem) {
+    mainItemHTML = `
+      <div class="score-main-item" title="${escapeHTML(acc.mainItem.name)}">
+        <div class="main-item-glow"></div>
+        <div class="main-item-badge">${acc.mainItem.rarity || 'ITEM'}</div>
+        <img class="main-item-img" src="${acc.mainItem.img}" alt="${escapeHTML(acc.mainItem.name)}" />
+      </div>
+    `;
+  }
+
   return `
     <div class="scoreboard-row" id="card-${acc.puuid}" data-url="${profileUrl}">
       
@@ -257,6 +270,7 @@ function buildCardHTML(acc, position) {
           </div>
           <span class="score-tag">#${escapeHTML(acc.tagLine)}</span>
         </div>
+        ${mainItemHTML}
       </div>
       
       <div class="score-stats">
@@ -284,11 +298,21 @@ function renderAccounts(accounts) {
   window._accounts_ref = accounts;
   const grid = document.getElementById('accounts-grid');
   if (!grid) return;
+  
   if (accounts.length === 0) {
     grid.innerHTML = '<div class="empty-state"><p>Sin cuentas aún</p></div>';
     return;
   }
+  
   grid.innerHTML = accounts.map((acc, idx) => buildCardHTML(acc, idx)).join('');
+
+  // --- Animación Staggered ---
+  const rows = grid.querySelectorAll('.scoreboard-row');
+  rows.forEach((row, index) => {
+    setTimeout(() => {
+      row.classList.add('show');
+    }, index * 50);
+  });
 }
 
 function showError(msg) {

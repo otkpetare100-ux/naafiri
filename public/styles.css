@@ -260,11 +260,18 @@ body {
   display: flex;
   align-items: center;
   gap: 20px;
-  transition: var(--transition);
-  position: relative;
-  overflow: hidden;
-  backdrop-filter: blur(5px);
   cursor: pointer;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.scoreboard-row.show {
+  animation: slide-up-premium 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slide-up-premium {
+  from { opacity: 0; transform: translateY(30px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .score-rank {
@@ -1660,4 +1667,92 @@ body {
   }
   .m-row-participants { display: none; }
   .m-row-items { grid-template-columns: repeat(8, 22px); }
+}
+
+/* --- Rework: Main Item Showcase --- */
+.score-main-item {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  margin-left: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.main-item-glow {
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  background: radial-gradient(circle, rgba(200, 155, 60, 0.2) 0%, transparent 70%);
+  z-index: 0;
+  animation: pulse-item 2.5s infinite;
+}
+
+.main-item-img {
+  width: 54px;
+  height: 54px;
+  border-radius: 12px;
+  border: 2px solid var(--gold-primary);
+  object-fit: cover;
+  z-index: 1;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.6);
+}
+
+.main-item-badge {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--gold-primary);
+  color: #000;
+  font-size: 0.6rem;
+  font-weight: 900;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  z-index: 2;
+  white-space: nowrap;
+}
+
+@keyframes pulse-item {
+  0%, 100% { transform: scale(1); opacity: 0.2; }
+  50% { transform: scale(1.1); opacity: 0.4; }
+}
+
+/* --- Mejoras en Mochila (Perfil) --- */
+.item-card.selectable {
+  cursor: pointer;
+}
+
+.item-card.is-main {
+  border: 2px solid var(--gold-primary);
+  background: rgba(200, 155, 60, 0.05);
+  box-shadow: 0 0 20px rgba(200, 155, 60, 0.2);
+}
+
+.item-card.is-main::before {
+  content: '★ PRINCIPAL';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--gold-primary);
+  color: #000;
+  font-size: 0.65rem;
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 4px;
+  z-index: 20;
+}
+
+/* --- Ajuste Responsivo Rework --- */
+@media (max-width: 1200px) {
+  .score-main-item {
+    margin-left: 0;
+    margin-top: 10px;
+    order: 4;
+  }
 }

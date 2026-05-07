@@ -739,6 +739,28 @@ app.post('/accounts/:puuid/react', async (req, res) => {
   }
 });
 
+// ---- Rework: Seleccionar Item Principal ----
+app.post('/accounts/:puuid/main-item', async (req, res) => {
+  const { puuid } = req.params;
+  const { item } = req.body; // { id, name, img, rarity }
+
+  try {
+    const acc = await getCollection().findOne({ puuid });
+    if (!acc) return res.status(404).json({ error: 'Cuenta no encontrada' });
+
+    // Si item es null, desmarcamos el item principal
+    await getCollection().updateOne(
+      { puuid },
+      { $set: { mainItem: item } }
+    );
+
+    res.json({ ok: true });
+  } catch(e) {
+    console.error('Error al guardar item principal:', e);
+    res.status(500).json({ error: 'Error del servidor' });
+  }
+});
+
 // ---- Proxy de Riot API ----
 app.get('/riot', async (req, res) => {
   const targetUrl = req.query.url;

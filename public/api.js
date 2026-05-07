@@ -85,6 +85,28 @@ async function getTopMasteryChampions(puuid) {
   return [];
 }
 
+async function getRankHistory(puuid) {
+  try {
+    const res = await fetch(`/rank-history/${puuid}`);
+    if (!res.ok) return [];
+    return await res.json();
+  } catch (e) {
+    return [];
+  }
+}
+
+async function setMainItem(puuid, item) {
+  try {
+    const res = await fetch(`/accounts/${puuid}/main-item`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ item })
+    });
+    return await res.json();
+  } catch (e) {
+    console.error('Error al guardar item principal:', e);
+    return { error: true };
+  }
 }
 
 
