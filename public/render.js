@@ -272,6 +272,9 @@ function buildCardHTML(acc, position) {
       <div class="score-actions">
         ${streakText ? `<span class="streak-badge ${acc.streak > 0 ? 'win' : 'loss'}">${streakText}</span>` : ''}
         <div class="score-btn-group" style="margin-left: 10px;">
+          <button class="history-btn" data-puuid="${acc.puuid}">
+            <span style="font-size:0.9rem;">📈</span> Historial
+          </button>
           <button class="refresh-btn" data-puuid="${acc.puuid}" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:var(--gold-primary); cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Actualizar">↻</button>
           <button class="remove-btn" data-puuid="${acc.puuid}" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:#d93f3f; cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Eliminar">✕</button>
         </div>

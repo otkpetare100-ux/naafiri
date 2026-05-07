@@ -203,11 +203,17 @@ if (accountsGrid) {
   accountsGrid.addEventListener('click', async (e) => {
     const refreshBtn = e.target.closest('.refresh-btn');
     const removeBtn  = e.target.closest('.remove-btn');
+    const historyBtn = e.target.closest('.history-btn');
     const row        = e.target.closest('.scoreboard-row');
 
     if (refreshBtn) {
       e.preventDefault(); e.stopPropagation();
       handleRefresh(refreshBtn.dataset.puuid);
+      return;
+    }
+    if (historyBtn) {
+      e.preventDefault(); e.stopPropagation();
+      if (typeof openPlayerModal === 'function') openPlayerModal(historyBtn.dataset.puuid, e);
       return;
     }
     if (removeBtn) {
