@@ -132,26 +132,10 @@ async function handleRefresh(puuid, silent = false, bypassCooldown = false) {
   if (btn) { btn.classList.add('spinning'); btn.disabled = true; }
 
   try {
-    // --- Funcionalidad 4: Caché Inteligente ---
-    const matchIds = await getMatchIds(acc.puuid);
-    const lastId = matchIds && matchIds.length > 0 ? matchIds[0] : null;
-    
-    // Permitir actualización si las partidas actuales no tienen items o participantes (migración de datos)
-    const needsRepair = acc.matches && acc.matches.length > 0 && (!acc.matches[0].items || !acc.matches[0].participants);
-    
-    if (lastId && acc.lastGameId === lastId && !needsRepair) {
-      if (!silent) showToast('Sin partidas nuevas desde el último refresh', 'toast-neutral');
-      if (btn) { btn.classList.remove('spinning'); btn.disabled = false; }
-      return;
-    }
-
     const updated = await fetchAccountSnapshot(acc.gameName, acc.tagLine);
-    updated.lastGameId = lastId; // Guardar ID para próxima comparación
-
-    // Siempre intentamos obtener el historial de partidas para tener las 20 últimas
+    
     if (btn) btn.classList.remove('spinning');
     
-    updated.matches      = acc.matches || [];
     updated.streak       = acc.streak  || 0;
     updated.mainPosition = acc.mainPosition || '—';
     updated.recentChampions = acc.recentChampions || [];
