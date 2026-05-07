@@ -28,7 +28,6 @@
         </div>
       </div>
       <div class="topnav-actions">
-        <button onclick="openBackpackPrompt()">🎒 Mochila</button>
         <button onclick="window.location.href='hall-of-fame.html'">👑 HOF</button>
         <button class="add-account-btn" onclick="openAddAccountModal()">Agregar Cuenta</button>
       </div>
@@ -95,14 +94,6 @@
       if (nav) nav.classList.toggle('scrolled', window.scrollY > 20);
     });
 
-    async function openBackpackPrompt() {
-      let discordId = localStorage.getItem('myDiscordId');
-      if (!discordId) {
-        discordId = await showCustomPrompt('Mochila de Discord', 'Ingresa tu Discord ID numérico para ver tu inventario:');
-        if (discordId) localStorage.setItem('myDiscordId', discordId.trim());
-      }
-      if (discordId) window.location.href = `/perfil/${discordId.trim()}`;
-    }
 
     async function openAddAccountModal() {
       const raw = await showCustomPrompt('Agregar Cuenta', 'Ingresa el nombre del invocador en formato Nombre#TAG');
