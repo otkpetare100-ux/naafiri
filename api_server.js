@@ -8,7 +8,7 @@ const dns = require('dns');
 dns.setServers(['8.8.8.8']);
 
 const app = express();
-const PORT = process.env.API_PORT || 3010;
+const PORT = process.env.PORT || process.env.API_PORT || 3010;
 const MONGO_URI = process.env.MONGO_URI;
 
 app.use(cors());
