@@ -1,7 +1,7 @@
 import './style.css'
 
 const API_BASE = `${window.location.origin}/api`;
-const ASSETS_BASE = `${window.location.origin}/assets`;
+const ASSETS_BASE = '/assets';
 const DDRAGON_VERSION = '16.9.1';
 
 async function fetchLadder() {
