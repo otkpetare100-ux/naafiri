@@ -76,13 +76,13 @@ function renderLadder(players) {
         </div>
       </div>
 
-      <!-- Botones de Acción (Solo visible on hover) -->
+      <!-- Botones de Acción -->
       <div class="card-actions">
         <button class="btn-refresh-card" onclick="refreshPlayer('${player.gameName}', '${player.tagLine}', '${player.region}')" title="Actualizar datos">
-          <span class="refresh-icon">🔄</span>
+          <span class="refresh-icon">↻</span>
         </button>
         <button class="btn-delete-card" onclick="openDeleteModal('${player.puuid}', '${player.gameName.replace(/'/g, "\\'")}')" title="Eliminar de la jauría">
-          &times;
+          ✕
         </button>
       </div>
     `;
