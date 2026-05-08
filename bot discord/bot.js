@@ -47,6 +47,15 @@ const TIER_ORDER = {
 };
 const DIV_ORDER = { I: 4, II: 3, III: 2, IV: 1 };
 
+const REGION_ROUTING = {
+  la1: 'americas', la2: 'americas', na1: 'americas', br1: 'americas',
+  euw1: 'europe', eun1: 'europe', tr1: 'europe', ru: 'europe',
+  kr: 'asia', jp1: 'asia',
+  oc1: 'sea', ph2: 'sea', sg2: 'sea', th2: 'sea', tw2: 'sea', vn2: 'sea'
+};
+
+const VALID_REGIONS = Object.keys(REGION_ROUTING);
+
 function isAdmin(userId) {
   return userId === process.env.ADMIN_DISCORD_ID;
 }
@@ -283,6 +292,7 @@ function initBot(db) {
         .setThumbnail(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${acc.profileIconId}.png`)
         .setColor(RANK_COLORS[acc.soloQ?.tier] || 0xffffff)
         .addFields(
+          { name: 'Región', value: (acc.region || 'LA1').toUpperCase(), inline: true },
           { name: 'Rango SoloQ', value: acc.soloQ ? `${acc.soloQ.tier} ${acc.soloQ.rank} (${acc.soloQ.leaguePoints} LP)` : 'Unranked', inline: true },
           { name: 'Winrate', value: acc.soloQ ? `${Math.round((acc.soloQ.wins / (acc.soloQ.wins + acc.soloQ.losses)) * 100)}%` : 'N/A', inline: true },
           { name: 'Racha', value: acc.streak > 0 ? `🔥 ${acc.streak} Wins` : acc.streak < 0 ? `❄️ ${Math.abs(acc.streak)} Loss` : '—', inline: true }
@@ -329,41 +339,52 @@ function initBot(db) {
     }
 
     if (command === 'vincular') {
-      const slug = args.join(' ');
-      if (!slug || !slug.includes('#')) return msg.channel.send(`<@${msg.author.id}> ❌ Uso: \`!vincular Nombre#TAG\``);
-      
-      let acc = await findAccountBySlug(slug);
-      let isNew = false;
-
-      if (!acc) {
-        // INTENTAR REGISTRO AUTOMÁTICO DESDE RIOT
-        const [name, tag] = slug.split('#').map(s => s.trim());
         const RIOT_API_KEY = process.env.RIOT_API_KEY;
-        
         if (!RIOT_API_KEY) return msg.channel.send('❌ El sistema no tiene configurada la Riot API Key.');
 
-        const statusMsg = await msg.channel.send(`🔍 Buscando a **${name}#${tag}** en los servidores de Riot...`);
+        let region = 'la1';
+        let nameWithTag = args.join(' ');
+        
+        // Detectar región al final del comando (opcional)
+        const possibleRegion = args[args.length - 1]?.toLowerCase();
+        if (VALID_REGIONS.includes(possibleRegion)) {
+          region = possibleRegion;
+          const tempArgs = [...args];
+          tempArgs.pop();
+          nameWithTag = tempArgs.join(' ');
+        }
 
-        try {
-          // 1. Obtener PUUID (Americas)
-          const accountUrl = `https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(name)}/${encodeURIComponent(tag)}?api_key=${RIOT_API_KEY}`;
+        if (!nameWithTag.includes('#')) return msg.channel.send(`<@${msg.author.id}> ❌ Uso: \`!vincular Nombre#TAG [Region]\`. Ejemplo: \`!vincular Faker#KR1 kr\``);
+        
+        let acc = await findAccountBySlug(nameWithTag);
+        let isNew = false;
+
+        if (!acc) {
+          const [name, tag] = nameWithTag.split('#').map(s => s.trim());
+          const routing = REGION_ROUTING[region] || 'americas';
+
+          const statusMsg = await msg.channel.send(`🔍 Buscando a **${name}#${tag}** en **${region.toUpperCase()}** (${routing})...`);
+
+          try {
+            // 1. Obtener PUUID (Routing Regional)
+            const accountUrl = `https://${routing}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(name)}/${encodeURIComponent(tag)}?api_key=${RIOT_API_KEY}`;
           const accountRes = await fetch(accountUrl);
           
           if (!accountRes.ok) {
             statusMsg.delete().catch(() => {});
-            return msg.channel.send(`<@${msg.author.id}> ❌ No pude encontrar a **${name}#${tag}** en Riot. Revisa si el nombre y tag son correctos.`);
+            return msg.channel.send(`<@${msg.author.id}> ❌ No pude encontrar a **${name}#${tag}** en Riot. Revisa si el nombre, tag y región son correctos.`);
           }
 
           const accountData = await accountRes.json();
           const puuid = accountData.puuid;
 
-          // 2. Obtener Summoner Data (LA1)
-          const summonerUrl = `https://la1.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${puuid}?api_key=${RIOT_API_KEY}`;
+          // 2. Obtener Summoner Data (Plataforma Específica)
+          const summonerUrl = `https://${region}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${puuid}?api_key=${RIOT_API_KEY}`;
           const summonerRes = await fetch(summonerUrl);
           const summonerData = summonerRes.ok ? await summonerRes.json() : {};
 
-          // 3. Obtener Rango inicial (LA1)
-          const leagueUrl = `https://la1.api.riotgames.com/lol/league/v4/entries/by-puuid/${puuid}?api_key=${RIOT_API_KEY}`;
+          // 3. Obtener Rango inicial (Plataforma Específica)
+          const leagueUrl = `https://${region}.api.riotgames.com/lol/league/v4/entries/by-puuid/${puuid}?api_key=${RIOT_API_KEY}`;
           const leagueRes = await fetch(leagueUrl);
           const leagues = leagueRes.ok ? await leagueRes.json() : [];
           const soloQ = leagues.find(l => l.queueType === 'RANKED_SOLO_5x5') || null;
@@ -373,6 +394,7 @@ function initBot(db) {
             puuid: puuid,
             gameName: accountData.gameName,
             tagLine: accountData.tagLine,
+            region: region, // GUARDAR REGIÓN
             summonerId: summonerData.id || '',
             profileIconId: summonerData.profileIconId || 0,
             summonerLevel: summonerData.summonerLevel || 0,
@@ -2680,14 +2702,15 @@ async function settleBets(acc) {
     console.log(`[Bets] Processing results for ${acc.gameName}...`);
     await new Promise(r => setTimeout(r, 120000));
     const API_KEY = process.env.RIOT_API_KEY;
+    const routing = REGION_ROUTING[acc.region] || 'americas';
 
-    const matchUrl = `https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/${acc.puuid.trim()}/ids?count=1`;
+    const matchUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/by-puuid/${acc.puuid.trim()}/ids?count=1`;
     const matchIdsRes = await fetch(matchUrl, { headers: { "X-Riot-Token": API_KEY.trim() } });
     const matchIds = await matchIdsRes.json();
     
     if (!matchIds || !Array.isArray(matchIds) || matchIds.length === 0) return;
 
-    const detailUrl = `https://americas.api.riotgames.com/lol/match/v5/matches/${matchIds[0]}`;
+    const detailUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/${matchIds[0]}`;
     const detailRes = await fetch(detailUrl, { headers: { "X-Riot-Token": API_KEY.trim() } });
     const match = await detailRes.json();
     
@@ -2814,7 +2837,8 @@ async function startBot() {
         for (const acc of accounts) {
           if (cooldown403.has(acc.puuid) && nowTime < cooldown403.get(acc.puuid)) continue;
           
-          const res = await fetch(`https://la1.api.riotgames.com/lol/spectator/v5/active-games/by-puuid/${acc.puuid.trim()}?api_key=${process.env.RIOT_API_KEY}`);
+          const region = acc.region || 'la1';
+          const res = await fetch(`https://${region}.api.riotgames.com/lol/spectator/v5/active-games/by-puuid/${acc.puuid.trim()}?api_key=${process.env.RIOT_API_KEY}`);
           if (res.ok) {
             const game = await res.json();
             if ([420, 440].includes(game.gameQueueConfigId) && !liveCache.has(acc.puuid)) {
