@@ -331,6 +331,7 @@ h1::after {
   align-items: center;
   justify-content: flex-end;
   gap: 1.5rem;
+  padding-right: 50px; /* Espacio para los botones flotantes */
 }
 
 .rank-emblem {
@@ -669,12 +670,13 @@ select option {
 .card-actions {
   position: absolute;
   top: 10px;
-  right: 10px;
+  right: 12px;
   display: flex;
+  flex-direction: column;
   gap: 8px;
   opacity: 0;
-  transform: translateY(-5px);
-  transition: all 0.3s ease;
+  transform: translateX(10px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 50;
 }
 
