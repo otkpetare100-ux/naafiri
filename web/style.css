@@ -154,9 +154,9 @@ h1::after {
 
 .player-card:hover {
   background: rgba(255, 255, 255, 0.08);
-  transform: translateX(8px);
+  transform: translateX(12px) scale(1.005);
   border-color: rgba(255, 255, 255, 0.4);
-  box-shadow: 0 0 25px rgba(255, 255, 255, 0.05);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 255, 255, 0.05);
 }
 
 .player-card.rank-1 {
@@ -671,14 +671,17 @@ select option {
 .card-actions {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   justify-content: center;
   align-items: center;
   opacity: 0;
-  transform: translateX(10px);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  padding-left: 10px;
-  border-left: 1px solid var(--border-muted);
+  transform: translateX(20px);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  background: rgba(10, 10, 12, 0.6);
+  backdrop-filter: blur(8px);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  height: 100%;
+  width: 100%;
 }
 
 .player-card:hover .card-actions {
@@ -687,44 +690,46 @@ select option {
 }
 
 .btn-delete-card, .btn-refresh-card {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: #fff;
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
 }
 
 .btn-delete-card {
-  background: rgba(239, 68, 68, 0.15);
+  background: rgba(239, 68, 68, 0.1);
   color: #ef4444;
-  border-color: rgba(239, 68, 68, 0.3);
+  border-color: rgba(239, 68, 68, 0.2);
 }
 
 .btn-delete-card:hover {
   background: #ef4444;
   color: white;
-  transform: scale(1.05);
-  box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
 }
 
 .btn-refresh-card {
-  background: rgba(59, 130, 246, 0.15);
+  background: rgba(59, 130, 246, 0.1);
   color: #3b82f6;
-  border-color: rgba(59, 130, 246, 0.3);
+  border-color: rgba(59, 130, 246, 0.2);
 }
 
 .btn-refresh-card:hover {
   background: #3b82f6;
   color: white;
-  transform: scale(1.05) rotate(180deg);
-  box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+  transform: scale(1.1) rotate(180deg);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
 }
 
 .refresh-icon {
