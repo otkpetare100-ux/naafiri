@@ -145,7 +145,7 @@ h1::after {
   border-radius: 12px;
   padding: 0.5rem 1.5rem;
   display: grid;
-  grid-template-columns: 60px 80px 1fr 250px 80px;
+  grid-template-columns: 80px 80px 1fr 300px;
   align-items: center;
   position: relative;
   transition: all 0.3s ease;
@@ -329,8 +329,8 @@ h1::after {
 .rank-data {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 1rem;
+  justify-content: flex-end;
+  gap: 1.5rem;
 }
 
 .rank-emblem {
@@ -395,8 +395,8 @@ h1::after {
 /* Responsive */
 @media (max-width: 1000px) {
   .player-card {
-    grid-template-columns: 50px 70px 1fr 60px;
-    padding: 0.8rem;
+    grid-template-columns: 50px 70px 1fr;
+    padding: 1rem;
     gap: 0.5rem;
   }
   .rank-data { 
@@ -406,10 +406,8 @@ h1::after {
     margin-top: 0.5rem;
   }
   .card-actions {
-    grid-column: 4;
-    grid-row: 1;
-    border-left: none;
-    padding-left: 0;
+    top: 5px;
+    right: 5px;
   }
 }
 
@@ -669,41 +667,36 @@ select option {
    CARD ACTIONS (REFRESH & DELETE)
    ========================================= */
 .card-actions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  justify-content: center;
-  align-items: center;
+  gap: 8px;
   opacity: 0;
-  transform: translateX(20px);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  background: rgba(10, 10, 12, 0.6);
-  backdrop-filter: blur(8px);
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
-  height: 100%;
-  width: 100%;
+  transform: translateY(-5px);
+  transition: all 0.3s ease;
+  z-index: 50;
 }
 
 .player-card:hover .card-actions {
   opacity: 1;
-  transform: translateX(0);
+  transform: translateY(0);
 }
 
 .btn-delete-card, .btn-refresh-card {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #fff;
-  width: 38px;
-  height: 38px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 14px;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  position: relative;
-  overflow: hidden;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
 }
 
 .btn-delete-card {
@@ -714,22 +707,15 @@ select option {
 
 .btn-delete-card:hover {
   background: #ef4444;
-  color: white;
-  transform: scale(1.1);
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
-}
-
-.btn-refresh-card {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
-  border-color: rgba(59, 130, 246, 0.2);
+  border-color: #ef4444;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
 }
 
 .btn-refresh-card:hover {
   background: #3b82f6;
-  color: white;
-  transform: scale(1.1) rotate(180deg);
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+  border-color: #3b82f6;
+  transform: rotate(180deg);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
 }
 
 .refresh-icon {
