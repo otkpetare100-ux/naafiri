@@ -383,7 +383,7 @@ function initBot(db) {
           const summonerRes = await fetch(summonerUrl);
           const summonerData = summonerRes.ok ? await summonerRes.json() : {};
 
-          // 3. Obtener Rango inicial (Plataforma Específica)
+          // 3. Obtener Rango inicial (Usando PUUID)
           const leagueUrl = `https://${region}.api.riotgames.com/lol/league/v4/entries/by-puuid/${puuid}?api_key=${RIOT_API_KEY}`;
           const leagueRes = await fetch(leagueUrl);
           const leagues = leagueRes.ok ? await leagueRes.json() : [];

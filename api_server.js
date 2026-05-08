@@ -109,25 +109,18 @@ app.post('/api/summoners', async (req, res) => {
       oc1: 'sea', ph2: 'sea', sg2: 'sea', th2: 'sea', tw2: 'sea', vn2: 'sea'
     };
     const routing = routingMap[region] || 'americas';
-    console.log(`[DEBUG] Routing: ${routing}`);
 
     // 2. PUUID
     const accountUrl = `https://${routing}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}?api_key=${RIOT_API_KEY}`;
-    console.log(`[DEBUG] Llamando Account-V1: ${accountUrl.replace(RIOT_API_KEY, 'HIDDEN')}`);
     const accountResp = await fetch(accountUrl);
-    console.log(`[DEBUG] Status Account-V1: ${accountResp.status}`);
     
     if (!accountResp.ok) {
       return res.status(accountResp.status).json({ message: 'No se encontró la cuenta en Riot Games.' });
     }
     const accountData = await accountResp.json();
-    console.log(`[DEBUG] PUUID obtenido: ${accountData.puuid}`);
 
     // 3. Summoner-V4
     const summonerUrl = `https://${region}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${accountData.puuid}?api_key=${RIOT_API_KEY}`;
-    console.log(`[DEBUG] Llamando Summoner-V4: ${summonerUrl.replace(RIOT_API_KEY, 'HIDDEN')}`);
-    const summonerResp = await fetch(summonerUrl);
-    console.log(`[DEBUG] Status Summoner-V4: ${summonerResp.status}`);
     
     let summonerLevel = 0;
     let profileIconId = 29;
@@ -138,31 +131,26 @@ app.post('/api/summoners', async (req, res) => {
       summonerLevel = summonerData.summonerLevel;
       profileIconId = summonerData.profileIconId;
       summonerId = summonerData.id;
-      console.log(`[DEBUG] Datos Summoner: Nivel ${summonerLevel}, Icon ${profileIconId}`);
     }
 
-    // 4. League-V4
+    // 4. League-V4 (Usando PUUID directamente)
     let soloQ = { tier: 'UNRANKED', rank: '', leaguePoints: 0, wins: 0, losses: 0 };
-    if (summonerId) {
-      const leagueUrl = `https://${region}.api.riotgames.com/lol/league/v4/entries/by-summoner/${summonerId}?api_key=${RIOT_API_KEY}`;
-      console.log(`[DEBUG] Llamando League-V4: ${leagueUrl.replace(RIOT_API_KEY, 'HIDDEN')}`);
-      const leagueResp = await fetch(leagueUrl);
-      console.log(`[DEBUG] Status League-V4: ${leagueResp.status}`);
-      
-      if (leagueResp.ok) {
-        const leagues = await leagueResp.json();
-        console.log(`[DEBUG] Ligas encontradas: ${leagues.length}`);
-        const soloQEntry = leagues.find(e => e.queueType === 'RANKED_SOLO_5x5');
-        if (soloQEntry) {
-          soloQ = {
-            tier: soloQEntry.tier,
-            rank: soloQEntry.rank,
-            leaguePoints: soloQEntry.leaguePoints,
-            wins: soloQEntry.wins,
-            losses: soloQEntry.losses
-          };
-          console.log(`[DEBUG] SoloQ detectado: ${soloQ.tier} ${soloQ.rank}`);
-        }
+    const leagueUrl = `https://${region}.api.riotgames.com/lol/league/v4/entries/by-puuid/${accountData.puuid}?api_key=${RIOT_API_KEY}`;
+    const leagueResp = await fetch(leagueUrl);
+    
+    if (leagueResp.ok) {
+      const leagues = await leagueResp.json();
+      console.log(`[DEBUG] Ligas encontradas: ${leagues.length}`);
+      const soloQEntry = leagues.find(e => e.queueType === 'RANKED_SOLO_5x5');
+      if (soloQEntry) {
+        soloQ = {
+          tier: soloQEntry.tier,
+          rank: soloQEntry.rank,
+          leaguePoints: soloQEntry.leaguePoints,
+          wins: soloQEntry.wins,
+          losses: soloQEntry.losses
+        };
+        console.log(`SoloQ detectado para ${gameName}: ${soloQ.tier} ${soloQ.rank}`);
       }
     }
 
