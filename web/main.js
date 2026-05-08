@@ -53,11 +53,14 @@ function renderLadder(players) {
       <div class="player-main-info">
         <div class="player-name-row">
           <span class="name">${player.gameName}</span>
+          ${player.discordId ? '<span class="discord-badge">Linked</span>' : ''}
           <span class="status-dot ${player.isLive ? 'online' : ''}"></span>
         </div>
         <div class="player-meta">
           <span class="tag">#${player.tagLine}</span>
           <span class="region-badge reg-${(player.region || 'la1').toLowerCase()}">${(player.region || 'LAN').toUpperCase()}</span>
+          ${player.streak > 0 ? `<span class="streak-tag streak-win">🔥 ${player.streak} Wins</span>` : 
+            player.streak < 0 ? `<span class="streak-tag streak-loss">❄️ ${Math.abs(player.streak)} Loss</span>` : ''}
         </div>
       </div>
 

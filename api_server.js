@@ -43,14 +43,20 @@ app.get('/api/ladder', async (req, res) => {
     const accounts = await db.collection('accounts').find({}).toArray();
     
     const getAbsoluteLP = (tier, rank, lp) => {
-      if (!tier || !rank) return 0;
-      const tiers = ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'EMERALD', 'DIAMOND', 'MASTER', 'GRANDMASTER', 'CHALLENGER'];
-      const ranks = ['IV', 'III', 'II', 'I'];
-      const tierIdx = tiers.indexOf(tier.toUpperCase());
-      if (tierIdx === -1) return 0;
-      if (tierIdx >= 7) return (7 * 400) + lp;
-      const rankIdx = ranks.indexOf(rank.toUpperCase());
-      return (tierIdx * 400) + (rankIdx * 100) + lp;
+      const tierOrder = {
+        CHALLENGER: 9, GRANDMASTER: 8, MASTER: 7,
+        DIAMOND: 6, EMERALD: 5, PLATINUM: 4,
+        GOLD: 3, SILVER: 2, BRONZE: 1, IRON: 0, UNRANKED: -1
+      };
+      const divOrder = { I: 4, II: 3, III: 2, IV: 1 };
+      
+      const t = tier?.toUpperCase() || 'UNRANKED';
+      const r = rank?.toUpperCase() || '';
+      
+      const tScore = tierOrder[t] ?? -1;
+      const dScore = divOrder[r] ?? 0;
+      
+      return (tScore * 10000) + (dScore * 1000) + (lp || 0);
     };
 
     const ladder = accounts.map(acc => {
@@ -70,7 +76,9 @@ app.get('/api/ladder', async (req, res) => {
         lp: soloQ.leaguePoints,
         winRate: `${winRate}%`,
         absLp: getAbsoluteLP(soloQ.tier, soloQ.rank, soloQ.leaguePoints),
-        isLive: acc.liveGameStartedAt ? true : false
+        isLive: acc.liveGameStartedAt ? true : false,
+        discordId: acc.discordId || null,
+        streak: acc.streak || 0
       };
     });
 
@@ -179,6 +187,8 @@ app.post('/api/summoners', async (req, res) => {
       profileIconId: profileIconId,
       summonerLevel: summonerLevel,
       soloQ: soloQ,
+      streak: 0,
+      addedAt: new Date(),
       lastUpdated: new Date()
     };
 
