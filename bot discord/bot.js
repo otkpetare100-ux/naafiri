@@ -4,6 +4,9 @@ const fetch = (...args) => import('node-fetch').then(({default: f}) => f(...args
 const fs = require('fs');
 const path = require('path');
 const { MongoClient } = require('mongodb');
+const dns = require('dns');
+
+dns.setServers(['8.8.8.8']);
 
 try { require('dotenv').config(); } catch(e) {}
 

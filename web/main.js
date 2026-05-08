@@ -1,8 +1,8 @@
 import './style.css'
 
-const API_BASE = 'http://localhost:3001/api';
-const ASSETS_BASE = 'http://localhost:3001/assets';
-const DDRAGON_VERSION = '15.8.1';
+const API_BASE = `${window.location.origin}/api`;
+const ASSETS_BASE = `${window.location.origin}/assets`;
+const DDRAGON_VERSION = '16.9.1';
 
 async function fetchLadder() {
   const container = document.getElementById('ladder-container');
@@ -15,7 +15,8 @@ async function fetchLadder() {
     renderLadder(players);
   } catch (error) {
     console.error('API Error:', error);
-    container.innerHTML = `<div class="error">⚠️ Error al conectar con la API de Naafiri.</div>`;
+    showToast('⚠️ Error al conectar con la API de Naafiri.', 'error');
+    container.innerHTML = `<div class="error">⚠️ Jauría desconectada. Reintenta en unos momentos.</div>`;
   }
 }
 
@@ -44,7 +45,8 @@ function renderLadder(players) {
       <div class="rank-text">#${rankNum}</div>
       
       <div class="avatar-wrapper">
-        <img src="${avatarUrl}" class="player-avatar" alt="${player.gameName}" />
+        ${rankNum === 1 ? `<img src="${ASSETS_BASE}/estetica/corona.png?t=${Date.now()}" class="rank-crown" alt="Crown" />` : ''}
+        <img src="${avatarUrl}" class="player-avatar" alt="${player.gameName}" onerror="this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png'" />
         <div class="level-tag">${player.summonerLevel}</div>
       </div>
 
@@ -53,7 +55,10 @@ function renderLadder(players) {
           <span class="name">${player.gameName}</span>
           <span class="status-dot ${player.isLive ? 'online' : ''}"></span>
         </div>
-        <div class="tag">#${player.tagLine}</div>
+        <div class="player-meta">
+          <span class="tag">#${player.tagLine}</span>
+          <span class="region-badge reg-${(player.region || 'la1').toLowerCase()}">${(player.region || 'LAN').toUpperCase()}</span>
+        </div>
       </div>
 
       <div class="rank-data">
@@ -67,28 +72,186 @@ function renderLadder(players) {
           </div>
         </div>
       </div>
+
+      <!-- Botones de Acción (Solo visible on hover) -->
+      <div class="card-actions">
+        <button class="btn-refresh-card" onclick="refreshPlayer('${player.gameName}', '${player.tagLine}', '${player.region}')" title="Actualizar datos">
+          <span class="refresh-icon">🔄</span>
+        </button>
+        <button class="btn-delete-card" onclick="openDeleteModal('${player.puuid}', '${player.gameName.replace(/'/g, "\\'")}')" title="Eliminar de la jauría">
+          &times;
+        </button>
+      </div>
     `;
 
     container.appendChild(card);
   });
 }
 
-// Búsqueda (Filtro local por ahora)
-const searchInput = document.getElementById('search-input');
-searchInput.addEventListener('input', (e) => {
-  const term = e.target.value.toLowerCase();
-  const cards = document.querySelectorAll('.player-card');
-  
-  cards.forEach(card => {
-    const name = card.querySelector('.name').textContent.toLowerCase();
-    const tag = card.querySelector('.tag').textContent.toLowerCase();
-    if (name.includes(term) || tag.includes(term)) {
-      card.style.display = 'flex';
+// Lógica de Actualización Manual
+async function refreshPlayer(gameName, tagLine, region) {
+  try {
+    showToast(`Actualizando a ${gameName}...`);
+    
+    const response = await fetch(`${API_BASE}/summoners`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ gameName, tagLine, region })
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      showToast(result.message || '¡Datos actualizados!');
+      fetchLadder(); // Recargar la lista
     } else {
-      card.style.display = 'none';
+      showToast(result.message || 'Error al actualizar', 'error');
     }
-  });
-});
+  } catch (error) {
+    console.error('Refresh error:', error);
+    showToast('Error de conexión.', 'error');
+  }
+}
+
+window.refreshPlayer = refreshPlayer;
+
+// Variables globales para el borrado
+let playerToDelete = null;
+
+function openDeleteModal(puuid, name) {
+  playerToDelete = puuid;
+  document.getElementById('delete-player-name').innerText = name;
+  document.getElementById('confirm-delete-modal').classList.add('active');
+}
+
+function initDeleteLogic() {
+  const modal = document.getElementById('confirm-delete-modal');
+  const cancelBtn = document.getElementById('cancel-delete');
+  const confirmBtn = document.getElementById('confirm-delete-btn');
+  const closeBtn = document.querySelector('.close-confirm');
+
+  const closeModal = () => {
+    modal.classList.remove('active');
+    playerToDelete = null;
+  };
+
+  cancelBtn.onclick = closeModal;
+  closeBtn.onclick = closeModal;
+  
+  confirmBtn.onclick = async () => {
+    if (!playerToDelete) return;
+
+    try {
+      confirmBtn.innerText = 'Eliminando...';
+      confirmBtn.disabled = true;
+
+      const response = await fetch(`${API_BASE}/summoners/${playerToDelete}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        showToast('✅ Jugador expulsado de la jauría.');
+        closeModal();
+        fetchLadder(); // Recargar la lista
+      } else {
+        showToast('❌ No se pudo eliminar al jugador.', 'error');
+      }
+    } catch (error) {
+      console.error('Delete error:', error);
+      showToast('❌ Error de conexión.', 'error');
+    } finally {
+      confirmBtn.innerText = 'Quitar';
+      confirmBtn.disabled = false;
+    }
+  };
+}
+
+// Hacer funciones disponibles globalmente para los onclick de los strings HTML
+window.openDeleteModal = openDeleteModal;
+
+
+
+// Lógica del Modal para Añadir Jugador
+function initModal() {
+  const modal = document.getElementById('add-player-modal');
+  const btn = document.getElementById('add-player-btn');
+  const span = document.querySelector('.close-modal');
+  const form = document.getElementById('add-player-form');
+
+  if (!modal || !btn || !span || !form) return;
+
+  btn.onclick = () => modal.classList.add('active');
+  span.onclick = () => modal.classList.remove('active');
+  
+  // Cerrar al hacer clic fuera del modal
+  window.onclick = (event) => {
+    if (event.target === modal) modal.classList.remove('active');
+  };
+
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    const submitBtn = form.querySelector('.submit-btn-gold');
+    const originalText = submitBtn.innerText;
+    
+    const data = {
+      region: document.getElementById('region').value,
+      gameName: document.getElementById('gameName').value,
+      tagLine: document.getElementById('tagLine').value
+    };
+
+    try {
+      submitBtn.innerText = 'Registrando...';
+      submitBtn.disabled = true;
+
+      const response = await fetch(`${API_BASE}/summoners`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        showToast(result.message || '¡Operación exitosa!');
+        modal.classList.remove('active');
+        form.reset();
+        fetchLadder(); // Recargar la lista
+      } else {
+        showToast(result.message || 'No se pudo añadir al jugador', 'error');
+      }
+    } catch (error) {
+      console.error('Error adding player:', error);
+      showToast('Error de conexión con el servidor.', 'error');
+    } finally {
+      submitBtn.innerText = originalText;
+      submitBtn.disabled = false;
+    }
+  };
+}
+
+// Sistema de Notificaciones Premium (Toast)
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  
+  const icon = type === 'success' ? '✅' : '❌';
+  toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+  
+  container.appendChild(toast);
+  
+  // Eliminar automáticamente después de 4 segundos
+  setTimeout(() => {
+    toast.classList.add('removing');
+    setTimeout(() => {
+      toast.remove();
+    }, 500);
+  }, 4000);
+}
 
 // Carga inicial
-document.addEventListener('DOMContentLoaded', fetchLadder);
+document.addEventListener('DOMContentLoaded', () => {
+  fetchLadder();
+  initModal();
+  initDeleteLogic();
+});

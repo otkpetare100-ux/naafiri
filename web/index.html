@@ -14,8 +14,8 @@
       <header class="main-header">
         <div class="header-content">
           <div class="brand">
-            <img src="http://localhost:3001/assets/estetica/logo.png" class="nav-logo" alt="Logo" />
-            <img src="http://localhost:3001/assets/estetica/texto.png" class="nav-text" alt="Las Perras de Naafiri" />
+            <img src="http://localhost:3010/assets/estetica/logo.png" class="nav-logo" alt="Logo" />
+            <img src="http://localhost:3010/assets/estetica/texto.png" class="nav-text" alt="Las Perras de Naafiri" />
           </div>
         </div>
       </header>
@@ -28,10 +28,9 @@
               <h1>Leaderboard</h1>
             </div>
             <div class="header-right">
-              <div class="search-box">
-                <input type="text" id="search-input" placeholder="Buscar jugador..." />
-                <span class="search-icon">🔍</span>
-              </div>
+              <button id="add-player-btn" class="btn-gold-action">
+                <span class="icon">+</span> Añadir Jugador
+              </button>
             </div>
           </div>
           
@@ -42,6 +41,70 @@
         </section>
       </main>
     </div>
+    
+    <!-- Modal para Añadir Jugador -->
+    <div id="add-player-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Añadir Nuevo Invocador</h2>
+          <span class="close-modal">&times;</span>
+        </div>
+        <form id="add-player-form">
+          <div class="form-group">
+            <label for="region">Región</label>
+            <select id="region" required>
+              <option value="la1">LAN (Latin America North)</option>
+              <option value="la2">LAS (Latin America South)</option>
+              <option value="na1">NA (North America)</option>
+              <option value="euw1">EUW (Europe West)</option>
+              <option value="eun1">EUNE (Europe Nordic & East)</option>
+              <option value="kr">KR (Korea)</option>
+              <option value="br1">BR (Brazil)</option>
+              <option value="jp1">JP (Japan)</option>
+              <option value="tr1">TR (Turkey)</option>
+              <option value="oc1">OCE (Oceania)</option>
+              <option value="ru">RU (Russia)</option>
+              <option value="ph2">PH (Philippines)</option>
+              <option value="sg2">SG (Singapore)</option>
+              <option value="th2">TH (Thailand)</option>
+              <option value="tw2">TW (Taiwan)</option>
+              <option value="vn2">VN (Vietnam)</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group flex-2">
+              <label for="gameName">Nombre</label>
+              <input type="text" id="gameName" placeholder="Ej: Naafiri" required>
+            </div>
+            <div class="form-group flex-1">
+              <label for="tagLine">Tag</label>
+              <input type="text" id="tagLine" placeholder="Ej: LAN" required>
+            </div>
+          </div>
+          <button type="submit" class="submit-btn-gold">Registrar en la Jauría</button>
+        </form>
+      </div>
+    </div>
+    <!-- Modal de Confirmación para Eliminar -->
+    <div id="confirm-delete-modal" class="modal">
+      <div class="modal-content confirm-modal">
+        <div class="modal-header">
+          <h2>Expulsar Jugador</h2>
+          <span class="close-modal close-confirm">&times;</span>
+        </div>
+        <div class="modal-body">
+          <p>¿Estás seguro de que quieres eliminar a <strong id="delete-player-name" style="color: var(--gold-primary);"></strong> de la jauría?</p>
+          <p class="warning-text">Esta acción no se puede deshacer.</p>
+        </div>
+        <div class="modal-footer">
+          <button id="cancel-delete" class="btn-secondary">Mantener</button>
+          <button id="confirm-delete-btn" class="btn-danger">Quitar</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
     <script type="module" src="/main.js"></script>
   </body>
 </html>

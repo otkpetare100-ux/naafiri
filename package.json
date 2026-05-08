@@ -4,7 +4,8 @@
   "description": "League of Legends LAN account tracker",
   "main": "bot discord/bot.js",
   "scripts": {
-    "start": "node \"bot discord/bot.js\""
+    "start": "node master.js",
+    "build": "npm install && cd web && npm install && npm run build"
   },
   "dependencies": {
     "discord.js": "^14.14.1",
