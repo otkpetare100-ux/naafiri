@@ -344,15 +344,22 @@ function initBot(db) {
       const accounts = await db.collection('accounts').find({}).toArray();
       const sorted = accounts.sort((a,b) => getRankScore(b) - getRankScore(a)).slice(0, 10);
       
-      const list = sorted.map((a, i) => `${i+1}. **${a.gameName}** - ${a.soloQ?.tier || 'Unranked'} ${a.soloQ?.rank || ''}`).join('\n');
-      
-      const embed = new EmbedBuilder()
-        .setTitle('🏆 Top 10 de La Perrera')
-        .setDescription(list || 'No hay jugadores registrados.')
-        .setColor(0xf4c874);
+      if (sorted.length === 0) return msg.channel.send('No hay jugadores registrados.');
 
-      const sentMsg = await msg.channel.send({ content: `<@${msg.author.id}>`,  embeds: [embed] });
-      await rotateGlobalMessage(db, msg.channel, 'last_ladder_msg', sentMsg);
+      try {
+        const buffer = await generateLadderImage(sorted);
+        const attachment = new AttachmentBuilder(buffer, { name: 'ladder.png' });
+        
+        const sentMsg = await msg.channel.send({ 
+          content: `<@${msg.author.id}> aquí tienes el Top 10 de la manada:`, 
+          files: [attachment] 
+        });
+
+        await rotateGlobalMessage(db, msg.channel, 'last_ladder_msg', sentMsg);
+      } catch (e) {
+        console.error('[Ladder Image Error]', e);
+        msg.channel.send('Hubo un error al generar el ranking visual.');
+      }
       return;
     }
 
@@ -2409,6 +2416,124 @@ async function sendChallengeReminder(db, targetChannel = null) {
   } catch (e) { 
     console.error('[Challenge Reminder Error]', e); 
     return null;
+  }
+}
+
+async function generateLadderImage(accounts) {
+  let rowsHtml = '';
+  
+  accounts.forEach((acc, idx) => {
+    const iconUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${acc.profileIconId}.png`;
+    const tier = acc.soloQ?.tier || 'UNRANKED';
+    const rankColor = RANK_COLORS[tier] || '#ffffff';
+    const wr = acc.soloQ ? Math.round((acc.soloQ.wins / (acc.soloQ.wins + acc.soloQ.losses)) * 100) : 0;
+    const streakIcon = acc.streak > 0 ? `🔥 ${acc.streak}` : acc.streak < 0 ? `❄️ ${Math.abs(acc.streak)}` : '';
+
+    rowsHtml += `
+      <div class="ladder-row" style="border-left: 4px solid ${rankColor}">
+        <div class="rank-num">#${idx + 1}</div>
+        <img src="${iconUrl}" class="p-icon">
+        <div class="p-info">
+          <div class="p-name">${acc.gameName}</div>
+          <div class="p-tag">#${acc.tagLine}</div>
+        </div>
+        <div class="p-tier" style="color: ${rankColor}">${tier} ${acc.soloQ?.rank || ''}</div>
+        <div class="p-lp">${acc.soloQ?.leaguePoints || 0} LP</div>
+        <div class="p-wr">${wr}% WR</div>
+        <div class="p-streak">${streakIcon}</div>
+      </div>
+    `;
+  });
+
+  // Cargar Background
+  let bgUrl = '';
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const bgPath = path.join(__dirname, 'assets', 'bg.jpg');
+    if (fs.existsSync(bgPath)) {
+      const bgBase64 = fs.readFileSync(bgPath).toString('base64');
+      bgUrl = `data:image/jpeg;base64,${bgBase64}`;
+    }
+  } catch (e) { console.error('[BG Load Error]', e); }
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap');
+        body { 
+          margin: 0; padding: 60px; 
+          background: ${bgUrl ? `url(${bgUrl})` : '#0a0a0c'} no-repeat center center; 
+          background-size: cover;
+          font-family: 'Outfit', sans-serif; color: #fff; 
+          width: 1200px; height: auto; position: relative; overflow: hidden;
+        }
+        body::before {
+          content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+          background: radial-gradient(circle at center, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.95) 100%);
+          z-index: 0;
+        }
+        .content { position: relative; z-index: 1; }
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; border-bottom: 2px solid rgba(212,175,55,0.3); padding-bottom: 20px; }
+        .header h1 { font-size: 48px; font-weight: 900; color: #d4af37; margin: 0; letter-spacing: 10px; text-transform: uppercase; }
+        .header p { color: rgba(255,255,255,0.4); margin: 0; font-size: 18px; letter-spacing: 4px; }
+        
+        .ladder-grid { display: flex; flex-direction: column; gap: 12px; }
+        .ladder-row { 
+          background: rgba(255,255,255,0.03); 
+          backdrop-filter: blur(10px);
+          border-radius: 8px; padding: 15px 30px; 
+          display: flex; align-items: center; gap: 20px;
+          border: 1px solid rgba(255,255,255,0.05);
+        }
+        .rank-num { font-size: 24px; font-weight: 900; color: rgba(255,255,255,0.2); width: 60px; }
+        .p-icon { width: 55px; height: 55px; border-radius: 50%; border: 2px solid rgba(212,175,55,0.3); }
+        .p-info { flex: 1; }
+        .p-name { font-size: 22px; font-weight: 900; color: #fff; }
+        .p-tag { font-size: 14px; color: rgba(255,255,255,0.3); }
+        .p-tier { font-size: 20px; font-weight: 900; width: 220px; text-transform: uppercase; }
+        .p-lp { font-size: 20px; font-weight: 700; color: #f1c40f; width: 120px; text-align: right; }
+        .p-wr { font-size: 18px; font-weight: 700; color: rgba(255,255,255,0.6); width: 100px; text-align: right; }
+        .p-streak { font-size: 18px; width: 80px; text-align: right; }
+
+        .footer { text-align: center; margin-top: 40px; font-size: 12px; color: rgba(255,255,255,0.2); letter-spacing: 6px; text-transform: uppercase; }
+      </style>
+    </head>
+    <body>
+      <div class="content">
+        <div class="header">
+          <div>
+            <h1>LADDER TOP 10</h1>
+            <p>LOS MEJORES DE LA JAURÍA</p>
+          </div>
+          <div style="text-align: right; color: #d4af37; font-weight: 900; letter-spacing: 2px;">
+            SEASON 2026<br><span style="color: rgba(255,255,255,0.3); font-size: 12px;">UPDATED IN REAL-TIME</span>
+          </div>
+        </div>
+        <div class="ladder-grid">
+          ${rowsHtml}
+        </div>
+        <div class="footer">Naafiri Tracker — Global Ranking System</div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const browser = await puppeteer.launch({
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
+  try {
+    const page = await browser.newPage();
+    await page.setViewport({ width: 1200, height: 100, deviceScaleFactor: 2.5 }); 
+    await page.setContent(htmlContent, { waitUntil: 'networkidle0', timeout: 30000 });
+    const bodyHeight = await page.evaluate(() => document.body.scrollHeight);
+    await page.setViewport({ width: 1200, height: bodyHeight, deviceScaleFactor: 2.5 });
+    return await page.screenshot({ type: 'png', fullPage: true });
+  } finally {
+    await browser.close().catch(() => {});
   }
 }
 
