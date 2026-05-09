@@ -198,6 +198,7 @@ app.post('/api/summoners', async (req, res) => {
     // 6. Verificar si ya existe en nuestra DB
     const existing = await db.collection('accounts').findOne({ puuid: accountData.puuid });
     
+    if (existing) {
       // Si ya existe, actualizamos todo el kit
       const updatedAccount = { 
         puuid: accountData.puuid, 
