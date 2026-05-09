@@ -2271,7 +2271,7 @@ async function generateChallengeImage() {
         .details { display: flex; flex-direction: column; gap: 4px; }
         .name { font-size: 26px; font-weight: 900; color: #fff; margin: 0; display: flex; align-items: center; gap: 10px; }
         .rarity { font-size: 13px; font-weight: 800; text-transform: uppercase; padding: 2px 8px; background: rgba(255,255,255,0.05); border-radius: 4px; }
-        .desc { font-size: 16px; color: rgba(255,255,255,0.6); line-height: 1.4; margin: 0; max-width: 320px; }
+        .desc { font-size: 18px; color: rgba(255,255,255,0.9); line-height: 1.4; margin: 0; max-width: 400px; font-weight: 500; }
         .reward { font-size: 28px; font-weight: 900; color: #f1c40f; text-shadow: 0 0 15px rgba(241,196,15,0.3); text-align: right; white-space: nowrap; }
         .footer { text-align: center; margin-top: 40px; font-size: 13px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 4px; font-weight: 700; }
       </style>
