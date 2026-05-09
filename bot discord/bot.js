@@ -13,7 +13,7 @@ try { require('dotenv').config(); } catch(e) {}
 let client = null;
 let dbInstance = null;
 let targetChannelId = process.env.DISCORD_CHANNEL_ID;
-let DDRAGON_VERSION = '15.8.1';
+let DDRAGON_VERSION = '14.9.1';
 
 // Función para actualizar la versión de Data Dragon desde el bot
 async function updateBotDDragonVersion() {
@@ -181,6 +181,20 @@ function initBot(db) {
 
     const args = msg.content.slice(1).trim().split(/ +/);
     const command = args.shift().toLowerCase();
+
+    if (command === 'retos' || command === 'challenges' || command === 'diario_retos') {
+      const now = Date.now();
+      const lastUsed = helpCooldowns.get(`retos_${msg.author.id}`) || 0;
+      const cooldownAmount = 60 * 1000; // 1 minuto de cooldown para no saturar Puppeteer
+
+      if (now - lastUsed < cooldownAmount) {
+        return msg.channel.send(`<@${msg.author.id}> ⌛ No satures el tablero de caza. Espera un poco.`);
+      }
+
+      helpCooldowns.set(`retos_${msg.author.id}`, now);
+      msg.channel.send('⏳ Consultando el tablón de caza actual...');
+      return sendChallengeReminder(dbInstance, msg.channel);
+    }
 
     if (command === 'help' || command === 'ayuda') {
       const now = Date.now();
@@ -1185,7 +1199,7 @@ function initBot(db) {
                 { name: '👤 Perfil y Rango', value: '`!perfil [Nombre#TAG]` - Mira tu rango y racha.\n`!ladder` - Top 10 Jugadores del servidor.\n`!shame` - Muro de la vergüenza 🤡.\n`!web` - Enlace a tu perfil web privado.' },
                 { name: '💰 Economía', value: '`!monedas` - Consulta tu saldo actual.\n`!diario` - Reclama tu bono diario (100 coins).\n`!pagar @usuario [cant]` - Envía coins a un amigo.\n`!top_ricos` - Ranking de millonarios.' },
                 { name: '🎮 Colección y Gachapon', value: '`!gacha` - Tira el Gachapon (10 coins) 🎰.\n`!mochila` - Mira tu colección de cartas.\n`!trade @usuario MiItem, SuItem` - Intercambia cartas 🤝.\n`!reroll [Rareza]` - Fusiona 3 repetidos para mejorar.\n`!reciclar` - Convierte repetidos en coins instantáneamente.' },
-                { name: '🎰 Apuestas', value: '`!ludopata` - Mira tu historial y winrate de apuestas.\n*(Para apostar, usa los botones que aparecen cuando alguien entra en partida)*' }
+                { name: '🎰 Apuestas y Retos', value: '`!ludopata` - Mira tu historial y winrate de apuestas.\n`!retos` - Consulta el Tablón de Caza activo 🐾.' }
               )
               .setColor(0x576bce)
               .setFooter({ text: 'Naafiri Bot · LAN Tracker' });
@@ -2155,10 +2169,10 @@ async function notifyChallengeComplete(targetName, challenges, coins) {
 
 // Función para notificar al admin vía DM
 const CHALLENGES_LIST = [
-  { id: 'penta', name: '🏆 PENTAKILL', description: 'Realiza una Pentakill en una partida de SoloQ o Flex.', rarity: 'Legendario', reward: '1000 Coins', color: '#f1c40f', icon: 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/item/3031.png' },
-  { id: 'butcher', name: '🔪 El Carnicero', description: 'Logra 15 o más asesinatos en una sola partida.', rarity: 'Épico', reward: '200 Coins', color: '#9b59b6', icon: 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/item/6676.png' },
-  { id: 'immortal', name: '😇 Inmortal', description: 'Gana la partida sin morir ni una sola vez.', rarity: 'Raro', reward: '150 Coins', color: '#3498db', icon: 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/item/3026.png' },
-  { id: 'farmer', name: '🚜 Farm Machine', description: 'Consigue más de 8.5 CS por minuto (min. 20 min).', rarity: 'Común', reward: '100 Coins', color: '#95a5a6', icon: 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/item/1083.png' }
+  { id: 'penta', name: '🏆 PENTAKILL', description: 'Realiza una Pentakill en una partida de SoloQ o Flex.', rarity: 'Legendario', reward: '1000 Coins', color: '#f1c40f', icon: 'item/3031.png' },
+  { id: 'butcher', name: '🔪 El Carnicero', description: 'Logra 15 o más asesinatos en una sola partida.', rarity: 'Épico', reward: '200 Coins', color: '#9b59b6', icon: 'item/6676.png' },
+  { id: 'immortal', name: '😇 Inmortal', description: 'Gana la partida sin morir ni una sola vez.', rarity: 'Raro', reward: '150 Coins', color: '#3498db', icon: 'item/3026.png' },
+  { id: 'farmer', name: '🚜 Farm Machine', description: 'Consigue más de 8.5 CS por minuto (min. 20 min).', rarity: 'Común', reward: '100 Coins', color: '#95a5a6', icon: 'item/1083.png' }
 ];
 
 async function generateChallengeImage() {
@@ -2177,9 +2191,10 @@ async function generateChallengeImage() {
   } catch (e) { console.error('[BG Load Error]', e); }
 
   CHALLENGES_LIST.forEach(c => {
+    const iconUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/${c.icon}`;
     cardsHtml += `
       <div class="card" style="border-left: 5px solid ${c.color}">
-        <img src="${c.icon}" class="icon">
+        <img src="${iconUrl}" class="icon">
         <div class="details">
           <div class="name">${c.name} <span class="rarity" style="color: ${c.color}">[${c.rarity}]</span></div>
           <div class="desc">${c.description}</div>
@@ -2267,9 +2282,9 @@ async function generateChallengeImage() {
   }
 }
 
-async function sendChallengeReminder(db) {
-  if (!client || !targetChannelId) return;
-  const channel = await client.channels.fetch(targetChannelId);
+async function sendChallengeReminder(db, targetChannel = null) {
+  if (!client || (!targetChannelId && !targetChannel)) return;
+  const channel = targetChannel || await client.channels.fetch(targetChannelId);
   if (!channel) return;
 
   try {
@@ -2821,7 +2836,10 @@ async function startBot() {
 
       // Snapshots y Notificaciones
       if (minute === 0) {
-        if (hour === 12) sendDailyMotivation(db);
+        if (hour === 12) {
+          sendDailyMotivation(db);
+          sendChallengeReminder(db);
+        }
         if ([18, 22].includes(hour)) sendDailySummary(db);
       }
     }, 60 * 1000);
