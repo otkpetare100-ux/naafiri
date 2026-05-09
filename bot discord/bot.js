@@ -3019,8 +3019,11 @@ async function speakNaafiri(text, member) {
 
     const player = createAudioPlayer();
     
-    // Forzar tipo de stream arbitrario para Google TTS (MP3)
-    const resource = createAudioResource(url, {
+    // Descargar el audio como stream para máxima compatibilidad
+    const audioRes = await fetch(url);
+    if (!audioRes.ok) throw new Error('No se pudo descargar el audio de Google');
+
+    const resource = createAudioResource(audioRes.body, {
       inputType: voiceLib.StreamType ? voiceLib.StreamType.Arbitrary : 0,
       inlineVolume: true
     });
@@ -3030,7 +3033,7 @@ async function speakNaafiri(text, member) {
     connection.subscribe(player);
     player.play(resource);
 
-    console.log('[Voice] Reproduciendo audio...');
+    console.log('[Voice] Reproduciendo audio desde stream directo...');
 
     player.on(AudioPlayerStatus.Playing, () => {
       console.log('[Voice] Naafiri está hablando ahora mismo.');
