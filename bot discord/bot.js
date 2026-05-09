@@ -358,6 +358,48 @@ function initBot(db) {
       return;
     }
 
+    if (command === 'build') {
+      const champArgs = args.join('').toLowerCase();
+      if (!champArgs) {
+        return msg.reply('❌ Debes especificar un campeón. Ejemplo: `!build aatrox`');
+      }
+
+      // Revisar la caché
+      const cacheKey = `build_${champArgs}`;
+      const cacheData = await dbInstance.collection('system_config').findOne({ key: cacheKey });
+      
+      // La caché dura 24 horas
+      if (cacheData && cacheData.buffer && (Date.now() - cacheData.timestamp < 24 * 60 * 60 * 1000)) {
+        const buffer = Buffer.from(cacheData.buffer.buffer || cacheData.buffer);
+        const attachment = new AttachmentBuilder(buffer, { name: 'build.png' });
+        return msg.reply({ files: [attachment] });
+      }
+
+      const tempMsg = await msg.reply('⏳ Consultando los pergaminos antiguos para la mejor build...');
+      
+      try {
+        const buffer = await generateBuildImage(champArgs);
+        if (!buffer) {
+          return tempMsg.edit('❌ No pude encontrar información de ese campeón en dpm.lol. Revisa el nombre e intenta de nuevo.');
+        }
+
+        const attachment = new AttachmentBuilder(buffer, { name: 'build.png' });
+        await msg.reply({ files: [attachment] });
+        await tempMsg.delete().catch(() => {});
+        
+        // Guardar en caché
+        await dbInstance.collection('system_config').updateOne(
+          { key: cacheKey },
+          { $set: { buffer: buffer, timestamp: Date.now() } },
+          { upsert: true }
+        );
+      } catch (e) {
+        console.error('[Build Command Error]', e);
+        tempMsg.edit('🐾 Hubo un problema obteniendo la build, intenta de nuevo más tarde.');
+      }
+      return;
+    }
+
     if (command === 'ladder') {
       const accounts = await db.collection('accounts').find({}).toArray();
       const sorted = accounts.sort((a,b) => getRankScore(b) - getRankScore(a)).slice(0, 10);
@@ -2457,6 +2499,52 @@ async function generateChallengeImage(db) {
     const bodyHeight = await page.evaluate(() => document.body.scrollHeight);
     await page.setViewport({ width: 1200, height: bodyHeight, deviceScaleFactor: 3 });
     return await page.screenshot({ type: 'png', fullPage: true });
+  } finally {
+    await browser.close().catch(() => {});
+  }
+}
+
+async function generateBuildImage(champion) {
+  const browser = await puppeteer.launch({
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
+  
+  try {
+    const page = await browser.newPage();
+    await page.setViewport({ width: 1200, height: 1080, deviceScaleFactor: 2 });
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+    
+    const response = await page.goto(`https://dpm.lol/champions/${champion}/build`, { waitUntil: 'networkidle0', timeout: 20000 });
+    if (response && response.status() === 404) return null;
+    
+    // Inyectar CSS estético Black & Gold
+    await page.addStyleTag({
+      content: \`
+        header, nav, footer, iframe, [class*="Ad"], [id*="ad"], .advertisement { display: none !important; }
+        body { background: #0a0a0c !important; color: #fff !important; }
+        main, .container { 
+          border: 2px solid #d4af37 !important; 
+          box-shadow: 0 0 30px rgba(212, 175, 55, 0.3) !important;
+          border-radius: 24px !important;
+          background: rgba(15, 15, 20, 0.95) !important;
+          margin: 20px auto !important;
+          padding: 20px !important;
+        }
+      \`
+    });
+    
+    // Esperar a que carguen imágenes
+    await new Promise(r => setTimeout(r, 1500));
+    
+    const mainEl = await page.$('main') || await page.$('.container') || await page.$('body');
+    if (mainEl) {
+      return await mainEl.screenshot({ type: 'png' });
+    }
+    return await page.screenshot({ type: 'png', fullPage: true });
+  } catch (e) {
+    console.error('[Generate Build Image Error]', e);
+    return null;
   } finally {
     await browser.close().catch(() => {});
   }
