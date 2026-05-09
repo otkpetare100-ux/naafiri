@@ -218,8 +218,8 @@ function initBot(db) {
       GatewayIntentBits.Guilds, 
       GatewayIntentBits.GuildMessages, 
       GatewayIntentBits.MessageContent,
-      GatewayIntentBits.GuildMembers,
-      GatewayIntentBits.GuildVoiceStates
+      GatewayIntentBits.GuildMembers
+      // GatewayIntentBits.GuildVoiceStates (Desactivado por ahora)
     ]
   });
 
@@ -708,10 +708,12 @@ function initBot(db) {
       msg.channel.sendTyping();
       const response = await askNaafiri(prompt, msg.author.username);
       
+      /* 
       // Si el usuario está en un canal de voz y la voz está disponible, Naafiri también habla
       if (voiceLib && googleTTS && msg.member && msg.member.voice.channel) {
         speakNaafiri(response, msg.member);
       }
+      */
 
       return msg.reply({ content: response, allowedMentions: { repliedUser: true } });
     }
