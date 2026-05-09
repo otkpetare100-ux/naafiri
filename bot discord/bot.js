@@ -1,5 +1,4 @@
-const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, AttachmentBuilder, Events } = require('discord.js');
-console.log('🚀 [SYSTEM] Iniciando LAN Tracker Bot...');
+const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, AttachmentBuilder } = require('discord.js');
 const puppeteer = require('puppeteer');
 const fetch = (...args) => import('node-fetch').then(({default: f}) => f(...args));
 const fs = require('fs');
@@ -206,16 +205,15 @@ function initBot(db) {
   client.on('messageCreate', async (msg) => {
     if (msg.author.bot || !msg.content.startsWith('!')) return;
 
-    console.log(`[DEBUG] Comando recibido: ${msg.content} de ${msg.author.tag}`);
+    // Eliminar el comando de forma instantánea
+    msg.delete().catch(() => {});
 
-      // Eliminar el comando de forma instantánea
-      msg.delete().catch(() => {});
+    const args = msg.content.slice(1).trim().split(/ +/);
+    const command = args.shift().toLowerCase();
 
-      const args = msg.content.slice(1).trim().split(/ +/);
-      const command = args.shift().toLowerCase();
 
-      if (command === 'help' || command === 'ayuda') {
-        const now = Date.now();
+    if (command === 'help' || command === 'ayuda') {
+      const now = Date.now();
       const lastUsed = helpCooldowns.get(msg.author.id) || 0;
       const cooldownAmount = 5 * 60 * 1000;
 
@@ -1183,6 +1181,9 @@ function initBot(db) {
           cleanNameWithTag = tempArgs.join(' ');
         }
 
+        let acc = await findAccountBySlug(cleanNameWithTag);
+        let isNew = false;
+
         const parts = cleanNameWithTag.split('#');
         const tag = parts.pop().trim();
         const name = parts.join('#').trim();
@@ -1318,6 +1319,7 @@ function initBot(db) {
         return;
       }
     }
+
   });
 
   // --- MANEJO DE INTERACCIONES (BOTONES Y MODALS) ---
