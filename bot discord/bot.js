@@ -1190,12 +1190,30 @@ function initBot(db) {
               return msg.channel.send(`❌ No encontré a **${name}#${tag}**.`);
             }
             const riotAcc = await accountRes.json();
+            const puuid = riotAcc.puuid;
+
+            // 2. Summoner Data
+            const summonerUrl = `https://${region}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${puuid}?api_key=${RIOT_API_KEY}`;
+            const summonerRes = await fetch(summonerUrl);
+            const summonerData = summonerRes.ok ? await summonerRes.json() : {};
+
+            // 3. League Data (Rank)
+            const leagueUrl = `https://${region}.api.riotgames.com/lol/league/v4/entries/by-puuid/${puuid}?api_key=${RIOT_API_KEY}`;
+            const leagueRes = await fetch(leagueUrl);
+            const leagues = leagueRes.ok ? await leagueRes.json() : [];
+            const soloQ = leagues.find(l => l.queueType === 'RANKED_SOLO_5x5') || null;
+
             acc = { 
-              puuid: riotAcc.puuid, 
+              puuid: puuid, 
               gameName: riotAcc.gameName, 
               tagLine: riotAcc.tagLine, 
               region: region,
-              addedAt: new Date()
+              summonerId: summonerData.id || '',
+              profileIconId: summonerData.profileIconId || 0,
+              summonerLevel: summonerData.summonerLevel || 0,
+              soloQ: soloQ,
+              addedAt: new Date(),
+              snapshots: {}
             };
             await db.collection('accounts').insertOne(acc);
             isNew = true;
