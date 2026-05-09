@@ -428,9 +428,7 @@ function initBot(db) {
         let isNew = false;
 
         if (!acc) {
-          const parts = nameWithTag.split('#');
-          const tag = parts.pop().trim();
-          const name = parts.join('#').trim();
+          const [name, tag] = nameWithTag.split('#').map(s => s.trim());
           const statusMsg = await msg.channel.send(`<@${msg.author.id}> 🔍 Buscando a **${name}#${tag}** en **${region.toUpperCase()}** vía Servidor Central...`);
 
           try {
@@ -1184,9 +1182,7 @@ function initBot(db) {
         let acc = await findAccountBySlug(cleanNameWithTag);
         let isNew = false;
 
-        const parts = cleanNameWithTag.split('#');
-        const tag = parts.pop().trim();
-        const name = parts.join('#').trim();
+        const [name, tag] = cleanNameWithTag.split('#').map(s => s.trim());
         const statusMsg = await msg.channel.send(`🔍 Sincronizando **${name}#${tag}** con el servidor central...`);
 
         try {
