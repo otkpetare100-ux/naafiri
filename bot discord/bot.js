@@ -2878,14 +2878,33 @@ async function askNaafiri(prompt, userName = 'Invocador') {
         generationConfig: {
           temperature: 0.8,
           maxOutputTokens: 200,
-        }
+        },
+        safetySettings: [
+          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+        ]
       })
     });
 
     const data = await response.json();
-    if (data.candidates && data.candidates[0].content.parts[0].text) {
+
+    if (data.error) {
+      console.error('[Gemini API Error Detail]', data.error);
+      return `*Naafiri sufre un dolor de cabeza místico...* (Error: ${data.error.message})`;
+    }
+
+    if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts[0].text) {
       return data.candidates[0].content.parts[0].text.trim();
     }
+
+    if (data.promptFeedback && data.promptFeedback.blockReason) {
+      console.warn('[Gemini Blocked Request]', data.promptFeedback.blockReason);
+      return "*Naafiri se niega a responder a eso, algo en tus palabras ofende a la manada.*";
+    }
+
+    console.log('[Gemini Unknown Response]', JSON.stringify(data, null, 2));
     return "*Naafiri gruñe hacia las sombras, algo ha fallado en la conexión.*";
   } catch (err) {
     console.error('[Gemini API Error]', err);
