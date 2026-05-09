@@ -2189,18 +2189,11 @@ async function notifyChallengeComplete(targetName, challenges, coins) {
 }
 
 // Función para notificar al admin vía DM
-const CHALLENGES_LIST = [
-  { id: 'penta', name: 'PENTAKILL', description: 'Realiza una Pentakill en una partida de SoloQ o Flex.', rarity: 'Legendario', reward: '1000 Coins', color: '#f1c40f', icon: 'item/3031.png' },
-  { id: 'butcher', name: 'El Carnicero', description: 'Logra 15 o más asesinatos en una sola partida.', rarity: 'Épico', reward: '200 Coins', color: '#9b59b6', icon: 'item/6676.png' },
-  { id: 'immortal', name: 'Inmortal', description: 'Gana la partida sin morir ni una sola vez.', rarity: 'Raro', reward: '150 Coins', color: '#3498db', icon: 'item/3026.png' },
-  { id: 'farmer', name: 'Farm Machine', description: 'Consigue más de 8.5 CS por minuto (min. 20 min).', rarity: 'Común', reward: '100 Coins', color: '#95a5a6', icon: 'item/1083.png' }
-];
-
 async function generateChallengeImage(db) {
   let cardsHtml = '';
   let topHuntersHtml = '';
   
-  // Obtener Top Cazadores del mes
+  // 1. Obtener Top Cazadores (Horizontal Podium)
   try {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -2216,48 +2209,43 @@ async function generateChallengeImage(db) {
       stats[name] = (stats[name] || 0) + 1;
     });
 
-    const sortedHunters = Object.entries(stats).sort((a,b) => b[1] - a[1]).slice(0, 5);
+    const sortedHunters = Object.entries(stats).sort((a,b) => b[1] - a[1]).slice(0, 4);
     
     if (sortedHunters.length > 0) {
-      topHuntersHtml = `
-        <div class="top-hunters">
-          <div class="hunter-title">TOP HUNTERS</div>
-          ${sortedHunters.map((h, idx) => `
-            <div class="hunter-row">
-              <span class="hunter-rank">${idx + 1}</span>
-              <span class="hunter-name">${h[0]}</span>
-              <span class="hunter-count">${h[1]}🏆</span>
-            </div>
-          `).join('')}
+      topHuntersHtml = sortedHunters.map((h, idx) => `
+        <div class="hunter-podium-item">
+          <span class="rank-badge">${idx + 1}</span>
+          <span class="hunter-name-small">${h[0]}</span>
+          <span class="hunter-score">${h[1]}🏆</span>
         </div>
-      `;
+      `).join('');
     } else {
-      topHuntersHtml = `
-        <div class="top-hunters">
-          <div class="hunter-title">TOP HUNTERS</div>
-          <div class="no-hunters">Esperando cacerías...</div>
-        </div>
-      `;
+      topHuntersHtml = '<div class="no-hunters-msg">Esperando a los primeros cazadores del mes...</div>';
     }
-  } catch (e) { console.error('[Hunters Fetch Error]', e); }
+  } catch (e) { console.error('[Hunters Error]', e); }
 
+  // 2. Generar Cards de Retos (Grid)
   CHALLENGES_LIST.forEach(c => {
     const iconUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/${c.icon}`;
     cardsHtml += `
-      <div class="card" style="border-left: 4px solid ${c.color}">
-        <img src="${iconUrl}" class="icon">
-        <div class="card-body">
-          <div class="card-header">
-            <span class="name">${c.name}</span>
-            <span class="reward">${c.reward}</span>
+      <div class="challenge-tile">
+        <div class="tile-rarity" style="background: ${c.color}">${c.rarity}</div>
+        <div class="tile-main">
+          <img src="${iconUrl}" class="tile-icon" style="border-color: ${c.color}">
+          <div class="tile-info">
+            <div class="tile-name">${c.name}</div>
+            <div class="tile-desc">${c.description}</div>
           </div>
-          <div class="desc">${c.description}</div>
+        </div>
+        <div class="tile-footer">
+          <span class="reward-label">RECOMPENSA</span>
+          <span class="reward-value">${c.reward}</span>
         </div>
       </div>
     `;
   });
 
-  // Cargar imagen de fondo local
+  // 3. Cargar Background
   let bgUrl = '';
   try {
     const fs = require('fs');
@@ -2274,15 +2262,15 @@ async function generateChallengeImage(db) {
     <html>
     <head>
       <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap');
         body { 
           margin: 0; 
-          padding: 40px 50px; 
+          padding: 60px; 
           background: ${bgUrl ? `url(${bgUrl})` : '#0a0a0c'} no-repeat center center; 
           background-size: cover;
-          font-family: 'Inter', sans-serif; 
+          font-family: 'Outfit', sans-serif; 
           color: #fff; 
-          width: 1500px; 
+          width: 1200px; 
           height: auto; 
           position: relative;
           overflow: hidden;
@@ -2291,57 +2279,93 @@ async function generateChallengeImage(db) {
           content: '';
           position: absolute;
           top: 0; left: 0; right: 0; bottom: 0;
-          background: rgba(0, 0, 0, 0.9);
+          background: radial-gradient(circle at center, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.95) 100%);
           z-index: 0;
         }
         .content { position: relative; z-index: 1; }
-        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; border-bottom: 2px solid rgba(212,175,55,0.3); padding-bottom: 20px; }
-        .header h1 { font-size: 40px; color: #d4af37; text-transform: uppercase; letter-spacing: 10px; margin: 0; font-weight: 900; }
-        .header p { color: rgba(255,255,255,0.4); margin: 0; font-size: 16px; text-transform: uppercase; letter-spacing: 3px; }
         
-        .main-layout { display: grid; grid-template-columns: 1fr 340px; gap: 40px; }
-        .challenges-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        /* HEADER */
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 50px; }
+        .title-group h1 { font-size: 56px; font-weight: 900; color: #d4af37; margin: 0; letter-spacing: 12px; text-transform: uppercase; text-shadow: 0 0 40px rgba(212,175,55,0.5); }
+        .title-group p { margin: 5px 0 0; color: rgba(255,255,255,0.4); font-size: 18px; text-transform: uppercase; letter-spacing: 5px; }
         
-        .card { 
-          background: rgba(255,255,255,0.03); 
-          backdrop-filter: blur(10px);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          border-radius: 12px; 
-          padding: 18px; 
-          display: flex;
+        /* TOP HUNTERS BAR */
+        .hunters-bar { 
+          background: rgba(212, 175, 55, 0.08); 
+          border: 1px solid rgba(212, 175, 55, 0.2);
+          border-radius: 50px; 
+          padding: 15px 40px; 
+          display: flex; 
           align-items: center; 
-          gap: 15px;
+          gap: 30px; 
         }
-        .icon { width: 70px; height: 70px; border-radius: 10px; border: 2px solid rgba(212,175,55,0.2); }
-        .card-body { flex: 1; }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-        .name { font-size: 22px; font-weight: 900; color: #fff; }
-        .reward { font-size: 22px; font-weight: 900; color: #f1c40f; }
-        .desc { font-size: 15px; color: rgba(255,255,255,0.7); line-height: 1.3; }
-        
-        .top-hunters { background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 16px; padding: 20px; }
-        .hunter-title { font-size: 18px; font-weight: 900; color: #d4af37; text-align: center; margin-bottom: 15px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding-bottom: 10px; }
-        .hunter-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .hunter-rank { font-size: 18px; font-weight: 900; color: #d4af37; width: 30px; }
-        .hunter-name { flex: 1; font-size: 16px; font-weight: 700; color: #fff; }
-        .hunter-count { font-size: 16px; font-weight: 900; color: #f1c40f; }
+        .hunters-bar-label { font-weight: 900; color: #d4af37; font-size: 14px; letter-spacing: 2px; }
+        .hunter-podium-item { display: flex; align-items: center; gap: 10px; }
+        .rank-badge { background: #d4af37; color: #000; font-weight: 900; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+        .hunter-name-small { font-weight: 700; color: #fff; font-size: 16px; }
+        .hunter-score { color: #f1c40f; font-weight: 900; font-size: 16px; }
+        .no-hunters-msg { color: rgba(255,255,255,0.3); font-style: italic; font-size: 14px; }
 
-        .footer { text-align: right; margin-top: 25px; font-size: 11px; color: rgba(255,255,255,0.2); text-transform: uppercase; letter-spacing: 4px; }
+        /* GRID */
+        .challenges-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        
+        .challenge-tile { 
+          background: rgba(20, 20, 25, 0.8); 
+          border: 1px solid rgba(255,255,255,0.05);
+          border-radius: 20px; 
+          padding: 0;
+          overflow: hidden;
+          position: relative;
+          box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        }
+        .tile-rarity { 
+          position: absolute; 
+          top: 0; right: 0; 
+          padding: 6px 15px; 
+          font-size: 11px; 
+          font-weight: 900; 
+          text-transform: uppercase; 
+          border-bottom-left-radius: 12px;
+          color: #000;
+        }
+        .tile-main { padding: 30px; display: flex; align-items: center; gap: 25px; }
+        .tile-icon { width: 90px; height: 90px; border-radius: 15px; border: 3px solid; background: #000; }
+        .tile-info { flex: 1; }
+        .tile-name { font-size: 28px; font-weight: 900; color: #fff; margin-bottom: 8px; }
+        .tile-desc { font-size: 16px; color: rgba(255,255,255,0.6); line-height: 1.4; }
+        
+        .tile-footer { 
+          background: rgba(255,255,255,0.03); 
+          padding: 20px 30px; 
+          display: flex; 
+          justify-content: space-between; 
+          align-items: center; 
+          border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .reward-label { font-size: 12px; font-weight: 900; color: rgba(255,255,255,0.3); letter-spacing: 2px; }
+        .reward-value { font-size: 26px; font-weight: 900; color: #f1c40f; text-shadow: 0 0 15px rgba(241,196,15,0.3); }
+
+        .footer-tag { text-align: center; margin-top: 50px; font-size: 13px; color: rgba(255,255,255,0.2); text-transform: uppercase; letter-spacing: 8px; }
       </style>
     </head>
     <body>
       <div class="content">
         <div class="header">
-          <h1>TABLÓN DE CAZA</h1>
-          <p>La Jauría - Retos Activos</p>
-        </div>
-        <div class="main-layout">
-          <div class="challenges-grid">
-            ${cardsHtml}
+          <div class="title-group">
+            <h1>Tablón de Caza</h1>
+            <p>Retos activos de la temporada</p>
           </div>
-          ${topHuntersHtml}
+          <div class="hunters-bar">
+            <span class="hunters-bar-label">HALL OF FAME</span>
+            ${topHuntersHtml}
+          </div>
         </div>
-        <div class="footer">NAAFIRI BOT — v2.5 UltraWide Landscape</div>
+        
+        <div class="challenges-grid">
+          ${cardsHtml}
+        </div>
+        
+        <div class="footer-tag">Naafiri Bounty System — Secure Connection Established</div>
       </div>
     </body>
     </html>
@@ -2353,10 +2377,10 @@ async function generateChallengeImage(db) {
   });
   try {
     const page = await browser.newPage();
-    await page.setViewport({ width: 1500, height: 100, deviceScaleFactor: 2 }); 
+    await page.setViewport({ width: 1200, height: 100, deviceScaleFactor: 3 }); 
     await page.setContent(htmlContent, { waitUntil: 'networkidle0', timeout: 30000 });
     const bodyHeight = await page.evaluate(() => document.body.scrollHeight);
-    await page.setViewport({ width: 1500, height: bodyHeight, deviceScaleFactor: 2 });
+    await page.setViewport({ width: 1200, height: bodyHeight, deviceScaleFactor: 3 });
     return await page.screenshot({ type: 'png', fullPage: true });
   } finally {
     await browser.close().catch(() => {});
