@@ -2331,7 +2331,7 @@ async function generateChallengeImage(db) {
         </div>
       `).join('');
     } else {
-      topHuntersHtml = '<div class="no-hunters-msg">Esperando a los primeros cazadores del mes...</div>';
+      topHuntersHtml = '<div class="no-hunters-msg" style="font-size: 28px; color: rgba(255,255,255,0.6);">Esperando a los primeros cazadores del mes...</div>';
     }
   } catch (e) { console.error('[Hunters Error]', e); }
 
