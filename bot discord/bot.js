@@ -2218,12 +2218,14 @@ async function generateChallengeImage(db) {
 
     const sortedHunters = Object.entries(stats).sort((a,b) => b[1] - a[1]).slice(0, 4);
     
+    const iconTrophy = `<svg width="16" height="16" viewBox="0 0 24 24" fill="#f1c40f" style="vertical-align: middle; margin-left: 5px;"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v3c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 10V7h2v3c0 1.21-.88 2.22-2 2.22c-.6 0-1-.4-1-1.22zm14 0c0 .82-.4 1.22-1 1.22c-1.12 0-2-1.01-2-2.22V7h2v3z"/></svg>`;
+
     if (sortedHunters.length > 0) {
       topHuntersHtml = sortedHunters.map((h, idx) => `
         <div class="hunter-podium-item">
           <span class="rank-badge">${idx + 1}</span>
           <span class="hunter-name-small">${h[0]}</span>
-          <span class="hunter-score">${h[1]}🏆</span>
+          <span class="hunter-score">${h[1]}${iconTrophy}</span>
         </div>
       `).join('');
     } else {
@@ -2422,12 +2424,20 @@ async function sendChallengeReminder(db, targetChannel = null) {
 async function generateLadderImage(accounts) {
   let rowsHtml = '';
   
+  const iconFire = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#e67e22" style="vertical-align: middle; margin-right: 5px;"><path d="M17.66 11.57c-.77-3.47-3.41-6.1-4.9-7.57-.3-.29-.77-.16-.9.23-.46 1.41-1.3 3.53-2.67 5.4-1.37 1.88-3.19 3.51-3.19 6.37 0 4.14 3.36 7.5 7.5 7.5s7.5-3.36 7.5-7.5c0-1.78-.62-3.41-1.64-4.7-.29-.38-.82-.36-1.1.27-.47.93-1.07 1.57-1.64 1.57-.4 0-.75-.24-.96-.57z"/></svg>`;
+  const iconIce = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#3498db" style="vertical-align: middle; margin-right: 5px;"><path d="M22 11h-4.17l3.24-3.24-1.41-1.41L15.41 10H13V7.59l3.66-3.66-1.41-1.41L12 5.76V2h-2v3.76L6.76 2.51 5.34 3.93 9 7.59V10H6.59L2.93 6.34 1.51 7.76 4.76 11H1v2h3.76l-3.24 3.24 1.41 1.41L7 13.41V16.41l-3.66 3.66 1.41 1.41L9 17.83V22h2v-4.17l3.24 3.24 1.41-1.41L13.41 16.41V13.41h2.59l3.66 3.66 1.41-1.41L17.83 13H22v-2z"/></svg>`;
+
   accounts.forEach((acc, idx) => {
     const iconUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${acc.profileIconId}.png`;
     const tier = acc.soloQ?.tier || 'UNRANKED';
     const rankColor = RANK_COLORS[tier] || '#ffffff';
-    const wr = acc.soloQ ? Math.round((acc.soloQ.wins / (acc.soloQ.wins + acc.soloQ.losses)) * 100) : 0;
-    const streakIcon = acc.streak > 0 ? `🔥 ${acc.streak}` : acc.streak < 0 ? `❄️ ${Math.abs(acc.streak)}` : '';
+    
+    let wr = 0;
+    if (acc.soloQ && (acc.soloQ.wins + acc.soloQ.losses) > 0) {
+      wr = Math.round((acc.soloQ.wins / (acc.soloQ.wins + acc.soloQ.losses)) * 100);
+    }
+    
+    const streakContent = acc.streak > 0 ? `${iconFire} ${acc.streak}` : acc.streak < 0 ? `${iconIce} ${Math.abs(acc.streak)}` : '';
 
     rowsHtml += `
       <div class="ladder-row" style="border-left: 4px solid ${rankColor}">
@@ -2440,7 +2450,7 @@ async function generateLadderImage(accounts) {
         <div class="p-tier" style="color: ${rankColor}">${tier} ${acc.soloQ?.rank || ''}</div>
         <div class="p-lp">${acc.soloQ?.leaguePoints || 0} LP</div>
         <div class="p-wr">${wr}% WR</div>
-        <div class="p-streak">${streakIcon}</div>
+        <div class="p-streak">${streakContent}</div>
       </div>
     `;
   });
