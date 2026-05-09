@@ -157,6 +157,13 @@ const GACHA_ITEMS = [
 ];
 
 
+const CHALLENGES_LIST = [
+  { name: 'Naafiri God', description: 'Consigue una Pentakill en una partida de SoloQ.', reward: '1000 Coins', color: '#f1c40f', icon: 'item/3153.png', rarity: 'Legendario' },
+  { name: 'Untouchable', description: 'Termina una partida con 0 muertes y victoria.', reward: '250 Coins', color: '#e74c3c', icon: 'item/3157.png', rarity: 'Épico' },
+  { name: 'Hard Carry', description: 'Haz más del 35% del daño total de tu equipo.', reward: '150 Coins', color: '#9b59b6', icon: 'item/3031.png', rarity: 'Raro' },
+  { name: 'Visionary', description: 'Consigue una puntuación de visión superior a 80.', reward: '100 Coins', color: '#3498db', icon: 'item/3363.png', rarity: 'Común' }
+];
+
 function escapeRegex(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
