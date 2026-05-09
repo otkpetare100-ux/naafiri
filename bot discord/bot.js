@@ -464,7 +464,7 @@ function initBot(db) {
           } catch (err) {
             console.error('[Sync Error]', err);
             statusMsg.delete().catch(() => {});
-            return msg.channel.send(`<@${msg.author.id}> ❌ Error al conectar con el servidor central.`);
+            return msg.channel.send(`<@${msg.author.id}> ❌ **Error técnico de conexión:** \`${err.message}\`. Verifica que la web esté online.`);
           }
         }
 
@@ -1207,7 +1207,7 @@ function initBot(db) {
           } catch (err) {
             console.error('[Admin Sync Error]', err);
             statusMsg.delete().catch(() => {});
-            return msg.channel.send(`❌ Error conectando con el servidor central.`);
+            return msg.channel.send(`❌ **Error técnico de conexión:** \`${err.message}\`.`);
           }
         }
 
