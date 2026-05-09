@@ -199,13 +199,26 @@ function initBot(db) {
 
   // Comandos básicos por mensaje (Prefijo !)
   client.on('messageCreate', async (msg) => {
-    if (msg.author.bot || !msg.content.startsWith('!')) return;
+    if (msg.author.bot) return;
 
-    // Eliminar el comando de forma instantánea
-    msg.delete().catch(() => {});
+    const prefix = '!';
+    const isMention = msg.mentions.has(client.user);
+    const startsWithPrefix = msg.content.startsWith(prefix);
 
-    const args = msg.content.slice(1).trim().split(/ +/);
-    const command = args.shift().toLowerCase();
+    if (!startsWithPrefix && !isMention) return;
+
+    // Solo borrar si es un comando con prefijo (para no borrar conversaciones con la IA)
+    if (startsWithPrefix) {
+      msg.delete().catch(() => {});
+    }
+
+    let command = '';
+    let args = [];
+
+    if (startsWithPrefix) {
+      args = msg.content.slice(prefix.length).trim().split(/ +/);
+      command = args.shift().toLowerCase();
+    }
 
 
     if (command === 'help' || command === 'ayuda') {
