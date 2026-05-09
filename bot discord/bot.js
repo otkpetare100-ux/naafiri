@@ -2183,7 +2183,7 @@ async function generateChallengeImage() {
   try {
     const fs = require('fs');
     const path = require('path');
-    const bgPath = path.join(__dirname, 'assets', 'pic', 'bg.jpg');
+    const bgPath = path.join(__dirname, 'assets', 'bg.jpg');
     if (fs.existsSync(bgPath)) {
       const bgBase64 = fs.readFileSync(bgPath).toString('base64');
       bgUrl = `data:image/jpeg;base64,${bgBase64}`;
@@ -2213,14 +2213,14 @@ async function generateChallengeImage() {
         body { 
           margin: 0; 
           padding: 60px 40px; 
-          background: ${bgUrl ? `url(${bgUrl})` : '#0a0a0c'}; 
+          background: ${bgUrl ? `url(${bgUrl})` : '#0a0a0c'} no-repeat center center; 
           background-size: cover;
-          background-position: center;
           font-family: 'Inter', sans-serif; 
           color: #fff; 
           width: 800px; 
           height: auto; 
           position: relative;
+          overflow: hidden;
         }
         body::before {
           content: '';
@@ -2272,11 +2272,11 @@ async function generateChallengeImage() {
   });
   try {
     const page = await browser.newPage();
-    await page.setViewport({ width: 880, height: 100, deviceScaleFactor: 3 }); 
+    await page.setViewport({ width: 850, height: 100, deviceScaleFactor: 4 }); 
     await page.setContent(htmlContent, { waitUntil: 'networkidle0', timeout: 30000 });
     const bodyHeight = await page.evaluate(() => document.body.scrollHeight);
-    await page.setViewport({ width: 880, height: bodyHeight, deviceScaleFactor: 3 });
-    return await page.screenshot({ type: 'png' });
+    await page.setViewport({ width: 850, height: bodyHeight, deviceScaleFactor: 4 });
+    return await page.screenshot({ type: 'png', fullPage: true });
   } finally {
     await browser.close().catch(() => {});
   }
