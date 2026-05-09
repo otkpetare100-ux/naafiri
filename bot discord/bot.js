@@ -2254,9 +2254,6 @@ async function sendDailySummary(db) {
         }
         .header-title {
           text-align: center;
-          font-size: 38px;
-          font-weight: 800;
-          color: #d4af37;
           text-transform: uppercase;
           letter-spacing: 6px;
           margin-bottom: 40px;
@@ -3019,12 +3016,23 @@ async function speakNaafiri(text, member) {
 
     const player = createAudioPlayer();
     
-    // Descargar el audio como stream para máxima compatibilidad
-    const audioRes = await fetch(url);
-    if (!audioRes.ok) throw new Error('No se pudo descargar el audio de Google');
+    // Usar transcodificación manual para máxima fiabilidad
+    const prism = require('prism-media');
+    const ffmpeg = new prism.FFmpeg({
+      args: [
+        '-analyzeduration', '0',
+        '-loglevel', '0',
+        '-f', 'mp3',
+        '-i', url,
+        '-acodec', 'libopus',
+        '-f', 'opus',
+        '-ar', '48000',
+        '-ac', '2',
+      ],
+    });
 
-    const resource = createAudioResource(audioRes.body, {
-      inputType: voiceLib.StreamType ? voiceLib.StreamType.Arbitrary : 0,
+    const resource = createAudioResource(ffmpeg, {
+      inputType: voiceLib.StreamType ? voiceLib.StreamType.Opus : 2,
       inlineVolume: true
     });
 
@@ -3033,7 +3041,7 @@ async function speakNaafiri(text, member) {
     connection.subscribe(player);
     player.play(resource);
 
-    console.log('[Voice] Reproduciendo audio desde stream directo...');
+    console.log('[Voice] Reproduciendo con transcodificación manual prism-media...');
 
     player.on(AudioPlayerStatus.Playing, () => {
       console.log('[Voice] Naafiri está hablando ahora mismo.');
