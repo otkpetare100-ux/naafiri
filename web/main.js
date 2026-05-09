@@ -93,11 +93,12 @@ function renderLadder(players) {
           ${topChampsHtml || '<span class="no-champs">No data</span>'}
         </div>
         <div class="player-performance">
-          ${Math.abs(player.streak) >= 2 ? (
-            player.streak > 0 ? 
-              `<span class="streak-tag streak-win"><span class="streak-emoji">🔥</span> ${player.streak} Wins</span>` : 
-              `<span class="streak-tag streak-loss"><span class="streak-emoji">❄️</span> ${Math.abs(player.streak)} Loss</span>`
-          ) : ''}
+          <div class="streak-container">
+            <span class="streak-tag ${Math.abs(player.streak) >= 2 ? (player.streak > 0 ? 'streak-win' : 'streak-loss') : 'streak-hidden'}">
+              <span class="streak-emoji">${player.streak >= 2 ? '🔥' : player.streak <= -2 ? '❄️' : '🔥'}</span> 
+              ${Math.abs(player.streak) >= 2 ? `${Math.abs(player.streak)} ${player.streak > 0 ? 'Wins' : 'Loss'}` : '0 Wins'}
+            </span>
+          </div>
           <div class="history-dots">${historyHtml}</div>
         </div>
         <img src="${emblemUrl}" class="rank-emblem" alt="${player.tier}" onerror="this.style.opacity='0'" />

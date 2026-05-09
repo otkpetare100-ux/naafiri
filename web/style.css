@@ -299,7 +299,7 @@ h1::after {
 .player-champions {
   display: flex;
   gap: 12px;
-  margin-right: 3rem; /* Más espacio a la izquierda de la racha */
+  margin-right: 1rem; /* Reducido un poco porque ahora el streak-container tiene su propio ancho */
 }
 
 .champ-item {
@@ -873,10 +873,20 @@ select option {
   box-shadow: 0 0 10px rgba(88, 101, 242, 0.3);
 }
 
+.streak-container {
+  min-width: 85px; /* Ancho fijo para mantener la simetría */
+  display: flex;
+  justify-content: flex-end;
+}
+
+.streak-hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .streak-tag {
   font-size: 0.75rem;
   font-weight: 800;
-  margin-left: 6px;
 }
 .streak-win { 
   color: #4ade80; 
