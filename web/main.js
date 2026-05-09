@@ -2,7 +2,20 @@ import './style.css'
 
 const API_BASE = `${window.location.origin}/api`;
 const ASSETS_BASE = '/assets';
-const DDRAGON_VERSION = '14.9.1';
+let DDRAGON_VERSION = '16.9.1';
+
+async function updateVersion() {
+  try {
+    const res = await fetch('https://ddragon.leagueoflegends.com/api/versions.json');
+    const versions = await res.json();
+    if (versions && versions.length > 0) {
+      DDRAGON_VERSION = versions[0];
+      console.log('DDragon Version updated:', DDRAGON_VERSION);
+    }
+  } catch (e) {
+    console.error('Error updating version:', e);
+  }
+}
 
 async function fetchLadder() {
   const container = document.getElementById('ladder-container');
@@ -288,7 +301,8 @@ function showToast(message, type = 'success') {
 }
 
 // Carga inicial
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await updateVersion();
   fetchLadder();
   initModal();
   initDeleteLogic();

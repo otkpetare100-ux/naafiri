@@ -12,7 +12,7 @@ async function refreshAll() {
 
   // Cargar Champion Map
   console.log('Cargando mapa de campeones...');
-  const champResp = await fetch('https://ddragon.leagueoflegends.com/cdn/14.9.1/data/en_US/champion.json');
+  const champResp = await fetch('https://ddragon.leagueoflegends.com/cdn/16.9.1/data/en_US/champion.json');
   const champData = await champResp.json();
   const champMap = {};
   Object.values(champData.data).forEach(c => champMap[c.key] = c.id);

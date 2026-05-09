@@ -13,7 +13,7 @@ try { require('dotenv').config(); } catch(e) {}
 let client = null;
 let dbInstance = null;
 let targetChannelId = process.env.DISCORD_CHANNEL_ID;
-let DDRAGON_VERSION = '14.9.1';
+let DDRAGON_VERSION = '16.9.1';
 
 // Función para actualizar la versión de Data Dragon desde el bot
 async function updateBotDDragonVersion() {

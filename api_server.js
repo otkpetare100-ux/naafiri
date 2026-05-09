@@ -15,18 +15,33 @@ app.use(cors());
 app.use(express.json());
 
 let db;
+let DDRAGON_VERSION = '16.9.1';
 let championMap = {};
+
+async function updateDDragonVersion() {
+  try {
+    const res = await fetch('https://ddragon.leagueoflegends.com/api/versions.json');
+    const versions = await res.json();
+    if (versions && versions.length > 0) {
+      DDRAGON_VERSION = versions[0];
+      console.log(`🚀 API Server: Versión de Data Dragon actualizada: ${DDRAGON_VERSION}`);
+    }
+  } catch (e) {
+    console.error('❌ Error actualizando versión de Data Dragon:', e);
+  }
+}
 
 async function fetchChampionMap() {
   try {
-    const resp = await fetch('https://ddragon.leagueoflegends.com/cdn/14.9.1/data/en_US/champion.json');
+    await updateDDragonVersion();
+    const resp = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/en_US/champion.json`);
     const data = await resp.json();
     const map = {};
     Object.values(data.data).forEach(champ => {
-      map[champ.key] = champ.id; // champ.key is the numeric ID as string
+      map[champ.key] = champ.id; 
     });
     championMap = map;
-    console.log('✅ API Server: Mapa de campeones cargado');
+    console.log(`✅ API Server: Mapa de campeones cargado (${DDRAGON_VERSION})`);
   } catch (e) {
     console.error('❌ Error cargando mapa de campeones:', e);
   }
