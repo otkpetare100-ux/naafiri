@@ -2275,7 +2275,7 @@ async function generateChallengeImage(db) {
           padding: 60px; 
           background: ${bgUrl ? `url(${bgUrl})` : '#0a0a0c'} no-repeat center center; 
           background-size: cover;
-          font-family: 'Outfit', sans-serif; 
+          font-family: 'Outfit', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', sans-serif; 
           color: #fff; 
           width: 1200px; 
           height: auto; 
@@ -2467,7 +2467,7 @@ async function generateLadderImage(accounts) {
           margin: 0; padding: 60px; 
           background: ${bgUrl ? `url(${bgUrl})` : '#0a0a0c'} no-repeat center center; 
           background-size: cover;
-          font-family: 'Outfit', sans-serif; color: #fff; 
+          font-family: 'Outfit', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', sans-serif; color: #fff; 
           width: 1200px; height: auto; position: relative; overflow: hidden;
         }
         body::before {
