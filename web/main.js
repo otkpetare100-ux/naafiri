@@ -73,15 +73,17 @@ function renderLadder(players) {
         <div class="player-meta">
           <span class="tag">#${player.tagLine}</span>
           <span class="region-badge reg-${(player.region || 'la1').toLowerCase()}">${getRegionName(player.region || 'la1')}</span>
-          <div class="player-performance">
-            ${player.streak > 0 ? `<span class="streak-tag streak-win">🔥 ${player.streak} Wins</span>` : 
-              player.streak < 0 ? `<span class="streak-tag streak-loss">❄️ ${Math.abs(player.streak)} Loss</span>` : ''}
-            <div class="history-dots">${historyHtml}</div>
-          </div>
         </div>
       </div>
 
       <div class="rank-data">
+        <div class="player-performance">
+          ${Math.abs(player.streak) >= 2 ? (
+            player.streak > 0 ? `<span class="streak-tag streak-win">🔥 ${player.streak} Wins</span>` : 
+            `<span class="streak-tag streak-loss">❄️ ${Math.abs(player.streak)} Loss</span>`
+          ) : ''}
+          <div class="history-dots">${historyHtml}</div>
+        </div>
         <img src="${emblemUrl}" class="rank-emblem" alt="${player.tier}" onerror="this.style.opacity='0'" />
         <div class="rank-info-text">
           <div class="tier-text">${player.tier} ${player.rank}</div>
