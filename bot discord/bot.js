@@ -2399,11 +2399,11 @@ async function generateChallengeImage(db) {
         .texto-img { height: 60px; width: auto; }
         
         .hunters-bar { background: rgba(212, 175, 55, 0.08); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 50px; padding: 15px 35px; display: flex; align-items: center; gap: 30px; }
-        .hunters-bar-label { font-weight: 900; color: #d4af37; font-size: 14px; letter-spacing: 2px; }
+        .hunters-bar-label { font-weight: 900; color: #d4af37; font-size: 28px; letter-spacing: 2px; }
         .hunter-podium-item { display: flex; align-items: center; gap: 10px; }
-        .rank-badge { background: #d4af37; color: #000; font-weight: 900; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; }
-        .hunter-name-small { font-weight: 700; color: #fff; font-size: 17px; }
-        .hunter-score { color: #f1c40f; font-weight: 900; font-size: 17px; display: flex; align-items: center; }
+        .rank-badge { background: #d4af37; color: #000; font-weight: 900; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+        .hunter-name-small { font-weight: 700; color: #fff; font-size: 28px; }
+        .hunter-score { color: #f1c40f; font-weight: 900; font-size: 28px; display: flex; align-items: center; }
 
         .challenges-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
         .challenge-tile { background: rgba(15, 15, 20, 0.85); border: 1px solid rgba(255,255,255,0.05); border-radius: 24px; overflow: hidden; box-shadow: 0 15px 50px rgba(0,0,0,0.5); }
@@ -2414,10 +2414,10 @@ async function generateChallengeImage(db) {
         .tile-desc { font-size: 32px; color: rgba(255,255,255,0.6); line-height: 1.4; }
         
         .tile-reward-bar { background: rgba(255,255,255,0.03); padding: 22px 35px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); }
-        .reward-tag { font-size: 13px; font-weight: 900; color: rgba(255,255,255,0.3); letter-spacing: 3px; }
-        .reward-amount { font-size: 30px; font-weight: 900; text-shadow: 0 0 20px rgba(212,175,55,0.3); }
+        .reward-tag { font-size: 28px; font-weight: 900; color: rgba(255,255,255,0.3); letter-spacing: 3px; }
+        .reward-amount { font-size: 28px; font-weight: 900; text-shadow: 0 0 20px rgba(212,175,55,0.3); }
 
-        .footer { text-align: center; margin-top: 60px; font-size: 14px; color: rgba(255,255,255,0.2); letter-spacing: 10px; text-transform: uppercase; font-weight: 900; }
+        .footer { text-align: center; margin-top: 60px; font-size: 28px; color: rgba(255,255,255,0.2); letter-spacing: 10px; text-transform: uppercase; font-weight: 900; }
       </style>
     </head>
     <body>
@@ -2427,7 +2427,7 @@ async function generateChallengeImage(db) {
             ${logoUrl ? `<img src="${logoUrl}" class="logo-img">` : ''}
             <div class="title-group">
               ${textoUrl ? `<img src="${textoUrl}" class="texto-img">` : '<h1>Tablón de Caza</h1>'}
-              <p>Bounty Hunter System</p>
+              <p style="font-size: 28px; margin: 0; color: rgba(255,255,255,0.6);">Bounty Hunter System</p>
             </div>
           </div>
           <div class="hunters-bar">
