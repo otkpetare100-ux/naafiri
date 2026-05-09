@@ -86,12 +86,12 @@ function renderLadder(players) {
           <span class="tag">#${player.tagLine}</span>
           <span class="region-badge reg-${(player.region || 'la1').toLowerCase()}">${getRegionName(player.region || 'la1')}</span>
         </div>
-        <div class="player-champions">
-          ${topChampsHtml || '<span class="no-champs">No data</span>'}
-        </div>
       </div>
 
       <div class="rank-data">
+        <div class="player-champions">
+          ${topChampsHtml || '<span class="no-champs">No data</span>'}
+        </div>
         <div class="player-performance">
           ${Math.abs(player.streak) >= 2 ? (
             player.streak > 0 ? 
