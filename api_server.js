@@ -15,6 +15,22 @@ app.use(cors());
 app.use(express.json());
 
 let db;
+let championMap = {};
+
+async function fetchChampionMap() {
+  try {
+    const resp = await fetch('https://ddragon.leagueoflegends.com/cdn/14.9.1/data/en_US/champion.json');
+    const data = await resp.json();
+    const map = {};
+    Object.values(data.data).forEach(champ => {
+      map[champ.key] = champ.id; // champ.key is the numeric ID as string
+    });
+    championMap = map;
+    console.log('✅ API Server: Mapa de campeones cargado');
+  } catch (e) {
+    console.error('❌ Error cargando mapa de campeones:', e);
+  }
+}
 
 async function connectDB() {
   try {
@@ -22,6 +38,7 @@ async function connectDB() {
     await client.connect();
     db = client.db('lan-tracker');
     console.log('✅ API Server: MongoDB conectado');
+    await fetchChampionMap();
   } catch (e) {
     console.error('❌ API Server: Error conectando a MongoDB:', e);
   }
@@ -34,6 +51,25 @@ app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
 });
+
+// Helper para obtener top campeones
+async function getTopChampions(puuid, region, apiKey) {
+  try {
+    const url = `https://${region}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}/top?count=3&api_key=${apiKey}`;
+    const resp = await fetch(url);
+    if (!resp.ok) return [];
+    const masteries = await resp.json();
+    return masteries.map(m => ({
+      id: m.championId,
+      name: championMap[m.championId.toString()] || 'Unknown',
+      level: m.championLevel,
+      points: m.championPoints
+    }));
+  } catch (e) {
+    console.error('Error fetching top champions:', e);
+    return [];
+  }
+}
 
 // --- Endpoints ---
 
@@ -78,7 +114,8 @@ app.get('/api/ladder', async (req, res) => {
         absLp: getAbsoluteLP(soloQ.tier, soloQ.rank, soloQ.leaguePoints),
         isLive: acc.liveGameStartedAt ? true : false,
         discordId: acc.discordId || null,
-        streak: acc.streak || 0
+        streak: acc.streak || 0,
+        topChampions: acc.topChampions || []
       };
     });
 
@@ -121,6 +158,7 @@ app.post('/api/summoners', async (req, res) => {
 
     // 3. Summoner-V4
     const summonerUrl = `https://${region}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${accountData.puuid}?api_key=${RIOT_API_KEY}`;
+    const summonerResp = await fetch(summonerUrl);
     
     let summonerLevel = 0;
     let profileIconId = 29;
@@ -154,14 +192,17 @@ app.post('/api/summoners', async (req, res) => {
       }
     }
 
-    // 5. Verificar si ya existe en nuestra DB
+    // 5. Top Campeones
+    const topChampions = await getTopChampions(accountData.puuid, region, RIOT_API_KEY);
+
+    // 6. Verificar si ya existe en nuestra DB
     const existing = await db.collection('accounts').findOne({ puuid: accountData.puuid });
     
     if (existing) {
       // Si ya existe, actualizamos todo el kit
       await db.collection('accounts').updateOne(
         { puuid: accountData.puuid },
-        { $set: { summonerLevel, profileIconId, soloQ, lastUpdated: new Date() } }
+        { $set: { summonerLevel, profileIconId, soloQ, topChampions, lastUpdated: new Date() } }
       );
       return res.json({ message: '✅ Datos del jugador actualizados.' });
     }
@@ -175,6 +216,7 @@ app.post('/api/summoners', async (req, res) => {
       profileIconId: profileIconId,
       summonerLevel: summonerLevel,
       soloQ: soloQ,
+      topChampions: topChampions,
       streak: 0,
       addedAt: new Date(),
       lastUpdated: new Date()

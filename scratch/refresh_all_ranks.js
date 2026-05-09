@@ -10,6 +10,13 @@ async function refreshAll() {
     return;
   }
 
+  // Cargar Champion Map
+  console.log('Cargando mapa de campeones...');
+  const champResp = await fetch('https://ddragon.leagueoflegends.com/cdn/14.9.1/data/en_US/champion.json');
+  const champData = await champResp.json();
+  const champMap = {};
+  Object.values(champData.data).forEach(c => champMap[c.key] = c.id);
+
   const client = new MongoClient(process.env.MONGO_URI);
   await client.connect();
   const db = client.db('lan-tracker');
@@ -48,6 +55,23 @@ async function refreshAll() {
             wins: flexEntry.wins,
             losses: flexEntry.losses
           };
+        }
+
+        // 2. Top Campeones
+        try {
+          const mUrl = `https://${region}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${acc.puuid}/top?count=3&api_key=${RIOT_API_KEY}`;
+          const mRes = await fetch(mUrl);
+          if (mRes.ok) {
+            const masteries = await mRes.json();
+            update.topChampions = masteries.map(m => ({
+              id: m.championId,
+              name: champMap[m.championId.toString()] || 'Unknown',
+              level: m.championLevel,
+              points: m.championPoints
+            }));
+          }
+        } catch (mErr) {
+          console.error(`  ⚠️ Error mastery: ${mErr.message}`);
         }
 
         await db.collection('accounts').updateOne({ puuid: acc.puuid }, { $set: update });

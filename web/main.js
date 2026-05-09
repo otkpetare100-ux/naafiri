@@ -2,7 +2,7 @@ import './style.css'
 
 const API_BASE = `${window.location.origin}/api`;
 const ASSETS_BASE = '/assets';
-const DDRAGON_VERSION = '16.9.1';
+const DDRAGON_VERSION = '14.9.1';
 
 async function fetchLadder() {
   const container = document.getElementById('ladder-container');
@@ -59,6 +59,14 @@ function renderLadder(players) {
     const wrValue = parseInt(player.winRate) || 0;
     const wrClass = wrValue >= 50 ? 'wr-positive' : 'wr-negative';
 
+    // Top Campeones HTML
+    const topChampsHtml = (player.topChampions || []).map(champ => `
+      <div class="champ-item" title="${champ.name} - Mastery ${champ.level}">
+        <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${champ.name}.png" alt="${champ.name}" onerror="this.src='/assets/placeholder_champ.png'" />
+        <span class="champ-mastery-lvl">${champ.level}</span>
+      </div>
+    `).join('');
+
     card.innerHTML = `
       <div class="rank-text">#${rankNum}</div>
       
@@ -77,6 +85,9 @@ function renderLadder(players) {
         <div class="player-meta">
           <span class="tag">#${player.tagLine}</span>
           <span class="region-badge reg-${(player.region || 'la1').toLowerCase()}">${getRegionName(player.region || 'la1')}</span>
+        </div>
+        <div class="player-champions">
+          ${topChampsHtml || '<span class="no-champs">No data</span>'}
         </div>
       </div>
 
