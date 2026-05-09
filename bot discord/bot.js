@@ -425,58 +425,48 @@ function initBot(db) {
 
         if (!acc) {
           const [name, tag] = nameWithTag.split('#').map(s => s.trim());
-          const routing = REGION_ROUTING[region] || 'americas';
-
-          const statusMsg = await msg.channel.send(`🔍 Buscando a **${name}#${tag}** en **${region.toUpperCase()}** (${routing})...`);
+          const statusMsg = await msg.channel.send(`<@${msg.author.id}> 🔍 Buscando a **${name}#${tag}** en **${region.toUpperCase()}** vía Servidor Central...`);
 
           try {
-            // 1. Obtener PUUID (Routing Regional)
-            const accountUrl = `https://${routing}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(name)}/${encodeURIComponent(tag)}?api_key=${RIOT_API_KEY.trim()}`;
-            const accountRes = await fetch(accountUrl);
-            
-            if (!accountRes.ok) {
+            const apiRes = await fetch('https://lan-tracker-production.up.railway.app/api/summoners', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ gameName: name, tagLine: tag, region: region })
+            });
+
+            if (!apiRes.ok) {
+              const errData = await apiRes.json();
               statusMsg.delete().catch(() => {});
-              const errorText = accountRes.status === 404 ? 'No existe ese Riot ID' : `Error ${accountRes.status} de Riot`;
-              return msg.channel.send(`<@${msg.author.id}> ❌ **Riot dice:** ${errorText}. Verifica nombre, tag y región (${region.toUpperCase()}).`);
+              return msg.channel.send(`<@${msg.author.id}> ❌ **Error de Sincronización:** ${errData.message || 'La web no pudo procesar la solicitud'}.`);
             }
 
-          const accountData = await accountRes.json();
-          const puuid = accountData.puuid;
+            const data = await apiRes.json();
+            const puuid = data.account.puuid;
 
-          // 2. Obtener Summoner Data (Plataforma Específica)
-          const summonerUrl = `https://${region}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${puuid}?api_key=${RIOT_API_KEY}`;
-          const summonerRes = await fetch(summonerUrl);
-          const summonerData = summonerRes.ok ? await summonerRes.json() : {};
+            // Vincular discordId en la misma DB que usa la web
+            await db.collection('accounts').updateOne(
+              { puuid: puuid },
+              { $set: { discordId: msg.author.id } }
+            );
 
-          // 3. Obtener Rango inicial (Usando PUUID)
-          const leagueUrl = `https://${region}.api.riotgames.com/lol/league/v4/entries/by-puuid/${puuid}?api_key=${RIOT_API_KEY}`;
-          const leagueRes = await fetch(leagueUrl);
-          const leagues = leagueRes.ok ? await leagueRes.json() : [];
-          const soloQ = leagues.find(l => l.queueType === 'RANKED_SOLO_5x5') || null;
+            // Sincronizar economía
+            await db.collection('economy').updateOne(
+              { discordId: msg.author.id },
+              { 
+                $setOnInsert: { coins: 100, lastDaily: null, inventory: [] },
+                $set: { puuid: puuid } 
+              },
+              { upsert: true }
+            );
 
-          // 4. Crear cuenta en DB
-          acc = {
-            puuid: puuid,
-            gameName: accountData.gameName,
-            tagLine: accountData.tagLine,
-            region: region, // GUARDAR REGIÓN
-            summonerId: summonerData.id || '',
-            profileIconId: summonerData.profileIconId || 0,
-            summonerLevel: summonerData.summonerLevel || 0,
-            soloQ: soloQ,
-            addedAt: new Date(),
-            snapshots: {}
-          };
-
-          await db.collection('accounts').insertOne(acc);
-          isNew = true;
-          statusMsg.delete().catch(() => {});
-        } catch (err) {
-          console.error('[Vincular/Riot Error]', err);
-          statusMsg.delete().catch(() => {});
-          return msg.channel.send(`<@${msg.author.id}> ❌ Error técnico al consultar Riot API.`);
+            statusMsg.delete().catch(() => {});
+            return msg.channel.send(`<@${msg.author.id}> ✅ **¡Sincronizado!** Tu cuenta **${data.account.gameName}#${data.account.tagLine}** ya está conectada al ladder.`);
+          } catch (err) {
+            console.error('[Sync Error]', err);
+            statusMsg.delete().catch(() => {});
+            return msg.channel.send(`<@${msg.author.id}> ❌ Error al conectar con el servidor central.`);
+          }
         }
-      }
 
       // VINCULAR
       await db.collection('accounts').updateOne(
@@ -1180,51 +1170,44 @@ function initBot(db) {
 
         if (!acc) {
           const [name, tag] = cleanNameWithTag.split('#').map(s => s.trim());
-          const routing = REGION_ROUTING[region] || 'americas';
-          const statusMsg = await msg.channel.send(`🔍 Buscando a **${name}#${tag}** en **${region.toUpperCase()}**...`);
-
           try {
-            const accountUrl = `https://${routing}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(name)}/${encodeURIComponent(tag)}?api_key=${RIOT_API_KEY.trim()}`;
-            const accountRes = await fetch(accountUrl);
+            const apiRes = await fetch('https://lan-tracker-production.up.railway.app/api/summoners', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ gameName: name, tagLine: tag, region: region })
+            });
 
-            if (!accountRes.ok) {
+            if (!apiRes.ok) {
+              const errData = await apiRes.json();
               statusMsg.delete().catch(() => {});
-              const errorText = accountRes.status === 404 ? 'No existe ese Riot ID' : `Error ${accountRes.status} de Riot`;
-              return msg.channel.send(`❌ **Riot dice:** ${errorText}. (${name}#${tag} en ${region.toUpperCase()})`);
+              return msg.channel.send(`❌ **Error de Sincronización:** ${errData.message || 'La web no pudo procesar la solicitud'}.`);
             }
-            const riotAcc = await accountRes.json();
-            const puuid = riotAcc.puuid;
 
-            // 2. Summoner Data
-            const summonerUrl = `https://${region}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${puuid}?api_key=${RIOT_API_KEY}`;
-            const summonerRes = await fetch(summonerUrl);
-            const summonerData = summonerRes.ok ? await summonerRes.json() : {};
+            const data = await apiRes.json();
+            const puuid = data.account.puuid;
 
-            // 3. League Data (Rank)
-            const leagueUrl = `https://${region}.api.riotgames.com/lol/league/v4/entries/by-puuid/${puuid}?api_key=${RIOT_API_KEY}`;
-            const leagueRes = await fetch(leagueUrl);
-            const leagues = leagueRes.ok ? await leagueRes.json() : [];
-            const soloQ = leagues.find(l => l.queueType === 'RANKED_SOLO_5x5') || null;
+            // Vincular discordId del usuario mencionado
+            await db.collection('accounts').updateOne(
+              { puuid: puuid },
+              { $set: { discordId: targetUser.id } }
+            );
 
-            acc = { 
-              puuid: puuid, 
-              gameName: riotAcc.gameName, 
-              tagLine: riotAcc.tagLine, 
-              region: region,
-              summonerId: summonerData.id || '',
-              profileIconId: summonerData.profileIconId || 0,
-              summonerLevel: summonerData.summonerLevel || 0,
-              soloQ: soloQ,
-              addedAt: new Date(),
-              snapshots: {}
-            };
-            await db.collection('accounts').insertOne(acc);
-            isNew = true;
+            // Sincronizar economía
+            await db.collection('economy').updateOne(
+              { discordId: targetUser.id },
+              { 
+                $setOnInsert: { coins: 100, lastDaily: null, inventory: [] },
+                $set: { puuid: puuid } 
+              },
+              { upsert: true }
+            );
+
             statusMsg.delete().catch(() => {});
+            return msg.channel.send(`✅ **Vínculo Manual Exitoso:** <@${targetUser.id}> vinculado a **${data.account.gameName}#${data.account.tagLine}**.`);
           } catch (err) {
-            console.error('[Admin Vincular Error]', err);
+            console.error('[Admin Sync Error]', err);
             statusMsg.delete().catch(() => {});
-            return msg.channel.send(`❌ Error consultando la API de Riot.`);
+            return msg.channel.send(`❌ Error conectando con el servidor central.`);
           }
         }
 
