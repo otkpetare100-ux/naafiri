@@ -2196,9 +2196,51 @@ const CHALLENGES_LIST = [
   { id: 'farmer', name: 'Farm Machine', description: 'Consigue más de 8.5 CS por minuto (min. 20 min).', rarity: 'Común', reward: '100 Coins', color: '#95a5a6', icon: 'item/1083.png' }
 ];
 
-async function generateChallengeImage() {
+async function generateChallengeImage(db) {
   let cardsHtml = '';
+  let topHuntersHtml = '';
   
+  // Obtener Top Cazadores del mes
+  try {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const activities = await db.collection('activities').find({
+      type: 'challenge_win',
+      timestamp: { $gte: startOfMonth }
+    }).toArray();
+
+    const stats = {};
+    activities.forEach(a => {
+      let name = a.message ? a.message.split('¡')[1]?.split(' ha')[0] : 'Desconocido';
+      if (!name) name = a.discordId || 'Desconocido';
+      stats[name] = (stats[name] || 0) + 1;
+    });
+
+    const sortedHunters = Object.entries(stats).sort((a,b) => b[1] - a[1]).slice(0, 5);
+    
+    if (sortedHunters.length > 0) {
+      topHuntersHtml = `
+        <div class="top-hunters">
+          <div class="hunter-title">MAYORES CAZADORES</div>
+          ${sortedHunters.map((h, idx) => `
+            <div class="hunter-row">
+              <span class="hunter-rank">${idx + 1}</span>
+              <span class="hunter-name">${h[0]}</span>
+              <span class="hunter-count">${h[1]} 🏆</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    } else {
+      topHuntersHtml = `
+        <div class="top-hunters">
+          <div class="hunter-title">MAYORES CAZADORES</div>
+          <div class="no-hunters">Aún no hay cacerías este mes...</div>
+        </div>
+      `;
+    }
+  } catch (e) { console.error('[Hunters Fetch Error]', e); }
+
   // Cargar imagen de fondo local
   let bgUrl = '';
   try {
@@ -2233,12 +2275,12 @@ async function generateChallengeImage() {
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { 
           margin: 0; 
-          padding: 60px 40px; 
+          padding: 60px 50px; 
           background: ${bgUrl ? `url(${bgUrl})` : '#0a0a0c'} no-repeat center center; 
           background-size: cover;
           font-family: 'Inter', sans-serif; 
           color: #fff; 
-          width: 750px; 
+          width: 1100px; 
           height: auto; 
           position: relative;
           overflow: hidden;
@@ -2252,28 +2294,38 @@ async function generateChallengeImage() {
         }
         .content { position: relative; z-index: 1; }
         .header { text-align: center; margin-bottom: 40px; }
-        .header h1 { font-size: 42px; color: #d4af37; text-transform: uppercase; letter-spacing: 6px; margin: 0; font-weight: 900; text-shadow: 0 0 20px rgba(212,175,55,0.4); }
-        .header p { color: rgba(255,255,255,0.6); margin-top: 10px; font-size: 16px; text-transform: uppercase; letter-spacing: 2px; }
+        .header h1 { font-size: 48px; color: #d4af37; text-transform: uppercase; letter-spacing: 12px; margin: 0; font-weight: 900; text-shadow: 0 0 25px rgba(212,175,55,0.5); }
+        .header p { color: rgba(255,255,255,0.5); margin-top: 10px; font-size: 18px; text-transform: uppercase; letter-spacing: 4px; }
+        .main-layout { display: grid; grid-template-columns: 1fr 340px; gap: 40px; }
         .card { 
-          background: rgba(20, 20, 25, 0.6); 
+          background: rgba(20, 20, 25, 0.7); 
           backdrop-filter: blur(15px);
           border: 1px solid rgba(255, 255, 255, 0.05);
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
           border-radius: 16px; 
-          padding: 25px; 
+          padding: 22px; 
           display: grid;
-          grid-template-columns: 85px 1fr auto;
+          grid-template-columns: 80px 1fr auto;
           align-items: center; 
-          gap: 25px;
-          margin-bottom: 20px; 
+          gap: 20px;
+          margin-bottom: 15px; 
         }
-        .icon { width: 85px; height: 85px; border-radius: 12px; border: 2px solid rgba(212,175,55,0.2); }
+        .icon { width: 80px; height: 80px; border-radius: 12px; border: 2px solid rgba(212,175,55,0.2); }
         .details { display: flex; flex-direction: column; gap: 4px; }
-        .name { font-size: 26px; font-weight: 900; color: #fff; margin: 0; display: flex; align-items: center; gap: 10px; }
-        .rarity { font-size: 13px; font-weight: 800; text-transform: uppercase; padding: 2px 8px; background: rgba(255,255,255,0.05); border-radius: 4px; }
-        .desc { font-size: 18px; color: rgba(255,255,255,0.9); line-height: 1.4; margin: 0; max-width: 400px; font-weight: 500; }
-        .reward { font-size: 28px; font-weight: 900; color: #f1c40f; text-shadow: 0 0 15px rgba(241,196,15,0.3); text-align: right; white-space: nowrap; }
-        .footer { text-align: center; margin-top: 40px; font-size: 13px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 4px; font-weight: 700; }
+        .name { font-size: 24px; font-weight: 900; color: #fff; margin: 0; }
+        .rarity { font-size: 12px; font-weight: 800; text-transform: uppercase; padding: 2px 8px; background: rgba(255,255,255,0.05); border-radius: 4px; color: #d4af37; }
+        .desc { font-size: 16px; color: rgba(255,255,255,0.8); line-height: 1.4; margin: 0; }
+        .reward { font-size: 26px; font-weight: 900; color: #f1c40f; text-shadow: 0 0 15px rgba(241,196,15,0.3); text-align: right; }
+        
+        .top-hunters { background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 20px; padding: 25px; height: fit-content; }
+        .hunter-title { font-size: 18px; font-weight: 900; color: #d4af37; text-align: center; margin-bottom: 25px; letter-spacing: 2px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding-bottom: 15px; }
+        .hunter-row { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .hunter-rank { font-size: 20px; font-weight: 900; color: #d4af37; width: 35px; }
+        .hunter-name { flex: 1; font-size: 18px; font-weight: 700; color: #fff; }
+        .hunter-count { font-size: 18px; font-weight: 900; color: #f1c40f; }
+        .no-hunters { text-align: center; opacity: 0.5; padding: 20px; font-style: italic; }
+
+        .footer { text-align: center; margin-top: 50px; font-size: 13px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 6px; font-weight: 800; }
       </style>
     </head>
     <body>
@@ -2282,8 +2334,13 @@ async function generateChallengeImage() {
           <h1>TABLÓN DE CAZA</h1>
           <p>Retos activos de la Perrera - Gana Naafiri Coins</p>
         </div>
-        ${cardsHtml}
-        <div class="footer">Generado por Naafiri Bot</div>
+        <div class="main-layout">
+          <div class="challenges-column">
+            ${cardsHtml}
+          </div>
+          ${topHuntersHtml}
+        </div>
+        <div class="footer">Generado por Naafiri Bot — Board Version 2.1</div>
       </div>
     </body>
     </html>
@@ -2295,10 +2352,10 @@ async function generateChallengeImage() {
   });
   try {
     const page = await browser.newPage();
-    await page.setViewport({ width: 750, height: 100, deviceScaleFactor: 2.5 }); 
+    await page.setViewport({ width: 1100, height: 100, deviceScaleFactor: 2 }); 
     await page.setContent(htmlContent, { waitUntil: 'networkidle0', timeout: 30000 });
     const bodyHeight = await page.evaluate(() => document.body.scrollHeight);
-    await page.setViewport({ width: 750, height: bodyHeight, deviceScaleFactor: 2.5 });
+    await page.setViewport({ width: 1100, height: bodyHeight, deviceScaleFactor: 2 });
     return await page.screenshot({ type: 'png', fullPage: true });
   } finally {
     await browser.close().catch(() => {});
@@ -2311,7 +2368,7 @@ async function sendChallengeReminder(db, targetChannel = null) {
   if (!channel) return;
 
   try {
-    const buffer = await generateChallengeImage();
+    const buffer = await generateChallengeImage(db);
     const attachment = new AttachmentBuilder(buffer, { name: 'retos.png' });
     const embed = new EmbedBuilder()
       .setTitle('📢 ¡ATENCIÓN MANADA! Botines disponibles 🐾')
