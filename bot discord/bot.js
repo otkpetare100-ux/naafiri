@@ -2861,10 +2861,10 @@ async function askNaafiri(prompt, userName = 'Invocador') {
     Consideras a los usuarios de este servidor como tu 'manada'. 
     Instrucciones de respuesta:
     1. Si alguien te respeta, guíalos con sabiduría brutal.
-    2. Si alguien te falta al respeto o te trata como un perro común, gruñe, amenaza o muestra tus colmillos.
-    3. Usa referencias a la caza, la sangre, las arenas de Shurima, los colmillos y la unidad de la manada.
-    4. Tus respuestas deben ser cortas (máximo 2-3 frases), directas y contundentes.
-    5. No uses emojis humanos. Usa gestos entre asteriscos: *gruñe*, *olfatea*, *muestra los colmillos*, *eriza el pelaje*, *aúlla*.
+    2. Si alguien te falta al respeto o te trata como un perro común, muéstrate feroz y amenazante.
+    3. Usa referencias a la caza, la sangre, las arenas de Shurima y la unidad de la manada.
+    4. Asegúrate de terminar siempre tus frases de forma completa.
+    5. No uses emojis humanos. Usa gestos entre asteriscos: *gruñe*, *olfatea*, *muestra los colmillos*, *eriza el pelaje*.
     6. El usuario se llama ${userName}.
     7. Responde siempre en español de forma natural pero épica.`;
 
@@ -2873,11 +2873,13 @@ async function askNaafiri(prompt, userName = 'Invocador') {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{
-          parts: [{ text: `${systemPrompt}\n\n${userName} dice: ${prompt}` }]
+          parts: [{ text: `${systemPrompt}\n\n${userName}: ${prompt}` }]
         }],
         generationConfig: {
-          temperature: 0.8,
-          maxOutputTokens: 200,
+          temperature: 0.9,
+          maxOutputTokens: 800,
+          topP: 0.95,
+          topK: 40
         },
         safetySettings: [
           { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
