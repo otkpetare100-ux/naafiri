@@ -193,8 +193,12 @@ function initBot(db) {
     ]
   });
 
-  client.on('ready', () => {
-    console.log(`✅ Bot conectado como: ${client.user.tag}`);
+  client.on(Events.ClientReady, async () => {
+    console.log(`[BOT] ¡Conectado como ${client.user.tag}!`);
+    console.log(`[BOT] Monitoreando racha de victorias en tiempo real...`);
+    
+    // Iniciar el monitor de rachas
+    startStreakMonitor();
   });
 
   // Comandos básicos por mensaje (Prefijo !)
