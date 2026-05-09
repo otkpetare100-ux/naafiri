@@ -2677,33 +2677,47 @@ async function checkEpicFreeGames(targetChannelId = null) {
 
     if (freeGames.length === 0) return null;
 
-    const embeds = freeGames.map(game => {
+    const embeds = [];
+    const expirations = [];
+
+    freeGames.forEach(game => {
       const title = game.title;
       const description = game.description || 'No hay descripción disponible.';
       const thumbnail = game.keyImages.find(img => img.type === 'Thumbnail')?.url || game.keyImages[0].url;
       const originalPrice = game.price.totalPrice.fmtPrice.originalPrice;
       const seller = game.seller.name;
       const expiryDateStr = game.promotions.promotionalOffers[0].promotionalOffers[0].endDate;
-      const expiryDate = new Date(expiryDateStr).toLocaleDateString('es-ES');
+      const expiryDate = new Date(expiryDateStr);
 
-      return new EmbedBuilder()
+      embeds.push(new EmbedBuilder()
         .setTitle(`🎁 Juego Gratis: ${title}`)
         .setURL(`https://store.epicgames.com/es-ES/p/${game.catalogNs.mappings[0].pageSlug || game.urlSlug}`)
         .setDescription(description)
         .addFields(
           { name: '💰 Precio Original', value: `~~${originalPrice}~~ **¡GRATIS!**`, inline: true },
-          { name: '📅 Reclámalo hasta', value: expiryDate, inline: true },
+          { name: '📅 Reclámalo hasta', value: expiryDate.toLocaleDateString('es-ES'), inline: true },
           { name: '🏢 Distribuidor', value: seller, inline: true }
         )
         .setImage(thumbnail)
         .setColor(0x000000)
-        .setFooter({ text: 'Epic Games Store x Naafiri Bot' });
+        .setFooter({ text: 'Epic Games Store x Naafiri Bot' }));
+      
+      expirations.push(expiryDate);
     });
 
     if (targetChannelId) {
       const channel = client.channels.cache.get(targetChannelId);
       if (channel) {
-        await channel.send({ content: '🔔 **¡Atención Cazadores! Hay nuevos juegos gratis en Epic Games Store:**', embeds });
+        const sentMsg = await channel.send({ content: '🔔 **¡Atención Cazadores! Hay nuevos juegos gratis en Epic Games Store:**', embeds });
+        
+        // Guardar en DB para borrar cuando expire (usamos la fecha del primer juego como referencia)
+        const db = client.db('lan-tracker');
+        await db.collection('temporary_messages').insertOne({
+          type: 'epic',
+          messageId: sentMsg.id,
+          channelId: targetChannelId,
+          expiresAt: expirations[0]
+        });
       }
     }
     return embeds;
@@ -2721,33 +2735,51 @@ async function checkSteamNews(targetChannelId = null) {
     const response = await fetch(url);
     const data = await response.json();
     
-    // Tomamos los "specials" (ofertas destacadas)
-    const specials = data.specials.items.slice(0, 5); // Top 5 ofertas
+    // Combinar Specials y Free Games si existen
+    const specials = data.specials.items.slice(0, 5);
 
     if (specials.length === 0) return null;
 
-    const embeds = specials.map(game => {
+    const embeds = [];
+    let maxExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // Default 24h
+
+    specials.forEach(game => {
       const originalPrice = (game.original_price / 100).toFixed(2);
       const finalPrice = (game.final_price / 100).toFixed(2);
       const discount = game.discount_percent;
+      const isFree = game.final_price === 0;
 
-      return new EmbedBuilder()
-        .setTitle(`🔥 Oferta en Steam: ${game.name}`)
+      if (game.discount_expiration) {
+        const exp = new Date(game.discount_expiration * 1000);
+        if (exp > maxExpiry) maxExpiry = exp;
+      }
+
+      embeds.push(new EmbedBuilder()
+        .setTitle(`${isFree ? '🎁 JUEGO GRATIS' : '🔥 Oferta'} en Steam: ${game.name}`)
         .setURL(`https://store.steampowered.com/app/${game.id}`)
-        .setDescription(`¡Ahorra un **${discount}%** en este título!`)
+        .setDescription(isFree ? '¡Este juego está gratis por tiempo limitado!' : `¡Ahorra un **${discount}%** en este título!`)
         .addFields(
           { name: '💰 Precio Original', value: `~~${originalPrice} ${game.currency}~~`, inline: true },
-          { name: '✨ Precio Oferta', value: `**${finalPrice} ${game.currency}**`, inline: true }
+          { name: '✨ Precio Final', value: isFree ? '**¡GRATIS!**' : `**${finalPrice} ${game.currency}**`, inline: true }
         )
         .setImage(game.header_image)
-        .setColor(0x1b2838) // Azul oscuro de Steam
-        .setFooter({ text: 'Steam Store x Naafiri Bot' });
+        .setColor(isFree ? 0x00FF00 : 0x1b2838)
+        .setFooter({ text: 'Steam Store x Naafiri Bot' }));
     });
 
     if (targetChannelId) {
       const channel = client.channels.cache.get(targetChannelId);
       if (channel) {
-        await channel.send({ content: '🎮 **¡Nuevas ofertas destacadas en Steam hoy!**', embeds });
+        const sentMsg = await channel.send({ content: '🎮 **¡Nuevas oportunidades en Steam hoy!**', embeds });
+        
+        // Guardar en DB para borrar cuando expire
+        const db = client.db('lan-tracker');
+        await db.collection('temporary_messages').insertOne({
+          type: 'steam',
+          messageId: sentMsg.id,
+          channelId: targetChannelId,
+          expiresAt: maxExpiry
+        });
       }
     }
     return embeds;
@@ -2757,20 +2789,49 @@ async function checkSteamNews(targetChannelId = null) {
   }
 }
 
-// Programador para Epic y Steam
+// Función para limpiar mensajes expirados
+async function cleanupExpiredMessages() {
+  try {
+    const db = client.db('lan-tracker');
+    const now = new Date();
+    const expired = await db.collection('temporary_messages').find({ expiresAt: { $lt: now } }).toArray();
+
+    for (const doc of expired) {
+      const channel = client.channels.cache.get(doc.channelId);
+      if (channel) {
+        try {
+          const msg = await channel.messages.fetch(doc.messageId);
+          if (msg) await msg.delete();
+          console.log(`[Cleanup] Mensaje ${doc.type} (${doc.messageId}) borrado por expiración.`);
+        } catch (e) {
+          // Si el mensaje ya no existe, igual lo quitamos de la DB
+        }
+      }
+      await db.collection('temporary_messages').deleteOne({ _id: doc._id });
+    }
+  } catch (err) {
+    console.error('[Cleanup Error]', err);
+  }
+}
+
+// Programador para Epic, Steam y Limpieza
 setInterval(() => {
   const now = new Date();
+  const channelId = process.env.DISCORD_CHANNEL_ID;
   
   // Epic Games: Jueves 11:15 AM
   if (now.getDay() === 4 && now.getHours() === 11 && now.getMinutes() === 15) {
-    const channelId = process.env.DISCORD_CHANNEL_ID;
     if (channelId) checkEpicFreeGames(channelId);
   }
 
   // Steam: Diario a las 12:00 PM
   if (now.getHours() === 12 && now.getMinutes() === 0) {
-    const channelId = process.env.DISCORD_CHANNEL_ID;
     if (channelId) checkSteamNews(channelId);
+  }
+
+  // Limpieza: Cada hora en el minuto 30
+  if (now.getMinutes() === 30) {
+    cleanupExpiredMessages();
   }
 }, 60000);
 
