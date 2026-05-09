@@ -826,8 +826,8 @@ select option {
   margin-left: 6px;
 }
 .streak-win { 
-  color: #ef4444; 
-  text-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+  color: #4ade80; 
+  text-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
   font-weight: 800;
 }
 .streak-loss { 
