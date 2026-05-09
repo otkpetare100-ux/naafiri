@@ -203,17 +203,19 @@ function initBot(db) {
 
   // Comandos básicos por mensaje (Prefijo !)
   client.on('messageCreate', async (msg) => {
-    if (msg.author.bot || !msg.content.startsWith('!')) return;
+    try {
+      if (msg.author.bot || !msg.content.startsWith('!')) return;
 
-    // Eliminar el comando de forma instantánea
-    msg.delete().catch(() => {});
+      console.log(`[DEBUG] Comando recibido: ${msg.content} de ${msg.author.tag}`);
 
-    const args = msg.content.slice(1).trim().split(/ +/);
-    const command = args.shift().toLowerCase();
+      // Eliminar el comando de forma instantánea
+      msg.delete().catch(() => {});
 
+      const args = msg.content.slice(1).trim().split(/ +/);
+      const command = args.shift().toLowerCase();
 
-    if (command === 'help' || command === 'ayuda') {
-      const now = Date.now();
+      if (command === 'help' || command === 'ayuda') {
+        const now = Date.now();
       const lastUsed = helpCooldowns.get(msg.author.id) || 0;
       const cooldownAmount = 5 * 60 * 1000;
 
@@ -1315,8 +1317,9 @@ function initBot(db) {
         }
         return;
       }
+    } catch (err) {
+      console.error('[Message Error]', err);
     }
-
   });
 
   // --- MANEJO DE INTERACCIONES (BOTONES Y MODALS) ---
