@@ -27,7 +27,7 @@
 
 6. UTILIDAD TÁCTICA
 - Comando !build [Campeón] con runas e items actuales. [COMPLETADO ✅]
-- Noticias de Steam: Ofertas y juegos gratis de Steam. [EN PROCESO 🔄]
+- Noticias de Steam: Ofertas y juegos gratis de Steam. [COMPLETADO ✅]
 - Alertas de Epic Games: Juegos gratis cada jueves. [COMPLETADO ✅]
 
 7. ESTÉTICA Y PERFIL
