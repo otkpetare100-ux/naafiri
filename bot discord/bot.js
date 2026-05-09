@@ -2933,18 +2933,36 @@ async function askNaafiri(prompt, userName = 'Invocador') {
 // --- Sistema de Voz (TTS) ---
 async function speakNaafiri(text, member) {
   try {
-    // Limpiar el texto de asteriscos y gestos para que no los lea el TTS
+    console.log(`[Voice] Intentando hablar: "${text}"`);
+    
+    // Limpiar el texto de asteriscos y gestos
     const cleanText = text.replace(/\*.*?\*/g, '').trim();
-    if (!cleanText) return;
+    if (!cleanText) {
+      console.log('[Voice] El texto está vacío después de limpiar gestos. No se hablará.');
+      return;
+    }
 
     const voiceChannel = member.voice.channel;
-    if (!voiceChannel) return;
+    if (!voiceChannel) {
+      console.log('[Voice] El usuario no está en un canal de voz.');
+      return;
+    }
+
+    console.log(`[Voice] Uniéndose al canal: ${voiceChannel.name}`);
 
     const connection = joinVoiceChannel({
       channelId: voiceChannel.id,
       guildId: voiceChannel.guild.id,
       adapterCreator: voiceChannel.guild.voiceAdapterCreator,
     });
+
+    // Configurar ffmpeg si es necesario
+    try {
+      const ffmpeg = require('ffmpeg-static');
+      // @discordjs/voice busca ffmpeg en el PATH o se puede configurar
+    } catch (e) {
+      console.warn('[Voice] No se pudo cargar ffmpeg-static, el audio podría fallar.');
+    }
 
     const url = googleTTS.getAudioUrl(cleanText, {
       lang: 'es-US',
@@ -2958,20 +2976,41 @@ async function speakNaafiri(text, member) {
     player.play(resource);
     connection.subscribe(player);
 
+    console.log('[Voice] Reproduciendo audio...');
+
+    player.on(AudioPlayerStatus.Playing, () => {
+      console.log('[Voice] Naafiri está hablando ahora mismo.');
+    });
+
     player.on(AudioPlayerStatus.Idle, () => {
-      // Esperar 2 segundos de silencio antes de irse (opcional)
+      console.log('[Voice] Terminado de hablar. Saliendo en 2s...');
       setTimeout(() => {
-        connection.destroy();
+        if (connection.state.status !== VoiceConnectionStatus.Destroyed) {
+          connection.destroy();
+        }
       }, 2000);
     });
 
     player.on('error', error => {
-      console.error('[Voice Player Error]', error);
+      console.error('[Voice Player Error]', error.message);
       connection.destroy();
     });
 
+    connection.on(VoiceConnectionStatus.Disconnected, async (oldState, newState) => {
+      try {
+        await Promise.race([
+          entersState(connection, VoiceConnectionStatus.Signalling, 5000),
+          entersState(connection, VoiceConnectionStatus.Connecting, 5000),
+        ]);
+        // Parece ser una desconexión temporal
+      } catch (error) {
+        // Desconexión real
+        connection.destroy();
+      }
+    });
+
   } catch (err) {
-    console.error('[Voice Error]', err);
+    console.error('[Voice Global Error]', err);
   }
 }
 
