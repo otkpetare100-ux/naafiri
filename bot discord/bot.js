@@ -2395,13 +2395,14 @@ async function sendChallengeReminder(db, targetChannel = null) {
   try {
     const buffer = await generateChallengeImage(db);
     const attachment = new AttachmentBuilder(buffer, { name: 'retos.png' });
-    const embed = new EmbedBuilder()
-      .setTitle('📢 ¡ATENCIÓN MANADA! Botines disponibles 🐾')
-      .setDescription('Si van a rankear hoy, recuerden que hay Naafiri Coins sobre la mesa. ¡A por ellos!')
-      .setImage('attachment://retos.png')
-      .setColor(0xd4af37);
-
-    const sentMsg = await channel.send({ embeds: [embed], files: [attachment] });
+    // Enviamos solo el archivo para un look más limpio y directo
+    const sentMsg = await channel.send({ files: [attachment] });
+    
+    // Rotar mensaje si es un canal público (para evitar spam)
+    if (db && !targetChannel) {
+      await rotateGlobalMessage(db, 'last_challenge_reminder', sentMsg);
+    }
+    
     return sentMsg;
   } catch (e) { 
     console.error('[Challenge Reminder Error]', e); 
