@@ -2253,17 +2253,22 @@ async function generateChallengeImage(db) {
     `;
   });
 
-  // 3. Cargar Background
-  let bgUrl = '';
+  // 3. Cargar Assets
+  let bgUrl = '', logoUrl = '', textoUrl = '';
   try {
     const fs = require('fs');
     const path = require('path');
-    const bgPath = path.join(__dirname, 'assets', 'bg.jpg');
-    if (fs.existsSync(bgPath)) {
-      const bgBase64 = fs.readFileSync(bgPath).toString('base64');
-      bgUrl = `data:image/jpeg;base64,${bgBase64}`;
-    }
-  } catch (e) { console.error('[BG Load Error]', e); }
+    
+    const loadAsBase64 = (relPath) => {
+      const p = path.join(__dirname, 'assets', relPath);
+      if (fs.existsSync(p)) return `data:image/png;base64,${fs.readFileSync(p).toString('base64')}`;
+      return '';
+    };
+
+    bgUrl = loadAsBase64('bg.jpg');
+    logoUrl = loadAsBase64('estetica/logo.png');
+    textoUrl = loadAsBase64('estetica/texto.png');
+  } catch (e) { console.error('[Branding Load Error]', e); }
 
   const htmlContent = `
     <!DOCTYPE html>
@@ -2272,29 +2277,24 @@ async function generateChallengeImage(db) {
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap');
         body { 
-          margin: 0; 
-          padding: 60px; 
+          margin: 0; padding: 60px; 
           background: ${bgUrl ? `url(${bgUrl})` : '#0a0a0c'} no-repeat center center; 
           background-size: cover;
           font-family: 'Outfit', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', sans-serif; 
           color: #fff; 
-          width: 1200px; 
-          height: auto; 
-          position: relative;
-          overflow: hidden;
+          width: 1200px; height: auto; position: relative; overflow: hidden;
         }
         body::before {
-          content: '';
-          position: absolute;
-          top: 0; left: 0; right: 0; bottom: 0;
-          background: radial-gradient(circle at center, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.95) 100%);
+          content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+          background: radial-gradient(circle at center, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.98) 100%);
           z-index: 0;
         }
         .content { position: relative; z-index: 1; }
         
         .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 50px; }
-        .title-group h1 { font-size: 56px; font-weight: 900; color: #d4af37; margin: 0; letter-spacing: 12px; text-transform: uppercase; }
-        .title-group p { margin: 5px 0 0; color: rgba(255,255,255,0.4); font-size: 18px; letter-spacing: 6px; text-transform: uppercase; }
+        .branding-group { display: flex; align-items: center; gap: 20px; }
+        .logo-img { height: 100px; width: auto; filter: drop-shadow(0 0 20px rgba(212,175,55,0.4)); }
+        .texto-img { height: 60px; width: auto; }
         
         .hunters-bar { background: rgba(212, 175, 55, 0.08); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 50px; padding: 15px 35px; display: flex; align-items: center; gap: 30px; }
         .hunters-bar-label { font-weight: 900; color: #d4af37; font-size: 14px; letter-spacing: 2px; }
@@ -2321,9 +2321,12 @@ async function generateChallengeImage(db) {
     <body>
       <div class="content">
         <div class="header">
-          <div class="title-group">
-            <h1>Tablón de Caza</h1>
-            <p>Retos activos de la temporada</p>
+          <div class="branding-group">
+            ${logoUrl ? `<img src="${logoUrl}" class="logo-img">` : ''}
+            <div class="title-group">
+              ${textoUrl ? `<img src="${textoUrl}" class="texto-img">` : '<h1>Tablón de Caza</h1>'}
+              <p>Bounty Hunter System</p>
+            </div>
           </div>
           <div class="hunters-bar">
             <span class="hunters-bar-label">HALL OF FAME</span>
@@ -2416,17 +2419,22 @@ async function generateLadderImage(accounts) {
     `;
   });
 
-  // Cargar Background
-  let bgUrl = '';
+  // Cargar Assets
+  let bgUrl = '', logoUrl = '', textoUrl = '';
   try {
     const fs = require('fs');
     const path = require('path');
-    const bgPath = path.join(__dirname, 'assets', 'bg.jpg');
-    if (fs.existsSync(bgPath)) {
-      const bgBase64 = fs.readFileSync(bgPath).toString('base64');
-      bgUrl = `data:image/jpeg;base64,${bgBase64}`;
-    }
-  } catch (e) { console.error('[BG Load Error]', e); }
+    
+    const loadAsBase64 = (relPath) => {
+      const p = path.join(__dirname, 'assets', relPath);
+      if (fs.existsSync(p)) return `data:image/png;base64,${fs.readFileSync(p).toString('base64')}`;
+      return '';
+    };
+
+    bgUrl = loadAsBase64('bg.jpg');
+    logoUrl = loadAsBase64('estetica/logo.png');
+    textoUrl = loadAsBase64('estetica/texto.png');
+  } catch (e) { console.error('[Branding Load Error]', e); }
 
   const htmlContent = `
     <!DOCTYPE html>
@@ -2448,8 +2456,9 @@ async function generateLadderImage(accounts) {
         }
         .content { position: relative; z-index: 1; }
         .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; border-bottom: 2px solid rgba(212,175,55,0.3); padding-bottom: 20px; }
-        .header h1 { font-size: 48px; font-weight: 900; color: #d4af37; margin: 0; letter-spacing: 10px; text-transform: uppercase; }
-        .header p { color: rgba(255,255,255,0.4); margin: 0; font-size: 18px; letter-spacing: 4px; }
+        .branding-group { display: flex; align-items: center; gap: 20px; }
+        .logo-img { height: 80px; width: auto; filter: drop-shadow(0 0 15px rgba(212,175,55,0.4)); }
+        .texto-img { height: 50px; width: auto; }
         
         .ladder-grid { display: flex; flex-direction: column; gap: 12px; }
         .ladder-row { 
@@ -2475,9 +2484,12 @@ async function generateLadderImage(accounts) {
     <body>
       <div class="content">
         <div class="header">
-          <div>
-            <h1>LADDER TOP 10</h1>
-            <p>LOS MEJORES DE LA JAURÍA</p>
+          <div class="branding-group">
+            ${logoUrl ? `<img src="${logoUrl}" class="logo-img">` : ''}
+            <div>
+              ${textoUrl ? `<img src="${textoUrl}" class="texto-img">` : '<h1>LADDER TOP 10</h1>'}
+              <p style="color: rgba(255,255,255,0.4); margin: 0; font-size: 18px; letter-spacing: 4px; text-transform: uppercase;">LOS MEJORES DE LA JAURÍA</p>
+            </div>
           </div>
           <div style="text-align: right; color: #d4af37; font-weight: 900; letter-spacing: 2px;">
             SEASON 2026<br><span style="color: rgba(255,255,255,0.3); font-size: 12px;">UPDATED IN REAL-TIME</span>
