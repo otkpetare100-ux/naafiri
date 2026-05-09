@@ -5,7 +5,7 @@
   "main": "bot discord/bot.js",
   "scripts": {
     "start": "node master.js",
-    "build": "npm install && cd web && npm install && npm run build"
+    "build": "cd web && npm install && npm run build"
   },
   "dependencies": {
     "@discordjs/voice": "^0.19.2",
