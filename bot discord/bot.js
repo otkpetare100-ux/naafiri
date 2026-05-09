@@ -364,15 +364,17 @@ function initBot(db) {
         return msg.channel.send(`<@${msg.author.id}> ❌ Debes especificar un campeón. Ejemplo: \`!build aatrox\``).then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
       }
 
-      const sendBuildInThread = async (buffer) => {
-        const attachment = new AttachmentBuilder(buffer, { name: 'build.png' });
+      const sendBuildInThread = async (buffers) => {
+        const bufferArray = Array.isArray(buffers) ? buffers : [buffers];
+        const attachments = bufferArray.map((buf, i) => new AttachmentBuilder(buf, { name: `build_${i}.png` }));
+        
         try {
           const thread = await msg.channel.threads.create({
             name: `Build de ${champArgs.toUpperCase()}`,
             autoArchiveDuration: 60,
             reason: 'Hilo temporal para mostrar la build'
           });
-          await thread.send({ content: `<@${msg.author.id}>, aquí tienes los pergaminos antiguos:`, files: [attachment] });
+          await thread.send({ content: `<@${msg.author.id}>, aquí tienes los pergaminos antiguos (Runas y Objetos):`, files: attachments });
           
           // Programar autodestrucción en 20 minutos
           setTimeout(async () => {
@@ -384,8 +386,7 @@ function initBot(db) {
           }, 20 * 60 * 1000);
         } catch (threadErr) {
           console.error('[Thread Create Error]', threadErr);
-          // Si falla crear el hilo (ej. sin permisos), enviar normal
-          await msg.channel.send({ content: `<@${msg.author.id}>, aquí tienes los pergaminos antiguos:`, files: [attachment] }).then(m => setTimeout(() => m.delete().catch(() => {}), 20 * 60 * 1000));
+          await msg.channel.send({ content: `<@${msg.author.id}>, aquí tienes los pergaminos antiguos:`, files: attachments }).then(m => setTimeout(() => m.delete().catch(() => {}), 20 * 60 * 1000));
         }
       };
 
@@ -394,27 +395,32 @@ function initBot(db) {
       const cacheData = await dbInstance.collection('system_config').findOne({ key: cacheKey });
       
       // La caché dura 24 horas
-      if (cacheData && cacheData.buffer && (Date.now() - cacheData.timestamp < 24 * 60 * 60 * 1000)) {
-        const buffer = Buffer.from(cacheData.buffer.buffer || cacheData.buffer);
-        await sendBuildInThread(buffer);
+      if (cacheData && (cacheData.buffers || cacheData.buffer) && (Date.now() - cacheData.timestamp < 24 * 60 * 60 * 1000)) {
+        let buffers = [];
+        if (cacheData.buffers) {
+          buffers = cacheData.buffers.map(b => Buffer.from(b.buffer || b));
+        } else {
+          buffers = [Buffer.from(cacheData.buffer.buffer || cacheData.buffer)];
+        }
+        await sendBuildInThread(buffers);
         return;
       }
 
       const tempMsg = await msg.channel.send(`<@${msg.author.id}> ⏳ Consultando los pergaminos antiguos para la mejor build...`);
       
       try {
-        const buffer = await generateBuildImage(champArgs);
-        if (!buffer) {
+        const buffers = await generateBuildImage(champArgs);
+        if (!buffers || buffers.length === 0) {
           return tempMsg.edit(`<@${msg.author.id}> ❌ No pude encontrar información de ese campeón en dpm.lol. Revisa el nombre e intenta de nuevo.`).then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
         }
 
         await tempMsg.delete().catch(() => {});
-        await sendBuildInThread(buffer);
+        await sendBuildInThread(buffers);
         
         // Guardar en caché
         await dbInstance.collection('system_config').updateOne(
           { key: cacheKey },
-          { $set: { buffer: buffer, timestamp: Date.now() } },
+          { $set: { buffers: buffers, timestamp: Date.now() } },
           { upsert: true }
         );
       } catch (e) {
@@ -2540,53 +2546,97 @@ async function generateBuildImage(champion) {
   
   try {
     const page = await browser.newPage();
-    await page.setViewport({ width: 1200, height: 1200, deviceScaleFactor: 2 });
+    await page.setViewport({ width: 1200, height: 1600, deviceScaleFactor: 2 });
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
     
-    // Navegar con un tiempo de espera más largo y esperar a que la red esté tranquila
-    const response = await page.goto(`https://dpm.lol/champions/${champion}/build`, { 
+    await page.goto(`https://dpm.lol/champions/${champion}/build`, { 
       waitUntil: 'networkidle2', 
       timeout: 30000 
     });
     
-    if (response && response.status() === 404) return null;
-    
-    // Esperar a que algún elemento de la build sea visible para asegurar que cargó
     try {
       await page.waitForSelector('img[src*="item"], img[src*="rune"]', { timeout: 10000 });
-    } catch (e) {
-      console.warn('[Build Gen] Timeout esperando imágenes, procediendo con captura...');
-    }
-    
-    // Inyectar CSS estético de forma más segura (sin romper el layout de React)
+    } catch (e) {}
+
+    // Limpiar la página
     await page.addStyleTag({
       content: `
-        header, nav, footer, iframe, .advertisement, [class*="Ad"], [id*="ad"] { 
-          display: none !important; 
-        }
-        body { 
-          background: #0a0a0c !important; 
-          overflow: hidden !important;
-        }
-        main {
+        header, nav, footer, iframe, .advertisement, [class*="Ad"], [id*="ad"] { display: none !important; }
+        body { background: #0a0a0c !important; }
+        main { background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; }
+        /* Estilo para las tarjetas divididas */
+        .premium-card {
           background: rgba(15, 15, 20, 0.95) !important;
           border: 2px solid #d4af37 !important;
           box-shadow: 0 0 40px rgba(212, 175, 55, 0.2) !important;
           border-radius: 20px !important;
           margin: 20px !important;
           padding: 20px !important;
+          display: inline-block !important;
         }
       `
     });
-    
-    // Pequeño respiro para que el CSS se aplique y las imágenes terminen de renderizar
-    await new Promise(r => setTimeout(r, 2500));
-    
-    const mainEl = await page.$('main');
-    if (mainEl) {
-      return await mainEl.screenshot({ type: 'png' });
+
+    await new Promise(r => setTimeout(r, 2000));
+
+    // Identificar secciones por contenido
+    const sectionsData = await page.evaluate(() => {
+      const getBox = (el) => {
+        const { x, y, width, height } = el.getBoundingClientRect();
+        return { x, y, width, height };
+      };
+
+      // Buscar el contenedor de Runas (donde hay muchas imágenes de runas)
+      const runeImgs = Array.from(document.querySelectorAll('img[src*="rune"]'));
+      let runesContainer = null;
+      if (runeImgs.length > 0) {
+        // En dpm.lol las runas suelen estar en un contenedor común
+        runesContainer = runeImgs[0].closest('div');
+        while (runesContainer && runesContainer.offsetWidth < 300) {
+          runesContainer = runesContainer.parentElement;
+        }
+      }
+
+      // Buscar el contenedor de Objetos/Build (donde hay muchas imágenes de items)
+      const itemImgs = Array.from(document.querySelectorAll('img[src*="item"]'));
+      let itemsContainer = null;
+      if (itemImgs.length > 0) {
+        itemsContainer = itemImgs[0].closest('div');
+        while (itemsContainer && itemsContainer.offsetWidth < 400) {
+          itemsContainer = itemsContainer.parentElement;
+        }
+      }
+
+      return {
+        runes: runesContainer ? getBox(runesContainer) : null,
+        items: itemsContainer ? getBox(itemsContainer) : null
+      };
+    });
+
+    const buffers = {};
+
+    if (sectionsData.runes) {
+      buffers.runes = await page.screenshot({ 
+        clip: { ...sectionsData.runes, height: sectionsData.runes.height + 20 },
+        type: 'png'
+      });
     }
-    return await page.screenshot({ type: 'png', fullPage: true });
+
+    if (sectionsData.items) {
+      buffers.items = await page.screenshot({ 
+        clip: { ...sectionsData.items, height: sectionsData.items.height + 20 },
+        type: 'png'
+      });
+    }
+
+    // Si no encontramos secciones específicas, fallback al main completo
+    if (Object.keys(buffers).length === 0) {
+      const mainEl = await page.$('main');
+      if (mainEl) return [await mainEl.screenshot({ type: 'png' })];
+      return [await page.screenshot({ type: 'png', fullPage: true })];
+    }
+
+    return Object.values(buffers);
   } catch (e) {
     console.error('[Generate Build Image Error]', e);
     return null;
