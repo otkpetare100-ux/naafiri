@@ -2393,12 +2393,14 @@ async function sendChallengeReminder(db, targetChannel = null) {
   if (!channel) return;
 
   try {
-    const buffer = await generateChallengeImage(db);
-    const attachment = new AttachmentBuilder(buffer, { name: 'retos.png' });
-    // Enviamos solo el archivo para un look más limpio y directo
-    const sentMsg = await channel.send({ files: [attachment] });
+    const embed = new EmbedBuilder()
+      .setTitle('📢 ¡ATENCIÓN MANADA! Botines disponibles 🐾')
+      .setDescription('Si van a rankear hoy, recuerden que hay Naafiri Coins sobre la mesa. ¡A por ellos!\n\nUsa `!retos` para ver los botines disponibles.')
+      .setColor(0xd4af37);
+
+    const sentMsg = await channel.send({ embeds: [embed] });
     
-    // Rotar mensaje si es un canal público (para evitar spam)
+    // Rotar mensaje si es un canal público
     if (db && !targetChannel) {
       await rotateGlobalMessage(db, 'last_challenge_reminder', sentMsg);
     }
