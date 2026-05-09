@@ -2579,7 +2579,7 @@ async function sendChallengeReminder(db, targetChannel = null) {
 
     const embed = new EmbedBuilder()
       .setTitle('📢 ¡ATENCIÓN MANADA! Botines disponibles 🐾')
-      .setDescription('Si van a rankear hoy, recuerden que hay Naafiri Coins sobre la mesa. ¡A por ellos!\n\nUsa `!retos` para ver los botines disponibles.')
+      .setDescription('Si van a rankear hoy, recuerden que hay Naafiri Coins sobre la mesa. ¡A por ellos!')
       .setImage('attachment://retos.png')
       .setColor(0xd4af37);
 
