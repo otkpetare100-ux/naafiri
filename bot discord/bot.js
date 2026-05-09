@@ -431,13 +431,19 @@ function initBot(db) {
 
           try {
             // 1. Obtener PUUID (Routing Regional)
-            const accountUrl = `https://${routing}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(name)}/${encodeURIComponent(tag)}?api_key=${RIOT_API_KEY}`;
-          const accountRes = await fetch(accountUrl);
-          
-          if (!accountRes.ok) {
-            statusMsg.delete().catch(() => {});
-            return msg.channel.send(`<@${msg.author.id}> ❌ No pude encontrar a **${name}#${tag}** en Riot. Revisa si el nombre, tag y región son correctos.`);
-          }
+            const accountUrl = `https://${routing}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(name)}/${encodeURIComponent(tag)}`;
+            const accountRes = await fetch(accountUrl, {
+              headers: { 
+                "X-Riot-Token": RIOT_API_KEY.trim(),
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
+              }
+            });
+            
+            if (!accountRes.ok) {
+              statusMsg.delete().catch(() => {});
+              const errorText = accountRes.status === 404 ? 'No existe ese Riot ID' : `Error ${accountRes.status} de Riot`;
+              return msg.channel.send(`<@${msg.author.id}> ❌ **Riot dice:** ${errorText}. Verifica nombre, tag y región (${region.toUpperCase()}).`);
+            }
 
           const accountData = await accountRes.json();
           const puuid = accountData.puuid;
@@ -1183,11 +1189,18 @@ function initBot(db) {
           const statusMsg = await msg.channel.send(`🔍 Buscando a **${name}#${tag}** en **${region.toUpperCase()}**...`);
 
           try {
-            const accountUrl = `https://${routing}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(name)}/${encodeURIComponent(tag)}?api_key=${RIOT_API_KEY}`;
-            const accountRes = await fetch(accountUrl);
+            const accountUrl = `https://${routing}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(name)}/${encodeURIComponent(tag)}`;
+            const accountRes = await fetch(accountUrl, {
+              headers: { 
+                "X-Riot-Token": RIOT_API_KEY.trim(),
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
+              }
+            });
+
             if (!accountRes.ok) {
               statusMsg.delete().catch(() => {});
-              return msg.channel.send(`❌ No encontré a **${name}#${tag}**.`);
+              const errorText = accountRes.status === 404 ? 'No existe ese Riot ID' : `Error ${accountRes.status} de Riot`;
+              return msg.channel.send(`❌ **Riot dice:** ${errorText}. (${name}#${tag} en ${region.toUpperCase()})`);
             }
             const riotAcc = await accountRes.json();
             const puuid = riotAcc.puuid;
