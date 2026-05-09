@@ -623,6 +623,18 @@ function initBot(db) {
       msg.channel.send(`<@${msg.author.id}> ✅ ¡Transferencia completada! Has enviado **${amount} coins** a **${target.username}**.`);
     }
 
+    if (command === 'epic') {
+      const tempMsg = await msg.channel.send(`<@${msg.author.id}> 🎮 Buscando tesoros en Epic Games Store...`);
+      const embeds = await checkEpicFreeGames();
+      
+      if (!embeds) {
+        return tempMsg.edit(`<@${msg.author.id}> 😕 No encontré juegos gratis activos en este momento (o la API de Epic no respondió).`);
+      }
+
+      await tempMsg.delete().catch(() => {});
+      msg.channel.send({ content: `<@${msg.author.id}>, aquí tienes los botines actuales:`, embeds });
+    }
+
     if (command === 'trade' || command === 'cambio') {
       const target = msg.mentions.users.first();
       if (!target || target.id === msg.author.id) return msg.channel.send(`<@${msg.author.id}> ❌ Uso: \`!trade @usuario MiCampeon, SuCampeon\``);
@@ -2635,6 +2647,69 @@ async function generateBuildImage(champion) {
     await browser.close().catch(() => {});
   }
 }
+
+// --- Epic Games Free Games System ---
+async function checkEpicFreeGames(targetChannelId = null) {
+  try {
+    const fetch = (await import('node-fetch')).default;
+    const url = 'https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=es-ES&country=MX&allowCountries=MX';
+    const response = await fetch(url);
+    const data = await response.json();
+    const elements = data.data.Catalog.searchStore.elements;
+
+    const freeGames = elements.filter(game => {
+      if (!game.promotions || !game.promotions.promotionalOffers || game.promotions.promotionalOffers.length === 0) return false;
+      const offers = game.promotions.promotionalOffers[0].promotionalOffers;
+      return offers.some(offer => offer.discountSetting.discountPercentage === 0);
+    });
+
+    if (freeGames.length === 0) return null;
+
+    const embeds = freeGames.map(game => {
+      const title = game.title;
+      const description = game.description || 'No hay descripción disponible.';
+      const thumbnail = game.keyImages.find(img => img.type === 'Thumbnail')?.url || game.keyImages[0].url;
+      const originalPrice = game.price.totalPrice.fmtPrice.originalPrice;
+      const seller = game.seller.name;
+      const expiryDateStr = game.promotions.promotionalOffers[0].promotionalOffers[0].endDate;
+      const expiryDate = new Date(expiryDateStr).toLocaleDateString('es-ES');
+
+      return new EmbedBuilder()
+        .setTitle(`🎁 Juego Gratis: ${title}`)
+        .setURL(`https://store.epicgames.com/es-ES/p/${game.catalogNs.mappings[0].pageSlug || game.urlSlug}`)
+        .setDescription(description)
+        .addFields(
+          { name: '💰 Precio Original', value: `~~${originalPrice}~~ **¡GRATIS!**`, inline: true },
+          { name: '📅 Reclámalo hasta', value: expiryDate, inline: true },
+          { name: '🏢 Distribuidor', value: seller, inline: true }
+        )
+        .setImage(thumbnail)
+        .setColor(0x000000)
+        .setFooter({ text: 'Epic Games Store x Naafiri Bot' });
+    });
+
+    if (targetChannelId) {
+      const channel = client.channels.cache.get(targetChannelId);
+      if (channel) {
+        await channel.send({ content: '🔔 **¡Atención Cazadores! Hay nuevos juegos gratis en Epic Games Store:**', embeds });
+      }
+    }
+    return embeds;
+  } catch (err) {
+    console.error('[Epic Games API Error]', err);
+    return null;
+  }
+}
+
+// Programador para los jueves a las 11:15 AM (MX/COL)
+setInterval(() => {
+  const now = new Date();
+  // Jueves es 4
+  if (now.getDay() === 4 && now.getHours() === 11 && now.getMinutes() === 15) {
+    const channelId = process.env.DISCORD_CHANNEL_ID;
+    if (channelId) checkEpicFreeGames(channelId);
+  }
+}, 60000); // Revisar cada minuto
 
 async function sendChallengeReminder(db, targetChannel = null) {
   if (!client || (!targetChannelId && !targetChannel)) return;
