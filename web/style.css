@@ -814,9 +814,31 @@ select option {
 .streak-tag {
   font-size: 0.75rem;
   font-weight: 800;
-  padding: 1px 6px;
-  border-radius: 4px;
   margin-left: 6px;
 }
-.streak-win { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
-.streak-loss { background: rgba(96, 165, 250, 0.1); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.2); }
+.streak-win { color: #ef4444; }
+.streak-loss { color: #60a5fa; }
+
+/* Historial Dots */
+.player-performance {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-left: 0.5rem;
+}
+
+.history-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.history-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #333;
+}
+
+.history-dot.dot-w { background: var(--accent-green); box-shadow: 0 0 8px rgba(74, 222, 128, 0.4); }
+.history-dot.dot-l { background: #ef4444; box-shadow: 0 0 8px rgba(239, 68, 68, 0.4); }
+.streak-loss { color: #60a5fa; }

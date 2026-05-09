@@ -20,6 +20,16 @@ async function fetchLadder() {
   }
 }
 
+function getRegionName(region) {
+  const mapping = {
+    'la1': 'LAN', 'la2': 'LAS', 'na1': 'NA', 'br1': 'BR',
+    'euw1': 'EUW', 'eun1': 'EUNE', 'jp1': 'JP', 'kr': 'KR',
+    'tr1': 'TR', 'oc1': 'OCE', 'ru': 'RU', 'ph2': 'PH',
+    'sg2': 'SG', 'th2': 'TH', 'tw2': 'TW', 'vn2': 'VN'
+  };
+  return mapping[region.toLowerCase()] || region.toUpperCase();
+}
+
 function renderLadder(players) {
   const container = document.getElementById('ladder-container');
   container.innerHTML = '';
@@ -41,6 +51,10 @@ function renderLadder(players) {
     // Icono de invocador
     const avatarUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${player.profileIconId}.png`;
 
+    // Historial mockeado (5 puntos) - En el futuro vendrá de la API
+    const history = player.history || ['W', 'W', 'L', 'W', 'L']; 
+    const historyHtml = history.map(res => `<span class="history-dot dot-${res.toLowerCase()}"></span>`).join('');
+
     card.innerHTML = `
       <div class="rank-text">#${rankNum}</div>
       
@@ -58,9 +72,12 @@ function renderLadder(players) {
         </div>
         <div class="player-meta">
           <span class="tag">#${player.tagLine}</span>
-          <span class="region-badge reg-${(player.region || 'la1').toLowerCase()}">${(player.region || 'LAN').toUpperCase()}</span>
-          ${player.streak > 0 ? `<span class="streak-tag streak-win">🔥 ${player.streak} Wins</span>` : 
-            player.streak < 0 ? `<span class="streak-tag streak-loss">❄️ ${Math.abs(player.streak)} Loss</span>` : ''}
+          <span class="region-badge reg-${(player.region || 'la1').toLowerCase()}">${getRegionName(player.region || 'la1')}</span>
+          <div class="player-performance">
+            ${player.streak > 0 ? `<span class="streak-tag streak-win">🔥 ${player.streak} Wins</span>` : 
+              player.streak < 0 ? `<span class="streak-tag streak-loss">❄️ ${Math.abs(player.streak)} Loss</span>` : ''}
+            <div class="history-dots">${historyHtml}</div>
+          </div>
         </div>
       </div>
 
