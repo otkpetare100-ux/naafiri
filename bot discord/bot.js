@@ -441,6 +441,12 @@ function initBot(db) {
             }
 
             const data = await apiRes.json();
+            
+            if (!data || !data.account) {
+              statusMsg.delete().catch(() => {});
+              return msg.channel.send(`<@${msg.author.id}> ❌ **Error de Formato:** El servidor central no devolvió los datos de la cuenta correctamente.`);
+            }
+
             const puuid = data.account.puuid;
 
             // Vincular discordId en la misma DB que usa la web
@@ -1189,6 +1195,12 @@ function initBot(db) {
           }
 
           const data = await apiRes.json();
+          
+          if (!data || !data.account) {
+            statusMsg.delete().catch(() => {});
+            return msg.channel.send(`❌ **Error de Formato:** La web respondió pero no envió los datos de la cuenta.`);
+          }
+
           const puuid = data.account.puuid;
 
           // 1. Vincular discordId en la colección de cuentas
