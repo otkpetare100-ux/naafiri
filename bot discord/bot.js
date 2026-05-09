@@ -1,3 +1,14 @@
+let voiceLib;
+let googleTTS;
+
+try {
+  voiceLib = require('@discordjs/voice');
+  googleTTS = require('google-tts-api');
+  console.log('✅ Librerías de voz cargadas correctamente.');
+} catch (e) {
+  console.warn('⚠️ No se pudieron cargar las librerías de voz. El bot funcionará solo por texto.');
+}
+
 const { 
   joinVoiceChannel, 
   createAudioPlayer, 
@@ -5,8 +16,8 @@ const {
   AudioPlayerStatus,
   VoiceConnectionStatus,
   entersState
-} = require('@discordjs/voice');
-const googleTTS = require('google-tts-api');
+} = voiceLib || {};
+
 const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, AttachmentBuilder } = require('discord.js');
 const puppeteer = require('puppeteer');
 const fetch = (...args) => import('node-fetch').then(({default: f}) => f(...args));
@@ -688,8 +699,8 @@ function initBot(db) {
       msg.channel.sendTyping();
       const response = await askNaafiri(prompt, msg.author.username);
       
-      // Si el usuario está en un canal de voz, Naafiri también habla
-      if (msg.member && msg.member.voice.channel) {
+      // Si el usuario está en un canal de voz y la voz está disponible, Naafiri también habla
+      if (voiceLib && googleTTS && msg.member && msg.member.voice.channel) {
         speakNaafiri(response, msg.member);
       }
 
@@ -2929,6 +2940,7 @@ async function askNaafiri(prompt, userName = 'Invocador') {
 
 // --- Sistema de Voz (TTS) ---
 async function speakNaafiri(text, member) {
+  if (!voiceLib || !googleTTS) return;
   try {
     console.log(`[Voice] Intentando hablar: "${text}"`);
     
