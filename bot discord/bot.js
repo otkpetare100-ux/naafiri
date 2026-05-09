@@ -2169,10 +2169,10 @@ async function notifyChallengeComplete(targetName, challenges, coins) {
 
 // Función para notificar al admin vía DM
 const CHALLENGES_LIST = [
-  { id: 'penta', name: '🏆 PENTAKILL', description: 'Realiza una Pentakill en una partida de SoloQ o Flex.', rarity: 'Legendario', reward: '1000 Coins', color: '#f1c40f', icon: 'item/3031.png' },
-  { id: 'butcher', name: '🔪 El Carnicero', description: 'Logra 15 o más asesinatos en una sola partida.', rarity: 'Épico', reward: '200 Coins', color: '#9b59b6', icon: 'item/6676.png' },
-  { id: 'immortal', name: '😇 Inmortal', description: 'Gana la partida sin morir ni una sola vez.', rarity: 'Raro', reward: '150 Coins', color: '#3498db', icon: 'item/3026.png' },
-  { id: 'farmer', name: '🚜 Farm Machine', description: 'Consigue más de 8.5 CS por minuto (min. 20 min).', rarity: 'Común', reward: '100 Coins', color: '#95a5a6', icon: 'item/1083.png' }
+  { id: 'penta', name: 'PENTAKILL', description: 'Realiza una Pentakill en una partida de SoloQ o Flex.', rarity: 'Legendario', reward: '1000 Coins', color: '#f1c40f', icon: 'item/3031.png' },
+  { id: 'butcher', name: 'El Carnicero', description: 'Logra 15 o más asesinatos en una sola partida.', rarity: 'Épico', reward: '200 Coins', color: '#9b59b6', icon: 'item/6676.png' },
+  { id: 'immortal', name: 'Inmortal', description: 'Gana la partida sin morir ni una sola vez.', rarity: 'Raro', reward: '150 Coins', color: '#3498db', icon: 'item/3026.png' },
+  { id: 'farmer', name: 'Farm Machine', description: 'Consigue más de 8.5 CS por minuto (min. 20 min).', rarity: 'Común', reward: '100 Coins', color: '#95a5a6', icon: 'item/1083.png' }
 ];
 
 async function generateChallengeImage() {
