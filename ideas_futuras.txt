@@ -46,7 +46,7 @@
 
 9. INTELIGENCIA ARTIFICIAL
 - IA de Imágenes (!imagina): Generar arte con IA desde el chat. [NUEVO]
-- Chat con Naafiri: Responder con la personalidad del campeón. [NUEVO]
+- Chat con Naafiri: Responder con la personalidad del campeón. [COMPLETADO ✅]
 
 10. WEB / DASHBOARD
 - Mochila interactiva para elegir carta principal del perfil. [PENDIENTE]

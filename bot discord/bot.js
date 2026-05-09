@@ -647,6 +647,26 @@ function initBot(db) {
       msg.channel.send({ content: `<@${msg.author.id}>, estas son las ofertas más calientes de Steam ahora mismo:`, embeds });
     }
 
+    // --- Chat con Naafiri (IA) ---
+    if (command === 'n' || command === 'naafiri' || msg.mentions.has(client.user)) {
+      // Evitar responder a menciones vacías o si el bot es el que menciona
+      if (msg.author.bot) return;
+      
+      const prompt = command === 'n' || command === 'naafiri' 
+        ? args.join(' ') 
+        : msg.content.replace(`<@${client.user.id}>`, '').replace(`<@!${client.user.id}>`, '').trim();
+
+      if (!prompt && msg.mentions.has(client.user)) {
+        return msg.channel.send(`*Naafiri te observa con ojos carmesí, esperando una orden o un desafío.*`);
+      }
+      
+      if (!prompt) return;
+
+      msg.channel.sendTyping();
+      const response = await askNaafiri(prompt, msg.author.username);
+      return msg.reply({ content: response, allowedMentions: { repliedUser: true } });
+    }
+
     if (command === 'trade' || command === 'cambio') {
       const target = msg.mentions.users.first();
       if (!target || target.id === msg.author.id) return msg.channel.send(`<@${msg.author.id}> ❌ Uso: \`!trade @usuario MiCampeon, SuCampeon\``);
@@ -2811,6 +2831,52 @@ async function cleanupExpiredMessages() {
     }
   } catch (err) {
     console.error('[Cleanup Error]', err);
+  }
+}
+
+// --- Inteligencia Artificial: Chat con Naafiri ---
+async function askNaafiri(prompt, userName = 'Invocador') {
+  try {
+    const fetch = (await import('node-fetch')).default;
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) return "*(Naafiri te mira fijamente, pero parece que su mente está en otra parte...)* [Falta GEMINI_API_KEY]";
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    
+    const systemPrompt = `Eres Naafiri, una entidad Darkin de League of Legends atrapada en el cuerpo de un sabueso de las dunas. Eres la líder de la manada. 
+    Tu tono es feral, sombrío, autoritario y afilado. No eres una mascota, eres una cazadora. 
+    Consideras a los usuarios de este servidor como tu 'manada'. 
+    Instrucciones de respuesta:
+    1. Si alguien te respeta, guíalos con sabiduría brutal.
+    2. Si alguien te falta al respeto o te trata como un perro común, gruñe, amenaza o muestra tus colmillos.
+    3. Usa referencias a la caza, la sangre, las arenas de Shurima, los colmillos y la unidad de la manada.
+    4. Tus respuestas deben ser cortas (máximo 2-3 frases), directas y contundentes.
+    5. No uses emojis humanos. Usa gestos entre asteriscos: *gruñe*, *olfatea*, *muestra los colmillos*, *eriza el pelaje*, *aúlla*.
+    6. El usuario se llama ${userName}.
+    7. Responde siempre en español de forma natural pero épica.`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{ text: `${systemPrompt}\n\n${userName} dice: ${prompt}` }]
+        }],
+        generationConfig: {
+          temperature: 0.8,
+          maxOutputTokens: 200,
+        }
+      })
+    });
+
+    const data = await response.json();
+    if (data.candidates && data.candidates[0].content.parts[0].text) {
+      return data.candidates[0].content.parts[0].text.trim();
+    }
+    return "*Naafiri gruñe hacia las sombras, algo ha fallado en la conexión.*";
+  } catch (err) {
+    console.error('[Gemini API Error]', err);
+    return "*La arena nubla mi mente... vuelve a intentarlo más tarde.*";
   }
 }
 
