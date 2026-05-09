@@ -364,6 +364,25 @@ function initBot(db) {
         return msg.reply('❌ Debes especificar un campeón. Ejemplo: `!build aatrox`');
       }
 
+      const sendBuildInThread = async (buffer) => {
+        const attachment = new AttachmentBuilder(buffer, { name: 'build.png' });
+        const thread = await msg.startThread({
+          name: `Build de ${champArgs.toUpperCase()}`,
+          autoArchiveDuration: 60,
+          reason: 'Hilo temporal para mostrar la build'
+        });
+        await thread.send({ content: `<@${msg.author.id}>, aquí tienes los pergaminos antiguos:`, files: [attachment] });
+        
+        // Programar autodestrucción en 20 minutos
+        setTimeout(async () => {
+          try {
+            await thread.delete('Tiempo expirado para la build temporal');
+          } catch (err) {
+            console.error('[Thread Delete Error]', err);
+          }
+        }, 20 * 60 * 1000);
+      };
+
       // Revisar la caché
       const cacheKey = `build_${champArgs}`;
       const cacheData = await dbInstance.collection('system_config').findOne({ key: cacheKey });
@@ -371,8 +390,8 @@ function initBot(db) {
       // La caché dura 24 horas
       if (cacheData && cacheData.buffer && (Date.now() - cacheData.timestamp < 24 * 60 * 60 * 1000)) {
         const buffer = Buffer.from(cacheData.buffer.buffer || cacheData.buffer);
-        const attachment = new AttachmentBuilder(buffer, { name: 'build.png' });
-        return msg.reply({ files: [attachment] });
+        await sendBuildInThread(buffer);
+        return;
       }
 
       const tempMsg = await msg.reply('⏳ Consultando los pergaminos antiguos para la mejor build...');
@@ -383,9 +402,8 @@ function initBot(db) {
           return tempMsg.edit('❌ No pude encontrar información de ese campeón en dpm.lol. Revisa el nombre e intenta de nuevo.');
         }
 
-        const attachment = new AttachmentBuilder(buffer, { name: 'build.png' });
-        await msg.reply({ files: [attachment] });
         await tempMsg.delete().catch(() => {});
+        await sendBuildInThread(buffer);
         
         // Guardar en caché
         await dbInstance.collection('system_config').updateOne(
