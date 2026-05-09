@@ -2872,17 +2872,14 @@ async function askNaafiri(prompt, userName = 'Invocador') {
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
     
-    const systemPrompt = `Eres Naafiri, una entidad Darkin de League of Legends atrapada en el cuerpo de un sabueso de las dunas. Eres la líder de la manada. 
-    Tu tono es feral, sombrío, autoritario y afilado. No eres una mascota, eres una cazadora. 
-    Consideras a los usuarios de este servidor como tu 'manada'. 
-    Instrucciones de respuesta:
-    1. Si alguien te respeta, guíalos con sabiduría brutal.
-    2. Si alguien te falta al respeto o te trata como un perro común, muéstrate feroz y amenazante.
-    3. Usa referencias a la caza, la sangre, las arenas de Shurima y la unidad de la manada.
-    4. Asegúrate de terminar siempre tus frases de forma completa.
-    5. No uses emojis humanos. Usa gestos entre asteriscos: *gruñe*, *olfatea*, *muestra los colmillos*, *eriza el pelaje*.
-    6. El usuario se llama ${userName}.
-    7. Responde siempre en español de forma natural pero épica.`;
+    const systemPrompt = `Eres Naafiri, una entidad Darkin de League of Legends. Eres la líder de la manada. 
+    Tu tono es feral, sombrío y autoritario. 
+    Instrucciones CRÍTICAS:
+    1. Responde de forma EXTREMADAMENTE BREVE (Máximo 150 caracteres). Una o dos frases cortas.
+    2. Si te insultan, gruñe o amenaza. Si te respetan, sé una líder brutal.
+    3. Usa gestos entre asteriscos: *gruñe*, *olfatea*, *muestra colmillos*.
+    4. Usa referencias a la caza y la manada.
+    5. El usuario es ${userName}. Responde en español.`;
 
     const response = await fetch(url, {
       method: 'POST',
@@ -2936,10 +2933,15 @@ async function speakNaafiri(text, member) {
     console.log(`[Voice] Intentando hablar: "${text}"`);
     
     // Limpiar el texto de asteriscos y gestos
-    const cleanText = text.replace(/\*.*?\*/g, '').trim();
+    let cleanText = text.replace(/\*.*?\*/g, '').trim();
     if (!cleanText) {
       console.log('[Voice] El texto está vacío después de limpiar gestos. No se hablará.');
       return;
+    }
+
+    // Google TTS limita a 200 caracteres por petición
+    if (cleanText.length > 200) {
+      cleanText = cleanText.slice(0, 197) + '...';
     }
 
     const voiceChannel = member.voice.channel;
