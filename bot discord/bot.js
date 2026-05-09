@@ -2198,49 +2198,7 @@ const CHALLENGES_LIST = [
 
 async function generateChallengeImage(db) {
   let cardsHtml = '';
-  let topHuntersHtml = '';
   
-  // Obtener Top Cazadores del mes
-  try {
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const activities = await db.collection('activities').find({
-      type: 'challenge_win',
-      timestamp: { $gte: startOfMonth }
-    }).toArray();
-
-    const stats = {};
-    activities.forEach(a => {
-      let name = a.message ? a.message.split('¡')[1]?.split(' ha')[0] : 'Desconocido';
-      if (!name) name = a.discordId || 'Desconocido';
-      stats[name] = (stats[name] || 0) + 1;
-    });
-
-    const sortedHunters = Object.entries(stats).sort((a,b) => b[1] - a[1]).slice(0, 5);
-    
-    if (sortedHunters.length > 0) {
-      topHuntersHtml = `
-        <div class="top-hunters">
-          <div class="hunter-title">MAYORES CAZADORES</div>
-          ${sortedHunters.map((h, idx) => `
-            <div class="hunter-row">
-              <span class="hunter-rank">${idx + 1}</span>
-              <span class="hunter-name">${h[0]}</span>
-              <span class="hunter-count">${h[1]} 🏆</span>
-            </div>
-          `).join('')}
-        </div>
-      `;
-    } else {
-      topHuntersHtml = `
-        <div class="top-hunters">
-          <div class="hunter-title">MAYORES CAZADORES</div>
-          <div class="no-hunters">Aún no hay cacerías este mes...</div>
-        </div>
-      `;
-    }
-  } catch (e) { console.error('[Hunters Fetch Error]', e); }
-
   // Cargar imagen de fondo local
   let bgUrl = '';
   try {
@@ -2275,7 +2233,7 @@ async function generateChallengeImage(db) {
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { 
           margin: 0; 
-          padding: 50px 30px; 
+          padding: 60px 40px; 
           background: ${bgUrl ? `url(${bgUrl})` : '#0a0a0c'} no-repeat center center; 
           background-size: cover;
           font-family: 'Inter', sans-serif; 
@@ -2294,37 +2252,26 @@ async function generateChallengeImage(db) {
         }
         .content { position: relative; z-index: 1; }
         .header { text-align: center; margin-bottom: 40px; }
-        .header h1 { font-size: 44px; color: #d4af37; text-transform: uppercase; letter-spacing: 8px; margin: 0; font-weight: 900; text-shadow: 0 0 30px rgba(212,175,55,0.6); }
-        .header p { color: rgba(255,255,255,0.6); margin-top: 10px; font-size: 16px; text-transform: uppercase; letter-spacing: 4px; }
-        .main-layout { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 30px; }
+        .header h1 { font-size: 42px; color: #d4af37; text-transform: uppercase; letter-spacing: 6px; margin: 0; font-weight: 900; text-shadow: 0 0 20px rgba(212,175,55,0.4); }
+        .header p { color: rgba(255,255,255,0.6); margin-top: 10px; font-size: 16px; text-transform: uppercase; letter-spacing: 2px; }
         .card { 
-          background: rgba(20, 20, 25, 0.7); 
-          backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 16px; 
+          background: rgba(255,255,255,0.03); 
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(212,175,55,0.15); 
+          border-radius: 12px; 
           padding: 20px; 
-          display: grid;
-          grid-template-columns: 75px 1fr auto;
+          display: flex; 
           align-items: center; 
-          gap: 15px;
           margin-bottom: 15px; 
+          transition: all 0.3s ease;
         }
-        .icon { width: 75px; height: 75px; border-radius: 12px; border: 2px solid rgba(212,175,55,0.3); }
-        .details { display: flex; flex-direction: column; gap: 4px; }
-        .name { font-size: 24px; font-weight: 900; color: #fff; margin: 0; }
-        .rarity { font-size: 11px; font-weight: 900; text-transform: uppercase; padding: 2px 6px; background: rgba(255,255,255,0.1); border-radius: 4px; color: #d4af37; width: fit-content; }
-        .desc { font-size: 15px; color: rgba(255,255,255,0.9); line-height: 1.3; margin: 0; font-weight: 500; }
-        .reward { font-size: 26px; font-weight: 900; color: #f1c40f; text-shadow: 0 0 15px rgba(241,196,15,0.4); text-align: right; }
-        
-        .top-hunters { background: rgba(212, 175, 55, 0.08); border: 2px solid rgba(212, 175, 55, 0.25); border-radius: 20px; padding: 25px; height: fit-content; }
-        .hunter-title { font-size: 18px; font-weight: 900; color: #d4af37; text-align: center; margin-bottom: 20px; letter-spacing: 2px; border-bottom: 2px solid rgba(212, 175, 55, 0.2); padding-bottom: 15px; }
-        .hunter-row { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
-        .hunter-rank { font-size: 18px; font-weight: 900; color: #d4af37; width: 30px; }
-        .hunter-name { flex: 1; font-size: 16px; font-weight: 700; color: #fff; }
-        .hunter-count { font-size: 16px; font-weight: 900; color: #f1c40f; }
-        .no-hunters { text-align: center; opacity: 0.6; padding: 20px; font-style: italic; font-size: 15px; }
-
-        .footer { text-align: center; margin-top: 40px; font-size: 12px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 6px; font-weight: 900; }
+        .icon { width: 85px; height: 85px; border-radius: 12px; margin-right: 20px; border: 2px solid rgba(212,175,55,0.3); }
+        .details { flex: 1; }
+        .name { font-size: 28px; font-weight: 900; margin-bottom: 5px; color: #fff; line-height: 1.1; }
+        .rarity { font-size: 16px; margin-left: 10px; font-weight: 700; text-transform: uppercase; vertical-align: middle; }
+        .desc { font-size: 18px; color: rgba(255,255,255,0.9); line-height: 1.4; margin: 0; max-width: 450px; font-weight: 500; }
+        .reward { font-size: 32px; font-weight: 900; color: #f1c40f; text-shadow: 0 0 15px rgba(241,196,15,0.4); min-width: 160px; text-align: right; }
+        .footer { text-align: center; margin-top: 40px; font-size: 14px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 4px; font-weight: 700; }
       </style>
     </head>
     <body>
@@ -2333,13 +2280,8 @@ async function generateChallengeImage(db) {
           <h1>TABLÓN DE CAZA</h1>
           <p>Retos activos de la Perrera - Gana Naafiri Coins</p>
         </div>
-        <div class="main-layout">
-          <div class="challenges-column">
-            ${cardsHtml}
-          </div>
-          ${topHuntersHtml}
-        </div>
-        <div class="footer">Generado por Naafiri Bot — Board Version 2.1</div>
+        ${cardsHtml}
+        <div class="footer">Generado por Naafiri Bot</div>
       </div>
     </body>
     </html>
@@ -2351,10 +2293,10 @@ async function generateChallengeImage(db) {
   });
   try {
     const page = await browser.newPage();
-    await page.setViewport({ width: 800, height: 100, deviceScaleFactor: 3 }); 
+    await page.setViewport({ width: 800, height: 100, deviceScaleFactor: 4 }); 
     await page.setContent(htmlContent, { waitUntil: 'networkidle0', timeout: 30000 });
     const bodyHeight = await page.evaluate(() => document.body.scrollHeight);
-    await page.setViewport({ width: 800, height: bodyHeight, deviceScaleFactor: 3 });
+    await page.setViewport({ width: 800, height: bodyHeight, deviceScaleFactor: 4 });
     return await page.screenshot({ type: 'png', fullPage: true });
   } finally {
     await browser.close().catch(() => {});
