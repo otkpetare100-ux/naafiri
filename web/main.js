@@ -105,7 +105,6 @@ function renderLadder(players) {
           <div class="tier-text">${player.tier} ${player.rank}</div>
           <div class="rank-stats">
             <span class="lp">${player.lp} LP</span>
-            <span class="separator">·</span>
             <span class="wr ${wrClass}">${player.winRate} WR</span>
           </div>
         </div>
