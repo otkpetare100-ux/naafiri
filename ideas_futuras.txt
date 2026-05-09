@@ -6,16 +6,19 @@
 - Auto-vínculo para nuevos miembros con !vincular. [PENDIENTE]
 - Roles de rango que cambian automáticamente (Top 1 Ladder). [PENDIENTE]
 - Auditoría privada de miembros no vinculados. [PENDIENTE]
+- Bienvenida por Voz: Saludo corto al entrar a un canal. [NUEVO]
 
 2. COMUNIDAD Y DINAMISMO
 - Canales de voz automáticos para premades en partida. [PENDIENTE]
 - Alertas de Clash para completar equipos. [PENDIENTE]
 - Confesiones Anónimas (!confesar): Mensajes anónimos a un canal. [NUEVO]
+- Alertas de Twitch: Aviso automático cuando alguien inicia stream. [NUEVO]
 
 3. ECONOMÍA (NAAFIRI COINS)
 - Tienda de roles de colores y packs de cartas. [PENDIENTE]
 - Pago de coins para cambiar el nick a un amigo por broma. [PENDIENTE]
 - Casino Naafiri: Blackjack (!bj), Ruleta y Tragamonedas. [NUEVO]
+- Lotería diaria a las 10 PM. [PENDIENTE]
 
 4. ANALÍTICA (EL PERIÓDICO)
 - Imagen semanal con MVP (más subida) y Manco (más bajada). [PENDIENTE]
@@ -25,10 +28,13 @@
 - Quinielas de eSports reales (LEC/LCK/LLA). [PENDIENTE]
 - Predicción mensual de quién subirá más divisiones. [PENDIENTE]
 
-6. UTILIDAD TÁCTICA
+6. UTILIDAD TÁCTICA Y DIARIA
 - Comando !build [Campeón] con runas e items actuales. [COMPLETADO ✅]
-- Noticias de Steam: Ofertas y juegos gratis de Steam. [COMPLETADO ✅]
-- Alertas de Epic Games: Juegos gratis cada jueves. [COMPLETADO ✅]
+- Noticias de Steam: Ofertas y juegos gratis (Auto-borrado). [COMPLETADO ✅]
+- Alertas de Epic Games: Juegos gratis cada jueves (Auto-borrado). [COMPLETADO ✅]
+- Clima (!clima): Estado del tiempo en cualquier ciudad. [NUEVO]
+- Recordatorios (!recordar): Avisos personales por tiempo. [NUEVO]
+- Traductor (!traducir): Traducción instantánea de frases. [NUEVO]
 
 7. ESTÉTICA Y PERFIL
 - Marcos (Frames) comprables para el comando !perfil. [PENDIENTE]
@@ -38,13 +44,13 @@
 - Pentakill Caller: Bot entra a voz y grita "¡PENTAKILL!" al detectarlo. [PENDIENTE]
 - Comentarista de IA: Reportes épicos en chat sobre partidas Master+. [PENDIENTE]
 
-9. WEB / DASHBOARD
+9. INTELIGENCIA ARTIFICIAL
+- IA de Imágenes (!imagina): Generar arte con IA desde el chat. [NUEVO]
+- Chat con Naafiri: Responder con la personalidad del campeón. [NUEVO]
+
+10. WEB / DASHBOARD
 - Mochila interactiva para elegir carta principal del perfil. [PENDIENTE]
 - Gráficas de ganancias/pérdidas de coins. [PENDIENTE]
-
-10. RETOS Y MISIONES
-- Misiones globales (ej. "Robar un Barón esta semana"). [PENDIENTE]
-- Lotería diaria a las 10 PM. [PENDIENTE]
 
 =====================================================
 Documento actualizado - Lan Tracker Project
