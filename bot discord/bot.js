@@ -449,12 +449,16 @@ function initBot(db) {
               { $set: { discordId: msg.author.id } }
             );
 
-            // Sincronizar economía
+            // Sincronizar economía (Solo establece el PUUID si es la primera vez)
             await db.collection('economy').updateOne(
               { discordId: msg.author.id },
               { 
-                $setOnInsert: { coins: 100, lastDaily: null, inventory: [] },
-                $set: { puuid: puuid } 
+                $setOnInsert: { 
+                  puuid: puuid,
+                  coins: 100, 
+                  lastDaily: null, 
+                  inventory: [] 
+                }
               },
               { upsert: true }
             );
@@ -1193,16 +1197,18 @@ function initBot(db) {
             { $set: { discordId: targetUser.id } }
           );
 
-          // 2. Vincular en la colección de economía
+          // 2. Vincular en la colección de economía (Solo establece el PUUID si es la primera vez)
           await db.collection('economy').updateOne(
             { discordId: targetUser.id },
             { 
-              $set: { 
+              $set: { discordTag: targetUser.tag },
+              $setOnInsert: { 
                 puuid: puuid,
-                discordTag: targetUser.tag,
-                linkedPuuid: puuid // Mantener compatibilidad si se usa este campo
-              },
-              $setOnInsert: { coins: 100, lastDaily: null, inventory: [] }
+                linkedPuuid: puuid, // Mantener compatibilidad
+                coins: 100, 
+                lastDaily: null, 
+                inventory: [] 
+              }
             },
             { upsert: true }
           );
