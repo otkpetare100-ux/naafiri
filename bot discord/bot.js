@@ -340,6 +340,24 @@ function initBot(db) {
       msg.channel.send({ content: `<@${msg.author.id}>`,  embeds: [embed] });
     }
 
+    if (command === 'retos') {
+      try {
+        const buffer = await generateChallengeImage(db);
+        const attachment = new AttachmentBuilder(buffer, { name: 'retos.png' });
+        
+        const sentMsg = await msg.channel.send({ 
+          content: `<@${msg.author.id}> aquí tienes el Tablón de Caza activo:`, 
+          files: [attachment] 
+        });
+
+        await rotateGlobalMessage(db, msg.channel, 'last_challenge_msg', sentMsg);
+      } catch (e) {
+        console.error('[Retos Command Error]', e);
+        msg.channel.send('Hubo un error al generar el Tablón de Caza.');
+      }
+      return;
+    }
+
     if (command === 'ladder') {
       const accounts = await db.collection('accounts').find({}).toArray();
       const sorted = accounts.sort((a,b) => getRankScore(b) - getRankScore(a)).slice(0, 10);
