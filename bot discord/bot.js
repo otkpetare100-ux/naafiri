@@ -1149,6 +1149,79 @@ function initBot(db) {
         return msg.channel.send(`<@${msg.author.id}> ✅ Reset global completado. **${result.modifiedCount}** usuario(s) puestos a 0 coins.`);
       }
 
+      // !admin_vincular @usuario Nombre#TAG [Region]
+      if (command === 'admin_vincular') {
+        const targetUser = msg.mentions.users.first();
+        if (!targetUser) return msg.channel.send(`<@${msg.author.id}> ❌ Debes mencionar a un usuario: \`!admin_vincular @usuario Nombre#TAG\``);
+
+        const nameWithTag = args.slice(1).join(' ');
+        if (!nameWithTag || !nameWithTag.includes('#')) {
+          return msg.channel.send(`<@${msg.author.id}> ❌ Uso: \`!admin_vincular @usuario Nombre#TAG [Region]\``);
+        }
+
+        const RIOT_API_KEY = process.env.RIOT_API_KEY;
+        if (!RIOT_API_KEY) return msg.channel.send('❌ No hay Riot API Key configurada.');
+
+        let region = 'la1';
+        let cleanNameWithTag = nameWithTag;
+        
+        // Detectar región opcional al final
+        const lastArg = args[args.length - 1]?.toLowerCase();
+        if (VALID_REGIONS.includes(lastArg)) {
+          region = lastArg;
+          const tempArgs = args.slice(1);
+          tempArgs.pop();
+          cleanNameWithTag = tempArgs.join(' ');
+        }
+
+        let acc = await findAccountBySlug(cleanNameWithTag);
+        let isNew = false;
+
+        if (!acc) {
+          const [name, tag] = cleanNameWithTag.split('#').map(s => s.trim());
+          const routing = REGION_ROUTING[region] || 'americas';
+          const statusMsg = await msg.channel.send(`🔍 Buscando a **${name}#${tag}** en **${region.toUpperCase()}**...`);
+
+          try {
+            const accountUrl = `https://${routing}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(name)}/${encodeURIComponent(tag)}?api_key=${RIOT_API_KEY}`;
+            const accountRes = await fetch(accountUrl);
+            if (!accountRes.ok) {
+              statusMsg.delete().catch(() => {});
+              return msg.channel.send(`❌ No encontré a **${name}#${tag}**.`);
+            }
+            const riotAcc = await accountRes.json();
+            acc = { 
+              puuid: riotAcc.puuid, 
+              gameName: riotAcc.gameName, 
+              tagLine: riotAcc.tagLine, 
+              region: region,
+              addedAt: new Date()
+            };
+            await db.collection('accounts').insertOne(acc);
+            isNew = true;
+            statusMsg.delete().catch(() => {});
+          } catch (err) {
+            console.error('[Admin Vincular Error]', err);
+            statusMsg.delete().catch(() => {});
+            return msg.channel.send(`❌ Error consultando la API de Riot.`);
+          }
+        }
+
+        // Vincular forzosamente
+        await db.collection('accounts').updateOne(
+          { puuid: acc.puuid },
+          { $set: { discordId: targetUser.id } }
+        );
+
+        await db.collection('economy').updateOne(
+          { discordId: targetUser.id },
+          { $set: { linkedPuuid: acc.puuid, discordTag: targetUser.tag } },
+          { upsert: true }
+        );
+
+        return msg.channel.send(`✅ **VINCULACIÓN MANUAL EXITOSA**\nUsuario: <@${targetUser.id}>\nCuenta LoL: **${acc.gameName}#${acc.tagLine}**`);
+      }
+
       // !admin_purge [cantidad]
       if (command === 'admin_purge') {
         const amount = args[0] ? parseInt(args[0]) : 100;
@@ -1261,7 +1334,7 @@ function initBot(db) {
             const adminEmbed = new EmbedBuilder()
               .setTitle('🛠️ Panel de Administración - LAN Tracker')
               .addFields(
-                { name: '💰 Gestión de Economía', value: '`!admin_dar @u [cant]`\n`!admin_quitar @u [cant]`\n`!admin_setcoins @u [cant]`\n`!admin_resetdiario @u`\n`!admin_resetall CONFIRMAR`' },
+                { name: '🛠️ Gestión de Cuentas', value: '`!admin_vincular @u N#T` - Vincular manual.\n`!admin_dar @u [cant]`\n`!admin_quitar @u [cant]`\n`!admin_setcoins @u [cant]`\n`!admin_resetdiario @u`\n`!admin_resetall CONFIRMAR`' },
                 { name: '🎒 Gestión de Inventario', value: '`!admin_daritem @u [id]`\n`!admin_clearinv @u`' },
                 { name: '📡 Monitoreo y Auditoría', value: '`!admin_scan` - Forzar escaneo en vivo.\n`!admin_vinculos` - Ver quién no se ha vinculado.\n`!admin_cancelarapuestas N#T`' },
                 { name: '🎭 Sistema y Herramientas', value: '`!admin_syncroles` - Sincronizar roles de Discord.\n`!admin_debug_key` - Estado API de Riot.\n`!admin_purge [n]` - Borrar mensajes del canal.' },
