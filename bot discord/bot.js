@@ -2538,7 +2538,7 @@ async function generateBuildImage(champion) {
     
     // Inyectar CSS estético Black & Gold
     await page.addStyleTag({
-      content: \`
+      content: `
         header, nav, footer, iframe, [class*="Ad"], [id*="ad"], .advertisement { display: none !important; }
         body { background: #0a0a0c !important; color: #fff !important; }
         main, .container { 
@@ -2549,7 +2549,7 @@ async function generateBuildImage(champion) {
           margin: 20px auto !important;
           padding: 20px !important;
         }
-      \`
+      `
     });
     
     // Esperar a que carguen imágenes
