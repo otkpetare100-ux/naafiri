@@ -2411,7 +2411,7 @@ async function generateChallengeImage(db) {
         .tile-icon { width: 100px; height: 100px; border-radius: 18px; border: 3px solid rgba(255,255,255,0.1); background: #000; }
         .tile-main { flex: 1; }
         .tile-name { font-size: 32px; font-weight: 900; color: #fff; margin-bottom: 8px; text-transform: uppercase; }
-        .tile-desc { font-size: 17px; color: rgba(255,255,255,0.6); line-height: 1.4; }
+        .tile-desc { font-size: 32px; color: rgba(255,255,255,0.6); line-height: 1.4; }
         
         .tile-reward-bar { background: rgba(255,255,255,0.03); padding: 22px 35px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); }
         .reward-tag { font-size: 13px; font-weight: 900; color: rgba(255,255,255,0.3); letter-spacing: 3px; }
