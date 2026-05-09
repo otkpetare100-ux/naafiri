@@ -2275,12 +2275,12 @@ async function generateChallengeImage(db) {
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { 
           margin: 0; 
-          padding: 50px 40px; 
+          padding: 50px 30px; 
           background: ${bgUrl ? `url(${bgUrl})` : '#0a0a0c'} no-repeat center center; 
           background-size: cover;
           font-family: 'Inter', sans-serif; 
           color: #fff; 
-          width: 650px; 
+          width: 800px; 
           height: auto; 
           position: relative;
           overflow: hidden;
@@ -2294,38 +2294,37 @@ async function generateChallengeImage(db) {
         }
         .content { position: relative; z-index: 1; }
         .header { text-align: center; margin-bottom: 40px; }
-        .header h1 { font-size: 44px; color: #d4af37; text-transform: uppercase; letter-spacing: 6px; margin: 0; font-weight: 900; text-shadow: 0 0 25px rgba(212,175,55,0.5); }
-        .header p { color: rgba(255,255,255,0.5); margin-top: 10px; font-size: 18px; text-transform: uppercase; letter-spacing: 2px; }
-        .main-layout { display: flex; flex-direction: column; gap: 40px; }
+        .header h1 { font-size: 44px; color: #d4af37; text-transform: uppercase; letter-spacing: 8px; margin: 0; font-weight: 900; text-shadow: 0 0 30px rgba(212,175,55,0.6); }
+        .header p { color: rgba(255,255,255,0.6); margin-top: 10px; font-size: 16px; text-transform: uppercase; letter-spacing: 4px; }
+        .main-layout { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 30px; }
         .card { 
           background: rgba(20, 20, 25, 0.7); 
-          backdrop-filter: blur(15px);
+          backdrop-filter: blur(20px);
           border: 1px solid rgba(255, 255, 255, 0.08);
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
           border-radius: 16px; 
-          padding: 22px; 
+          padding: 20px; 
           display: grid;
-          grid-template-columns: 80px 1fr auto;
+          grid-template-columns: 75px 1fr auto;
           align-items: center; 
-          gap: 20px;
-          margin-bottom: 12px; 
+          gap: 15px;
+          margin-bottom: 15px; 
         }
-        .icon { width: 80px; height: 80px; border-radius: 12px; border: 2px solid rgba(212,175,55,0.2); }
+        .icon { width: 75px; height: 75px; border-radius: 12px; border: 2px solid rgba(212,175,55,0.3); }
         .details { display: flex; flex-direction: column; gap: 4px; }
-        .name { font-size: 26px; font-weight: 900; color: #fff; margin: 0; }
-        .rarity { font-size: 13px; font-weight: 800; text-transform: uppercase; padding: 2px 8px; background: rgba(255,255,255,0.05); border-radius: 4px; color: #d4af37; width: fit-content; }
-        .desc { font-size: 17px; color: rgba(255,255,255,0.9); line-height: 1.4; margin: 0; }
-        .reward { font-size: 30px; font-weight: 900; color: #f1c40f; text-shadow: 0 0 15px rgba(241,196,15,0.3); text-align: right; }
+        .name { font-size: 24px; font-weight: 900; color: #fff; margin: 0; }
+        .rarity { font-size: 11px; font-weight: 900; text-transform: uppercase; padding: 2px 6px; background: rgba(255,255,255,0.1); border-radius: 4px; color: #d4af37; width: fit-content; }
+        .desc { font-size: 15px; color: rgba(255,255,255,0.9); line-height: 1.3; margin: 0; font-weight: 500; }
+        .reward { font-size: 26px; font-weight: 900; color: #f1c40f; text-shadow: 0 0 15px rgba(241,196,15,0.4); text-align: right; }
         
-        .top-hunters { background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 20px; padding: 25px; margin-top: 10px; }
-        .hunter-title { font-size: 20px; font-weight: 900; color: #d4af37; text-align: center; margin-bottom: 20px; letter-spacing: 2px; border-bottom: 1px solid rgba(212, 175, 55, 0.1); padding-bottom: 15px; }
-        .hunter-row { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .hunter-rank { font-size: 22px; font-weight: 900; color: #d4af37; width: 40px; }
-        .hunter-name { flex: 1; font-size: 20px; font-weight: 700; color: #fff; }
-        .hunter-count { font-size: 20px; font-weight: 900; color: #f1c40f; }
-        .no-hunters { text-align: center; opacity: 0.5; padding: 20px; font-style: italic; }
+        .top-hunters { background: rgba(212, 175, 55, 0.08); border: 2px solid rgba(212, 175, 55, 0.25); border-radius: 20px; padding: 25px; height: fit-content; }
+        .hunter-title { font-size: 18px; font-weight: 900; color: #d4af37; text-align: center; margin-bottom: 20px; letter-spacing: 2px; border-bottom: 2px solid rgba(212, 175, 55, 0.2); padding-bottom: 15px; }
+        .hunter-row { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .hunter-rank { font-size: 18px; font-weight: 900; color: #d4af37; width: 30px; }
+        .hunter-name { flex: 1; font-size: 16px; font-weight: 700; color: #fff; }
+        .hunter-count { font-size: 16px; font-weight: 900; color: #f1c40f; }
+        .no-hunters { text-align: center; opacity: 0.6; padding: 20px; font-style: italic; font-size: 15px; }
 
-        .footer { text-align: center; margin-top: 40px; font-size: 14px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 6px; font-weight: 800; }
+        .footer { text-align: center; margin-top: 40px; font-size: 12px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 6px; font-weight: 900; }
       </style>
     </head>
     <body>
@@ -2352,10 +2351,10 @@ async function generateChallengeImage(db) {
   });
   try {
     const page = await browser.newPage();
-    await page.setViewport({ width: 650, height: 100, deviceScaleFactor: 2 }); 
+    await page.setViewport({ width: 800, height: 100, deviceScaleFactor: 3 }); 
     await page.setContent(htmlContent, { waitUntil: 'networkidle0', timeout: 30000 });
     const bodyHeight = await page.evaluate(() => document.body.scrollHeight);
-    await page.setViewport({ width: 650, height: bodyHeight, deviceScaleFactor: 2 });
+    await page.setViewport({ width: 800, height: bodyHeight, deviceScaleFactor: 3 });
     return await page.screenshot({ type: 'png', fullPage: true });
   } finally {
     await browser.close().catch(() => {});
