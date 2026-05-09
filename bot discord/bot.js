@@ -2393,7 +2393,7 @@ async function sendChallengeReminder(db, targetChannel = null) {
     
     // Rotar mensaje si es un canal público
     if (db && !targetChannel) {
-      await rotateGlobalMessage(db, 'last_challenge_reminder', sentMsg);
+      await rotateGlobalMessage(db, channel, 'last_challenge_reminder', sentMsg);
     }
     
     return sentMsg;
