@@ -431,13 +431,8 @@ function initBot(db) {
 
           try {
             // 1. Obtener PUUID (Routing Regional)
-            const accountUrl = `https://${routing}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(name)}/${encodeURIComponent(tag)}`;
-            const accountRes = await fetch(accountUrl, {
-              headers: { 
-                "X-Riot-Token": RIOT_API_KEY.trim(),
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
-              }
-            });
+            const accountUrl = `https://${routing}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(name)}/${encodeURIComponent(tag)}?api_key=${RIOT_API_KEY.trim()}`;
+            const accountRes = await fetch(accountUrl);
             
             if (!accountRes.ok) {
               statusMsg.delete().catch(() => {});
@@ -1189,13 +1184,8 @@ function initBot(db) {
           const statusMsg = await msg.channel.send(`🔍 Buscando a **${name}#${tag}** en **${region.toUpperCase()}**...`);
 
           try {
-            const accountUrl = `https://${routing}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(name)}/${encodeURIComponent(tag)}`;
-            const accountRes = await fetch(accountUrl, {
-              headers: { 
-                "X-Riot-Token": RIOT_API_KEY.trim(),
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
-              }
-            });
+            const accountUrl = `https://${routing}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(name)}/${encodeURIComponent(tag)}?api_key=${RIOT_API_KEY.trim()}`;
+            const accountRes = await fetch(accountUrl);
 
             if (!accountRes.ok) {
               statusMsg.delete().catch(() => {});
