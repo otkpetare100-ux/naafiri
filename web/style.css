@@ -87,7 +87,7 @@ body::before {
 }
 
 .ladder-section {
-  max-width: 1100px;
+  max-width: 1300px;
   margin: 0 auto;
   padding: 0 2rem;
 }
@@ -143,7 +143,7 @@ h1::after {
   background: var(--bg-card);
   border: 1px solid var(--border-muted);
   border-radius: 12px;
-  padding: 0.5rem 1.5rem;
+  padding: 0.8rem 2.5rem;
   display: grid;
   grid-template-columns: 60px 80px 1fr 550px;
   align-items: center;
@@ -299,7 +299,7 @@ h1::after {
 .player-champions {
   display: flex;
   gap: 12px;
-  margin-right: 1rem; /* Reducido un poco porque ahora el streak-container tiene su propio ancho */
+  margin-right: 0.5rem; /* Un poquito más a la derecha (menos espacio con la racha) */
 }
 
 .champ-item {
