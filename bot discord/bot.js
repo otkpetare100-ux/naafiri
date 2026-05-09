@@ -411,7 +411,7 @@ function initBot(db) {
       try {
         const buffers = await generateBuildImage(champArgs);
         if (!buffers || buffers.length === 0) {
-          return tempMsg.edit(`<@${msg.author.id}> ❌ No pude encontrar información de ese campeón en dpm.lol. Revisa el nombre e intenta de nuevo.`).then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
+          return tempMsg.edit(`<@${msg.author.id}> ❌ No pude encontrar información de ese campeón en U.GG. Revisa el nombre e intenta de nuevo.`).then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
         }
 
         await tempMsg.delete().catch(() => {});
@@ -2556,7 +2556,10 @@ async function generateBuildImage(champion) {
       timeout: 30000 
     });
     
-    if (response && response.status() === 404) return null;
+    if (response && response.status() === 404) {
+      console.warn(`[Build Gen] 404 en U.GG para ${champion}`);
+      return null;
+    }
 
     // Ocultar basura y anuncios de U.GG
     await page.addStyleTag({
