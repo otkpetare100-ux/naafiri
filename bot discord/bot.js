@@ -345,7 +345,6 @@ function initBot(db) {
         const attachment = new AttachmentBuilder(buffer, { name: 'retos.png' });
         
         const sentMsg = await msg.channel.send({ 
-          content: `<@${msg.author.id}> aquí tienes el Tablón de Caza activo:`, 
           files: [attachment] 
         });
 
@@ -370,7 +369,6 @@ function initBot(db) {
         const attachment = new AttachmentBuilder(buffer, { name: 'ladder.png' });
         
         const sentMsg = await msg.channel.send({ 
-          content: `<@${msg.author.id}> aquí tienes el Top 10 de la manada:`, 
           files: [attachment] 
         });
 
