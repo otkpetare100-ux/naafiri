@@ -359,7 +359,11 @@ function initBot(db) {
     }
 
     if (command === 'build') {
-      const champArgs = args.join('').toLowerCase();
+      let champArgs = args.join('-').toLowerCase();
+      // Casos especiales (opcional, pero ayuda)
+      if (champArgs === 'mundo' || champArgs === 'dr-mundo') champArgs = 'dr-mundo';
+      if (champArgs === 'yi') champArgs = 'master-yi';
+      
       if (!champArgs) {
         return msg.channel.send(`<@${msg.author.id}> ❌ Debes especificar un campeón. Ejemplo: \`!build aatrox\``).then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
       }
