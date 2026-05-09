@@ -207,25 +207,6 @@ function initBot(db) {
     const args = msg.content.slice(1).trim().split(/ +/);
     const command = args.shift().toLowerCase();
 
-    if (command === 'retos' || command === 'challenges' || command === 'diario_retos') {
-      const now = Date.now();
-      const lastUsed = helpCooldowns.get(`retos_${msg.author.id}`) || 0;
-      const cooldownAmount = 30 * 1000;
-
-      if (now - lastUsed < cooldownAmount) {
-        return msg.channel.send(`<@${msg.author.id}> ⌛ No satures el tablero de caza. Espera un poco.`).then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
-      }
-
-      helpCooldowns.set(`retos_${msg.author.id}`, now);
-      const statusMsg = await msg.channel.send('⏳ Consultando el tablón de caza actual...');
-      
-      const sentMsg = await sendChallengeReminder(dbInstance, msg.channel);
-      if (sentMsg) {
-        await rotateGlobalMessage(dbInstance, msg.channel, 'last_challenges_msg', sentMsg);
-      }
-      statusMsg.delete().catch(() => {});
-      return;
-    }
 
     if (command === 'help' || command === 'ayuda') {
       const now = Date.now();
@@ -347,7 +328,18 @@ function initBot(db) {
       msg.channel.send({ content: `<@${msg.author.id}>`,  embeds: [embed] });
     }
 
-    if (command === 'retos') {
+    if (command === 'retos' || command === 'challenges') {
+      const now = Date.now();
+      const lastUsed = helpCooldowns.get(`retos_${msg.author.id}`) || 0;
+      const cooldownAmount = 30 * 1000;
+
+      if (now - lastUsed < cooldownAmount) {
+        return msg.channel.send(`<@${msg.author.id}> ⌛ No satures el tablero de caza. Espera un poco.`).then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
+      }
+
+      helpCooldowns.set(`retos_${msg.author.id}`, now);
+      const statusMsg = await msg.channel.send('⏳ Generando el Tablón de Caza...');
+
       try {
         const buffer = await generateChallengeImage(db);
         const attachment = new AttachmentBuilder(buffer, { name: 'retos.png' });
@@ -358,9 +350,11 @@ function initBot(db) {
         });
 
         await rotateGlobalMessage(db, msg.channel, 'last_challenge_msg', sentMsg);
+        statusMsg.delete().catch(() => {});
       } catch (e) {
         console.error('[Retos Command Error]', e);
         msg.channel.send('Hubo un error al generar el Tablón de Caza.');
+        statusMsg.delete().catch(() => {});
       }
       return;
     }
