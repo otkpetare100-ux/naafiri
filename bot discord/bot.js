@@ -2468,16 +2468,20 @@ async function sendChallengeReminder(db, targetChannel = null) {
   if (!channel) return;
 
   try {
+    const buffer = await generateChallengeImage(db);
+    const attachment = new AttachmentBuilder(buffer, { name: 'retos.png' });
+
     const embed = new EmbedBuilder()
       .setTitle('📢 ¡ATENCIÓN MANADA! Botines disponibles 🐾')
       .setDescription('Si van a rankear hoy, recuerden que hay Naafiri Coins sobre la mesa. ¡A por ellos!\n\nUsa `!retos` para ver los botines disponibles.')
+      .setImage('attachment://retos.png')
       .setColor(0xd4af37);
 
-    const sentMsg = await channel.send({ embeds: [embed] });
+    const sentMsg = await channel.send({ embeds: [embed], files: [attachment] });
     
     // Rotar mensaje si es un canal público
     if (db && !targetChannel) {
-      await rotateGlobalMessage(db, channel, 'last_challenge_reminder', sentMsg);
+      await rotateGlobalMessage(db, channel, 'last_challenge_msg', sentMsg);
     }
     
     return sentMsg;
