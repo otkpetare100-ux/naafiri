@@ -825,8 +825,27 @@ select option {
   font-weight: 800;
   margin-left: 6px;
 }
-.streak-win { color: #ef4444; }
-.streak-loss { color: #60a5fa; }
+.streak-win { 
+  color: #ef4444; 
+  text-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+  font-weight: 800;
+}
+.streak-loss { 
+  color: #60a5fa; 
+  text-shadow: 0 0 8px rgba(96, 165, 250, 0.6);
+  font-weight: 800;
+}
+
+.streak-emoji {
+  display: inline-block;
+  margin-right: 4px;
+  animation: float-emoji 2s ease-in-out infinite;
+}
+
+@keyframes float-emoji {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
 
 /* Historial Dots */
 .player-performance {

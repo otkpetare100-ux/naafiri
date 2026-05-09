@@ -83,8 +83,9 @@ function renderLadder(players) {
       <div class="rank-data">
         <div class="player-performance">
           ${Math.abs(player.streak) >= 2 ? (
-            player.streak > 0 ? `<span class="streak-tag streak-win">🔥 ${player.streak} Wins</span>` : 
-            `<span class="streak-tag streak-loss">❄️ ${Math.abs(player.streak)} Loss</span>`
+            player.streak > 0 ? 
+              `<span class="streak-tag streak-win"><span class="streak-emoji">🔥</span> ${player.streak} Wins</span>` : 
+              `<span class="streak-tag streak-loss"><span class="streak-emoji">❄️</span> ${Math.abs(player.streak)} Loss</span>`
           ) : ''}
           <div class="history-dots">${historyHtml}</div>
         </div>
