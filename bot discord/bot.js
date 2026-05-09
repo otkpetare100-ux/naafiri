@@ -2854,7 +2854,7 @@ async function askNaafiri(prompt, userName = 'Invocador') {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) return "*(Naafiri te mira fijamente, pero parece que su mente está en otra parte...)* [Falta GEMINI_API_KEY]";
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
     
     const systemPrompt = `Eres Naafiri, una entidad Darkin de League of Legends atrapada en el cuerpo de un sabueso de las dunas. Eres la líder de la manada. 
     Tu tono es feral, sombrío, autoritario y afilado. No eres una mascota, eres una cazadora. 
