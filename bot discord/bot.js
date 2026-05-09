@@ -2544,99 +2544,87 @@ async function generateBuildImage(champion) {
     args: [
       '--no-sandbox', 
       '--disable-setuid-sandbox',
-      '--disable-blink-features=AutomationControlled'
+      '--disable-blink-features=AutomationControlled',
+      '--disable-features=IsolateOrigins,site-per-process'
     ]
   });
   
   try {
     const page = await browser.newPage();
+    // Bloquear anuncios y trackers para acelerar la carga
+    await page.setRequestInterception(true);
+    page.on('request', (request) => {
+      const url = request.url();
+      if (url.includes('google-analytics') || url.includes('doubleclick') || url.includes('quantserve') || url.includes('adroll') || url.includes('adsystem')) {
+        request.abort();
+      } else {
+        request.continue();
+      }
+    });
+
     await page.setViewport({ width: 1400, height: 2500, deviceScaleFactor: 2 });
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
     
     const url = `https://u.gg/lol/champions/${champion}/build`;
-    console.log(`[Build Gen] Navegando a U.GG: ${url}`);
-    const response = await page.goto(url, { 
-      waitUntil: 'networkidle2', 
-      timeout: 30000 
-    });
+    console.log(`[Build Gen] Intentando cargar U.GG de forma optimizada: ${url}`);
     
-    if (response && response.status() === 404) {
-      console.warn(`[Build Gen] 404 en U.GG para ${champion}`);
-      return null;
-    }
+    // Esperar solo lo básico para no colgarse
+    await page.goto(url, { 
+      waitUntil: 'domcontentloaded', 
+      timeout: 20000 
+    });
 
-    // Ocultar basura y anuncios de U.GG
+    // Dar un par de segundos para que React renderice lo básico
+    await new Promise(r => setTimeout(r, 4000));
+
+    // Ocultar basura
     await page.addStyleTag({
       content: `
-        #onesignal-slidedown-container, .ads-container, .nav-container, footer, .header-container, .champion-ranking-container, .side-nav, .search-container { 
+        #onesignal-slidedown-container, .ads-container, .nav-container, footer, .header-container, .champion-ranking-container, .side-nav, .search-container, .banner-container { 
           display: none !important; 
         }
-        body { 
-          background: #0a0a0c !important; 
-          color: #fff !important;
-        }
-        .rune-trees-container, .core-items, .skill-order, .content-section {
+        body { background: #0a0a0c !important; color: #fff !important; }
+        .rune-trees-container, .core-items, .skill-order {
           background: rgba(15, 15, 20, 0.95) !important;
           border: 2px solid #d4af37 !important;
           box-shadow: 0 0 40px rgba(212, 175, 55, 0.2) !important;
           border-radius: 20px !important;
           margin: 20px !important;
           padding: 20px !important;
+          display: block !important;
         }
       `
     });
 
-    await new Promise(r => setTimeout(r, 2000));
-
-    // Identificar secciones en U.GG
     const sectionsData = await page.evaluate(() => {
-      const getBox = (el) => {
+      const getBox = (selector) => {
+        const el = document.querySelector(selector);
         if (!el) return null;
         const { x, y, width, height } = el.getBoundingClientRect();
         return { x, y, width, height };
       };
-
       return {
-        runes: getBox(document.querySelector('.rune-trees-container')),
-        items: getBox(document.querySelector('.core-items')),
-        skills: getBox(document.querySelector('.skill-order'))
+        runes: getBox('.rune-trees-container'),
+        items: getBox('.core-items'),
+        skills: getBox('.skill-order')
       };
     });
 
     const buffers = [];
-
-    // Capturar Runas
     if (sectionsData.runes && sectionsData.runes.height > 100) {
-      buffers.push(await page.screenshot({ 
-        clip: { ...sectionsData.runes },
-        type: 'png'
-      }));
+      buffers.push(await page.screenshot({ clip: sectionsData.runes, type: 'png' }));
     }
-
-    // Capturar Objetos
     if (sectionsData.items && sectionsData.items.height > 100) {
-      buffers.push(await page.screenshot({ 
-        clip: { ...sectionsData.items },
-        type: 'png'
-      }));
+      buffers.push(await page.screenshot({ clip: sectionsData.items, type: 'png' }));
     }
-
-    // Capturar Habilidades
     if (sectionsData.skills && sectionsData.skills.height > 50) {
-      buffers.push(await page.screenshot({ 
-        clip: { ...sectionsData.skills },
-        type: 'png'
-      }));
+      buffers.push(await page.screenshot({ clip: sectionsData.skills, type: 'png' }));
     }
 
-    // Fallback si algo falló
     if (buffers.length === 0) {
       const mainEl = await page.$('.champion-profile-page') || await page.$('main');
-      if (mainEl) {
-        buffers.push(await mainEl.screenshot({ type: 'png' }));
-      } else {
-        buffers.push(await page.screenshot({ type: 'png', fullPage: true }));
-      }
+      if (mainEl) buffers.push(await mainEl.screenshot({ type: 'png' }));
+      else buffers.push(await page.screenshot({ type: 'png', fullPage: false }));
     }
 
     return buffers;
