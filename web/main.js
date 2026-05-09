@@ -55,6 +55,10 @@ function renderLadder(players) {
     const history = player.history || ['W', 'W', 'L', 'W', 'L']; 
     const historyHtml = history.map(res => `<span class="history-dot dot-${res.toLowerCase()}"></span>`).join('');
 
+    // Clase para el Winrate
+    const wrValue = parseInt(player.winRate) || 0;
+    const wrClass = wrValue >= 50 ? 'wr-positive' : 'wr-negative';
+
     card.innerHTML = `
       <div class="rank-text">#${rankNum}</div>
       
@@ -90,7 +94,7 @@ function renderLadder(players) {
           <div class="rank-stats">
             <span class="lp">${player.lp} LP</span>
             <span class="separator">·</span>
-            <span class="wr">${player.winRate} WR</span>
+            <span class="wr ${wrClass}">${player.winRate} WR</span>
           </div>
         </div>
       </div>
