@@ -1181,9 +1181,6 @@ function initBot(db) {
           cleanNameWithTag = tempArgs.join(' ');
         }
 
-        let acc = await findAccountBySlug(cleanNameWithTag);
-        let isNew = false;
-
         const parts = cleanNameWithTag.split('#');
         const tag = parts.pop().trim();
         const name = parts.join('#').trim();
