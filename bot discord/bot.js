@@ -56,6 +56,24 @@ const REGION_ROUTING = {
 
 const VALID_REGIONS = Object.keys(REGION_ROUTING);
 
+// Helper para rotar mensajes globales (Borrar anterior y guardar nuevo)
+async function rotateGlobalMessage(db, channel, key, newMessage) {
+  try {
+    const config = await db.collection('system_config').findOne({ key });
+    if (config && config.messageId) {
+      const oldMsg = await channel.messages.fetch(config.messageId).catch(() => null);
+      if (oldMsg) await oldMsg.delete().catch(() => {});
+    }
+    await db.collection('system_config').updateOne(
+      { key },
+      { $set: { messageId: newMessage.id, timestamp: new Date() } },
+      { upsert: true }
+    );
+  } catch (e) {
+    console.error(`[Rotate Error: ${key}]`, e);
+  }
+}
+
 function isAdmin(userId) {
   return userId === process.env.ADMIN_DISCORD_ID;
 }
@@ -64,7 +82,6 @@ function isAdmin(userId) {
 const helpCooldowns = new Map();
 const gachaCooldowns = new Map();
 const lastMiddayMotivation = new Map();
-let lastChallengesMessage = null; // Para evitar spam y borrar el anterior
 
 // --- SISTEMA DE GACHAPON ---
 const GACHA_ITEMS = [
@@ -186,23 +203,19 @@ function initBot(db) {
     if (command === 'retos' || command === 'challenges' || command === 'diario_retos') {
       const now = Date.now();
       const lastUsed = helpCooldowns.get(`retos_${msg.author.id}`) || 0;
-      const cooldownAmount = 30 * 1000; // 30 segundos de cooldown por usuario
+      const cooldownAmount = 30 * 1000;
 
       if (now - lastUsed < cooldownAmount) {
         return msg.channel.send(`<@${msg.author.id}> ⌛ No satures el tablero de caza. Espera un poco.`).then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
       }
 
       helpCooldowns.set(`retos_${msg.author.id}`, now);
-      
-      // Borrar el tablero anterior si existe en este canal
-      if (lastChallengesMessage) {
-        lastChallengesMessage.delete().catch(() => {});
-      }
-
       const statusMsg = await msg.channel.send('⏳ Consultando el tablón de caza actual...');
-      const sentMsg = await sendChallengeReminder(dbInstance, msg.channel);
       
-      if (sentMsg) lastChallengesMessage = sentMsg;
+      const sentMsg = await sendChallengeReminder(dbInstance, msg.channel);
+      if (sentMsg) {
+        await rotateGlobalMessage(dbInstance, msg.channel, 'last_challenges_msg', sentMsg);
+      }
       statusMsg.delete().catch(() => {});
       return;
     }
@@ -338,7 +351,9 @@ function initBot(db) {
         .setDescription(list || 'No hay jugadores registrados.')
         .setColor(0xf4c874);
 
-      msg.channel.send({ content: `<@${msg.author.id}>`,  embeds: [embed] });
+      const sentMsg = await msg.channel.send({ content: `<@${msg.author.id}>`,  embeds: [embed] });
+      await rotateGlobalMessage(db, msg.channel, 'last_ladder_msg', sentMsg);
+      return;
     }
 
     // --- Fase 1: Vínculo y Economía ---
@@ -583,7 +598,9 @@ function initBot(db) {
         .setDescription(list || 'Todos son pro players por ahora.')
         .setColor(0xd93f3f);
 
-      msg.channel.send({ content: `<@${msg.author.id}>`,  embeds: [embed] });
+      const sentMsg = await msg.channel.send({ content: `<@${msg.author.id}>`,  embeds: [embed] });
+      await rotateGlobalMessage(db, msg.channel, 'last_shame_msg', sentMsg);
+      return;
     }
 
     if (command === 'top_ricos' || command === 'top_coins') {
@@ -1785,14 +1802,7 @@ async function sendDailySummary(db) {
     const channel = await client.channels.fetch(targetChannelId);
     if (!channel) return;
 
-    // --- Borrar resumen anterior si existe en DB ---
-    try {
-      const config = await db.collection('system_config').findOne({ key: 'last_summary_msg' });
-      if (config && config.messageId) {
-        const oldMsg = await channel.messages.fetch(config.messageId).catch(() => null);
-        if (oldMsg) await oldMsg.delete().catch(() => {});
-      }
-    } catch (e) { console.error('[Summary Delete Error]', e); }
+    const statusMsg = await channel.send('⏳ Generando Scoreboard Diario...');
 
     const accounts = await db.collection('accounts').find({}).toArray();
     if (!accounts.length) return;
@@ -2315,10 +2325,12 @@ async function sendChallengeReminder(db, targetChannel = null) {
   }
 }
 
-async function sendMonthlyHallOfFame(db, isMock = false) {
-  if (!client || !targetChannelId) return;
-  const channel = await client.channels.fetch(targetChannelId);
+async function sendMonthlyHallOfFame(db, isMock = false, targetChannel = null) {
+  if (!client || (!targetChannelId && !targetChannel)) return;
+  const channel = targetChannel || await client.channels.fetch(targetChannelId);
   if (!channel) return;
+
+  if (lastHallMessage) lastHallMessage.delete().catch(() => {});
 
   try {
     const now = new Date();
@@ -2852,10 +2864,8 @@ async function startBot() {
       // Snapshots y Notificaciones
       if (minute === 0) {
         if (hour === 12) {
-          sendDailyMotivation(db);
-          // Al enviar el diario, también rotamos el tablero global
-          if (lastChallengesMessage) lastChallengesMessage.delete().catch(() => {});
-          lastChallengesMessage = await sendChallengeReminder(db);
+          await sendDailyMotivation(db);
+          await sendChallengeReminder(db);
         }
         if ([18, 22].includes(hour)) sendDailySummary(db);
       }
