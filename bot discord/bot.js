@@ -2233,12 +2233,12 @@ async function generateChallengeImage() {
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { 
           margin: 0; 
-          padding: 60px 40px; 
+          padding: 60px 30px; 
           background: ${bgUrl ? `url(${bgUrl})` : '#0a0a0c'} no-repeat center center; 
           background-size: cover;
           font-family: 'Inter', sans-serif; 
           color: #fff; 
-          width: 800px; 
+          width: 650px; 
           height: auto; 
           position: relative;
           overflow: hidden;
@@ -2252,8 +2252,8 @@ async function generateChallengeImage() {
         }
         .content { position: relative; z-index: 1; }
         .header { text-align: center; margin-bottom: 40px; }
-        .header h1 { font-size: 38px; color: #d4af37; text-transform: uppercase; letter-spacing: 8px; margin: 0; font-weight: 900; text-shadow: 0 0 20px rgba(212,175,55,0.4); }
-        .header p { color: rgba(255,255,255,0.6); margin-top: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; }
+        .header h1 { font-size: 48px; color: #d4af37; text-transform: uppercase; letter-spacing: 4px; margin: 0; font-weight: 900; text-shadow: 0 0 20px rgba(212,175,55,0.4); }
+        .header p { color: rgba(255,255,255,0.6); margin-top: 10px; font-size: 18px; text-transform: uppercase; letter-spacing: 2px; }
         .card { 
           background: rgba(255,255,255,0.03); 
           backdrop-filter: blur(10px);
@@ -2265,13 +2265,13 @@ async function generateChallengeImage() {
           margin-bottom: 15px; 
           transition: all 0.3s ease;
         }
-        .icon { width: 65px; height: 65px; border-radius: 8px; margin-right: 20px; border: 2px solid rgba(212,175,55,0.3); }
+        .icon { width: 85px; height: 85px; border-radius: 12px; margin-right: 20px; border: 2px solid rgba(212,175,55,0.3); }
         .details { flex: 1; }
-        .name { font-size: 20px; font-weight: 900; margin-bottom: 5px; color: #fff; }
-        .rarity { font-size: 12px; margin-left: 10px; font-weight: 700; text-transform: uppercase; }
-        .desc { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.4; }
-        .reward { font-size: 22px; font-weight: 900; color: #f1c40f; text-shadow: 0 0 15px rgba(241,196,15,0.4); min-width: 140px; text-align: right; }
-        .footer { text-align: center; margin-top: 40px; font-size: 12px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 4px; font-weight: 700; }
+        .name { font-size: 28px; font-weight: 900; margin-bottom: 5px; color: #fff; line-height: 1.1; }
+        .rarity { font-size: 16px; margin-left: 10px; font-weight: 700; text-transform: uppercase; vertical-align: middle; }
+        .desc { font-size: 18px; color: rgba(255,255,255,0.8); line-height: 1.3; }
+        .reward { font-size: 32px; font-weight: 900; color: #f1c40f; text-shadow: 0 0 15px rgba(241,196,15,0.4); min-width: 160px; text-align: right; }
+        .footer { text-align: center; margin-top: 40px; font-size: 14px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 4px; font-weight: 700; }
       </style>
     </head>
     <body>
@@ -2293,10 +2293,10 @@ async function generateChallengeImage() {
   });
   try {
     const page = await browser.newPage();
-    await page.setViewport({ width: 850, height: 100, deviceScaleFactor: 4 }); 
+    await page.setViewport({ width: 700, height: 100, deviceScaleFactor: 2 }); 
     await page.setContent(htmlContent, { waitUntil: 'networkidle0', timeout: 30000 });
     const bodyHeight = await page.evaluate(() => document.body.scrollHeight);
-    await page.setViewport({ width: 850, height: bodyHeight, deviceScaleFactor: 4 });
+    await page.setViewport({ width: 700, height: bodyHeight, deviceScaleFactor: 2 });
     return await page.screenshot({ type: 'png', fullPage: true });
   } finally {
     await browser.close().catch(() => {});
