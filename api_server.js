@@ -198,13 +198,22 @@ app.post('/api/summoners', async (req, res) => {
     // 6. Verificar si ya existe en nuestra DB
     const existing = await db.collection('accounts').findOne({ puuid: accountData.puuid });
     
-    if (existing) {
       // Si ya existe, actualizamos todo el kit
+      const updatedAccount = { 
+        puuid: accountData.puuid, 
+        gameName: accountData.gameName, 
+        tagLine: accountData.tagLine,
+        summonerLevel, 
+        profileIconId, 
+        soloQ, 
+        topChampions, 
+        lastUpdated: new Date() 
+      };
       await db.collection('accounts').updateOne(
         { puuid: accountData.puuid },
-        { $set: { summonerLevel, profileIconId, soloQ, topChampions, lastUpdated: new Date() } }
+        { $set: updatedAccount }
       );
-      return res.json({ message: '✅ Datos del jugador actualizados.' });
+      return res.json({ success: true, message: '✅ Datos del jugador actualizados.', account: updatedAccount });
     }
 
     // 6. Crear documento base con datos reales completos
@@ -223,7 +232,7 @@ app.post('/api/summoners', async (req, res) => {
     };
 
     await db.collection('accounts').insertOne(newAccount);
-    res.json({ message: '✅ Jugador añadido correctamente.' });
+    res.json({ success: true, message: '✅ Jugador añadido correctamente.', account: newAccount });
 
   } catch (error) {
     console.error('Error in /api/summoners:', error);
