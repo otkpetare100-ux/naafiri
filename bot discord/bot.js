@@ -204,10 +204,9 @@ function initBot(db) {
 
   // Comandos básicos por mensaje (Prefijo !)
   client.on('messageCreate', async (msg) => {
-    try {
-      if (msg.author.bot || !msg.content.startsWith('!')) return;
+    if (msg.author.bot || !msg.content.startsWith('!')) return;
 
-      console.log(`[DEBUG] Comando recibido: ${msg.content} de ${msg.author.tag}`);
+    console.log(`[DEBUG] Comando recibido: ${msg.content} de ${msg.author.tag}`);
 
       // Eliminar el comando de forma instantánea
       msg.delete().catch(() => {});
@@ -1318,8 +1317,6 @@ function initBot(db) {
         }
         return;
       }
-    } catch (err) {
-      console.error('[Message Error]', err);
     }
   });
 
