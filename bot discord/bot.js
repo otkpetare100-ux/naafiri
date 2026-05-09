@@ -361,26 +361,32 @@ function initBot(db) {
     if (command === 'build') {
       const champArgs = args.join('').toLowerCase();
       if (!champArgs) {
-        return msg.reply('❌ Debes especificar un campeón. Ejemplo: `!build aatrox`');
+        return msg.channel.send(`<@${msg.author.id}> ❌ Debes especificar un campeón. Ejemplo: \`!build aatrox\``).then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
       }
 
       const sendBuildInThread = async (buffer) => {
         const attachment = new AttachmentBuilder(buffer, { name: 'build.png' });
-        const thread = await msg.startThread({
-          name: `Build de ${champArgs.toUpperCase()}`,
-          autoArchiveDuration: 60,
-          reason: 'Hilo temporal para mostrar la build'
-        });
-        await thread.send({ content: `<@${msg.author.id}>, aquí tienes los pergaminos antiguos:`, files: [attachment] });
-        
-        // Programar autodestrucción en 20 minutos
-        setTimeout(async () => {
-          try {
-            await thread.delete('Tiempo expirado para la build temporal');
-          } catch (err) {
-            console.error('[Thread Delete Error]', err);
-          }
-        }, 20 * 60 * 1000);
+        try {
+          const thread = await msg.channel.threads.create({
+            name: `Build de ${champArgs.toUpperCase()}`,
+            autoArchiveDuration: 60,
+            reason: 'Hilo temporal para mostrar la build'
+          });
+          await thread.send({ content: `<@${msg.author.id}>, aquí tienes los pergaminos antiguos:`, files: [attachment] });
+          
+          // Programar autodestrucción en 20 minutos
+          setTimeout(async () => {
+            try {
+              await thread.delete('Tiempo expirado para la build temporal');
+            } catch (err) {
+              console.error('[Thread Delete Error]', err);
+            }
+          }, 20 * 60 * 1000);
+        } catch (threadErr) {
+          console.error('[Thread Create Error]', threadErr);
+          // Si falla crear el hilo (ej. sin permisos), enviar normal
+          await msg.channel.send({ content: `<@${msg.author.id}>, aquí tienes los pergaminos antiguos:`, files: [attachment] }).then(m => setTimeout(() => m.delete().catch(() => {}), 20 * 60 * 1000));
+        }
       };
 
       // Revisar la caché
@@ -394,12 +400,12 @@ function initBot(db) {
         return;
       }
 
-      const tempMsg = await msg.reply('⏳ Consultando los pergaminos antiguos para la mejor build...');
+      const tempMsg = await msg.channel.send(`<@${msg.author.id}> ⏳ Consultando los pergaminos antiguos para la mejor build...`);
       
       try {
         const buffer = await generateBuildImage(champArgs);
         if (!buffer) {
-          return tempMsg.edit('❌ No pude encontrar información de ese campeón en dpm.lol. Revisa el nombre e intenta de nuevo.');
+          return tempMsg.edit(`<@${msg.author.id}> ❌ No pude encontrar información de ese campeón en dpm.lol. Revisa el nombre e intenta de nuevo.`).then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
         }
 
         await tempMsg.delete().catch(() => {});
@@ -413,7 +419,7 @@ function initBot(db) {
         );
       } catch (e) {
         console.error('[Build Command Error]', e);
-        tempMsg.edit('🐾 Hubo un problema obteniendo la build, intenta de nuevo más tarde.');
+        tempMsg.edit(`<@${msg.author.id}> 🐾 Hubo un problema obteniendo la build, intenta de nuevo más tarde.`).then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
       }
       return;
     }
