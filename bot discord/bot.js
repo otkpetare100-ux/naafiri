@@ -1,3 +1,12 @@
+const { 
+  joinVoiceChannel, 
+  createAudioPlayer, 
+  createAudioResource, 
+  AudioPlayerStatus,
+  VoiceConnectionStatus,
+  entersState
+} = require('@discordjs/voice');
+const googleTTS = require('google-tts-api');
 const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, AttachmentBuilder } = require('discord.js');
 const puppeteer = require('puppeteer');
 const fetch = (...args) => import('node-fetch').then(({default: f}) => f(...args));
@@ -189,7 +198,8 @@ function initBot(db) {
       GatewayIntentBits.Guilds, 
       GatewayIntentBits.GuildMessages, 
       GatewayIntentBits.MessageContent,
-      GatewayIntentBits.GuildMembers
+      GatewayIntentBits.GuildMembers,
+      GatewayIntentBits.GuildVoiceStates
     ]
   });
 
@@ -677,6 +687,12 @@ function initBot(db) {
 
       msg.channel.sendTyping();
       const response = await askNaafiri(prompt, msg.author.username);
+      
+      // Si el usuario está en un canal de voz, Naafiri también habla
+      if (msg.member && msg.member.voice.channel) {
+        speakNaafiri(response, msg.member);
+      }
+
       return msg.reply({ content: response, allowedMentions: { repliedUser: true } });
     }
 
@@ -2911,6 +2927,51 @@ async function askNaafiri(prompt, userName = 'Invocador') {
   } catch (err) {
     console.error('[Gemini API Error]', err);
     return "*La arena nubla mi mente... vuelve a intentarlo más tarde.*";
+  }
+}
+
+// --- Sistema de Voz (TTS) ---
+async function speakNaafiri(text, member) {
+  try {
+    // Limpiar el texto de asteriscos y gestos para que no los lea el TTS
+    const cleanText = text.replace(/\*.*?\*/g, '').trim();
+    if (!cleanText) return;
+
+    const voiceChannel = member.voice.channel;
+    if (!voiceChannel) return;
+
+    const connection = joinVoiceChannel({
+      channelId: voiceChannel.id,
+      guildId: voiceChannel.guild.id,
+      adapterCreator: voiceChannel.guild.voiceAdapterCreator,
+    });
+
+    const url = googleTTS.getAudioUrl(cleanText, {
+      lang: 'es-US',
+      slow: false,
+      host: 'https://translate.google.com',
+    });
+
+    const player = createAudioPlayer();
+    const resource = createAudioResource(url);
+
+    player.play(resource);
+    connection.subscribe(player);
+
+    player.on(AudioPlayerStatus.Idle, () => {
+      // Esperar 2 segundos de silencio antes de irse (opcional)
+      setTimeout(() => {
+        connection.destroy();
+      }, 2000);
+    });
+
+    player.on('error', error => {
+      console.error('[Voice Player Error]', error);
+      connection.destroy();
+    });
+
+  } catch (err) {
+    console.error('[Voice Error]', err);
   }
 }
 
