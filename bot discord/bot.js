@@ -1325,7 +1325,7 @@ function initBot(db) {
               .setTitle('🐾 Guía de Comandos - LAN Tracker')
               .setDescription('¡Bienvenido a la perrera! Aquí tienes todo lo que puedes hacer:')
               .addFields(
-                { name: '👤 Perfil y Rango', value: '`!perfil [Nombre#TAG]` - Mira tu rango y racha.\n`!ladder` - Top 10 Jugadores del servidor.\n`!shame` - Muro de la vergüenza 🤡.\n`!web` - Enlace a tu perfil web privado.' },
+                { name: '👤 Perfil y Rango', value: '`!vincular N#T [Reg]` - Conecta tu cuenta 🔗.\n`!perfil [N#T]` - Mira tu rango y racha.\n`!ladder` - Top 10 Jugadores del servidor.\n`!shame` - Muro de la vergüenza 🤡.\n`!web` - Enlace a tu perfil web privado.' },
                 { name: '💰 Economía', value: '`!monedas` - Consulta tu saldo actual.\n`!diario` - Reclama tu bono diario (100 coins).\n`!pagar @usuario [cant]` - Envía coins a un amigo.\n`!top_ricos` - Ranking de millonarios.' },
                 { name: '🎮 Colección y Gachapon', value: '`!gacha` - Tira el Gachapon (10 coins) 🎰.\n`!mochila` - Mira tu colección de cartas.\n`!trade @usuario MiItem, SuItem` - Intercambia cartas 🤝.\n`!reroll [Rareza]` - Fusiona 3 repetidos para mejorar.\n`!reciclar` - Convierte repetidos en coins instantáneamente.' },
                 { name: '🎰 Apuestas y Retos', value: '`!ludopata` - Mira tu historial y winrate de apuestas.\n`!retos` - Consulta el Tablón de Caza activo 🐾.' }
@@ -1338,12 +1338,12 @@ function initBot(db) {
             const adminEmbed = new EmbedBuilder()
               .setTitle('🛠️ Panel de Administración - LAN Tracker')
               .addFields(
-                { name: '🛠️ Gestión de Cuentas', value: '`!admin_vincular @u N#T` - Vincular manual.\n`!admin_dar @u [cant]`\n`!admin_quitar @u [cant]`\n`!admin_setcoins @u [cant]`\n`!admin_resetdiario @u`\n`!admin_resetall CONFIRMAR`' },
-                { name: '🎒 Gestión de Inventario', value: '`!admin_daritem @u [id]`\n`!admin_clearinv @u`' },
-                { name: '📡 Monitoreo y Auditoría', value: '`!admin_scan` - Forzar escaneo en vivo.\n`!admin_vinculos` - Ver quién no se ha vinculado.\n`!admin_cancelarapuestas N#T`' },
-                { name: '🎭 Sistema y Herramientas', value: '`!admin_syncroles` - Sincronizar roles de Discord.\n`!admin_debug_key` - Estado API de Riot.\n`!admin_purge [n]` - Borrar mensajes del canal.' },
-                { name: '🧪 Pruebas Premium (Collector Edition)', value: '`!admin_testitem [Nombre]` - Probar una carta específica.\n`!admin_testgacha [Rareza]` - Probar diseño por rareza.\n`!admin_testpro` - Probar diseño de Pro Player aleatorio.' },
-                { name: '📅 Pruebas de Notificaciones', value: '`!admin_testdiario` - Recordatorio 12pm.\n`!admin_testsummary` - Scoreboard diario.\n`!admin_testretos` - Imagen de Retos.\n`!admin_testhall` - Salón de la Fama.' }
+                { name: '🛠️ Gestión de Cuentas', value: '`!admin_vincular @u N#T` - Vincular manual (vía API).\n`!admin_dar @u [cant]` / `!admin_quitar @u [cant]`\n`!admin_setcoins @u [cant]` / `!admin_resetdiario @u`\n`!admin_resetall CONFIRMAR` - Reset total economía.' },
+                { name: '🎒 Gestión de Inventario', value: '`!admin_daritem @u [id]` - Dar carta específica.\n`!admin_clearinv @u` - Vaciar mochila.' },
+                { name: '📡 Monitoreo y Auditoría', value: '`!admin_scan` - Forzar escaneo en vivo.\n`!admin_vinculos` - Usuarios no vinculados.\n`!admin_stats` - Estadísticas del bot.\n`!admin_check @u` - Info técnica de un usuario.' },
+                { name: '🎭 Sistema y Herramientas', value: '`!admin_anuncio [msg]` - Mensaje global.\n`!admin_syncroles` - Sincronizar roles Discord.\n`!admin_purge [n]` - Limpiar chat.\n`!admin_debug_key` - Estado Riot API.' },
+                { name: '🧪 Pruebas Premium', value: '`!admin_testitem [Nombre]` / `!admin_testgacha [Rareza]`\n`!admin_testpro` - Test Pro Player.\n`!admin_testlive` - Test Notificación Live Game.' },
+                { name: '📅 Pruebas de Notificaciones', value: '`!admin_testdiario` - Recordatorio 12pm.\n`!admin_testsummary` - Scoreboard diario.\n`!admin_testretos` - Imagen de Retos.\n`!admin_testhall` - Salón de la Fama.\n`!admin_cancelarapuestas N#T` - Abortar apuestas.' }
               )
               .setColor(0xd93f3f)
               .setFooter({ text: 'Naafiri Admin Console' });
