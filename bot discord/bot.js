@@ -64,6 +64,7 @@ function isAdmin(userId) {
 const helpCooldowns = new Map();
 const gachaCooldowns = new Map();
 const lastMiddayMotivation = new Map();
+let lastChallengesMessage = null; // Para evitar spam y borrar el anterior
 
 // --- SISTEMA DE GACHAPON ---
 const GACHA_ITEMS = [
@@ -185,15 +186,25 @@ function initBot(db) {
     if (command === 'retos' || command === 'challenges' || command === 'diario_retos') {
       const now = Date.now();
       const lastUsed = helpCooldowns.get(`retos_${msg.author.id}`) || 0;
-      const cooldownAmount = 60 * 1000; // 1 minuto de cooldown para no saturar Puppeteer
+      const cooldownAmount = 30 * 1000; // 30 segundos de cooldown por usuario
 
       if (now - lastUsed < cooldownAmount) {
-        return msg.channel.send(`<@${msg.author.id}> ⌛ No satures el tablero de caza. Espera un poco.`);
+        return msg.channel.send(`<@${msg.author.id}> ⌛ No satures el tablero de caza. Espera un poco.`).then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
       }
 
       helpCooldowns.set(`retos_${msg.author.id}`, now);
-      msg.channel.send('⏳ Consultando el tablón de caza actual...');
-      return sendChallengeReminder(dbInstance, msg.channel);
+      
+      // Borrar el tablero anterior si existe en este canal
+      if (lastChallengesMessage) {
+        lastChallengesMessage.delete().catch(() => {});
+      }
+
+      const statusMsg = await msg.channel.send('⏳ Consultando el tablón de caza actual...');
+      const sentMsg = await sendChallengeReminder(dbInstance, msg.channel);
+      
+      if (sentMsg) lastChallengesMessage = sentMsg;
+      statusMsg.delete().catch(() => {});
+      return;
     }
 
     if (command === 'help' || command === 'ayuda') {
@@ -2296,8 +2307,12 @@ async function sendChallengeReminder(db, targetChannel = null) {
       .setImage('attachment://retos.png')
       .setColor(0xd4af37);
 
-    await channel.send({ embeds: [embed], files: [attachment] });
-  } catch (e) { console.error('[Challenge Reminder Error]', e); }
+    const sentMsg = await channel.send({ embeds: [embed], files: [attachment] });
+    return sentMsg;
+  } catch (e) { 
+    console.error('[Challenge Reminder Error]', e); 
+    return null;
+  }
 }
 
 async function sendMonthlyHallOfFame(db, isMock = false) {
@@ -2838,7 +2853,9 @@ async function startBot() {
       if (minute === 0) {
         if (hour === 12) {
           sendDailyMotivation(db);
-          sendChallengeReminder(db);
+          // Al enviar el diario, también rotamos el tablero global
+          if (lastChallengesMessage) lastChallengesMessage.delete().catch(() => {});
+          lastChallengesMessage = await sendChallengeReminder(db);
         }
         if ([18, 22].includes(hour)) sendDailySummary(db);
       }
