@@ -2218,7 +2218,7 @@ async function generateChallengeImage(db) {
 
     const sortedHunters = Object.entries(stats).sort((a,b) => b[1] - a[1]).slice(0, 4);
     
-    const iconTrophy = `<svg width="16" height="16" viewBox="0 0 24 24" fill="#f1c40f" style="vertical-align: middle; margin-left: 5px;"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v3c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 10V7h2v3c0 1.21-.88 2.22-2 2.22c-.6 0-1-.4-1-1.22zm14 0c0 .82-.4 1.22-1 1.22c-1.12 0-2-1.01-2-2.22V7h2v3z"/></svg>`;
+    const iconTrophy = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#f1c40f" style="vertical-align: middle; margin-left: 6px;"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v3c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 10V7h2v3c0 1.21-.88 2.22-2 2.22c-.6 0-1-.4-1-1.22zm14 0c0 .82-.4 1.22-1 1.22c-1.12 0-2-1.01-2-2.22V7h2v3z"/></svg>`;
 
     if (sortedHunters.length > 0) {
       topHuntersHtml = sortedHunters.map((h, idx) => `
@@ -2237,18 +2237,17 @@ async function generateChallengeImage(db) {
   CHALLENGES_LIST.forEach(c => {
     const iconUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/${c.icon}`;
     cardsHtml += `
-      <div class="challenge-tile">
-        <div class="tile-rarity" style="background: ${c.color}">${c.rarity}</div>
-        <div class="tile-main">
-          <img src="${iconUrl}" class="tile-icon" style="border-color: ${c.color}">
-          <div class="tile-info">
+      <div class="challenge-tile" style="border-top: 3px solid ${c.color}">
+        <div class="tile-content">
+          <img src="${iconUrl}" class="tile-icon">
+          <div class="tile-main">
             <div class="tile-name">${c.name}</div>
             <div class="tile-desc">${c.description}</div>
           </div>
         </div>
-        <div class="tile-footer">
-          <span class="reward-label">RECOMPENSA</span>
-          <span class="reward-value">${c.reward}</span>
+        <div class="tile-reward-bar">
+          <span class="reward-tag">BOUNTY</span>
+          <span class="reward-amount" style="color: ${c.color}">${c.reward}</span>
         </div>
       </div>
     `;
@@ -2293,68 +2292,30 @@ async function generateChallengeImage(db) {
         }
         .content { position: relative; z-index: 1; }
         
-        /* HEADER */
         .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 50px; }
-        .title-group h1 { font-size: 56px; font-weight: 900; color: #d4af37; margin: 0; letter-spacing: 12px; text-transform: uppercase; text-shadow: 0 0 40px rgba(212,175,55,0.5); }
-        .title-group p { margin: 5px 0 0; color: rgba(255,255,255,0.4); font-size: 18px; text-transform: uppercase; letter-spacing: 5px; }
+        .title-group h1 { font-size: 56px; font-weight: 900; color: #d4af37; margin: 0; letter-spacing: 12px; text-transform: uppercase; }
+        .title-group p { margin: 5px 0 0; color: rgba(255,255,255,0.4); font-size: 18px; letter-spacing: 6px; text-transform: uppercase; }
         
-        /* TOP HUNTERS BAR */
-        .hunters-bar { 
-          background: rgba(212, 175, 55, 0.08); 
-          border: 1px solid rgba(212, 175, 55, 0.2);
-          border-radius: 50px; 
-          padding: 15px 40px; 
-          display: flex; 
-          align-items: center; 
-          gap: 30px; 
-        }
+        .hunters-bar { background: rgba(212, 175, 55, 0.08); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 50px; padding: 15px 35px; display: flex; align-items: center; gap: 30px; }
         .hunters-bar-label { font-weight: 900; color: #d4af37; font-size: 14px; letter-spacing: 2px; }
         .hunter-podium-item { display: flex; align-items: center; gap: 10px; }
-        .rank-badge { background: #d4af37; color: #000; font-weight: 900; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
-        .hunter-name-small { font-weight: 700; color: #fff; font-size: 16px; }
-        .hunter-score { color: #f1c40f; font-weight: 900; font-size: 16px; }
-        .no-hunters-msg { color: rgba(255,255,255,0.3); font-style: italic; font-size: 14px; }
+        .rank-badge { background: #d4af37; color: #000; font-weight: 900; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+        .hunter-name-small { font-weight: 700; color: #fff; font-size: 17px; }
+        .hunter-score { color: #f1c40f; font-weight: 900; font-size: 17px; display: flex; align-items: center; }
 
-        /* GRID */
         .challenges-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .challenge-tile { background: rgba(15, 15, 20, 0.85); border: 1px solid rgba(255,255,255,0.05); border-radius: 24px; overflow: hidden; box-shadow: 0 15px 50px rgba(0,0,0,0.5); }
+        .tile-content { padding: 35px; display: flex; gap: 25px; align-items: center; }
+        .tile-icon { width: 100px; height: 100px; border-radius: 18px; border: 3px solid rgba(255,255,255,0.1); background: #000; }
+        .tile-main { flex: 1; }
+        .tile-name { font-size: 32px; font-weight: 900; color: #fff; margin-bottom: 8px; text-transform: uppercase; }
+        .tile-desc { font-size: 17px; color: rgba(255,255,255,0.6); line-height: 1.4; }
         
-        .challenge-tile { 
-          background: rgba(20, 20, 25, 0.8); 
-          border: 1px solid rgba(255,255,255,0.05);
-          border-radius: 20px; 
-          padding: 0;
-          overflow: hidden;
-          position: relative;
-          box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-        }
-        .tile-rarity { 
-          position: absolute; 
-          top: 0; right: 0; 
-          padding: 6px 15px; 
-          font-size: 11px; 
-          font-weight: 900; 
-          text-transform: uppercase; 
-          border-bottom-left-radius: 12px;
-          color: #000;
-        }
-        .tile-main { padding: 30px; display: flex; align-items: center; gap: 25px; }
-        .tile-icon { width: 90px; height: 90px; border-radius: 15px; border: 3px solid; background: #000; }
-        .tile-info { flex: 1; }
-        .tile-name { font-size: 28px; font-weight: 900; color: #fff; margin-bottom: 8px; }
-        .tile-desc { font-size: 16px; color: rgba(255,255,255,0.6); line-height: 1.4; }
-        
-        .tile-footer { 
-          background: rgba(255,255,255,0.03); 
-          padding: 20px 30px; 
-          display: flex; 
-          justify-content: space-between; 
-          align-items: center; 
-          border-top: 1px solid rgba(255,255,255,0.05);
-        }
-        .reward-label { font-size: 12px; font-weight: 900; color: rgba(255,255,255,0.3); letter-spacing: 2px; }
-        .reward-value { font-size: 26px; font-weight: 900; color: #f1c40f; text-shadow: 0 0 15px rgba(241,196,15,0.3); }
+        .tile-reward-bar { background: rgba(255,255,255,0.03); padding: 22px 35px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); }
+        .reward-tag { font-size: 13px; font-weight: 900; color: rgba(255,255,255,0.3); letter-spacing: 3px; }
+        .reward-amount { font-size: 30px; font-weight: 900; text-shadow: 0 0 20px rgba(212,175,55,0.3); }
 
-        .footer-tag { text-align: center; margin-top: 50px; font-size: 13px; color: rgba(255,255,255,0.2); text-transform: uppercase; letter-spacing: 8px; }
+        .footer { text-align: center; margin-top: 60px; font-size: 14px; color: rgba(255,255,255,0.2); letter-spacing: 10px; text-transform: uppercase; font-weight: 900; }
       </style>
     </head>
     <body>
@@ -2437,7 +2398,7 @@ async function generateLadderImage(accounts) {
       wr = Math.round((acc.soloQ.wins / (acc.soloQ.wins + acc.soloQ.losses)) * 100);
     }
     
-    const streakContent = acc.streak > 0 ? `${iconFire} ${acc.streak}` : acc.streak < 0 ? `${iconIce} ${Math.abs(acc.streak)}` : '';
+    const streakContent = (acc.streak >= 2) ? `${iconFire} ${acc.streak}` : (acc.streak <= -2) ? `${iconIce} ${Math.abs(acc.streak)}` : '';
 
     rowsHtml += `
       <div class="ladder-row" style="border-left: 4px solid ${rankColor}">
