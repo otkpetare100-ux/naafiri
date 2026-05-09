@@ -635,6 +635,18 @@ function initBot(db) {
       msg.channel.send({ content: `<@${msg.author.id}>, aquí tienes los botines actuales:`, embeds });
     }
 
+    if (command === 'steam') {
+      const tempMsg = await msg.channel.send(`<@${msg.author.id}> ⚙️ Buscando ofertas en los motores de Steam...`);
+      const embeds = await checkSteamNews();
+      
+      if (!embeds) {
+        return tempMsg.edit(`<@${msg.author.id}> 😕 No encontré ofertas destacadas en este momento.`);
+      }
+
+      await tempMsg.delete().catch(() => {});
+      msg.channel.send({ content: `<@${msg.author.id}>, estas son las ofertas más calientes de Steam ahora mismo:`, embeds });
+    }
+
     if (command === 'trade' || command === 'cambio') {
       const target = msg.mentions.users.first();
       if (!target || target.id === msg.author.id) return msg.channel.send(`<@${msg.author.id}> ❌ Uso: \`!trade @usuario MiCampeon, SuCampeon\``);
@@ -2701,15 +2713,66 @@ async function checkEpicFreeGames(targetChannelId = null) {
   }
 }
 
-// Programador para los jueves a las 11:15 AM (MX/COL)
+// --- Steam News System ---
+async function checkSteamNews(targetChannelId = null) {
+  try {
+    const fetch = (await import('node-fetch')).default;
+    const url = 'https://store.steampowered.com/api/featuredcategories/?l=spanish';
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    // Tomamos los "specials" (ofertas destacadas)
+    const specials = data.specials.items.slice(0, 5); // Top 5 ofertas
+
+    if (specials.length === 0) return null;
+
+    const embeds = specials.map(game => {
+      const originalPrice = (game.original_price / 100).toFixed(2);
+      const finalPrice = (game.final_price / 100).toFixed(2);
+      const discount = game.discount_percent;
+
+      return new EmbedBuilder()
+        .setTitle(`🔥 Oferta en Steam: ${game.name}`)
+        .setURL(`https://store.steampowered.com/app/${game.id}`)
+        .setDescription(`¡Ahorra un **${discount}%** en este título!`)
+        .addFields(
+          { name: '💰 Precio Original', value: `~~${originalPrice} ${game.currency}~~`, inline: true },
+          { name: '✨ Precio Oferta', value: `**${finalPrice} ${game.currency}**`, inline: true }
+        )
+        .setImage(game.header_image)
+        .setColor(0x1b2838) // Azul oscuro de Steam
+        .setFooter({ text: 'Steam Store x Naafiri Bot' });
+    });
+
+    if (targetChannelId) {
+      const channel = client.channels.cache.get(targetChannelId);
+      if (channel) {
+        await channel.send({ content: '🎮 **¡Nuevas ofertas destacadas en Steam hoy!**', embeds });
+      }
+    }
+    return embeds;
+  } catch (err) {
+    console.error('[Steam API Error]', err);
+    return null;
+  }
+}
+
+// Programador para Epic y Steam
 setInterval(() => {
   const now = new Date();
-  // Jueves es 4
+  
+  // Epic Games: Jueves 11:15 AM
   if (now.getDay() === 4 && now.getHours() === 11 && now.getMinutes() === 15) {
     const channelId = process.env.DISCORD_CHANNEL_ID;
     if (channelId) checkEpicFreeGames(channelId);
   }
-}, 60000); // Revisar cada minuto
+
+  // Steam: Diario a las 12:00 PM
+  if (now.getHours() === 12 && now.getMinutes() === 0) {
+    const channelId = process.env.DISCORD_CHANNEL_ID;
+    if (channelId) checkSteamNews(channelId);
+  }
+}, 60000);
 
 async function sendChallengeReminder(db, targetChannel = null) {
   if (!client || (!targetChannelId && !targetChannel)) return;

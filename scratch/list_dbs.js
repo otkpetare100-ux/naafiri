@@ -1,21 +1,27 @@
 const { MongoClient } = require('mongodb');
 const dns = require('dns');
 dns.setServers(['8.8.8.8']);
-require('dotenv').config({ path: '.env' });
+require('dotenv').config();
 
-async function listDBs() {
-  const client = new MongoClient(process.env.MONGO_URI);
-  await client.connect();
-  const admin = client.db().admin();
-  const dbs = await admin.listDatabases();
-  console.log("Databases:", dbs.databases.map(d => d.name));
-  
-  for (const dbInfo of dbs.databases) {
-    const db = client.db(dbInfo.name);
-    const collections = await db.listCollections().toArray();
-    console.log(`DB ${dbInfo.name} has collections:`, collections.map(c => c.name));
+async function listDbs() {
+  const uri = process.env.MONGO_URI;
+  const client = new MongoClient(uri);
+  try {
+    await client.connect();
+    const admin = client.db().admin();
+    const dbs = await admin.listDatabases();
+    console.log('Databases:', dbs.databases.map(d => d.name));
+    
+    // Check 'test' db
+    const testDb = client.db('test');
+    const cols = await testDb.listCollections().toArray();
+    console.log('Collections in test:', cols.map(c => c.name));
+
+  } catch (e) {
+    console.error(e);
+  } finally {
+    await client.close();
   }
-  
-  await client.close();
 }
-listDBs();
+
+listDbs();
