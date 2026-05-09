@@ -707,6 +707,19 @@ function initBot(db) {
       return msg.reply({ content: response, allowedMentions: { repliedUser: true } });
     }
 
+    if (command === 'n_debug') {
+      let report = "**Diagnóstico de Voz de Naafiri:**\n";
+      report += `- Librerías cargadas: ${voiceLib ? '✅' : '❌'}\n`;
+      report += `- Google TTS: ${googleTTS ? '✅' : '❌'}\n`;
+      if (msg.member && msg.member.voice.channel) {
+        report += `- Tu canal: ${msg.member.voice.channel.name} ✅\n`;
+        report += `- Permisos del bot: ${msg.member.voice.channel.permissionsFor(client.user).has('Connect') ? 'Conectar ✅' : 'No puedo conectar ❌'}\n`;
+      } else {
+        report += `- Tu canal: ❌ (No estás en voz)\n`;
+      }
+      return msg.channel.send(report);
+    }
+
     if (command === 'trade' || command === 'cambio') {
       const target = msg.mentions.users.first();
       if (!target || target.id === msg.author.id) return msg.channel.send(`<@${msg.author.id}> ❌ Uso: \`!trade @usuario MiCampeon, SuCampeon\``);
@@ -2942,6 +2955,10 @@ async function askNaafiri(prompt, userName = 'Invocador') {
 async function speakNaafiri(text, member) {
   if (!voiceLib || !googleTTS) return;
   try {
+    // Asegurar que libsodium esté listo (necesario en algunos servidores)
+    const sodium = require('libsodium-wrappers');
+    await sodium.ready;
+
     console.log(`[Voice] Intentando hablar: "${text}"`);
     
     // Limpiar el texto de asteriscos y gestos
