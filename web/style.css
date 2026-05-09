@@ -299,7 +299,7 @@ h1::after {
 .player-champions {
   display: flex;
   gap: 12px;
-  margin-right: 1.5rem;
+  margin-right: 3rem; /* Más espacio a la izquierda de la racha */
 }
 
 .champ-item {
