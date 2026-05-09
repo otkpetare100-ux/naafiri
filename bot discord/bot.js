@@ -2994,13 +2994,18 @@ async function speakNaafiri(text, member) {
       channelId: voiceChannel.id,
       guildId: voiceChannel.guild.id,
       adapterCreator: voiceChannel.guild.voiceAdapterCreator,
+      selfDeaf: true,
+      selfMute: false,
     });
 
     // Esperar a que la conexión esté lista
     try {
       await entersState(connection, VoiceConnectionStatus.Ready, 5000);
       console.log('[Voice] Conexión establecida y lista.');
+      // Pequeña pausa extra para estabilizar
+      await new Promise(resolve => setTimeout(resolve, 1000));
     } catch (e) {
+
       console.error('[Voice] No se pudo conectar al canal a tiempo:', e.message);
       connection.destroy();
       return;
@@ -3014,12 +3019,13 @@ async function speakNaafiri(text, member) {
 
     const player = createAudioPlayer();
     
-    // Crear recurso con configuración de stream más robusta
+    // Forzar tipo de stream arbitrario para Google TTS (MP3)
     const resource = createAudioResource(url, {
+      inputType: voiceLib.StreamType ? voiceLib.StreamType.Arbitrary : 0,
       inlineVolume: true
     });
 
-    resource.volume.setVolume(1.0);
+    if (resource.volume) resource.volume.setVolume(1.0);
 
     connection.subscribe(player);
     player.play(resource);
