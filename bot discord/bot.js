@@ -21,8 +21,17 @@ const {
 const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, AttachmentBuilder } = require('discord.js');
 const puppeteer = require('puppeteer');
 const fetch = (...args) => import('node-fetch').then(({default: f}) => f(...args));
-const fs = require('fs');
 const path = require('path');
+const fs = require('fs');
+
+// Configurar ffmpeg para el sistema de voz
+try {
+  process.env.FFMPEG_PATH = require('ffmpeg-static');
+  console.log('✅ Motor de audio (ffmpeg) configurado.');
+} catch (e) {
+  console.warn('⚠️ No se pudo configurar ffmpeg-static.');
+}
+
 const { MongoClient } = require('mongodb');
 const dns = require('dns');
 
@@ -3004,7 +3013,13 @@ async function speakNaafiri(text, member) {
     });
 
     const player = createAudioPlayer();
-    const resource = createAudioResource(url);
+    
+    // Crear recurso con configuración de stream más robusta
+    const resource = createAudioResource(url, {
+      inlineVolume: true
+    });
+
+    resource.volume.setVolume(1.0);
 
     connection.subscribe(player);
     player.play(resource);
