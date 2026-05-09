@@ -1168,62 +1168,52 @@ function initBot(db) {
         let acc = await findAccountBySlug(cleanNameWithTag);
         let isNew = false;
 
-        if (!acc) {
-          const [name, tag] = cleanNameWithTag.split('#').map(s => s.trim());
-          try {
-            const apiRes = await fetch('https://lan-tracker-production.up.railway.app/api/summoners', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ gameName: name, tagLine: tag, region: region })
-            });
+        const [name, tag] = cleanNameWithTag.split('#').map(s => s.trim());
+        const statusMsg = await msg.channel.send(`🔍 Sincronizando **${name}#${tag}** con el servidor central...`);
 
-            if (!apiRes.ok) {
-              const errData = await apiRes.json();
-              statusMsg.delete().catch(() => {});
-              return msg.channel.send(`❌ **Error de Sincronización:** ${errData.message || 'La web no pudo procesar la solicitud'}.`);
-            }
+        try {
+          const apiRes = await fetch('https://lan-tracker-production.up.railway.app/api/summoners', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ gameName: name, tagLine: tag, region: region })
+          });
 
-            const data = await apiRes.json();
-            const puuid = data.account.puuid;
-
-            // Vincular discordId del usuario mencionado
-            await db.collection('accounts').updateOne(
-              { puuid: puuid },
-              { $set: { discordId: targetUser.id } }
-            );
-
-            // Sincronizar economía
-            await db.collection('economy').updateOne(
-              { discordId: targetUser.id },
-              { 
-                $setOnInsert: { coins: 100, lastDaily: null, inventory: [] },
-                $set: { puuid: puuid } 
-              },
-              { upsert: true }
-            );
-
+          if (!apiRes.ok) {
+            const errData = await apiRes.json();
             statusMsg.delete().catch(() => {});
-            return msg.channel.send(`✅ **Vínculo Manual Exitoso:** <@${targetUser.id}> vinculado a **${data.account.gameName}#${data.account.tagLine}**.`);
-          } catch (err) {
-            console.error('[Admin Sync Error]', err);
-            statusMsg.delete().catch(() => {});
-            return msg.channel.send(`❌ **Error técnico de conexión:** \`${err.message}\`.`);
+            return msg.channel.send(`❌ **Error de Sincronización:** ${errData.message || 'La web no pudo procesar la solicitud'}.`);
           }
+
+          const data = await apiRes.json();
+          const puuid = data.account.puuid;
+
+          // 1. Vincular discordId en la colección de cuentas
+          await db.collection('accounts').updateOne(
+            { puuid: puuid },
+            { $set: { discordId: targetUser.id } }
+          );
+
+          // 2. Vincular en la colección de economía
+          await db.collection('economy').updateOne(
+            { discordId: targetUser.id },
+            { 
+              $set: { 
+                puuid: puuid,
+                discordTag: targetUser.tag,
+                linkedPuuid: puuid // Mantener compatibilidad si se usa este campo
+              },
+              $setOnInsert: { coins: 100, lastDaily: null, inventory: [] }
+            },
+            { upsert: true }
+          );
+
+          statusMsg.delete().catch(() => {});
+          return msg.channel.send(`✅ **VÍNCULO MANUAL COMPLETADO**\nUsuario: <@${targetUser.id}>\nCuenta LoL: **${data.account.gameName}#${data.account.tagLine}**\n*Sincronizado con la web y economía actualizada.*`);
+        } catch (err) {
+          console.error('[Admin Sync Error]', err);
+          statusMsg.delete().catch(() => {});
+          return msg.channel.send(`❌ **Error técnico:** \`${err.message}\`.`);
         }
-
-        // Vincular forzosamente
-        await db.collection('accounts').updateOne(
-          { puuid: acc.puuid },
-          { $set: { discordId: targetUser.id } }
-        );
-
-        await db.collection('economy').updateOne(
-          { discordId: targetUser.id },
-          { $set: { linkedPuuid: acc.puuid, discordTag: targetUser.tag } },
-          { upsert: true }
-        );
-
-        return msg.channel.send(`✅ **VINCULACIÓN MANUAL EXITOSA**\nUsuario: <@${targetUser.id}>\nCuenta LoL: **${acc.gameName}#${acc.tagLine}**`);
       }
 
       // !admin_purge [cantidad]
