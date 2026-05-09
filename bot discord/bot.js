@@ -2958,12 +2958,14 @@ async function speakNaafiri(text, member) {
       adapterCreator: voiceChannel.guild.voiceAdapterCreator,
     });
 
-    // Configurar ffmpeg si es necesario
+    // Esperar a que la conexión esté lista
     try {
-      const ffmpeg = require('ffmpeg-static');
-      // @discordjs/voice busca ffmpeg en el PATH o se puede configurar
+      await entersState(connection, VoiceConnectionStatus.Ready, 5000);
+      console.log('[Voice] Conexión establecida y lista.');
     } catch (e) {
-      console.warn('[Voice] No se pudo cargar ffmpeg-static, el audio podría fallar.');
+      console.error('[Voice] No se pudo conectar al canal a tiempo:', e.message);
+      connection.destroy();
+      return;
     }
 
     const url = googleTTS.getAudioUrl(cleanText, {
@@ -2975,8 +2977,8 @@ async function speakNaafiri(text, member) {
     const player = createAudioPlayer();
     const resource = createAudioResource(url);
 
-    player.play(resource);
     connection.subscribe(player);
+    player.play(resource);
 
     console.log('[Voice] Reproduciendo audio...');
 
