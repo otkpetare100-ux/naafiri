@@ -145,7 +145,7 @@ h1::after {
   border-radius: 12px;
   padding: 0.5rem 1.5rem;
   display: grid;
-  grid-template-columns: 80px 80px 1fr 300px;
+  grid-template-columns: 60px 80px 1fr 400px;
   align-items: center;
   position: relative;
   transition: all 0.3s ease;
@@ -330,7 +330,7 @@ h1::after {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 1.5rem;
+  gap: 1rem;
   padding-right: 50px;
 }
 
@@ -359,6 +359,7 @@ h1::after {
   font-size: 1.2rem;
   font-weight: 700;
   color: var(--text-gold);
+  white-space: nowrap;
 }
 
 .rank-stats {
@@ -367,6 +368,7 @@ h1::after {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  white-space: nowrap;
 }
 
 .lp { color: white; font-weight: 600; }
