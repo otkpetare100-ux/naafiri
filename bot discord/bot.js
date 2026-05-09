@@ -2546,11 +2546,11 @@ async function generateBuildImage(champion) {
   
   try {
     const page = await browser.newPage();
-    await page.setViewport({ width: 1200, height: 1800, deviceScaleFactor: 2 });
+    await page.setViewport({ width: 1400, height: 2500, deviceScaleFactor: 2 });
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
     
-    const url = `https://dpm.lol/champions/${champion}/build`;
-    console.log(`[Build Gen] Navegando a ${url}`);
+    const url = `https://u.gg/lol/champions/${champion}/build`;
+    console.log(`[Build Gen] Navegando a U.GG: ${url}`);
     const response = await page.goto(url, { 
       waitUntil: 'networkidle2', 
       timeout: 30000 
@@ -2558,96 +2558,78 @@ async function generateBuildImage(champion) {
     
     if (response && response.status() === 404) return null;
 
-    // Scroll para activar lazy loading
-    await page.evaluate(async () => {
-      await new Promise((resolve) => {
-        let totalHeight = 0;
-        let distance = 200;
-        let timer = setInterval(() => {
-          let scrollHeight = document.body.scrollHeight;
-          window.scrollBy(0, distance);
-          totalHeight += distance;
-          if(totalHeight >= scrollHeight || totalHeight > 3000){
-            clearInterval(timer);
-            resolve();
-          }
-        }, 100);
-      });
-    });
-    
-    await new Promise(r => setTimeout(r, 2000));
-
-    // Limpiar la página
+    // Ocultar basura y anuncios de U.GG
     await page.addStyleTag({
       content: `
-        header, nav, footer, iframe, .advertisement, [class*="Ad"], [id*="ad"] { display: none !important; }
-        body { background: #0a0a0c !important; }
-        main { background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; }
+        #onesignal-slidedown-container, .ads-container, .nav-container, footer, .header-container, .champion-ranking-container, .side-nav, .search-container { 
+          display: none !important; 
+        }
+        body { 
+          background: #0a0a0c !important; 
+          color: #fff !important;
+        }
+        .rune-trees-container, .core-items, .skill-order, .content-section {
+          background: rgba(15, 15, 20, 0.95) !important;
+          border: 2px solid #d4af37 !important;
+          box-shadow: 0 0 40px rgba(212, 175, 55, 0.2) !important;
+          border-radius: 20px !important;
+          margin: 20px !important;
+          padding: 20px !important;
+        }
       `
     });
 
-    // Identificar secciones por contenido
+    await new Promise(r => setTimeout(r, 2000));
+
+    // Identificar secciones en U.GG
     const sectionsData = await page.evaluate(() => {
       const getBox = (el) => {
+        if (!el) return null;
         const { x, y, width, height } = el.getBoundingClientRect();
         return { x, y, width, height };
       };
 
-      // Buscar el contenedor de Runas
-      const runeImgs = Array.from(document.querySelectorAll('img[src*="rune"]'));
-      let runesContainer = null;
-      if (runeImgs.length > 0) {
-        runesContainer = runeImgs[0].closest('div');
-        while (runesContainer && runesContainer.offsetWidth < 300 && runesContainer.parentElement) {
-          runesContainer = runesContainer.parentElement;
-        }
-      }
-
-      // Buscar el contenedor de Objetos/Build
-      const itemImgs = Array.from(document.querySelectorAll('img[src*="item"]'));
-      let itemsContainer = null;
-      if (itemImgs.length > 0) {
-        itemsContainer = itemImgs[0].closest('div');
-        while (itemsContainer && itemsContainer.offsetWidth < 400 && itemsContainer.parentElement) {
-          itemsContainer = itemsContainer.parentElement;
-        }
-      }
-
       return {
-        runes: runesContainer && runesContainer.offsetWidth > 100 ? getBox(runesContainer) : null,
-        items: itemsContainer && itemsContainer.offsetWidth > 100 ? getBox(itemsContainer) : null
+        runes: getBox(document.querySelector('.rune-trees-container')),
+        items: getBox(document.querySelector('.core-items')),
+        skills: getBox(document.querySelector('.skill-order'))
       };
     });
 
     const buffers = [];
 
+    // Capturar Runas
     if (sectionsData.runes && sectionsData.runes.height > 100) {
       buffers.push(await page.screenshot({ 
-        clip: { ...sectionsData.runes, height: sectionsData.runes.height + 20 },
+        clip: { ...sectionsData.runes },
         type: 'png'
       }));
     }
 
+    // Capturar Objetos
     if (sectionsData.items && sectionsData.items.height > 100) {
       buffers.push(await page.screenshot({ 
-        clip: { ...sectionsData.items, height: sectionsData.items.height + 20 },
+        clip: { ...sectionsData.items },
         type: 'png'
       }));
     }
 
-    // Si no encontramos secciones específicas o están vacías, fallback al main completo o página completa
-    if (buffers.length === 0) {
-      const mainEl = await page.$('main');
-      if (mainEl) {
-        const mainBox = await mainEl.boundingBox();
-        if (mainBox && mainBox.height > 100) {
-          buffers.push(await mainEl.screenshot({ type: 'png' }));
-        }
-      }
+    // Capturar Habilidades
+    if (sectionsData.skills && sectionsData.skills.height > 50) {
+      buffers.push(await page.screenshot({ 
+        clip: { ...sectionsData.skills },
+        type: 'png'
+      }));
     }
 
+    // Fallback si algo falló
     if (buffers.length === 0) {
-      buffers.push(await page.screenshot({ type: 'png', fullPage: true }));
+      const mainEl = await page.$('.champion-profile-page') || await page.$('main');
+      if (mainEl) {
+        buffers.push(await mainEl.screenshot({ type: 'png' }));
+      } else {
+        buffers.push(await page.screenshot({ type: 'png', fullPage: true }));
+      }
     }
 
     return buffers;
