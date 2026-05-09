@@ -2531,37 +2531,58 @@ async function generateChallengeImage(db) {
 async function generateBuildImage(champion) {
   const browser = await puppeteer.launch({
     executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
+    args: [
+      '--no-sandbox', 
+      '--disable-setuid-sandbox',
+      '--disable-blink-features=AutomationControlled'
+    ]
   });
   
   try {
     const page = await browser.newPage();
-    await page.setViewport({ width: 1200, height: 1080, deviceScaleFactor: 2 });
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+    await page.setViewport({ width: 1200, height: 1200, deviceScaleFactor: 2 });
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
     
-    const response = await page.goto(`https://dpm.lol/champions/${champion}/build`, { waitUntil: 'networkidle0', timeout: 20000 });
+    // Navegar con un tiempo de espera más largo y esperar a que la red esté tranquila
+    const response = await page.goto(`https://dpm.lol/champions/${champion}/build`, { 
+      waitUntil: 'networkidle2', 
+      timeout: 30000 
+    });
+    
     if (response && response.status() === 404) return null;
     
-    // Inyectar CSS estético Black & Gold
+    // Esperar a que algún elemento de la build sea visible para asegurar que cargó
+    try {
+      await page.waitForSelector('img[src*="item"], img[src*="rune"]', { timeout: 10000 });
+    } catch (e) {
+      console.warn('[Build Gen] Timeout esperando imágenes, procediendo con captura...');
+    }
+    
+    // Inyectar CSS estético de forma más segura (sin romper el layout de React)
     await page.addStyleTag({
       content: `
-        header, nav, footer, iframe, [class*="Ad"], [id*="ad"], .advertisement { display: none !important; }
-        body { background: #0a0a0c !important; color: #fff !important; }
-        main, .container { 
-          border: 2px solid #d4af37 !important; 
-          box-shadow: 0 0 30px rgba(212, 175, 55, 0.3) !important;
-          border-radius: 24px !important;
+        header, nav, footer, iframe, .advertisement, [class*="Ad"], [id*="ad"] { 
+          display: none !important; 
+        }
+        body { 
+          background: #0a0a0c !important; 
+          overflow: hidden !important;
+        }
+        main {
           background: rgba(15, 15, 20, 0.95) !important;
-          margin: 20px auto !important;
+          border: 2px solid #d4af37 !important;
+          box-shadow: 0 0 40px rgba(212, 175, 55, 0.2) !important;
+          border-radius: 20px !important;
+          margin: 20px !important;
           padding: 20px !important;
         }
       `
     });
     
-    // Esperar a que carguen imágenes
-    await new Promise(r => setTimeout(r, 1500));
+    // Pequeño respiro para que el CSS se aplique y las imágenes terminen de renderizar
+    await new Promise(r => setTimeout(r, 2500));
     
-    const mainEl = await page.$('main') || await page.$('.container') || await page.$('body');
+    const mainEl = await page.$('main');
     if (mainEl) {
       return await mainEl.screenshot({ type: 'png' });
     }
