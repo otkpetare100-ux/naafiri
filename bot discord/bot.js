@@ -111,6 +111,7 @@ function isAdmin(userId) {
 const helpCooldowns = new Map();
 const gachaCooldowns = new Map();
 const lastMiddayMotivation = new Map();
+let lastHallMessage = null;
 
 // --- SISTEMA DE GACHAPON ---
 const GACHA_ITEMS = [
@@ -1145,7 +1146,8 @@ function initBot(db) {
 
         for (const acc of accounts) {
           try {
-            const url = `https://la1.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${acc.puuid.trim()}`;
+            const region = acc.region || 'la1';
+            const url = `https://${region}.api.riotgames.com/lol/spectator/v5/active-games/by-puuid/${acc.puuid.trim()}`;
             const res = await fetch(url, {
               headers: {
                 "X-Riot-Token": process.env.RIOT_API_KEY.trim(),
@@ -1213,9 +1215,17 @@ function initBot(db) {
         const acc = await findAccountBySlug(slug);
         if (!acc) return msg.channel.send(`<@${msg.author.id}> ❌ Jugador no encontrado en el dashboard.`);
 
-        const url = `https://la1.api.riotgames.com/lol/spectator/v5/active-games/by-puuid/${acc.puuid.trim()}`;
+        const region = acc.region || 'la1';
+        const url = `https://${region}.api.riotgames.com/lol/spectator/v5/active-games/by-puuid/${acc.puuid.trim()}`;
+        
+        console.log(`[Admin Check] Revisando partida: ${url}`);
+        
         const res = await fetch(url, {
-          headers: { "X-Riot-Token": process.env.RIOT_API_KEY.trim() }
+          headers: {
+            "X-Riot-Token": process.env.RIOT_API_KEY.trim(),
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+            "Accept-Language": "es-ES,es;q=0.9"
+          }
         });
 
         if (res.ok) {
@@ -1713,10 +1723,14 @@ function initBot(db) {
           const myItemObj = sEco.inventory.find(i => i.id === myItemId);
           const suItemObj = tEco.inventory.find(i => i.id === suItemId);
 
-          const newSInv = sEco.inventory.filter(i => i.id !== myItemId);
+          const newSInv = [...sEco.inventory];
+          const sIdx = newSInv.findIndex(i => i.id === myItemId);
+          if (sIdx > -1) newSInv.splice(sIdx, 1);
           newSInv.push({ ...suItemObj, date: new Date() });
           
-          const newTInv = tEco.inventory.filter(i => i.id !== suItemId);
+          const newTInv = [...tEco.inventory];
+          const tIdx = newTInv.findIndex(i => i.id === suItemId);
+          if (tIdx > -1) newTInv.splice(tIdx, 1);
           newTInv.push({ ...myItemObj, date: new Date() });
 
           await dbInstance.collection('economy').updateOne({ discordId: senderId }, { $set: { inventory: newSInv, discordTag: interaction.user.tag } });
@@ -1814,7 +1828,7 @@ async function updateUserRoles(discordId, tier) {
 // Alerta de Partida en Vivo
 async function notifyLiveGame(acc, gameData) {
   if (!client || !targetChannelId) return;
-  const channel = client.channels.cache.get(targetChannelId);
+  const channel = await client.channels.fetch(targetChannelId).catch(() => null);
   if (!channel) return;
 
   const version = gameData.version || '15.8.1';
@@ -2320,7 +2334,7 @@ async function sendDailySummary(db) {
           <div class="header-title">Scoreboard de las Perritas</div>
           <div class="table-header">
             <div class="col-pos"></div>
-            <div class="col-name">Niggers</div>
+            <div class="col-name">Jugador</div>
             <div class="col-rank">Rank</div>
             <div class="col-lp">LP (24h)</div>
             <div class="col-lp">LP (7d)</div>
@@ -2388,7 +2402,7 @@ const QUEUE_NAMES = {
 // Notificación de resultados de apuestas
 async function notifyBetResults(targetName, result, winners, profileIconId, championId, lpData, kda, version, totalBets = 0, queueId = 420, highlights = null) {
   if (!client || !targetChannelId) return;
-  const channel = client.channels.cache.get(targetChannelId);
+  const channel = await client.channels.fetch(targetChannelId).catch(() => null);
   if (!channel) return;
 
   const v = version || '15.8.1';
@@ -2443,7 +2457,7 @@ async function notifyBetResults(targetName, result, winners, profileIconId, cham
 // Notificación de Remake
 async function notifyRemake(targetName) {
   if (!client || !targetChannelId) return;
-  const channel = client.channels.cache.get(targetChannelId);
+  const channel = await client.channels.fetch(targetChannelId).catch(() => null);
   if (!channel) return;
 
   const title = `Remake for ${targetName}`;
@@ -2460,7 +2474,7 @@ async function notifyRemake(targetName) {
 // Notificación de Reto Completado
 async function notifyChallengeComplete(targetName, challenges, coins) {
   if (!client || !targetChannelId) return;
-  const channel = client.channels.cache.get(targetChannelId);
+  const channel = await client.channels.fetch(targetChannelId).catch(() => null);
   if (!channel) return;
 
   const title = `Challenge Complete for ${targetName}`;
@@ -2792,7 +2806,7 @@ async function checkEpicFreeGames(targetChannelId = null) {
         const sentMsg = await channel.send({ content: '🔔 **¡Atención Cazadores! Hay nuevos juegos gratis en Epic Games Store:**', embeds });
         
         // Guardar en DB para borrar cuando expire (usamos la fecha del primer juego como referencia)
-        const db = client.db('lan-tracker');
+        const db = dbInstance;
         await db.collection('temporary_messages').insertOne({
           type: 'epic',
           messageId: sentMsg.id,
@@ -2854,7 +2868,7 @@ async function checkSteamNews(targetChannelId = null) {
         const sentMsg = await channel.send({ content: '🎮 **¡Nuevas oportunidades en Steam hoy!**', embeds });
         
         // Guardar en DB para borrar cuando expire
-        const db = client.db('lan-tracker');
+        const db = dbInstance;
         await db.collection('temporary_messages').insertOne({
           type: 'steam',
           messageId: sentMsg.id,
@@ -2873,12 +2887,12 @@ async function checkSteamNews(targetChannelId = null) {
 // Función para limpiar mensajes expirados
 async function cleanupExpiredMessages() {
   try {
-    const db = client.db('lan-tracker');
+    const db = dbInstance;
     const now = new Date();
     const expired = await db.collection('temporary_messages').find({ expiresAt: { $lt: now } }).toArray();
 
     for (const doc of expired) {
-      const channel = client.channels.cache.get(doc.channelId);
+      const channel = await client.channels.fetch(doc.channelId).catch(() => null);
       if (channel) {
         try {
           const msg = await channel.messages.fetch(doc.messageId);
@@ -3689,15 +3703,33 @@ async function settleBets(acc) {
 
     const matchUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/by-puuid/${acc.puuid.trim()}/ids?count=1`;
     const matchIdsRes = await fetch(matchUrl, { headers: { "X-Riot-Token": API_KEY.trim() } });
+    
+    if (!matchIdsRes.ok) {
+      console.error(`[Bets Error] Riot API Match IDs failed: ${matchIdsRes.status}`);
+      return;
+    }
+    
     const matchIds = await matchIdsRes.json();
     
-    if (!matchIds || !Array.isArray(matchIds) || matchIds.length === 0) return;
+    if (!matchIds || !Array.isArray(matchIds) || matchIds.length === 0) {
+      console.log(`[Bets] No matches found for ${acc.gameName} yet.`);
+      return;
+    }
 
     const detailUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/${matchIds[0]}`;
     const detailRes = await fetch(detailUrl, { headers: { "X-Riot-Token": API_KEY.trim() } });
+    
+    if (!detailRes.ok) {
+      console.error(`[Bets Error] Riot API Match Detail failed: ${detailRes.status}`);
+      return;
+    }
+    
     const match = await detailRes.json();
     
-    if (!match || !match.info) return;
+    if (!match || !match.info) {
+      console.error(`[Bets Error] Invalid match data for ${acc.gameName}`);
+      return;
+    }
 
     const allowedQueues = [420, 440];
     if (!allowedQueues.includes(match.info.queueId)) return;
@@ -3737,7 +3769,7 @@ async function settleBets(acc) {
       let attempts = 0;
       while (attempts < 3) {
         try {
-          const leagueUrl = `https://la1.api.riotgames.com/lol/league/v4/entries/by-puuid/${acc.puuid}?api_key=${API_KEY}`;
+          const leagueUrl = `https://${acc.region || 'la1'}.api.riotgames.com/lol/league/v4/entries/by-puuid/${acc.puuid}?api_key=${API_KEY}`;
           const leagues = await (await fetch(leagueUrl)).json();
           const targetQueueType = match.info.queueId === 420 ? 'RANKED_SOLO_5x5' : 'RANKED_FLEX_SR';
           const soloQ = leagues.find(l => l.queueType === targetQueueType);
@@ -3755,6 +3787,8 @@ async function settleBets(acc) {
     const highlights = calculateMatchHighlights(match);
     notifyBetResults(acc.gameName, gameResult, winners, p.profileIcon, p.championName, lpDataObj, kda, DDRAGON_VERSION, openBets.length, match.info.queueId, highlights);
     liveCache.delete(acc.puuid);
+    // Limpiar estado de partida en DB
+    await dbInstance.collection('accounts').updateOne({ puuid: acc.puuid }, { $unset: { liveGameStartedAt: "", lastLiveGameId: "" } });
     await checkChallenges(acc, match);
   } catch (e) {
     console.error(`[Bets Error]`, e);
@@ -3804,6 +3838,7 @@ async function startBot() {
 
       // Snapshots y Notificaciones
       if (minute === 0) {
+        if (hour === 0) await takeDailySnapshots(db);
         if (hour === 12) {
           await sendDailyMotivation(db);
           await sendChallengeReminder(db);
@@ -3824,14 +3859,30 @@ async function startBot() {
           if (cooldown403.has(acc.puuid) && nowTime < cooldown403.get(acc.puuid)) continue;
           
           const region = acc.region || 'la1';
-          const res = await fetch(`https://${region}.api.riotgames.com/lol/spectator/v5/active-games/by-puuid/${acc.puuid.trim()}?api_key=${process.env.RIOT_API_KEY}`);
+          const url = `https://${region}.api.riotgames.com/lol/spectator/v5/active-games/by-puuid/${acc.puuid.trim()}`;
+          const res = await fetch(url, {
+            headers: {
+              "X-Riot-Token": process.env.RIOT_API_KEY.trim(),
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+              "Accept-Language": "es-ES,es;q=0.9"
+            }
+          });
           if (res.ok) {
             const game = await res.json();
             if ([420, 440].includes(game.gameQueueConfigId) && !liveCache.has(acc.puuid)) {
+              console.log(`[Scanner] 🎯 Partida detectada para ${acc.gameName}`);
               liveCache.add(acc.puuid);
               const me = game.participants.find(p => p.puuid === acc.puuid.trim());
               const champKey = Object.keys(champData.data).find(key => champData.data[key].key == me.championId);
-              notifyLiveGame(acc, { championName: champKey, championId: champKey, profileIconId: me.profileIconId, version: DDRAGON_VERSION });
+              const champName = champKey ? champData.data[champKey].name : 'Desconocido';
+
+              // Sincronizar DB para permitir apuestas
+              await db.collection('accounts').updateOne(
+                { puuid: acc.puuid },
+                { $set: { liveGameStartedAt: new Date(), lastLiveGameId: game.gameId } }
+              );
+
+              notifyLiveGame(acc, { championName: champName, championId: champKey, profileIconId: me.profileIconId, version: DDRAGON_VERSION });
             }
           } else if (res.status === 404 && liveCache.has(acc.puuid)) {
             liveCache.delete(acc.puuid);
