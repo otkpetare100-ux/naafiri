@@ -143,7 +143,7 @@ h1::after {
   background: var(--bg-card);
   border: 1px solid var(--border-muted);
   border-radius: 12px;
-  padding: 0.8rem 2.5rem;
+  padding: 0.5rem 2.5rem;
   display: grid;
   grid-template-columns: 60px 80px 1fr 620px;
   align-items: center;
@@ -233,8 +233,8 @@ h1::after {
 }
 
 .player-avatar {
-  width: 64px;
-  height: 64px;
+  width: 56px;
+  height: 56px;
   border-radius: 10px;
   object-fit: cover;
   border: 2px solid rgba(255, 255, 255, 0.1);
@@ -364,18 +364,17 @@ h1::after {
 
 /* Rank Data (Right side) */
 .rank-data {
-  display: grid;
-  grid-template-columns: 180px 130px 90px 180px; 
+  grid-template-columns: 180px 130px 85px 180px; 
   align-items: center;
-  column-gap: 20px; 
+  column-gap: 10px;
   padding-right: 20px;
   width: 610px;
   justify-items: end;
 }
 
 .rank-emblem-container {
-  width: 90px;
-  height: 90px;
+  width: 75px;
+  height: 75px;
   display: flex;
   align-items: center;
   justify-content: center;
