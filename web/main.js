@@ -74,9 +74,22 @@ function renderLadder(players) {
 
     // Top Campeones HTML
     const topChampsHtml = (player.topChampions || []).map(champ => `
-      <div class="champ-item" title="${champ.name}">
+      <div class="champ-item">
         <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${champ.name}.png" alt="${champ.name}" onerror="this.src='/assets/placeholder_champ.png'" />
-        <span class="mastery-badge">Lvl ${champ.level}</span>
+        
+        <div class="mastery-card">
+          <div class="m-card-header">
+            <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${champ.name}.png" class="m-avatar" />
+            <div class="m-level-shield">${champ.level}</div>
+          </div>
+          <div class="m-card-body">
+            <div class="m-champ-name">${champ.name}</div>
+            <div class="m-stats">
+              <span class="m-label">Maestría</span>
+              <span class="m-value">${champ.level}</span>
+            </div>
+          </div>
+        </div>
       </div>
     `).join('');
 

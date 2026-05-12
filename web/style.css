@@ -332,29 +332,97 @@ h1::after {
   filter: brightness(1.1);
 }
 
-.mastery-badge {
+.mastery-card {
   position: absolute;
-  bottom: -8px;
+  bottom: 100%;
   left: 50%;
-  transform: translateX(-50%) translateY(5px);
-  background: linear-gradient(135deg, #d4af37, #b8860b);
-  color: #000;
-  font-size: 0.65rem;
-  font-weight: 900;
-  padding: 2px 8px;
-  border-radius: 20px;
-  border: 1.5px solid rgba(0,0,0,0.8);
-  white-space: nowrap;
+  transform: translateX(-50%) translateY(10px);
+  background: rgba(10, 10, 12, 0.98);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--gold-primary);
+  border-radius: 12px;
+  padding: 15px;
+  width: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
   opacity: 0;
   pointer-events: none;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-  z-index: 20;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(212, 175, 55, 0.2);
+  margin-bottom: 15px;
+  z-index: 1000;
 }
 
-.champ-item:hover .mastery-badge {
+.champ-item:hover .mastery-card {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+}
+
+.m-card-header {
+  position: relative;
+  width: 70px;
+  height: 70px;
+}
+
+.m-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid var(--gold-primary);
+  object-fit: cover;
+}
+
+.m-level-shield {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #1e2328, #0a0a0a);
+  border: 2px solid var(--gold-primary);
+  color: var(--gold-primary);
+  font-weight: 900;
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  border-radius: 4px;
+  clip-path: polygon(0% 0%, 100% 0%, 100% 75%, 50% 100%, 0% 75%); /* Forma de escudo */
+  min-width: 30px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+.m-champ-name {
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 5px;
+  text-align: center;
+}
+
+.m-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 8px;
+  width: 100%;
+}
+
+.m-label {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.m-value {
+  font-size: 0.8rem;
+  color: var(--gold-primary);
+  font-weight: 700;
 }
 
 /* .champ-mastery-lvl styles removed */
