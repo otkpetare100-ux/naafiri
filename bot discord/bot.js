@@ -3836,11 +3836,49 @@ async function takeDailySnapshots(db) {
 
 async function settleBets(acc) {
   try {
-    console.log(`[Bets] Processing results for ${acc.gameName}...`);
-    await new Promise(r => setTimeout(r, 120000));
     const API_KEY = process.env.RIOT_API_KEY;
     const routing = REGION_ROUTING[acc.region] || 'americas';
+    const spectatorUrl = `https://${acc.region || 'la1'}.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${acc.puuid.trim()}`;
 
+    // Fase 1: Esperar a que el jugador salga de la partida sondeando el Spectator API
+    const MAX_WAIT_MINUTES = 90;
+    let waitedMinutes = 0;
+    let gameEnded = false;
+
+    console.log(`[Bets] Esperando fin de partida para ${acc.gameName}...`);
+
+    while (waitedMinutes < MAX_WAIT_MINUTES) {
+      await new Promise(r => setTimeout(r, 60000)); // esperar 1 minuto
+      waitedMinutes++;
+
+      try {
+        const spectRes = await fetch(spectatorUrl, {
+          headers: { "X-Riot-Token": API_KEY.trim() }
+        });
+
+        if (spectRes.status === 404) {
+          gameEnded = true;
+          console.log(`[Bets] ✅ ${acc.gameName} ya no está en partida (${waitedMinutes} min). Procesando resultado...`);
+          break;
+        }
+
+        console.log(`[Bets] ⏳ ${acc.gameName} aún en partida (${waitedMinutes} min). Esperando...`);
+      } catch (e) {
+        console.warn(`[Bets] Error sondeando Spectator API para ${acc.gameName}:`, e.message);
+      }
+    }
+
+    if (!gameEnded) {
+      console.log(`[Bets] ⚠️ Timeout (${MAX_WAIT_MINUTES} min) esperando fin de partida de ${acc.gameName}. Abortando.`);
+      liveCache.delete(acc.puuid);
+      return;
+    }
+
+    // Fase 2: Esperar 2 minutos para que Riot procese y registre la partida en el historial
+    console.log(`[Bets] Esperando 2 min para que Riot procese el resultado de ${acc.gameName}...`);
+    await new Promise(r => setTimeout(r, 120000));
+
+    // Fase 3: Obtener el ID de la última partida
     let matchIds = [];
     let attempts = 0;
     while (attempts < 3) {
@@ -3859,6 +3897,7 @@ async function settleBets(acc) {
     
     if (!matchIds || !Array.isArray(matchIds) || matchIds.length === 0) {
       console.log(`[Bets] No se encontraron partidas para ${acc.gameName} tras varios intentos. Abortando.`);
+      liveCache.delete(acc.puuid);
       return;
     }
 
@@ -3988,6 +4027,46 @@ async function startBot() {
     
     // Inicializar lógica del bot
     initBot(db);
+
+    // --- Recuperación tras reinicio: apuestas pendientes ---
+    // Si el servidor se reinició mientras un jugador estaba en partida o acaba de terminarla,
+    // las apuestas quedarían en 'open' para siempre. Este bloque las recupera.
+    setTimeout(async () => {
+      try {
+        const pendingAccounts = await db.collection('accounts').find({ lastLiveGameId: { $exists: true, $ne: null } }).toArray();
+        if (pendingAccounts.length === 0) return;
+
+        console.log(`[Recovery] 🔄 Encontradas ${pendingAccounts.length} cuenta(s) con partida pendiente. Verificando estado...`);
+
+        for (const acc of pendingAccounts) {
+          try {
+            const region = acc.region || 'la1';
+            const spectUrl = `https://${region}.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${acc.puuid.trim()}`;
+            const spectRes = await fetch(spectUrl, {
+              headers: { "X-Riot-Token": process.env.RIOT_API_KEY.trim() }
+            });
+
+            if (spectRes.ok) {
+              // Todavía en partida: añadir al liveCache para que settleBets la espere
+              console.log(`[Recovery] ⏳ ${acc.gameName} todavía en partida. Reanudando seguimiento...`);
+              liveCache.add(acc.puuid);
+              settleBets(acc);
+            } else if (spectRes.status === 404) {
+              // Ya terminó la partida: liquidar directamente
+              console.log(`[Recovery] ✅ ${acc.gameName} ya salió de partida. Liquidando apuestas pendientes...`);
+              liveCache.add(acc.puuid);
+              settleBets(acc);
+            } else {
+              console.warn(`[Recovery] ⚠️ No se pudo verificar el estado de ${acc.gameName} (HTTP ${spectRes.status}). Omitiendo.`);
+            }
+          } catch (e) {
+            console.error(`[Recovery] Error verificando ${acc.gameName}:`, e.message);
+          }
+        }
+      } catch (e) {
+        console.error('[Recovery] Error en recuperación de apuestas:', e);
+      }
+    }, 5000); // Esperar 5s a que el bot esté listo antes de ejecutar
 
     // Temporizadores de Notificaciones
     setInterval(async () => {

@@ -89,6 +89,7 @@ function renderLadder(players) {
              onerror="this.src='/assets/placeholder_champ.png'" />
         <div class="champ-mastery-badge">
           <img src="${getMasteryCrest(champ.level)}" class="champ-crest-mini" onerror="this.style.display='none'" />
+          <span class="champ-mastery-num">${champ.level}</span>
         </div>
 
         <div class="mastery-card ${cardPositionClass}">
