@@ -259,6 +259,7 @@ h1::after {
 /* Name & Status */
 .player-main-info {
   flex: 1;
+  margin-left: 15px; /* Espacio extra para que el level-tag no lo tape */
 }
 
 .player-name-row {
