@@ -1265,7 +1265,7 @@ function initBot(db) {
 
           return msg.channel.send(`<@${msg.author.id}> ✅ **${acc.gameName}** está en partida. Notificación enviada.`);
         } else {
-          return msg.channel.send(`<@${msg.author.id}> 💤 **${acc.gameName}** no parece estar en partida ahora mismo.`);
+          return msg.channel.send(`<@${msg.author.id}> 💤 **${acc.gameName}** [v2.0] no parece estar en partida ahora mismo.`);
         }
       }
 
