@@ -130,7 +130,8 @@ app.get('/api/ladder', async (req, res) => {
         isLive: acc.liveGameStartedAt ? true : false,
         discordId: acc.discordId || null,
         streak: acc.streak || 0,
-        topChampions: acc.topChampions || []
+        topChampions: acc.topChampions || [],
+        history: acc.history || []
       };
     });
 

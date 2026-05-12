@@ -3917,6 +3917,21 @@ async function settleBets(acc) {
     }
 
     const gameResult = p.win ? 'gana' : 'pierde';
+    
+    // Guardar en Historial (W/L) - Para la web
+    const resultTag = p.win ? 'W' : 'L';
+    await dbInstance.collection('accounts').updateOne(
+      { puuid: acc.puuid },
+      { 
+        $push: { 
+          history: { 
+            $each: [resultTag], 
+            $slice: -5 
+          } 
+        } 
+      }
+    );
+
     const openBets = await dbInstance.collection('bets').find({ targetPuuid: acc.puuid, status: 'open' }).toArray();
     const winners = [];
     for (const bet of openBets) {

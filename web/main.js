@@ -64,8 +64,8 @@ function renderLadder(players) {
     // Icono de invocador
     const avatarUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${player.profileIconId}.png`;
 
-    // Historial mockeado (5 puntos) - En el futuro vendrá de la API
-    const history = player.history || ['W', 'W', 'L', 'W', 'L']; 
+    // Historial (W/L) - Viene de la API
+    const history = player.history || []; 
     const historyHtml = history.map(res => `<span class="history-dot dot-${res.toLowerCase()}"></span>`).join('');
 
     // Clase para el Winrate
