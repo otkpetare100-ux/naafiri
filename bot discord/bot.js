@@ -2521,16 +2521,24 @@ async function notifyBetResults(targetName, result, winners, profileIconId, cham
 }
 
 // Notificación de Remake
-async function notifyRemake(targetName) {
+async function notifyRemake(targetName, profileIconId, championId, version, refundedCount = 0) {
   if (!client || !targetChannelId) return;
   const channel = await client.channels.fetch(targetChannelId).catch(() => null);
   if (!channel) return;
 
-  const title = `Remake for ${targetName}`;
+  const v = version || DDRAGON_VERSION || '15.8.1';
+  const playerIcon = `https://ddragon.leagueoflegends.com/cdn/${v}/img/profileicon/${profileIconId || 0}.png`;
+  const champIcon = championId ? `https://ddragon.leagueoflegends.com/cdn/${v}/img/champion/${championId}.png` : null;
+
+  const refundLine = refundedCount > 0
+    ? `\n\n💰 **${refundedCount} apuesta(s)** han sido reembolsadas automáticamente.`
+    : `\n\nNo había apuestas activas.`;
 
   const embedRemake = new EmbedBuilder()
-    .setTitle(title)
-    .setDescription(`La partida fue un remake (menos de 3:30 min).\nTodas las apuestas han sido **reembolsadas** automáticamente. 💰`)
+    .setAuthor({ name: targetName, iconURL: playerIcon })
+    .setTitle('⚠️ Remake Detectado')
+    .setDescription(`La partida terminó antes de los **3:30 min** y fue declarada remake.${refundLine}`)
+    .setThumbnail(champIcon)
     .setColor(0xf39c12)
     .setTimestamp();
 
@@ -3929,7 +3937,10 @@ async function settleBets(acc) {
         await dbInstance.collection('economy').updateOne({ discordId: bet.discordId }, { $inc: { coins: bet.amount } });
         await dbInstance.collection('bets').updateOne({ _id: bet._id }, { $set: { status: 'refunded' } });
       }
-      notifyRemake(acc.gameName);
+      notifyRemake(acc.gameName, p.profileIcon, p.championName, DDRAGON_VERSION, allBets.length);
+      // Limpiar estado para que el jugador vuelva al ciclo de escaneo
+      liveCache.delete(acc.puuid);
+      await dbInstance.collection('accounts').updateOne({ puuid: acc.puuid }, { $unset: { liveGameStartedAt: "", lastLiveGameId: "" } });
       return;
     }
 
