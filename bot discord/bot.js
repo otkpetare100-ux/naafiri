@@ -1285,8 +1285,6 @@ function initBot(db) {
         const message = args.join(' ');
         if (!message) return msg.channel.send(`<@${msg.author.id}> Uso: \`!admin_anuncio [mensaje]\``);
         
-        const loadingMsg = await msg.channel.send('🎨 Forjando el anuncio en las llamas de Naafiri...');
-        
         try {
           const buffer = await generateAnnouncementImage(message);
           const attachment = new AttachmentBuilder(buffer, { name: 'anuncio.png' });
@@ -1295,11 +1293,9 @@ function initBot(db) {
             files: [attachment] 
           });
           
-          await loadingMsg.delete().catch(() => {});
           return msg.delete().catch(() => {});
         } catch (e) {
           console.error('[Anuncio Error]', e);
-          await loadingMsg.edit('❌ Error al generar la imagen del anuncio. Enviando como texto:');
           return msg.channel.send(`📢 **ANUNCIO:** ${message}`);
         }
       }
@@ -2164,8 +2160,6 @@ async function sendDailySummary(db) {
   try {
     const channel = await client.channels.fetch(targetChannelId);
     if (!channel) return;
-
-    const statusMsg = await channel.send('⏳ Generando Scoreboard Diario...');
 
     const accounts = await db.collection('accounts').find({}).toArray();
     if (!accounts.length) return;
