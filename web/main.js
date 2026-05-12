@@ -74,8 +74,9 @@ function renderLadder(players) {
 
     // Top Campeones HTML
     const topChampsHtml = (player.topChampions || []).map(champ => `
-      <div class="champ-item" title="${champ.name} - Mastery ${champ.level}">
+      <div class="champ-item" title="${champ.name}">
         <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${champ.name}.png" alt="${champ.name}" onerror="this.src='/assets/placeholder_champ.png'" />
+        <span class="mastery-badge">Lvl ${champ.level}</span>
       </div>
     `).join('');
 
