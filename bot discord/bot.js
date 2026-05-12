@@ -1345,7 +1345,9 @@ function initBot(db) {
           { targetPuuid: acc.puuid, status: 'open' },
           { $set: { status: 'cancelled' } }
         );
-        return msg.channel.send(`<@${msg.author.id}> ✅ **${openBets.length}** apuesta(s) canceladas y reembolsadas para **${acc.gameName}#${acc.tagLine}**.`);
+        const sentMsg = await msg.channel.send(`<@${msg.author.id}> ✅ **${openBets.length}** apuesta(s) canceladas y reembolsadas para **${acc.gameName}#${acc.tagLine}**.`);
+        setTimeout(() => sentMsg.delete().catch(() => {}), 10000);
+        return;
       }
 
       // !admin_resetAll CONFIRMAR
@@ -1354,7 +1356,9 @@ function initBot(db) {
           return msg.channel.send(`<@${msg.author.id}> ⚠️ Esto pondrá a **0 coins** a TODOS los usuarios.\nPara confirmar escribe: \`!admin_resetAll CONFIRMAR\``);
         }
         const result = await db.collection('economy').updateMany({}, { $set: { coins: 0 } });
-        return msg.channel.send(`<@${msg.author.id}> ✅ Reset global completado. **${result.modifiedCount}** usuario(s) puestos a 0 coins.`);
+        const sentMsg = await msg.channel.send(`<@${msg.author.id}> ✅ Reset global completado. **${result.modifiedCount}** usuario(s) puestos a 0 coins.`);
+        setTimeout(() => sentMsg.delete().catch(() => {}), 10000);
+        return;
       }
 
       // !admin_vincular @usuario Nombre#TAG [Region]
@@ -1433,7 +1437,9 @@ function initBot(db) {
           );
 
           statusMsg.delete().catch(() => {});
-          return msg.channel.send(`✅ **VÍNCULO MANUAL COMPLETADO**\nUsuario: <@${targetUser.id}>\nCuenta LoL: **${data.account.gameName}#${data.account.tagLine}**\n*Sincronizado con la web y economía actualizada.*`);
+          const sentMsg = await msg.channel.send(`✅ **VÍNCULO MANUAL COMPLETADO**\nUsuario: <@${targetUser.id}>\nCuenta LoL: **${data.account.gameName}#${data.account.tagLine}**\n*Sincronizado con la web y economía actualizada.*`);
+          setTimeout(() => sentMsg.delete().catch(() => {}), 10000);
+          return;
         } catch (err) {
           console.error('[Admin Sync Error]', err);
           statusMsg.delete().catch(() => {});
@@ -1471,7 +1477,9 @@ function initBot(db) {
             if (ok) success++;
           }
         }
-        return msg.channel.send(`✅ Sincronización completada: **${success}/${accounts.length}** actualizados.`);
+        const sentMsg = await msg.channel.send(`✅ Sincronización completada: **${success}/${accounts.length}** actualizados.`);
+        setTimeout(() => sentMsg.delete().catch(() => {}), 10000);
+        return;
       }
 
       // !admin_vinculos
