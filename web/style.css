@@ -367,7 +367,7 @@ h1::after {
   display: grid;
   grid-template-columns: 180px 130px 90px 180px; 
   align-items: center;
-  column-gap: 15px; /* Reducido para que no esté tan lejos */
+  column-gap: 20px; 
   padding-right: 20px;
   width: 610px;
   justify-items: end;
