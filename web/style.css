@@ -315,7 +315,6 @@ h1::after {
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   cursor: pointer;
   overflow: visible;
-  padding-bottom: 20px; /* espacio para que el badge no quede cortado */
 }
 
 .champ-item:hover {
