@@ -1147,7 +1147,7 @@ function initBot(db) {
         for (const acc of accounts) {
           try {
             const region = acc.region || 'la1';
-            const url = `https://${region}.api.riotgames.com/lol/spectator/v5/active-games/by-puuid/${acc.puuid.trim()}`;
+            const url = `https://${region}.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${acc.puuid.trim()}`;
             const res = await fetch(url, {
               headers: {
                 "X-Riot-Token": process.env.RIOT_API_KEY.trim(),
@@ -1219,7 +1219,7 @@ function initBot(db) {
         }
 
         const region = acc.region || 'la1';
-        const url = `https://${region}.api.riotgames.com/lol/spectator/v5/active-games/by-puuid/${acc.puuid.trim()}`;
+        const url = `https://${region}.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${acc.puuid.trim()}`;
         
         console.log(`[Admin Check] 🔍 Buscando partida para ${acc.gameName} en ${region}...`);
         console.log(`[Admin Check] URL: ${url}`);
@@ -1265,7 +1265,7 @@ function initBot(db) {
 
           return msg.channel.send(`<@${msg.author.id}> ✅ **${acc.gameName}** está en partida. Notificación enviada.`);
         } else {
-          return msg.channel.send(`<@${msg.author.id}> 💤 **${acc.gameName}** [v2.0] no parece estar en partida ahora mismo.`);
+          return msg.channel.send(`<@${msg.author.id}> 💤 **${acc.gameName}** no parece estar en partida ahora mismo.`);
         }
       }
 
@@ -3866,7 +3866,7 @@ async function startBot() {
           if (cooldown403.has(acc.puuid) && nowTime < cooldown403.get(acc.puuid)) continue;
           
           const region = acc.region || 'la1';
-          const url = `https://${region}.api.riotgames.com/lol/spectator/v5/active-games/by-puuid/${acc.puuid.trim()}`;
+          const url = `https://${region}.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${acc.puuid.trim()}`;
           const res = await fetch(url, {
             headers: {
               "X-Riot-Token": process.env.RIOT_API_KEY.trim(),
