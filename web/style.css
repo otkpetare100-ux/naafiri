@@ -365,11 +365,11 @@ h1::after {
 /* Rank Data (Right side) */
 .rank-data {
   display: grid;
-  grid-template-columns: 180px 130px 100px 200px; /* Ajustados anchos para dar espacio */
+  grid-template-columns: 180px 130px 90px 180px; 
   align-items: center;
-  column-gap: 25px; /* Espacio real entre las columnas */
+  column-gap: 10px; /* Reducido para que no esté tan lejos */
   padding-right: 20px;
-  width: 650px;
+  width: 610px;
   justify-items: end;
 }
 
