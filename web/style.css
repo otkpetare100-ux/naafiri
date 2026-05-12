@@ -378,31 +378,27 @@ h1::after {
   box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
 }
 
-.m-level-shield {
+.m-crest-official {
   position: absolute;
-  bottom: -12px;
+  bottom: -25px;
   left: 50%;
   transform: translateX(-50%);
-  background: #010a13;
-  color: #f0e6d2;
-  font-weight: 900;
-  font-size: 0.85rem;
-  padding: 5px 12px;
-  min-width: 35px;
-  text-align: center;
+  width: 90px;
+  height: auto;
   z-index: 2;
-  /* Nueva forma de escudo con borde visible */
-  border: 1.5px solid var(--gold-primary);
-  border-top: none;
-  border-radius: 0 0 10px 10px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.8);
+  filter: drop-shadow(0 5px 15px rgba(0,0,0,0.8));
 }
 
-.m-level-shield::before {
-  content: '';
+.m-level-number {
   position: absolute;
-  top: -2px; left: -1.5px; right: -1.5px; height: 2px;
-  background: var(--gold-primary);
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #f0e6d2;
+  font-weight: 900;
+  font-size: 0.9rem;
+  z-index: 3;
+  text-shadow: 0 0 5px #000, 0 0 10px #000;
 }
 
 .m-champ-name {

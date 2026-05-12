@@ -72,6 +72,11 @@ function renderLadder(players) {
     const wrValue = parseInt(player.winRate) || 0;
     const wrClass = wrValue >= 50 ? 'wr-positive' : 'wr-negative';
 
+    const getMasteryCrest = (level) => {
+      const lv = Math.min(Math.max(parseInt(level) || 1, 1), 10);
+      return `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/champion-mastery/crest_level_${lv}.png`;
+    };
+
     // Top Campeones HTML
     const topChampsHtml = (player.topChampions || []).map(champ => `
       <div class="champ-item">
@@ -80,7 +85,8 @@ function renderLadder(players) {
         <div class="mastery-card">
           <div class="m-card-header">
             <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${champ.name}.png" class="m-avatar" />
-            <div class="m-level-shield">${champ.level}</div>
+            <img src="${getMasteryCrest(champ.level)}" class="m-crest-official" />
+            <div class="m-level-number">${champ.level}</div>
           </div>
           <div class="m-card-body">
             <div class="m-champ-name">${champ.name}</div>
