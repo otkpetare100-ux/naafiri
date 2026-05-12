@@ -3863,18 +3863,24 @@ async function settleBets(acc) {
     const API_KEY = process.env.RIOT_API_KEY;
     const routing = REGION_ROUTING[acc.region] || 'americas';
 
-    const matchUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/by-puuid/${acc.puuid.trim()}/ids?count=1`;
-    const matchIdsRes = await fetch(matchUrl, { headers: { "X-Riot-Token": API_KEY.trim() } });
-    
-    if (!matchIdsRes.ok) {
-      console.error(`[Bets Error] Riot API Match IDs failed: ${matchIdsRes.status}`);
-      return;
+    let matchIds = [];
+    let attempts = 0;
+    while (attempts < 3) {
+      const matchUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/by-puuid/${acc.puuid.trim()}/ids?count=1`;
+      const matchIdsRes = await fetch(matchUrl, { headers: { "X-Riot-Token": API_KEY.trim() } });
+      
+      if (matchIdsRes.ok) {
+        matchIds = await matchIdsRes.json();
+        if (matchIds && matchIds.length > 0) break;
+      }
+      
+      console.log(`[Bets] No se encontró partida aún para ${acc.gameName} (Intento ${attempts + 1}/3). Reintentando en 1min...`);
+      attempts++;
+      if (attempts < 3) await new Promise(r => setTimeout(r, 60000));
     }
     
-    const matchIds = await matchIdsRes.json();
-    
     if (!matchIds || !Array.isArray(matchIds) || matchIds.length === 0) {
-      console.log(`[Bets] No matches found for ${acc.gameName} yet.`);
+      console.log(`[Bets] No se encontraron partidas para ${acc.gameName} tras varios intentos. Abortando.`);
       return;
     }
 
@@ -3931,8 +3937,9 @@ async function settleBets(acc) {
       let attempts = 0;
       while (attempts < 3) {
         try {
-          const leagueUrl = `https://${acc.region || 'la1'}.api.riotgames.com/lol/league/v4/entries/by-puuid/${acc.puuid}?api_key=${API_KEY}`;
-          const leagues = await (await fetch(leagueUrl)).json();
+          const leagueUrl = `https://${acc.region || 'la1'}.api.riotgames.com/lol/league/v4/entries/by-puuid/${acc.puuid}`;
+          const lRes = await fetch(leagueUrl, { headers: { "X-Riot-Token": API_KEY.trim() } });
+          const leagues = await lRes.json();
           const targetQueueType = match.info.queueId === 420 ? 'RANKED_SOLO_5x5' : 'RANKED_FLEX_SR';
           const soloQ = leagues.find(l => l.queueType === targetQueueType);
           if (soloQ) {
