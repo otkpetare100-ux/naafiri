@@ -4029,6 +4029,12 @@ async function startBot() {
             const game = await res.json();
             console.log(`[Scanner] Partida detectada para ${acc.gameName}. Modo: ${game.gameQueueConfigId}`);
             if ([420, 440].includes(game.gameQueueConfigId) && !liveCache.has(acc.puuid)) {
+              // Evitar duplicados si el servidor se reinicia
+              if (acc.lastLiveGameId === game.gameId) {
+                console.log(`[Scanner] ⏭️ Ya se notificó la partida ${game.gameId} para ${acc.gameName}. Omitiendo.`);
+                liveCache.add(acc.puuid); // Lo metemos en cache para que no siga logueando lo mismo
+                continue;
+              }
               console.log(`[Scanner] 🎯 Partida VÁLIDA (SoloQ/Flex). Notificando...`);
               liveCache.add(acc.puuid);
               const me = game.participants.find(p => p.puuid === acc.puuid.trim());
