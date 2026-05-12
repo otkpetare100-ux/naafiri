@@ -1284,14 +1284,24 @@ function initBot(db) {
       if (command === 'admin_anuncio') {
         const message = args.join(' ');
         if (!message) return msg.channel.send(`<@${msg.author.id}> Uso: \`!admin_anuncio [mensaje]\``);
-        const embed = new EmbedBuilder()
-          .setTitle('📢 ANUNCIO OFICIAL')
-          .setDescription(message)
-          .setColor(0xf4c874)
-          .setTimestamp()
-          .setFooter({ text: 'LAN Tracker Bot' });
-        await msg.channel.send({ embeds: [embed] });
-        return msg.delete().catch(() => {});
+        
+        const loadingMsg = await msg.channel.send('🎨 Forjando el anuncio en las llamas de Naafiri...');
+        
+        try {
+          const buffer = await generateAnnouncementImage(message);
+          const attachment = new AttachmentBuilder(buffer, { name: 'anuncio.png' });
+          
+          await msg.channel.send({ 
+            files: [attachment] 
+          });
+          
+          await loadingMsg.delete().catch(() => {});
+          return msg.delete().catch(() => {});
+        } catch (e) {
+          console.error('[Anuncio Error]', e);
+          await loadingMsg.edit('❌ Error al generar la imagen del anuncio. Enviando como texto:');
+          return msg.channel.send(`📢 **ANUNCIO:** ${message}`);
+        }
       }
 
       // !admin_stats
@@ -2698,6 +2708,105 @@ async function generateChallengeImage(db) {
     const bodyHeight = await page.evaluate(() => document.body.scrollHeight);
     await page.setViewport({ width: 1200, height: bodyHeight, deviceScaleFactor: 3 });
     return await page.screenshot({ type: 'png', fullPage: true });
+  } finally {
+    await browser.close().catch(() => {});
+  }
+}
+
+async function generateAnnouncementImage(message) {
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap');
+        body { 
+          margin: 0; padding: 0; 
+          background: #050505;
+          font-family: 'Outfit', sans-serif; 
+          color: #fff; 
+          width: 1000px; height: 500px; 
+          display: flex; align-items: center; justify-content: center;
+          overflow: hidden;
+        }
+        .container {
+          position: relative;
+          width: 100%; height: 100%;
+          background: linear-gradient(to right, rgba(0,0,0,0.95) 40%, rgba(0,0,0,0.4) 100%),
+                      url('https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Naafiri_0.jpg') no-repeat center right;
+          background-size: cover;
+          display: flex; flex-direction: column; justify-content: center;
+          padding-left: 60px;
+          box-sizing: border-box;
+          border: 4px solid #d4af37;
+        }
+        .border-inner {
+          position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px;
+          border: 1px solid rgba(212, 175, 55, 0.3);
+          pointer-events: none;
+        }
+        .label {
+          font-weight: 900; color: #d4af37; font-size: 24px;
+          letter-spacing: 5px; text-transform: uppercase;
+          margin-bottom: 10px;
+          text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+        .title {
+          font-size: 60px; font-weight: 900; line-height: 1;
+          margin-bottom: 30px; color: #fff;
+          max-width: 600px;
+          text-transform: uppercase;
+        }
+        .message-box {
+          max-width: 550px;
+          font-size: 32px; font-weight: 400; line-height: 1.4;
+          color: rgba(255, 255, 255, 0.9);
+          border-left: 5px solid #d4af37;
+          padding-left: 25px;
+        }
+        .footer {
+          position: absolute; bottom: 40px; left: 60px;
+          font-size: 16px; color: rgba(212, 175, 55, 0.6);
+          letter-spacing: 2px; text-transform: uppercase;
+        }
+        .corner {
+          position: absolute; width: 40px; height: 40px;
+          border: 3px solid #d4af37;
+        }
+        .top-left { top: 0; left: 0; border-right: 0; border-bottom: 0; }
+        .top-right { top: 0; right: 0; border-left: 0; border-bottom: 0; }
+        .bottom-left { bottom: 0; left: 0; border-right: 0; border-top: 0; }
+        .bottom-right { bottom: 0; right: 0; border-left: 0; border-top: 0; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="corner top-left"></div>
+        <div class="corner top-right"></div>
+        <div class="corner bottom-left"></div>
+        <div class="corner bottom-right"></div>
+        <div class="border-inner"></div>
+        
+        <div class="label">Comunicado Oficial</div>
+        <div class="title">La Manada <br/> ha Hablado</div>
+        <div class="message-box">
+          ${message}
+        </div>
+        <div class="footer">Naafiri — Official Announcement System</div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const browser = await puppeteer.launch({
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
+  try {
+    const page = await browser.newPage();
+    await page.setViewport({ width: 1000, height: 500, deviceScaleFactor: 2 });
+    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+    return await page.screenshot({ type: 'png' });
   } finally {
     await browser.close().catch(() => {});
   }
