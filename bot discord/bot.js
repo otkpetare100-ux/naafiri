@@ -1213,12 +1213,16 @@ function initBot(db) {
         if (!slug) return msg.channel.send(`<@${msg.author.id}> Uso: \`!admin_check Nombre#TAG\``);
         
         const acc = await findAccountBySlug(slug);
-        if (!acc) return msg.channel.send(`<@${msg.author.id}> ❌ Jugador no encontrado en el dashboard.`);
+        if (!acc) {
+          console.log(`[Admin Check] ❌ Jugador no encontrado para el slug: "${slug}"`);
+          return msg.channel.send(`<@${msg.author.id}> ❌ Jugador no encontrado en el dashboard.`);
+        }
 
         const region = acc.region || 'la1';
         const url = `https://${region}.api.riotgames.com/lol/spectator/v5/active-games/by-puuid/${acc.puuid.trim()}`;
         
-        console.log(`[Admin Check] Revisando partida: ${url}`);
+        console.log(`[Admin Check] 🔍 Buscando partida para ${acc.gameName} en ${region}...`);
+        console.log(`[Admin Check] URL: ${url}`);
         
         const res = await fetch(url, {
           headers: {
@@ -1228,8 +1232,11 @@ function initBot(db) {
           }
         });
 
+        console.log(`[Admin Check] Riot API Status: ${res.status} (${res.statusText})`);
+
         if (res.ok) {
           const game = await res.json();
+          console.log(`[Admin Check] ✅ Partida encontrada! Modo: ${game.gameQueueConfigId}`);
           // Obtener nombre del campeón
           const champRes = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/es_MX/champion.json`);
           const champData = await champRes.json();
@@ -3869,8 +3876,9 @@ async function startBot() {
           });
           if (res.ok) {
             const game = await res.json();
+            console.log(`[Scanner] Partida detectada para ${acc.gameName}. Modo: ${game.gameQueueConfigId}`);
             if ([420, 440].includes(game.gameQueueConfigId) && !liveCache.has(acc.puuid)) {
-              console.log(`[Scanner] 🎯 Partida detectada para ${acc.gameName}`);
+              console.log(`[Scanner] 🎯 Partida VÁLIDA (SoloQ/Flex). Notificando...`);
               liveCache.add(acc.puuid);
               const me = game.participants.find(p => p.puuid === acc.puuid.trim());
               const champKey = Object.keys(champData.data).find(key => champData.data[key].key == me.championId);
