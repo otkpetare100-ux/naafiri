@@ -4019,6 +4019,8 @@ async function startBot() {
         const nowTime = Date.now();
 
         for (const acc of accounts) {
+          // Jugador ya en partida → no hacemos ninguna llamada API hasta que settleBets lo saque del liveCache
+          if (liveCache.has(acc.puuid)) continue;
           if (cooldown403.has(acc.puuid) && nowTime < cooldown403.get(acc.puuid)) continue;
           
           const region = acc.region || 'la1';
@@ -4070,13 +4072,13 @@ async function startBot() {
                     .catch(err => console.error(`[Scanner] Error al borrar notificación automática:`, err.message));
                 }, 5 * 60 * 1000);
               }
+              settleBets(acc); // background: espera resultado, liquida apuestas y saca del liveCache al terminar
             }
-          } else if (res.status === 404 && liveCache.has(acc.puuid)) {
-            liveCache.delete(acc.puuid);
-            settleBets(acc);
           } else if (res.status === 403) {
+            console.warn(`[Scanner] 🔑 API Key sin permisos para ${acc.gameName}. Cooldown 10min.`);
             cooldown403.set(acc.puuid, nowTime + 10 * 60 * 1000);
           }
+          // 404 = no está en partida, se sigue escaneando normalmente en el próximo ciclo
         }
       } catch (e) {
         console.error('[Scanner Error]', e);
