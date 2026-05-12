@@ -307,12 +307,14 @@ h1::after {
 .champ-item {
   position: relative;
   width: 52px;
+  height: 52px; /* solo el ícono, el badge flota absolutamente */
   display: flex;
-  flex-direction: column;
   align-items: center;
+  justify-content: center;
   flex-shrink: 0;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   cursor: pointer;
+  overflow: visible;
 }
 
 .champ-item:hover {
@@ -345,16 +347,18 @@ h1::after {
     0 0 40px rgba(212, 175, 55, 0.2);
 }
 
-/* Badge de maestría permanente bajo el ícono */
+/* Badge de maestría — flota bajo el ícono sin afectar el layout */
 .champ-mastery-badge {
-  position: relative;
-  margin-top: -6px; /* se superpone ligeramente al borde del ícono */
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
   width: 36px;
-  height: 20px;
-  flex-shrink: 0;
+  z-index: 2;
+  pointer-events: none;
 }
 
 .champ-crest-mini {
