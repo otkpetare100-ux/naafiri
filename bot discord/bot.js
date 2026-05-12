@@ -2109,6 +2109,45 @@ function getAbsoluteLP(tier, rank, lp) {
 }
 
 // Resumen Diario
+// Función para refrescar estadísticas de todas las cuentas
+async function refreshAllAccounts(db) {
+  const accounts = await db.collection('accounts').find({}).toArray();
+  const API_KEY = process.env.RIOT_API_KEY;
+  console.log(`[Refresh] Actualizando estadísticas para ${accounts.length} cuentas...`);
+
+  for (const acc of accounts) {
+    try {
+      const region = acc.region || 'la1';
+      const url = `https://${region}.api.riotgames.com/lol/league/v4/entries/by-puuid/${acc.puuid}?api_key=${API_KEY}`;
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        const soloQ = data.find(entry => entry.queueType === 'RANKED_SOLO_5x5');
+        if (soloQ) {
+          const newData = {
+            tier: soloQ.tier,
+            rank: soloQ.rank,
+            leaguePoints: soloQ.leaguePoints,
+            wins: soloQ.wins,
+            losses: soloQ.losses
+          };
+          
+          // Actualizar en DB
+          await db.collection('accounts').updateOne(
+            { puuid: acc.puuid },
+            { $set: { soloQ: newData, lastUpdated: new Date() } }
+          );
+        }
+      }
+      // Pequeño delay para no saturar la API
+      await new Promise(r => setTimeout(r, 100));
+    } catch (e) {
+      console.error(`[Refresh Error] No se pudo actualizar a ${acc.gameName}:`, e.message);
+    }
+  }
+  console.log('[Refresh] Actualización completada.');
+}
+
 async function sendDailySummary(db) {
   if (!client || !targetChannelId) return;
 
@@ -3850,7 +3889,10 @@ async function startBot() {
           await sendDailyMotivation(db);
           await sendChallengeReminder(db);
         }
-        if ([18, 22].includes(hour)) sendDailySummary(db);
+        if ([18, 22].includes(hour)) {
+          await refreshAllAccounts(db);
+          await sendDailySummary(db);
+        }
       }
     }, 60 * 1000);
 
