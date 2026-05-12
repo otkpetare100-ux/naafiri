@@ -390,6 +390,7 @@ h1::after {
 .rank-info-text {
   display: flex;
   flex-direction: column;
+  width: 180px; /* Ancho fijo para estabilizar el emblema */
 }
 
 .tier-text {
