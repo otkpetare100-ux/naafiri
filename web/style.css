@@ -301,7 +301,7 @@ h1::after {
   display: flex;
   gap: 16px;
   margin-right: 0.5rem;
-  align-items: flex-start; /* alinea desde arriba para dar espacio al badge */
+  align-items: center;
 }
 
 .champ-item {
