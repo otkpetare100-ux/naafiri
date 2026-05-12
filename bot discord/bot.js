@@ -1205,11 +1205,12 @@ function initBot(db) {
         const accounts = await db.collection('accounts').find({}).toArray();
         if (accounts.length === 0) return msg.channel.send(`<@${msg.author.id}> ⚠️ No hay cuentas registradas.`);
 
-        const statusMsg = await msg.channel.send(`<@${msg.author.id}> 🔄 Actualizando **${accounts.length}** cuenta(s)...`);
+        const statusMsg = await msg.channel.send(`<@${msg.author.id}> 🔄 Actualizando **${accounts.length}** cuenta(s) y revisando apuestas pendientes...`);
         const API_KEY = process.env.RIOT_API_KEY;
         let updated = 0;
         let failed = 0;
 
+        // Paso 1: Refrescar stats de todas las cuentas
         for (const acc of accounts) {
           try {
             const region = acc.region || 'la1';
@@ -1228,13 +1229,35 @@ function initBot(db) {
             } else {
               failed++;
             }
-            await new Promise(r => setTimeout(r, 120)); // delay entre llamadas
+            await new Promise(r => setTimeout(r, 120));
           } catch (e) {
             failed++;
           }
         }
 
-        return statusMsg.edit(`<@${msg.author.id}> ✅ Refresh completado: **${updated}** actualizadas, **${failed}** fallidas.`);
+        // Paso 2: Recuperar apuestas colgadas (cuentas con lastLiveGameId en DB pero sin settleBets activo)
+        let recovered = 0;
+        const pendingAccounts = accounts.filter(a => a.lastLiveGameId && !liveCache.has(a.puuid));
+
+        for (const acc of pendingAccounts) {
+          try {
+            const region = acc.region || 'la1';
+            const spectUrl = `https://${region}.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${acc.puuid.trim()}`;
+            const spectRes = await fetch(spectUrl, { headers: { "X-Riot-Token": API_KEY.trim() } });
+
+            if (spectRes.ok || spectRes.status === 404) {
+              console.log(`[Admin Refresh] 🔄 Reanudando settleBets para ${acc.gameName}...`);
+              liveCache.add(acc.puuid);
+              settleBets(acc);
+              recovered++;
+            }
+          } catch (e) {
+            console.error(`[Admin Refresh] Error verificando ${acc.gameName}:`, e.message);
+          }
+        }
+
+        const recoveryLine = recovered > 0 ? `\n🎰 **${recovered}** apuesta(s) colgada(s) reactivada(s).` : `\n🎰 No había apuestas colgadas.`;
+        return statusMsg.edit(`<@${msg.author.id}> ✅ Refresh completado: **${updated}** actualizadas, **${failed}** fallidas.${recoveryLine}`);
       }
 
             if (command === 'admin_testbet') {
