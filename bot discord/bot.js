@@ -1198,14 +1198,8 @@ function initBot(db) {
           { discordId: msg.author.id, amount: 50, multiplier: 2.0, choice: 'gana', anonymous: false }
         ];
         const testLp = { tier: 'EMERALD', rank: 'II', lp: 74, diff: 38 };
-        const testHighlights = {
-          mvp: { name: 'BODKIN ARROW', champion: 'Vi' },
-          topDamage: { name: 'KaisaPlayer', champion: 'Kaisa', value: 42500 },
-          topVision: { name: 'SupportGod', champion: 'Thresh', value: 85 },
-          topGold: { name: 'BODKIN ARROW', champion: 'Vi', value: 18200 }
-        };
-        await notifyBetResults('BODKIN ARROW#BHR', 'gana', testWinners, 0, 'Vi', testLp, '18/1/9', DDRAGON_VERSION, 1, 420, testHighlights);
-        return msg.channel.send(`<@${msg.author.id}> ✅ Notificación de prueba con MVP y logros enviada.`);
+        await notifyBetResults('BODKIN ARROW#BHR', 'gana', testWinners, 0, 'Vi', testLp, '18/1/9', DDRAGON_VERSION, 1, 420);
+        return msg.channel.send(`<@${msg.author.id}> ✅ Notificación de prueba enviada.`);
       }
 
       if (command === 'admin_check') {
@@ -2463,7 +2457,7 @@ const QUEUE_NAMES = {
 
 
 // Notificación de resultados de apuestas
-async function notifyBetResults(targetName, result, winners, profileIconId, championId, lpData, kda, version, totalBets = 0, queueId = 420, highlights = null) {
+async function notifyBetResults(targetName, result, winners, profileIconId, championId, lpData, kda, version, totalBets = 0, queueId = 420) {
   if (!client || !targetChannelId) return;
   const channel = await client.channels.fetch(targetChannelId).catch(() => null);
   if (!channel) return;
@@ -2490,6 +2484,7 @@ async function notifyBetResults(targetName, result, winners, profileIconId, cham
   }
 
   const embedBet = new EmbedBuilder()
+    .setAuthor({ name: targetName, iconURL: playerIcon })
     .setTitle(title)
     .setThumbnail(champIcon)
     .addFields(
@@ -3829,32 +3824,7 @@ async function takeDailySnapshots(db) {
   }
 }
 
-function calculateMatchHighlights(match) {
-  const participants = match.info.participants;
-  if (!participants || participants.length === 0) return null;
 
-  let mvp = participants[0];
-  let maxScore = -999;
-  let topDamage = participants[0];
-  let topVision = participants[0];
-  let topGold = participants[0];
-
-  participants.forEach(p => {
-    const score = (p.kills * 4) + (p.assists * 2.5) - (p.deaths * 3) + (p.totalDamageDealtToChampions / 1500) + (p.visionScore / 1.5) + (p.goldEarned / 1000);
-    if (score > maxScore) { maxScore = score; mvp = p; }
-    if (p.totalDamageDealtToChampions > topDamage.totalDamageDealtToChampions) topDamage = p;
-    if (p.visionScore > topVision.visionScore) topVision = p;
-    if (p.goldEarned > topGold.goldEarned) topGold = p;
-  });
-
-  const getName = (p) => p.riotIdGameName || p.summonerName || 'Desconocido';
-  return {
-    mvp: { name: getName(mvp), champion: mvp.championName },
-    topDamage: { name: getName(topDamage), champion: topDamage.championName, value: topDamage.totalDamageDealtToChampions },
-    topVision: { name: getName(topVision), champion: topVision.championName, value: topVision.visionScore },
-    topGold: { name: getName(topGold), champion: topGold.championName, value: topGold.goldEarned }
-  };
-}
 
 async function settleBets(acc) {
   try {
@@ -3968,8 +3938,7 @@ async function settleBets(acc) {
       }
     }
 
-    const highlights = calculateMatchHighlights(match);
-    notifyBetResults(acc.gameName, gameResult, winners, p.profileIcon, p.championName, lpDataObj, kda, DDRAGON_VERSION, openBets.length, match.info.queueId, highlights);
+    notifyBetResults(acc.gameName, gameResult, winners, p.profileIcon, p.championName, lpDataObj, kda, DDRAGON_VERSION, openBets.length, match.info.queueId);
     liveCache.delete(acc.puuid);
     // Limpiar estado de partida en DB
     await dbInstance.collection('accounts').updateOne({ puuid: acc.puuid }, { $unset: { liveGameStartedAt: "", lastLiveGameId: "" } });
@@ -4036,10 +4005,17 @@ async function startBot() {
 
     // Escaneo de Partidas en Vivo
     setInterval(async () => {
+      // Fix 1: Fetch DDragon por separado para que su fallo no bloquee el scan completo
+      let champData = null;
+      try {
+        const champRes = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/es_MX/champion.json`);
+        champData = await champRes.json();
+      } catch (e) {
+        console.warn('[Scanner] ⚠️ No se pudo obtener datos de campeones de DDragon. Se continuará sin nombres:', e.message);
+      }
+
       try {
         const accounts = await db.collection('accounts').find({}).toArray();
-        const champRes = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/es_MX/champion.json`);
-        const champData = await champRes.json();
         const nowTime = Date.now();
 
         for (const acc of accounts) {
@@ -4061,14 +4037,23 @@ async function startBot() {
               // Evitar duplicados si el servidor se reinicia
               if (acc.lastLiveGameId === game.gameId) {
                 console.log(`[Scanner] ⏭️ Ya se notificó la partida ${game.gameId} para ${acc.gameName}. Omitiendo.`);
-                liveCache.add(acc.puuid); // Lo metemos en cache para que no siga logueando lo mismo
+                liveCache.add(acc.puuid);
                 continue;
               }
+
+              // Fix 2: Null check para me — evita crash si el PUUID no está en participantes
+              const me = game.participants.find(p => p.puuid === acc.puuid.trim());
+              if (!me) {
+                console.warn(`[Scanner] ⚠️ No se encontró a ${acc.gameName} en los participantes. Partida ignorada.`);
+                continue;
+              }
+
+              // Fix 3: Guard para champData en caso de que DDragon haya fallado
+              const champKey = champData ? Object.keys(champData.data).find(key => champData.data[key].key == me.championId) : null;
+              const champName = champKey ? champData.data[champKey].name : 'Desconocido';
+
               console.log(`[Scanner] 🎯 Partida VÁLIDA (SoloQ/Flex). Notificando...`);
               liveCache.add(acc.puuid);
-              const me = game.participants.find(p => p.puuid === acc.puuid.trim());
-              const champKey = Object.keys(champData.data).find(key => champData.data[key].key == me.championId);
-              const champName = champKey ? champData.data[champKey].name : 'Desconocido';
 
               // Sincronizar DB para permitir apuestas
               await db.collection('accounts').updateOne(
@@ -4093,7 +4078,9 @@ async function startBot() {
             cooldown403.set(acc.puuid, nowTime + 10 * 60 * 1000);
           }
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error('[Scanner Error]', e);
+      }
     }, 60 * 1000);
 
   } catch (e) {

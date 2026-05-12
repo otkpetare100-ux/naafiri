@@ -74,8 +74,8 @@ function renderLadder(players) {
 
     const getMasteryCrest = (level) => {
       const lv = Math.min(Math.max(parseInt(level) || 1, 1), 10);
-      // Nueva URL oficial corregida de Community Dragon
-      return `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-collections/global/default/images/item-element/mastery-crest-${lv}.png`;
+      const idx = lv - 1; // nivel 1→0, nivel 2→1, ..., nivel 10→9
+      return `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-collections/global/default/images/item-element/crest-and-banner-mastery-${idx}.png`;
     };
 
     // Si es top 1 o 2, mostramos la tarjeta abajo para que no se salga de la pantalla
