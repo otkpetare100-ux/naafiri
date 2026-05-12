@@ -74,15 +74,19 @@ function renderLadder(players) {
 
     const getMasteryCrest = (level) => {
       const lv = Math.min(Math.max(parseInt(level) || 1, 1), 10);
-      return `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/champion-mastery/crest_level_${lv}.png`;
+      // Nueva URL oficial corregida de Community Dragon
+      return `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-collections/global/default/images/item-element/mastery-crest-${lv}.png`;
     };
+
+    // Si es top 1 o 2, mostramos la tarjeta abajo para que no se salga de la pantalla
+    const cardPositionClass = rankNum <= 2 ? 'm-card-bottom' : '';
 
     // Top Campeones HTML
     const topChampsHtml = (player.topChampions || []).map(champ => `
       <div class="champ-item">
         <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${champ.name}.png" alt="${champ.name}" onerror="this.src='/assets/placeholder_champ.png'" />
         
-        <div class="mastery-card">
+        <div class="mastery-card ${cardPositionClass}">
           <div class="m-card-header">
             <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${champ.name}.png" class="m-avatar" />
             <img src="${getMasteryCrest(champ.level)}" class="m-crest-official" />

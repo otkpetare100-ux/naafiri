@@ -355,6 +355,18 @@ h1::after {
   z-index: 1000;
 }
 
+.mastery-card.m-card-bottom {
+  bottom: auto;
+  top: 110%;
+  margin-bottom: 0;
+  margin-top: 10px;
+  transform: translateX(-50%) translateY(-15px);
+}
+
+.champ-item:hover .mastery-card.m-card-bottom {
+  transform: translateX(-50%) translateY(0);
+}
+
 .champ-item:hover .mastery-card {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
@@ -370,8 +382,8 @@ h1::after {
 }
 
 .m-avatar {
-  width: 100%;
-  height: 100%;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   border: 2px solid var(--gold-primary);
   object-fit: cover;
@@ -380,10 +392,10 @@ h1::after {
 
 .m-crest-official {
   position: absolute;
-  bottom: -25px;
+  bottom: -22px;
   left: 50%;
   transform: translateX(-50%);
-  width: 90px;
+  width: 100px; /* Un poco más grande para el asset oficial */
   height: auto;
   z-index: 2;
   filter: drop-shadow(0 5px 15px rgba(0,0,0,0.8));
@@ -391,14 +403,14 @@ h1::after {
 
 .m-level-number {
   position: absolute;
-  bottom: -2px;
+  bottom: 0px;
   left: 50%;
   transform: translateX(-50%);
   color: #f0e6d2;
   font-weight: 900;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   z-index: 3;
-  text-shadow: 0 0 5px #000, 0 0 10px #000;
+  text-shadow: 0 2px 4px #000, 0 0 10px #000;
 }
 
 .m-champ-name {
