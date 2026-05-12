@@ -1201,6 +1201,42 @@ function initBot(db) {
         return msg.channel.send(`<@${msg.author.id}> ✅ Recordatorio diario de prueba enviado.`);
       }
 
+      if (command === 'admin_refresh') {
+        const accounts = await db.collection('accounts').find({}).toArray();
+        if (accounts.length === 0) return msg.channel.send(`<@${msg.author.id}> ⚠️ No hay cuentas registradas.`);
+
+        const statusMsg = await msg.channel.send(`<@${msg.author.id}> 🔄 Actualizando **${accounts.length}** cuenta(s)...`);
+        const API_KEY = process.env.RIOT_API_KEY;
+        let updated = 0;
+        let failed = 0;
+
+        for (const acc of accounts) {
+          try {
+            const region = acc.region || 'la1';
+            const url = `https://${region}.api.riotgames.com/lol/league/v4/entries/by-puuid/${acc.puuid}?api_key=${API_KEY}`;
+            const res = await fetch(url);
+            if (res.ok) {
+              const data = await res.json();
+              const soloQ = data.find(e => e.queueType === 'RANKED_SOLO_5x5');
+              if (soloQ) {
+                await db.collection('accounts').updateOne(
+                  { puuid: acc.puuid },
+                  { $set: { soloQ: { tier: soloQ.tier, rank: soloQ.rank, leaguePoints: soloQ.leaguePoints, wins: soloQ.wins, losses: soloQ.losses }, lastUpdated: new Date() } }
+                );
+              }
+              updated++;
+            } else {
+              failed++;
+            }
+            await new Promise(r => setTimeout(r, 120)); // delay entre llamadas
+          } catch (e) {
+            failed++;
+          }
+        }
+
+        return statusMsg.edit(`<@${msg.author.id}> ✅ Refresh completado: **${updated}** actualizadas, **${failed}** fallidas.`);
+      }
+
             if (command === 'admin_testbet') {
         const testWinners = [
           { discordId: msg.author.id, amount: 50, multiplier: 2.0, choice: 'gana', anonymous: false }
@@ -1570,7 +1606,7 @@ function initBot(db) {
               .addFields(
                 { name: '🛠️ Gestión de Cuentas', value: '`!admin_vincular @u N#T` - Vincular manual (vía API).\n`!admin_dar @u [cant]` / `!admin_quitar @u [cant]`\n`!admin_setcoins @u [cant]` / `!admin_resetdiario @u`\n`!admin_resetall CONFIRMAR` - Reset total economía.' },
                 { name: '🎒 Gestión de Inventario', value: '`!admin_daritem @u [id]` - Dar carta específica.\n`!admin_clearinv @u` - Vaciar mochila.' },
-                { name: '📡 Monitoreo y Auditoría', value: '`!admin_scan` - Forzar escaneo en vivo.\n`!admin_vinculos` - Usuarios no vinculados.\n`!admin_stats` - Estadísticas del bot.\n`!admin_check @u` - Info técnica de un usuario.' },
+                { name: '📡 Monitoreo y Auditoría', value: '`!admin_scan` - Forzar escaneo en vivo.\n`!admin_refresh` - Refrescar stats de todas las cuentas.\n`!admin_vinculos` - Usuarios no vinculados.\n`!admin_stats` - Estadísticas del bot.\n`!admin_check @u` - Info técnica de un usuario.' },
                 { name: '🎭 Sistema y Herramientas', value: '`!admin_anuncio [msg]` - Mensaje global.\n`!admin_syncroles` - Sincronizar roles Discord.\n`!admin_purge [n]` - Limpiar chat.\n`!admin_debug_key` - Estado Riot API.' },
                 { name: '🧪 Pruebas Premium', value: '`!admin_testitem [Nombre]` / `!admin_testgacha [Rareza]`\n`!admin_testpro` - Test Pro Player.\n`!admin_testlive` - Test Notificación Live Game.' },
                 { name: '📅 Pruebas de Notificaciones', value: '`!admin_testdiario` - Recordatorio 12pm.\n`!admin_testsummary` - Scoreboard diario.\n`!admin_testretos` - Imagen de Retos.\n`!admin_testhall` - Salón de la Fama.\n`!admin_cancelarapuestas N#T` - Abortar apuestas.' }
