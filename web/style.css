@@ -149,7 +149,7 @@ h1::after {
   align-items: center;
   position: relative;
   transition: all 0.3s ease;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .player-card:hover {
@@ -383,18 +383,26 @@ h1::after {
   bottom: -12px;
   left: 50%;
   transform: translateX(-50%);
-  background: linear-gradient(135deg, #1e2328, #010a13);
-  border: 1.5px solid var(--gold-primary);
+  background: #010a13;
   color: #f0e6d2;
   font-weight: 900;
   font-size: 0.85rem;
   padding: 5px 12px;
-  border-radius: 2px;
-  clip-path: polygon(0% 0%, 100% 0%, 100% 70%, 50% 100%, 0% 70%);
   min-width: 35px;
   text-align: center;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.6);
-  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  z-index: 2;
+  /* Nueva forma de escudo con borde visible */
+  border: 1.5px solid var(--gold-primary);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.8);
+}
+
+.m-level-shield::before {
+  content: '';
+  position: absolute;
+  top: -2px; left: -1.5px; right: -1.5px; height: 2px;
+  background: var(--gold-primary);
 }
 
 .m-champ-name {
