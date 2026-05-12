@@ -113,7 +113,9 @@ function renderLadder(players) {
           </div>
           <div class="history-dots">${historyHtml}</div>
         </div>
-        <img src="${emblemUrl}" class="rank-emblem" alt="${player.tier}" onerror="this.style.opacity='0'" />
+        <div class="rank-emblem-container">
+          <img src="${emblemUrl}" class="rank-emblem" alt="${player.tier}" onerror="this.style.opacity='0'" />
+        </div>
         <div class="rank-info-text">
           <div class="tier-text">${player.tier} ${player.rank}</div>
           <div class="rank-stats">
