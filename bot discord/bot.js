@@ -1157,12 +1157,20 @@ function initBot(db) {
             });
             if (res.ok) {
               found++;
-              results.push(`✅ **${acc.gameName}**: En partida`);
+              const game = await res.json();
+              const queueStr = game.gameQueueConfigId === 420 ? 'SoloQ' : game.gameQueueConfigId === 440 ? 'Flex' : `Modo ${game.gameQueueConfigId}`;
+              results.push(`✅ **${acc.gameName}**: En partida (${queueStr})`);
+            } else if (res.status === 404) {
+              results.push(`💤 **${acc.gameName}**: No en partida`);
+            } else if (res.status === 403) {
+              results.push(`🔑 **${acc.gameName}**: API Key expirada o sin permisos (403)`);
+            } else if (res.status === 429) {
+              results.push(`⏳ **${acc.gameName}**: Rate limit alcanzado (429)`);
             } else {
-              results.push(`💤 **${acc.gameName}**: No está en partida`);
+              results.push(`⚠️ **${acc.gameName}**: Error HTTP ${res.status}`);
             }
           } catch (e) {
-            results.push(`❌ **${acc.gameName}**: Error de conexión`);
+            results.push(`❌ **${acc.gameName}**: Error de conexión — ${e.message}`);
           }
         }
 
