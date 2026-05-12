@@ -1258,12 +1258,17 @@ function initBot(db) {
           const sentMsg = await notifyLiveGame(acc, { championName: cName, championId: champKey });
           
           if (sentMsg) {
+            console.log(`[Admin Check] Temporizador de borrado iniciado (5min) para ${acc.gameName}`);
             setTimeout(() => {
-              sentMsg.delete().catch(() => {});
+              sentMsg.delete()
+                .then(() => console.log(`[Admin Check] Notificación de ${acc.gameName} borrada.`))
+                .catch(err => console.error(`[Admin Check] Error al borrar notificación:`, err.message));
             }, 5 * 60 * 1000);
           }
 
-          return msg.channel.send(`<@${msg.author.id}> ✅ **${acc.gameName}** está en partida. Notificación enviada.`);
+          const confirmMsg = await msg.channel.send(`<@${msg.author.id}> ✅ **${acc.gameName}** está en partida. Notificación enviada.`);
+          setTimeout(() => confirmMsg.delete().catch(() => {}), 10000); // El de texto se borra en 10s
+          return;
         } else {
           return msg.channel.send(`<@${msg.author.id}> 💤 **${acc.gameName}** no parece estar en partida ahora mismo.`);
         }
@@ -4051,8 +4056,11 @@ async function startBot() {
 
               const sentMsg = await notifyLiveGame(acc, { championName: champName, championId: champKey, profileIconId: me.profileIconId, version: DDRAGON_VERSION });
               if (sentMsg) {
+                console.log(`[Scanner] Temporizador de borrado iniciado (5min) para ${acc.gameName}`);
                 setTimeout(() => {
-                  sentMsg.delete().catch(() => {});
+                  sentMsg.delete()
+                    .then(() => console.log(`[Scanner] Notificación automática de ${acc.gameName} borrada.`))
+                    .catch(err => console.error(`[Scanner] Error al borrar notificación automática:`, err.message));
                 }, 5 * 60 * 1000);
               }
             }
