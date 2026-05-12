@@ -141,6 +141,16 @@ app.get('/api/ladder', async (req, res) => {
   }
 });
 
+// Obtener lista de Invocadores (Plural) - Para compatibilidad con el frontend
+app.get('/api/summoners', async (req, res) => {
+  try {
+    const accounts = await db.collection('accounts').find({}).toArray();
+    res.json(accounts);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Añadir nuevo Invocador
 app.post('/api/summoners', async (req, res) => {
   const { gameName, tagLine, region } = req.body;
