@@ -4047,7 +4047,12 @@ async function startBot() {
                 { $set: { liveGameStartedAt: new Date(), lastLiveGameId: game.gameId } }
               );
 
-              notifyLiveGame(acc, { championName: champName, championId: champKey, profileIconId: me.profileIconId, version: DDRAGON_VERSION });
+              const sentMsg = await notifyLiveGame(acc, { championName: champName, championId: champKey, profileIconId: me.profileIconId, version: DDRAGON_VERSION });
+              if (sentMsg) {
+                setTimeout(() => {
+                  sentMsg.delete().catch(() => {});
+                }, 5 * 60 * 1000);
+              }
             }
           } else if (res.status === 404 && liveCache.has(acc.puuid)) {
             liveCache.delete(acc.puuid);
