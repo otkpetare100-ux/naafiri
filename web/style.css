@@ -145,7 +145,7 @@ h1::after {
   border-radius: 12px;
   padding: 0.8rem 2.5rem;
   display: grid;
-  grid-template-columns: 60px 80px 1fr 550px;
+  grid-template-columns: 60px 80px 1fr 620px;
   align-items: center;
   position: relative;
   transition: all 0.3s ease;
@@ -364,11 +364,12 @@ h1::after {
 
 /* Rank Data (Right side) */
 .rank-data {
-  display: flex;
+  display: grid;
+  grid-template-columns: 180px 150px 100px 180px; 
   align-items: center;
-  justify-content: flex-end;
-  gap: 1rem;
-  padding-right: 50px;
+  padding-right: 20px;
+  width: 610px;
+  justify-items: end; /* Alinear contenido de celdas a la derecha */
 }
 
 .rank-emblem-container {
