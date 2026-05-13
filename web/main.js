@@ -349,19 +349,48 @@ function openPlayerDetails(player) {
   const wr = totalGames > 0 ? Math.round((totalWins / totalGames) * 100) : 0;
 
   // Big Winrate Top Right
-  document.getElementById('detail-wr-big').textContent = `${wr}% Winrate`;
+  const wrEl = document.getElementById('detail-wr-big');
 
-  // Rank Box
-  const tier = (player.tier || 'UNRANKED').toLowerCase();
-  document.getElementById('detail-rank-emblem').src = `${ASSETS_BASE}/ranks/${tier}.png`;
-  document.getElementById('detail-tier-rank').textContent = player.tier === 'UNRANKED' ? 'UNRANKED' : `${player.tier} ${player.rank}`;
-  document.getElementById('detail-lp').textContent = `${player.lp || 0} LP`;
-  
-  document.getElementById('detail-wins').textContent = `${totalWins} W`;
-  document.getElementById('detail-losses').textContent = `${totalLosses} L`;
-  
-  const winBar = document.getElementById('detail-win-bar');
-  winBar.style.width = totalGames > 0 ? `${wr}%` : '0%';
+  // Helper function to render a specific queue
+  const renderQueueStats = (queueData) => {
+    if (!queueData) queueData = { tier: 'UNRANKED', rank: '', leaguePoints: 0, wins: 0, losses: 0 };
+    
+    const tier = (queueData.tier || 'UNRANKED').toLowerCase();
+    document.getElementById('detail-rank-emblem').src = `${ASSETS_BASE}/ranks/${tier}.png`;
+    document.getElementById('detail-tier-rank').textContent = queueData.tier === 'UNRANKED' ? 'UNRANKED' : `${queueData.tier} ${queueData.rank}`;
+    document.getElementById('detail-lp').textContent = `${queueData.leaguePoints || 0} LP`;
+    
+    const w = queueData.wins || 0;
+    const l = queueData.losses || 0;
+    const t = w + l;
+    const qWr = t > 0 ? Math.round((w / t) * 100) : 0;
+    
+    document.getElementById('detail-wins').textContent = `${w} W`;
+    document.getElementById('detail-losses').textContent = `${l} L`;
+    wrEl.textContent = `${qWr}% Winrate`;
+    
+    const winBar = document.getElementById('detail-win-bar');
+    winBar.style.width = t > 0 ? `${qWr}%` : '0%';
+  };
+
+  // Setup toggle buttons
+  const btnSolo = document.getElementById('btn-soloq');
+  const btnFlex = document.getElementById('btn-flexq');
+
+  btnSolo.onclick = () => {
+    btnSolo.classList.add('active');
+    btnFlex.classList.remove('active');
+    renderQueueStats(player.soloQ);
+  };
+
+  btnFlex.onclick = () => {
+    btnFlex.classList.add('active');
+    btnSolo.classList.remove('active');
+    renderQueueStats(player.flexQ);
+  };
+
+  // Render default (SoloQ)
+  btnSolo.onclick();
 
   // Top Champs (Horizontal Row)
   const champsContainer = document.getElementById('detail-top-champs');

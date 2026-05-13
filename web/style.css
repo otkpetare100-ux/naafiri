@@ -1386,15 +1386,40 @@ select option {
   align-items: center;
 }
 
-.rank-box h4 {
-  margin: 0 0 15px 0;
-  font-size: 0.85rem;
-  color: var(--text-gold);
-  text-transform: uppercase;
-  letter-spacing: 0.05rem;
+.rank-box .queue-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
   width: 100%;
   border-bottom: 1px solid rgba(212, 175, 55, 0.1);
-  padding-bottom: 8px;
+  padding-bottom: 12px;
+  margin-bottom: 15px;
+}
+
+.queue-btn {
+  background: transparent;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: var(--text-muted);
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.queue-btn:hover {
+  border-color: rgba(212, 175, 55, 0.6);
+  color: #ddd;
+}
+
+.queue-btn.active {
+  background: rgba(212, 175, 55, 0.15);
+  border-color: var(--gold-primary);
+  color: var(--text-gold);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
 }
 
 .rank-box img {

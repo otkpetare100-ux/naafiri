@@ -121,7 +121,7 @@ app.get('/api/ladder', async (req, res) => {
         tagLine: acc.tagLine,
         profileIconId: acc.profileIconId,
         summonerLevel: acc.summonerLevel || 0,
-        region: acc.region || 'la1', // Por defecto LAN si no tiene
+        region: acc.region || 'la1',
         tier: soloQ.tier,
         rank: soloQ.rank,
         lp: soloQ.leaguePoints,
@@ -131,7 +131,9 @@ app.get('/api/ladder', async (req, res) => {
         discordId: acc.discordId || null,
         streak: acc.streak || 0,
         topChampions: acc.topChampions || [],
-        history: acc.history || []
+        history: acc.history || [],
+        soloQ: soloQ,
+        flexQ: acc.flexQ || { tier: 'UNRANKED', rank: '', leaguePoints: 0, wins: 0, losses: 0 }
       };
     });
 
