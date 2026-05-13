@@ -103,6 +103,12 @@ function renderLadder(players) {
     const rankNum = index + 1;
     const card = document.createElement('div');
     card.className = `player-card rank-${rankNum}`;
+    card.style.cursor = 'pointer';
+
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('.card-actions')) return;
+      openPlayerDetails(player);
+    });
     
     // Ruta del emblema
     const tier = player.tier.toLowerCase();
@@ -312,7 +318,97 @@ function initDeleteLogic() {
 // Hacer funciones disponibles globalmente para los onclick de los strings HTML
 window.openDeleteModal = openDeleteModal;
 
+// Modal de Detalles del Jugador
+function openPlayerDetails(player) {
+  const modal = document.getElementById('player-details-modal');
+  
+  // Header
+  document.getElementById('detail-profile-icon').src = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${player.profileIconId || 1}.png`;
+  document.getElementById('detail-level').textContent = player.summonerLevel || 0;
+  document.getElementById('detail-name').textContent = player.gameName;
+  document.getElementById('detail-region').textContent = getRegionName(player.region);
+  
+  const statusEl = document.getElementById('detail-status');
+  if (player.isLive) {
+    statusEl.textContent = 'EN PARTIDA';
+    statusEl.className = 'status-badge';
+  } else {
+    statusEl.textContent = 'DESCONECTADO';
+    statusEl.className = 'status-badge offline';
+  }
 
+  // Rank Info
+  const tier = (player.tier || 'UNRANKED').toLowerCase();
+  document.getElementById('detail-rank-emblem').src = `${ASSETS_BASE}/ranks/${tier}.png`;
+  document.getElementById('detail-tier-rank').textContent = player.tier === 'UNRANKED' ? 'UNRANKED' : `${player.tier} ${player.rank}`;
+  document.getElementById('detail-lp').textContent = `${player.lp || 0} LP`;
+
+  const historyArr = player.history || [];
+  const wins = historyArr.filter(r => r === 'W').length;
+  const losses = historyArr.filter(r => r === 'L').length;
+  const total = wins + losses;
+  
+  // Si no tenemos W/L en el history, usamos el de soloQ que está en la DB
+  // (Asumiendo que backend manda history. Si backend manda W/L total, lo usamos directo).
+  const totalWins = player.wins !== undefined ? player.wins : wins;
+  const totalLosses = player.losses !== undefined ? player.losses : losses;
+  const totalGames = totalWins + totalLosses;
+  const wr = totalGames > 0 ? Math.round((totalWins / totalGames) * 100) : 0;
+  
+  document.getElementById('detail-wins').textContent = `${totalWins} W`;
+  document.getElementById('detail-losses').textContent = `${totalLosses} L`;
+  document.getElementById('detail-wr').textContent = `${wr}% Winrate`;
+  
+  const winBar = document.getElementById('detail-win-bar');
+  if (totalGames > 0) {
+    winBar.style.width = `${wr}%`;
+  } else {
+    winBar.style.width = '0%';
+  }
+
+  // Top Champs
+  const champsContainer = document.getElementById('detail-top-champs');
+  champsContainer.innerHTML = '';
+  if (player.topChampions && player.topChampions.length > 0) {
+    player.topChampions.slice(0, 3).forEach(champ => {
+      const champId = champ.name; // ID from Riot API
+      const ptsStr = champ.points.toLocaleString('es-ES');
+      const crestUrl = getMasteryCrest(champ.level);
+      
+      champsContainer.innerHTML += `
+        <div class="champ-detail-item">
+          <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${champId}.png" class="champ-detail-icon" onerror="this.src='/assets/placeholder_champ.png'" />
+          <div class="champ-detail-info">
+            <div class="champ-detail-name">${champId}</div>
+            <div class="champ-detail-pts">${ptsStr} Pts</div>
+          </div>
+          <img src="${crestUrl}" class="champ-detail-crest" onerror="this.style.display='none'" />
+        </div>
+      `;
+    });
+  } else {
+    champsContainer.innerHTML = '<span class="history-empty">Sin datos de campeones</span>';
+  }
+
+  // Historial
+  const historyContainer = document.getElementById('detail-history');
+  historyContainer.innerHTML = '';
+  if (player.history && player.history.length > 0) {
+    player.history.slice(-15).reverse().forEach(res => {
+      const cls = res === 'W' ? 'win' : 'loss';
+      historyContainer.innerHTML += `<div class="history-badge ${cls}">${res}</div>`;
+    });
+  } else {
+    historyContainer.innerHTML = '<span class="history-empty">No hay partidas recientes</span>';
+  }
+
+  // Bind close button
+  modal.querySelector('.close-details').onclick = () => {
+    modal.classList.remove('active');
+  };
+
+  modal.classList.add('active');
+}
 
 // Lógica del Modal para Añadir Jugador
 function initModal() {
@@ -326,9 +422,14 @@ function initModal() {
   btn.onclick = () => modal.classList.add('active');
   span.onclick = () => modal.classList.remove('active');
   
-  // Cerrar al hacer clic fuera del modal
+  // Cerrar al hacer clic fuera del modal (Aplica para todos los modales)
   window.onclick = (event) => {
+    const confirmDeleteModal = document.getElementById('confirm-delete-modal');
+    const detailsModal = document.getElementById('player-details-modal');
+    
     if (event.target === modal) modal.classList.remove('active');
+    if (event.target === confirmDeleteModal) confirmDeleteModal.classList.remove('active');
+    if (event.target === detailsModal) detailsModal.classList.remove('active');
   };
 
   form.onsubmit = async (e) => {

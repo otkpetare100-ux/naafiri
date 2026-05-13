@@ -103,6 +103,62 @@
       </div>
     </div>
 
+    <!-- Modal de Detalles del Jugador -->
+    <div id="player-details-modal" class="modal">
+      <div class="modal-content details-modal">
+        <div class="modal-header">
+          <h2>Perfil del Invocador</h2>
+          <span class="close-modal close-details">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="profile-header">
+            <div class="profile-icon-wrapper">
+              <img id="detail-profile-icon" src="" alt="Icono" />
+              <div id="detail-level" class="level-badge"></div>
+            </div>
+            <div class="profile-info">
+              <h3 id="detail-name"></h3>
+              <div id="detail-tags" class="detail-tags">
+                <span id="detail-region" class="region-badge"></span>
+                <span id="detail-status" class="status-badge"></span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="details-grid">
+            <!-- Rank Box -->
+            <div class="detail-box rank-box">
+              <h4>Clasificatoria Solo/Dúo</h4>
+              <img id="detail-rank-emblem" src="" alt="Rango" />
+              <div id="detail-tier-rank" class="tier-rank"></div>
+              <div id="detail-lp" class="lp-text"></div>
+              <div class="winrate-bar">
+                <div id="detail-win-bar" class="win-bar"></div>
+                <div id="detail-loss-bar" class="loss-bar"></div>
+              </div>
+              <div class="winrate-text">
+                <span id="detail-wins" class="wins-text"></span>
+                <span id="detail-wr" class="wr-text"></span>
+                <span id="detail-losses" class="losses-text"></span>
+              </div>
+            </div>
+
+            <!-- Top Champs Box -->
+            <div class="detail-box champs-box">
+              <h4>Mejores Campeones</h4>
+              <div id="detail-top-champs" class="top-champs-list"></div>
+            </div>
+          </div>
+
+          <!-- History Box -->
+          <div class="detail-box history-box">
+            <h4>Últimas Partidas Registradas</h4>
+            <div id="detail-history" class="history-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="toast-container" class="toast-container"></div>
 
     <script type="module" src="/main.js"></script>
