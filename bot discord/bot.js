@@ -4042,11 +4042,15 @@ async function settleBets(acc) {
           const leagueUrl = `https://${acc.region || 'la1'}.api.riotgames.com/lol/league/v4/entries/by-puuid/${acc.puuid}`;
           const lRes = await fetch(leagueUrl, { headers: { "X-Riot-Token": API_KEY.trim() } });
           const leagues = await lRes.json();
-          const targetQueueType = match.info.queueId === 420 ? 'RANKED_SOLO_5x5' : 'RANKED_FLEX_SR';
-          const soloQ = leagues.find(l => l.queueType === targetQueueType);
-          if (soloQ) {
-            await dbInstance.collection('accounts').updateOne({ puuid: acc.puuid }, { $set: { soloQ: soloQ } });
-            lpDataObj = { tier: soloQ.tier, rank: soloQ.rank, lp: soloQ.leaguePoints, diff: soloQ.leaguePoints - (acc.soloQ?.leaguePoints || 0) };
+          const isFlex = match.info.queueId === 440;
+          const targetQueueType = isFlex ? 'RANKED_FLEX_SR' : 'RANKED_SOLO_5x5';
+          const dbField = isFlex ? 'flexQ' : 'soloQ';
+          const queueData = leagues.find(l => l.queueType === targetQueueType);
+          
+          if (queueData) {
+            await dbInstance.collection('accounts').updateOne({ puuid: acc.puuid }, { $set: { [dbField]: queueData } });
+            const previousLp = acc[dbField]?.leaguePoints || 0;
+            lpDataObj = { tier: queueData.tier, rank: queueData.rank, lp: queueData.leaguePoints, diff: queueData.leaguePoints - previousLp };
             break;
           }
         } catch (e) {}

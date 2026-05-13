@@ -211,12 +211,14 @@ app.post('/api/summoners', async (req, res) => {
 
     // 4. League-V4 (Usando PUUID directamente)
     let soloQ = { tier: 'UNRANKED', rank: '', leaguePoints: 0, wins: 0, losses: 0 };
+    let flexQ = { tier: 'UNRANKED', rank: '', leaguePoints: 0, wins: 0, losses: 0 };
     const leagueUrl = `https://${region}.api.riotgames.com/lol/league/v4/entries/by-puuid/${accountData.puuid}?api_key=${RIOT_API_KEY}`;
     const leagueResp = await fetch(leagueUrl);
     
     if (leagueResp.ok) {
       const leagues = await leagueResp.json();
       console.log(`[DEBUG] Ligas encontradas: ${leagues.length}`);
+      
       const soloQEntry = leagues.find(e => e.queueType === 'RANKED_SOLO_5x5');
       if (soloQEntry) {
         soloQ = {
@@ -227,6 +229,18 @@ app.post('/api/summoners', async (req, res) => {
           losses: soloQEntry.losses
         };
         console.log(`SoloQ detectado para ${gameName}: ${soloQ.tier} ${soloQ.rank}`);
+      }
+
+      const flexQEntry = leagues.find(e => e.queueType === 'RANKED_FLEX_SR');
+      if (flexQEntry) {
+        flexQ = {
+          tier: flexQEntry.tier,
+          rank: flexQEntry.rank,
+          leaguePoints: flexQEntry.leaguePoints,
+          wins: flexQEntry.wins,
+          losses: flexQEntry.losses
+        };
+        console.log(`FlexQ detectado para ${gameName}: ${flexQ.tier} ${flexQ.rank}`);
       }
     }
 
@@ -245,6 +259,7 @@ app.post('/api/summoners', async (req, res) => {
         summonerLevel, 
         profileIconId, 
         soloQ, 
+        flexQ,
         topChampions, 
         lastUpdated: new Date() 
       };
@@ -265,6 +280,7 @@ app.post('/api/summoners', async (req, res) => {
       profileIconId: profileIconId,
       summonerLevel: summonerLevel,
       soloQ: soloQ,
+      flexQ: flexQ,
       topChampions: topChampions,
       streak: 0,
       addedAt: new Date(),
