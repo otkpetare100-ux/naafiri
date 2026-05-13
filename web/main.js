@@ -4,6 +4,9 @@ const API_BASE = `${window.location.origin}/api`;
 const ASSETS_BASE = '/assets';
 let DDRAGON_VERSION = '16.9.1';
 
+// Snapshot de datos anteriores por puuid — usado para detectar cambios en el auto-refresh
+const playerSnapshot = new Map();
+
 async function updateVersion() {
   try {
     const res = await fetch('https://ddragon.leagueoflegends.com/api/versions.json');
@@ -33,6 +36,40 @@ async function fetchLadder() {
   }
 }
 
+// Auto-refresh inteligente: compara datos por jugador y solo re-renderiza si algo cambió
+async function smartRefresh() {
+  try {
+    const response = await fetch(`${API_BASE}/ladder`);
+    if (!response.ok) return;
+    const players = await response.json();
+
+    let anyChanged = false;
+
+    for (const player of players) {
+      const prev = playerSnapshot.get(player.puuid);
+      const prevHistory = prev ? prev.history : null;
+      const currHistory = player.history || [];
+
+      // Comparar historial de partidas y LP
+      const historyChanged = !prevHistory || JSON.stringify(prevHistory) !== JSON.stringify(currHistory);
+      const lpChanged = !prev || prev.lp !== player.lp || prev.tier !== player.tier || prev.rank !== player.rank;
+
+      if (historyChanged || lpChanged) {
+        console.log(`[AutoRefresh] Cambio detectado en ${player.gameName} — actualizando...`);
+        anyChanged = true;
+      } else {
+        console.log(`[AutoRefresh] ${player.gameName}: sin cambios, omitiendo.`);
+      }
+    }
+
+    if (anyChanged) {
+      renderLadder(players);
+    }
+  } catch (e) {
+    console.error('[AutoRefresh] Error:', e);
+  }
+}
+
 function getRegionName(region) {
   const mapping = {
     'la1': 'LAN', 'la2': 'LAS', 'na1': 'NA', 'br1': 'BR',
@@ -51,6 +88,16 @@ function renderLadder(players) {
     container.innerHTML = `<div class="empty">No hay perros en la jauría aún.</div>`;
     return;
   }
+
+  // Guardar snapshot para el próximo auto-refresh
+  players.forEach(p => {
+    playerSnapshot.set(p.puuid, {
+      history: p.history || [],
+      lp: p.lp,
+      tier: p.tier,
+      rank: p.rank
+    });
+  });
 
   players.forEach((player, index) => {
     const rankNum = index + 1;
@@ -167,9 +214,23 @@ function renderLadder(players) {
   });
 }
 
+// Cooldown de 5 min por jugador para el botón de refresh
+const refreshCooldowns = new Map(); // clave: gameName → timestamp del último refresh
+const REFRESH_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutos
+
 // Lógica de Actualización Manual
 async function refreshPlayer(gameName, tagLine, region) {
+  const now = Date.now();
+  const lastRefresh = refreshCooldowns.get(gameName);
+
+  if (lastRefresh && (now - lastRefresh) < REFRESH_COOLDOWN_MS) {
+    const remaining = Math.ceil((REFRESH_COOLDOWN_MS - (now - lastRefresh)) / 60000);
+    showToast(`⏳ Espera ${remaining} min antes de actualizar a ${gameName} de nuevo.`, 'error');
+    return;
+  }
+
   try {
+    refreshCooldowns.set(gameName, now);
     showToast(`Actualizando a ${gameName}...`);
     
     const response = await fetch(`${API_BASE}/summoners`, {
@@ -182,11 +243,14 @@ async function refreshPlayer(gameName, tagLine, region) {
 
     if (response.ok) {
       showToast(result.message || '¡Datos actualizados!');
-      fetchLadder(); // Recargar la lista
+      fetchLadder();
     } else {
+      // Si falló, liberar el cooldown para que pueda reintentar
+      refreshCooldowns.delete(gameName);
       showToast(result.message || 'Error al actualizar', 'error');
     }
   } catch (error) {
+    refreshCooldowns.delete(gameName);
     console.error('Refresh error:', error);
     showToast('Error de conexión.', 'error');
   }
@@ -334,4 +398,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   fetchLadder();
   initModal();
   initDeleteLogic();
+
+  // Auto-refresh cada 5 minutos: solo re-renderiza si hay cambios en historial o LP
+  setInterval(smartRefresh, 5 * 60 * 1000);
 });
+

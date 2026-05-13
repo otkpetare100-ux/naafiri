@@ -152,13 +152,25 @@ app.get('/api/summoners', async (req, res) => {
   }
 });
 
-// Añadir nuevo Invocador
+// Cooldown global en memoria (clave: gameName#tagLine)
+const refreshCooldowns = new Map();
+
+// Añadir o actualizar Invocador
 app.post('/api/summoners', async (req, res) => {
   const { gameName, tagLine, region } = req.body;
   const RIOT_API_KEY = process.env.RIOT_API_KEY;
 
   if (!gameName || !tagLine || !region) {
     return res.status(400).json({ message: 'Faltan datos requeridos.' });
+  }
+
+  // Comprobar cooldown global (5 min)
+  const cooldownKey = `${gameName.toLowerCase()}#${tagLine.toLowerCase()}`;
+  const lastRefresh = refreshCooldowns.get(cooldownKey);
+  const now = Date.now();
+  if (lastRefresh && (now - lastRefresh) < 5 * 60 * 1000) {
+    const remaining = Math.ceil((5 * 60 * 1000 - (now - lastRefresh)) / 60000);
+    return res.status(429).json({ message: `⏳ Espera ${remaining} min antes de actualizar a ${gameName} de nuevo.` });
   }
 
   console.log(`[POST] Intentando añadir/actualizar: ${gameName}#${tagLine} en ${region}`);
@@ -240,6 +252,7 @@ app.post('/api/summoners', async (req, res) => {
         { puuid: accountData.puuid },
         { $set: updatedAccount }
       );
+      refreshCooldowns.set(cooldownKey, Date.now());
       return res.json({ success: true, message: '✅ Datos del jugador actualizados.', account: updatedAccount });
     }
 
@@ -259,6 +272,7 @@ app.post('/api/summoners', async (req, res) => {
     };
 
     await db.collection('accounts').insertOne(newAccount);
+    refreshCooldowns.set(cooldownKey, Date.now());
     res.json({ success: true, message: '✅ Jugador añadido correctamente.', account: newAccount });
 
   } catch (error) {
