@@ -93,7 +93,6 @@ function renderLadder(players) {
           <div class="m-card-header">
             <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${champ.name}.png" class="m-avatar" />
             <img src="${getMasteryCrest(champ.level)}" class="m-crest-official" />
-            <div class="m-level-number">${champ.level}</div>
           </div>
           <div class="m-card-body">
             <div class="m-champ-name">${champ.name}</div>
