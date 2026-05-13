@@ -80,6 +80,12 @@ function getRegionName(region) {
   return mapping[region.toLowerCase()] || region.toUpperCase();
 }
 
+const getMasteryCrest = (level) => {
+  const lv = Math.min(Math.max(parseInt(level) || 1, 1), 10);
+  const idx = lv - 1; // nivel 1→0, nivel 2→1, ..., nivel 10→9
+  return `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-collections/global/default/images/item-element/crest-and-banner-mastery-${idx}.png`;
+};
+
 function renderLadder(players) {
   const container = document.getElementById('ladder-container');
   container.innerHTML = '';
@@ -124,12 +130,6 @@ function renderLadder(players) {
     // Clase para el Winrate
     const wrValue = parseInt(player.winRate) || 0;
     const wrClass = wrValue >= 50 ? 'wr-positive' : 'wr-negative';
-
-    const getMasteryCrest = (level) => {
-      const lv = Math.min(Math.max(parseInt(level) || 1, 1), 10);
-      const idx = lv - 1; // nivel 1→0, nivel 2→1, ..., nivel 10→9
-      return `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-collections/global/default/images/item-element/crest-and-banner-mastery-${idx}.png`;
-    };
 
     // Si es top 1 o 2, mostramos la tarjeta abajo para que no se salga de la pantalla
     const cardPositionClass = rankNum <= 2 ? 'm-card-bottom' : '';

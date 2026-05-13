@@ -136,7 +136,8 @@ h1::after {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  margin-top: 2rem; /* Espacio para que la corona del Top 1 no se corte */
+  margin-top: 2rem;
+  /* Espacio para que la corona del Top 1 no se corte */
 }
 
 .player-card {
@@ -163,42 +164,62 @@ h1::after {
   border-color: var(--gold-primary);
   background: linear-gradient(90deg, rgba(200, 155, 60, 0.15) 0%, var(--bg-card) 40%);
   box-shadow: 0 0 30px rgba(200, 155, 60, 0.1);
-  overflow: visible !important; /* Forzamos que sobresalga */
+  overflow: visible !important;
+  /* Forzamos que sobresalga */
   z-index: 100;
-  margin-top: 1.5rem; /* Espacio extra individual */
+  margin-top: 1.5rem;
+  /* Espacio extra individual */
 }
+
 .player-card.rank-1:hover {
   background: linear-gradient(90deg, rgba(255, 255, 255, 0.15) 0%, rgba(200, 155, 60, 0.2) 20%, var(--bg-card) 60%);
   border-color: #fff;
   box-shadow: 0 0 40px hsla(66, 72%, 43%, 0.795);
 }
-.rank-1 .player-avatar { border-color: var(--gold-primary); }
+
+.rank-1 .player-avatar {
+  border-color: var(--gold-primary);
+}
 
 /* Especial para el Top 2 (Plata) */
 .player-card.rank-2 {
   border-color: #cbd5e1;
   background: linear-gradient(90deg, rgba(203, 213, 225, 0.1) 0%, var(--bg-card) 40%);
 }
+
 .player-card.rank-2:hover {
   background: linear-gradient(90deg, rgba(255, 255, 255, 0.15) 0%, rgba(203, 213, 225, 0.15) 20%, var(--bg-card) 60%);
   border-color: #fff;
   box-shadow: 0 0 35px rgba(255, 255, 255, 0.15);
 }
-.rank-2 .player-avatar { border-color: #cbd5e1; }
-.rank-2 .rank-text { color: #e2e8f0; }
+
+.rank-2 .player-avatar {
+  border-color: #cbd5e1;
+}
+
+.rank-2 .rank-text {
+  color: #e2e8f0;
+}
 
 /* Especial para el Top 3 (Bronce) */
 .player-card.rank-3 {
   border-color: #b45309;
   background: linear-gradient(90deg, rgba(180, 83, 9, 0.1) 0%, var(--bg-card) 40%);
 }
+
 .player-card.rank-3:hover {
   background: linear-gradient(90deg, rgba(255, 255, 255, 0.15) 0%, rgba(180, 83, 9, 0.15) 20%, var(--bg-card) 60%);
   border-color: #fff;
   box-shadow: 0 0 35px rgba(255, 255, 255, 0.15);
 }
-.rank-3 .player-avatar { border-color: #b45309; }
-.rank-3 .rank-text { color: #d97706; }
+
+.rank-3 .player-avatar {
+  border-color: #b45309;
+}
+
+.rank-3 .rank-text {
+  color: #d97706;
+}
 
 .rank-text {
   font-size: 2.2rem;
@@ -217,10 +238,12 @@ h1::after {
 
 .rank-crown {
   position: absolute;
-  top: -35px; /* Más arriba para que sobresalga de la tarjeta */
+  top: -35px;
+  /* Más arriba para que sobresalga de la tarjeta */
   left: 50%;
   transform: translateX(-50%) rotate(-5deg);
-  width: 55px; /* Un poco más grande para que se note el efecto */
+  width: 55px;
+  /* Un poco más grande para que se note el efecto */
   z-index: 100;
   filter: drop-shadow(0 0 15px rgba(200, 155, 60, 0.6));
   animation: float 3s ease-in-out infinite;
@@ -228,8 +251,15 @@ h1::after {
 }
 
 @keyframes float {
-  0%, 100% { transform: translateX(-50%) rotate(-5deg) translateY(0); }
-  50% { transform: translateX(-50%) rotate(-5deg) translateY(-5px); }
+
+  0%,
+  100% {
+    transform: translateX(-50%) rotate(-5deg) translateY(0);
+  }
+
+  50% {
+    transform: translateX(-50%) rotate(-5deg) translateY(-5px);
+  }
 }
 
 .player-avatar {
@@ -259,7 +289,8 @@ h1::after {
 /* Name & Status */
 .player-main-info {
   flex: 1;
-  margin-left: 15px; /* Espacio extra para que el level-tag no lo tape */
+  margin-left: 15px;
+  /* Espacio extra para que el level-tag no lo tape */
 }
 
 .player-name-row {
@@ -446,10 +477,11 @@ h1::after {
   bottom: -22px;
   left: 50%;
   transform: translateX(-50%);
-  width: 100px; /* Un poco más grande para el asset oficial */
+  width: 100px;
+  /* Un poco más grande para el asset oficial */
   height: auto;
   z-index: 2;
-  filter: drop-shadow(0 5px 15px rgba(0,0,0,0.8));
+  filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.8));
 }
 
 .m-level-number {
@@ -472,7 +504,7 @@ h1::after {
   letter-spacing: 2px;
   margin-top: 8px;
   text-align: center;
-  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
 }
 
 .m-stats {
@@ -515,16 +547,19 @@ h1::after {
 }
 
 /* Colores por región */
-.region-badge.reg-la1, .region-badge.reg-la2 {
+.region-badge.reg-la1,
+.region-badge.reg-la2 {
   border-color: #4ade80;
   color: #4ade80;
   background: rgba(74, 222, 128, 0.1);
 }
+
 .region-badge.reg-na1 {
   border-color: #60a5fa;
   color: #60a5fa;
   background: rgba(96, 165, 250, 0.1);
 }
+
 .region-badge.reg-euw1 {
   border-color: #a78bfa;
   color: #a78bfa;
@@ -534,7 +569,7 @@ h1::after {
 /* Rank Data (Right side) */
 .rank-data {
   display: grid;
-  grid-template-columns: 180px 130px 85px 180px; 
+  grid-template-columns: 180px 130px 85px 180px;
   align-items: center;
   column-gap: 10px;
   padding-right: 20px;
@@ -550,6 +585,7 @@ h1::after {
   justify-content: center;
   flex-shrink: 0;
 }
+
 .rank-emblem {
   max-width: 100%;
   max-height: 100%;
@@ -558,18 +594,36 @@ h1::after {
 }
 
 @keyframes heartbeat {
-  0% { transform: scale(1); }
-  5% { transform: scale(1.1); }
-  10% { transform: scale(1.05); }
-  15% { transform: scale(1.15); }
-  50% { transform: scale(1); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+
+  5% {
+    transform: scale(1.1);
+  }
+
+  10% {
+    transform: scale(1.05);
+  }
+
+  15% {
+    transform: scale(1.15);
+  }
+
+  50% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 .rank-info-text {
   display: flex;
   flex-direction: column;
-  width: 180px; /* Ancho fijo para estabilizar el emblema */
+  width: 180px;
+  /* Ancho fijo para estabilizar el emblema */
 }
 
 .tier-text {
@@ -588,7 +642,10 @@ h1::after {
   white-space: nowrap;
 }
 
-.lp { color: white; font-weight: 600; }
+.lp {
+  color: white;
+  font-weight: 600;
+}
 
 .wr-positive {
   color: #4ade80 !important;
@@ -614,9 +671,17 @@ h1::after {
 }
 
 @keyframes pulse {
-  0% { opacity: 0.4; }
-  50% { opacity: 1; }
-  100% { opacity: 0.4; }
+  0% {
+    opacity: 0.4;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.4;
+  }
 }
 
 /* Responsive */
@@ -626,12 +691,14 @@ h1::after {
     padding: 1rem;
     gap: 0.5rem;
   }
-  .rank-data { 
-    grid-column: 1 / -1; 
+
+  .rank-data {
+    grid-column: 1 / -1;
     justify-content: flex-start;
     padding-left: 120px;
     margin-top: 0.5rem;
   }
+
   .card-actions {
     top: 5px;
     right: 5px;
@@ -702,8 +769,15 @@ h1::after {
 }
 
 @keyframes modalFadeIn {
-  from { opacity: 0; transform: translateY(-40px) scale(0.95); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(-40px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .modal-header {
@@ -750,8 +824,15 @@ h1::after {
   width: 100%;
 }
 
-.flex-2 { flex: 2; min-width: 0; }
-.flex-1 { flex: 1; min-width: 0; }
+.flex-2 {
+  flex: 2;
+  min-width: 0;
+}
+
+.flex-1 {
+  flex: 1;
+  min-width: 0;
+}
 
 label {
   color: var(--gold-primary);
@@ -762,7 +843,8 @@ label {
   opacity: 0.8;
 }
 
-input, select {
+input,
+select {
   background: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(200, 155, 60, 0.2);
   border-radius: 12px;
@@ -771,14 +853,16 @@ input, select {
   font-family: 'Outfit', sans-serif;
   font-size: 1rem;
   transition: all 0.3s;
-  width: 100%; /* Asegura que no se salgan */
+  width: 100%;
+  /* Asegura que no se salgan */
 }
 
 input::placeholder {
   color: rgba(255, 255, 255, 0.2);
 }
 
-input:focus, select:focus {
+input:focus,
+select:focus {
   outline: none;
   border-color: var(--gold-primary);
   background: rgba(255, 255, 255, 0.05);
@@ -884,11 +968,12 @@ select option {
 }
 
 @keyframes toastIn {
-  to { transform: translateX(0); }
+  to {
+    transform: translateX(0);
+  }
 }
 
-@keyframes toastOut {
-}
+@keyframes toastOut {}
 
 /* =========================================
    CARD ACTIONS (REFRESH & DELETE)
@@ -911,7 +996,8 @@ select option {
   transform: translateY(-50%) translateX(0);
 }
 
-.btn-delete-card, .btn-refresh-card {
+.btn-delete-card,
+.btn-refresh-card {
   background: rgba(0, 0, 0, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.15);
   color: #fff;
@@ -1038,7 +1124,8 @@ select option {
 }
 
 .streak-container {
-  min-width: 85px; /* Ancho fijo para mantener la simetría */
+  min-width: 85px;
+  /* Ancho fijo para mantener la simetría */
   display: flex;
   justify-content: flex-end;
 }
@@ -1052,13 +1139,15 @@ select option {
   font-size: 0.75rem;
   font-weight: 800;
 }
-.streak-win { 
-  color: #4ade80; 
+
+.streak-win {
+  color: #4ade80;
   text-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
   font-weight: 800;
 }
-.streak-loss { 
-  color: #60a5fa; 
+
+.streak-loss {
+  color: #60a5fa;
   text-shadow: 0 0 8px rgba(96, 165, 250, 0.6);
   font-weight: 800;
 }
@@ -1070,8 +1159,15 @@ select option {
 }
 
 @keyframes float-emoji {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-3px);
+  }
 }
 
 /* Historial Dots */
@@ -1094,9 +1190,19 @@ select option {
   background: #333;
 }
 
-.history-dot.dot-w { background: var(--accent-green); box-shadow: 0 0 8px rgba(74, 222, 128, 0.4); }
-.history-dot.dot-l { background: #ef4444; box-shadow: 0 0 8px rgba(239, 68, 68, 0.4); }
-.streak-loss { color: #60a5fa; }
+.history-dot.dot-w {
+  background: var(--accent-green);
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.4);
+}
+
+.history-dot.dot-l {
+  background: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+}
+
+.streak-loss {
+  color: #60a5fa;
+}
 
 /* =========================================
    Player Details Modal Styles
@@ -1231,7 +1337,8 @@ select option {
   border-radius: 3px;
   overflow: hidden;
   margin-bottom: 8px;
-  background: #ef4444; /* Rojo de fondo para losses */
+  background: #ef4444;
+  /* Rojo de fondo para losses */
 }
 
 .win-bar {
@@ -1246,9 +1353,17 @@ select option {
   font-weight: 600;
 }
 
-.wins-text { color: #4ade80; }
-.losses-text { color: #ef4444; }
-.wr-text { color: var(--text-gold); }
+.wins-text {
+  color: #4ade80;
+}
+
+.losses-text {
+  color: #ef4444;
+}
+
+.wr-text {
+  color: var(--text-gold);
+}
 
 /* Top Champs Box */
 .top-champs-list {
