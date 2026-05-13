@@ -1209,24 +1209,47 @@ select option {
    ========================================= */
 .details-modal {
   max-width: 650px;
-  background: var(--bg-card);
+  max-height: 90vh; /* Para que no se salga de la pantalla */
+  overflow-y: auto; /* Scroll interno si es necesario */
+  background: radial-gradient(circle at top, #1a1a1f 0%, #0a0a0c 100%);
   border: 1px solid rgba(212, 175, 55, 0.3);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(212, 175, 55, 0.1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(212, 175, 55, 0.1);
+  padding: 2rem !important; /* Reducido para ahorrar espacio */
+}
+
+/* Custom Scrollbar para el modal */
+.details-modal::-webkit-scrollbar {
+  width: 8px;
+}
+.details-modal::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+.details-modal::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.3);
+  border-radius: 4px;
+}
+.details-modal::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 175, 55, 0.6);
+}
+
+.details-modal .modal-header {
+  margin-bottom: 1.5rem; /* Reducido */
 }
 
 .profile-header {
   display: flex;
   align-items: center;
-  gap: 20px;
-  margin-bottom: 25px;
-  padding-bottom: 20px;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
   border-bottom: 1px solid rgba(212, 175, 55, 0.15);
 }
 
 .profile-icon-wrapper {
   position: relative;
-  width: 80px;
-  height: 80px;
+  width: 70px; /* Un poco más pequeño */
+  height: 70px;
   border-radius: 50%;
   border: 2px solid var(--gold-primary);
   box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
@@ -1241,38 +1264,39 @@ select option {
 
 .level-badge {
   position: absolute;
-  bottom: -5px;
+  bottom: -6px;
   left: 50%;
   transform: translateX(-50%);
-  background: #1e1e1e;
+  background: #111;
   border: 1px solid var(--gold-primary);
   color: var(--text-gold);
-  font-size: 0.8rem;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 8px;
   white-space: nowrap;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
 }
 
 .profile-info h3 {
-  font-size: 1.8rem;
-  margin: 0 0 10px 0;
+  font-size: 1.6rem;
+  margin: 0 0 5px 0;
   color: white;
-  text-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
 }
 
 .detail-tags {
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
 
 .status-badge {
   background: rgba(74, 222, 128, 0.1);
   border: 1px solid #4ade80;
   color: #4ade80;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 800;
-  padding: 1px 6px;
+  padding: 2px 6px;
   border-radius: 4px;
   text-transform: uppercase;
 }
@@ -1286,52 +1310,59 @@ select option {
 .details-grid {
   display: grid;
   grid-template-columns: 1fr 1.5fr;
-  gap: 20px;
-  margin-bottom: 20px;
+  gap: 15px;
+  margin-bottom: 15px;
 }
 
 .detail-box {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 8px;
-  padding: 15px;
+  padding: 12px 15px;
 }
 
 .detail-box h4 {
-  margin: 0 0 15px 0;
-  font-size: 0.9rem;
+  margin: 0 0 10px 0;
+  font-size: 0.8rem;
   color: var(--text-gold);
   text-transform: uppercase;
   letter-spacing: 0.05rem;
   border-bottom: 1px solid rgba(212, 175, 55, 0.1);
-  padding-bottom: 8px;
+  padding-bottom: 6px;
 }
 
 /* Rank Box */
 .rank-box {
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .rank-box img {
-  width: 90px;
-  height: 90px;
+  width: 75px;
+  height: 75px;
   object-fit: contain;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
+  filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
 }
 
 .tier-rank {
-  font-size: 1.3rem;
-  font-weight: 700;
+  font-size: 1.15rem;
+  font-weight: 800;
   color: white;
+  margin-bottom: 2px;
 }
 
 .lp-text {
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: var(--text-muted);
-  margin-bottom: 15px;
+  margin-bottom: 12px;
 }
 
 .winrate-bar {
+  width: 100%;
   display: flex;
   height: 6px;
   border-radius: 3px;
@@ -1375,23 +1406,25 @@ select option {
 .champ-detail-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: rgba(255, 255, 255, 0.03);
-  padding: 8px;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 6px 8px;
   border-radius: 6px;
   border-left: 2px solid transparent;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
 }
 
 .champ-detail-item:hover {
   border-left-color: var(--gold-primary);
-  background: rgba(212, 175, 55, 0.05);
+  background: rgba(212, 175, 55, 0.08);
+  transform: translateX(2px);
 }
 
 .champ-detail-icon {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
 }
 
 .champ-detail-info {
@@ -1399,37 +1432,38 @@ select option {
 }
 
 .champ-detail-name {
-  font-weight: 700;
+  font-weight: 800;
   color: white;
-  font-size: 0.95rem;
-  margin-bottom: 2px;
+  font-size: 0.9rem;
+  margin-bottom: 0px;
 }
 
 .champ-detail-pts {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
 }
 
 .champ-detail-crest {
-  width: 30px;
+  width: 26px;
   object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
 }
 
 /* History Box */
 .history-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 5px;
 }
 
 .history-badge {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   border-radius: 4px;
 }
 
