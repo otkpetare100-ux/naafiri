@@ -110,51 +110,72 @@
           <h2>Perfil del Invocador</h2>
           <span class="close-modal close-details">&times;</span>
         </div>
-        <div class="modal-body">
-          <div class="profile-header">
-            <div class="profile-icon-wrapper">
-              <img id="detail-profile-icon" src="" alt="Icono" />
-              <div id="detail-level" class="level-badge"></div>
+        <div class="modal-body layout-split">
+          
+          <!-- Columna Izquierda: Estadísticas Detalladas -->
+          <div class="left-column">
+            <div class="kda-section">
+              <h3 id="detail-kda-title">KDA AQUI</h3>
             </div>
-            <div class="profile-info">
-              <h3 id="detail-name"></h3>
-              <div id="detail-tags" class="detail-tags">
-                <span id="detail-region" class="region-badge"></span>
-                <span id="detail-status" class="status-badge"></span>
+            <ul class="advanced-stats-list">
+              <li>PUNTUACION DE ORO: <span id="stat-gold">--</span></li>
+              <li>PROMEDIO DE MUERTES: <span id="stat-deaths">--</span></li>
+              <li>MINIONS POR MIN: <span id="stat-cs">--</span></li>
+              <li>PARTICIPACION DE KILLS: <span id="stat-kp">--</span></li>
+              <li>DAÑO PROMEDIO POR PARTIDAS: <span id="stat-dmg">--</span></li>
+              <li>DAÑO RECIBIDO: <span id="stat-dmg-taken">--</span></li>
+            </ul>
+          </div>
+
+          <!-- Columna Derecha: Perfil, Rango y Campeones -->
+          <div class="right-column">
+            
+            <!-- Row 1: Perfil y Winrate -->
+            <div class="profile-header-row">
+              <div class="profile-info-block">
+                <div class="profile-icon-wrapper">
+                  <img id="detail-profile-icon" src="" alt="Icono" />
+                  <div id="detail-level" class="level-badge"></div>
+                </div>
+                <div class="profile-text">
+                  <h3 id="detail-name"></h3>
+                  <div id="detail-tags" class="detail-tags">
+                    <span id="detail-region" class="region-badge"></span>
+                    <span id="detail-status" class="status-badge"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="winrate-block">
+                <div id="detail-wr-big" class="wr-big-text">WINRATE AQUI</div>
               </div>
             </div>
-          </div>
-          
-          <div class="details-grid">
-            <!-- Rank Box -->
+            
+            <!-- Row 2: Rango -->
             <div class="detail-box rank-box">
               <h4>Clasificatoria Solo/Dúo</h4>
               <img id="detail-rank-emblem" src="" alt="Rango" />
               <div id="detail-tier-rank" class="tier-rank"></div>
               <div id="detail-lp" class="lp-text"></div>
-              <div class="winrate-bar">
-                <div id="detail-win-bar" class="win-bar"></div>
-                <div id="detail-loss-bar" class="loss-bar"></div>
-              </div>
-              <div class="winrate-text">
-                <span id="detail-wins" class="wins-text"></span>
-                <span id="detail-wr" class="wr-text"></span>
-                <span id="detail-losses" class="losses-text"></span>
+              
+              <!-- Barra de W/L debajo del rango -->
+              <div class="winrate-bar-container">
+                <div class="winrate-bar">
+                  <div id="detail-win-bar" class="win-bar"></div>
+                </div>
+                <div class="winrate-text">
+                  <span id="detail-wins" class="wins-text"></span>
+                  <span id="detail-losses" class="losses-text"></span>
+                </div>
               </div>
             </div>
 
-            <!-- Top Champs Box -->
-            <div class="detail-box champs-box">
-              <h4>Mejores Campeones</h4>
-              <div id="detail-top-champs" class="top-champs-list"></div>
+            <!-- Row 3: Top Champs -->
+            <div class="detail-box champs-box-bottom">
+              <div id="detail-top-champs" class="top-champs-row"></div>
             </div>
-          </div>
 
-          <!-- History Box -->
-          <div class="detail-box history-box">
-            <h4>Últimas Partidas Registradas</h4>
-            <div id="detail-history" class="history-list"></div>
           </div>
+          
         </div>
       </div>
     </div>

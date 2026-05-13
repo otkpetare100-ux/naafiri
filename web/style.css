@@ -1201,54 +1201,105 @@ select option {
 }
 
 .streak-loss {
-  color: #60a5fa;
-}
-
-/* =========================================
+  color/* =========================================
    Player Details Modal Styles
    ========================================= */
 .details-modal {
-  max-width: 650px;
-  max-height: 90vh; /* Para que no se salga de la pantalla */
-  overflow-y: auto; /* Scroll interno si es necesario */
-  background: radial-gradient(circle at top, #1a1a1f 0%, #0a0a0c 100%);
+  max-width: 850px; /* Ampliado para dos columnas */
+  max-height: 90vh; 
+  overflow-y: auto; 
+  background: var(--bg-card);
   border: 1px solid rgba(212, 175, 55, 0.3);
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(212, 175, 55, 0.1);
-  padding: 2rem !important; /* Reducido para ahorrar espacio */
+  padding: 2rem !important; 
 }
 
 /* Custom Scrollbar para el modal */
-.details-modal::-webkit-scrollbar {
-  width: 8px;
-}
-.details-modal::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 4px;
-}
-.details-modal::-webkit-scrollbar-thumb {
-  background: rgba(212, 175, 55, 0.3);
-  border-radius: 4px;
-}
-.details-modal::-webkit-scrollbar-thumb:hover {
-  background: rgba(212, 175, 55, 0.6);
-}
+.details-modal::-webkit-scrollbar { width: 8px; }
+.details-modal::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.3); border-radius: 4px; }
+.details-modal::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.3); border-radius: 4px; }
+.details-modal::-webkit-scrollbar-thumb:hover { background: rgba(212, 175, 55, 0.6); }
 
 .details-modal .modal-header {
-  margin-bottom: 1.5rem; /* Reducido */
+  margin-bottom: 1.5rem; 
+  border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+  padding-bottom: 10px;
 }
 
-.profile-header {
+/* Layout de Dos Columnas */
+.layout-split {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 30px;
+}
+
+/* --- Columna Izquierda --- */
+.left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.kda-section h3 {
+  font-size: 2.2rem;
+  font-weight: 300;
+  color: white;
+  margin: 0 0 20px 0;
+  text-align: left;
+}
+
+.advanced-stats-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.advanced-stats-list li {
+  font-size: 0.85rem;
+  color: var(--gold-primary);
+  display: flex;
+  flex-direction: column;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.05rem;
+}
+
+.advanced-stats-list span {
+  color: white;
+  font-size: 1rem;
+  margin-top: 4px;
+}
+
+/* --- Columna Derecha --- */
+.right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Header de Perfil y Winrate */
+.profile-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.profile-info-block {
   display: flex;
   align-items: center;
   gap: 15px;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.15);
 }
 
 .profile-icon-wrapper {
   position: relative;
-  width: 70px; /* Un poco más pequeño */
+  width: 70px;
   height: 70px;
   border-radius: 50%;
   border: 2px solid var(--gold-primary);
@@ -1278,7 +1329,7 @@ select option {
   box-shadow: 0 2px 5px rgba(0,0,0,0.5);
 }
 
-.profile-info h3 {
+.profile-text h3 {
   font-size: 1.6rem;
   margin: 0 0 5px 0;
   color: white;
@@ -1300,65 +1351,73 @@ select option {
   border-radius: 4px;
   text-transform: uppercase;
 }
-
 .status-badge.offline {
   background: rgba(150, 150, 150, 0.1);
   border-color: #666;
   color: #aaa;
 }
 
-.details-grid {
-  display: grid;
-  grid-template-columns: 1fr 1.5fr;
-  gap: 15px;
-  margin-bottom: 15px;
+.winrate-block {
+  text-align: right;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  padding-left: 20px;
+}
+.wr-big-text {
+  font-size: 1.4rem;
+  color: white;
+  font-weight: 300;
 }
 
+/* Rank Box */
 .detail-box {
   background: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 8px;
-  padding: 12px 15px;
+  padding: 15px;
 }
 
-.detail-box h4 {
-  margin: 0 0 10px 0;
-  font-size: 0.8rem;
-  color: var(--text-gold);
-  text-transform: uppercase;
-  letter-spacing: 0.05rem;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.1);
-  padding-bottom: 6px;
-}
-
-/* Rank Box */
 .rank-box {
   text-align: center;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
 }
 
+.rank-box h4 {
+  margin: 0 0 15px 0;
+  font-size: 0.85rem;
+  color: var(--text-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.05rem;
+  width: 100%;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+  padding-bottom: 8px;
+}
+
 .rank-box img {
-  width: 75px;
-  height: 75px;
+  width: 90px;
+  height: 90px;
   object-fit: contain;
   margin-bottom: 5px;
   filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
 }
 
 .tier-rank {
-  font-size: 1.15rem;
+  font-size: 1.3rem;
   font-weight: 800;
   color: white;
   margin-bottom: 2px;
 }
 
 .lp-text {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: var(--text-muted);
-  margin-bottom: 12px;
+  margin-bottom: 15px;
+}
+
+.winrate-bar-container {
+  width: 100%;
+  max-width: 300px;
 }
 
 .winrate-bar {
@@ -1368,8 +1427,7 @@ select option {
   border-radius: 3px;
   overflow: hidden;
   margin-bottom: 8px;
-  background: #ef4444;
-  /* Rojo de fondo para losses */
+  background: #ef4444; 
 }
 
 .win-bar {
@@ -1384,103 +1442,58 @@ select option {
   font-weight: 600;
 }
 
-.wins-text {
-  color: #4ade80;
-}
-
-.losses-text {
-  color: #ef4444;
-}
-
-.wr-text {
-  color: var(--text-gold);
-}
+.wins-text { color: #4ade80; }
+.losses-text { color: #ef4444; }
 
 /* Top Champs Box */
-.top-champs-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.champs-box-bottom {
+  padding: 15px;
 }
-
+.top-champs-row {
+  display: flex;
+  gap: 10px;
+  justify-content: space-around;
+}
 .champ-detail-item {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 5px;
   background: rgba(255, 255, 255, 0.02);
-  padding: 6px 8px;
+  padding: 10px;
   border-radius: 6px;
-  border-left: 2px solid transparent;
+  width: 30%;
   transition: all 0.2s;
+  border-top: 2px solid transparent;
 }
-
 .champ-detail-item:hover {
-  border-left-color: var(--gold-primary);
+  border-top-color: var(--gold-primary);
   background: rgba(212, 175, 55, 0.08);
-  transform: translateX(2px);
+  transform: translateY(-2px);
 }
-
 .champ-detail-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 4px;
+  width: 45px;
+  height: 45px;
+  border-radius: 5px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.5);
 }
-
 .champ-detail-info {
-  flex-grow: 1;
+  text-align: center;
 }
-
 .champ-detail-name {
   font-weight: 800;
   color: white;
   font-size: 0.9rem;
-  margin-bottom: 0px;
+  margin-bottom: 2px;
 }
-
 .champ-detail-pts {
   font-size: 0.75rem;
   color: var(--text-muted);
 }
-
 .champ-detail-crest {
   width: 26px;
   object-fit: contain;
+  margin-top: 5px;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
 }
-
-/* History Box */
-.history-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-}
-
-.history-badge {
-  width: 26px;
-  height: 26px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 0.8rem;
-  border-radius: 4px;
-}
-
-.history-badge.win {
-  background: rgba(74, 222, 128, 0.15);
-  color: #4ade80;
-  border: 1px solid rgba(74, 222, 128, 0.3);
-}
-
-.history-badge.loss {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
-  border: 1px solid rgba(239, 68, 68, 0.3);
-}
-
-.history-empty {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  font-style: italic;
 }

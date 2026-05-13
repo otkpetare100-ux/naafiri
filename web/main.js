@@ -322,7 +322,7 @@ window.openDeleteModal = openDeleteModal;
 function openPlayerDetails(player) {
   const modal = document.getElementById('player-details-modal');
   
-  // Header
+  // Header Info
   document.getElementById('detail-profile-icon').src = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${player.profileIconId || 1}.png`;
   document.getElementById('detail-level').textContent = player.summonerLevel || 0;
   document.getElementById('detail-name').textContent = player.gameName;
@@ -337,41 +337,38 @@ function openPlayerDetails(player) {
     statusEl.className = 'status-badge offline';
   }
 
-  // Rank Info
-  const tier = (player.tier || 'UNRANKED').toLowerCase();
-  document.getElementById('detail-rank-emblem').src = `${ASSETS_BASE}/ranks/${tier}.png`;
-  document.getElementById('detail-tier-rank').textContent = player.tier === 'UNRANKED' ? 'UNRANKED' : `${player.tier} ${player.rank}`;
-  document.getElementById('detail-lp').textContent = `${player.lp || 0} LP`;
-
+  // W/L Calculation
   const historyArr = player.history || [];
   const wins = historyArr.filter(r => r === 'W').length;
   const losses = historyArr.filter(r => r === 'L').length;
   const total = wins + losses;
   
-  // Si no tenemos W/L en el history, usamos el de soloQ que está en la DB
-  // (Asumiendo que backend manda history. Si backend manda W/L total, lo usamos directo).
   const totalWins = player.wins !== undefined ? player.wins : wins;
   const totalLosses = player.losses !== undefined ? player.losses : losses;
   const totalGames = totalWins + totalLosses;
   const wr = totalGames > 0 ? Math.round((totalWins / totalGames) * 100) : 0;
+
+  // Big Winrate Top Right
+  document.getElementById('detail-wr-big').textContent = `${wr}% Winrate`;
+
+  // Rank Box
+  const tier = (player.tier || 'UNRANKED').toLowerCase();
+  document.getElementById('detail-rank-emblem').src = `${ASSETS_BASE}/ranks/${tier}.png`;
+  document.getElementById('detail-tier-rank').textContent = player.tier === 'UNRANKED' ? 'UNRANKED' : `${player.tier} ${player.rank}`;
+  document.getElementById('detail-lp').textContent = `${player.lp || 0} LP`;
   
   document.getElementById('detail-wins').textContent = `${totalWins} W`;
   document.getElementById('detail-losses').textContent = `${totalLosses} L`;
-  document.getElementById('detail-wr').textContent = `${wr}% Winrate`;
   
   const winBar = document.getElementById('detail-win-bar');
-  if (totalGames > 0) {
-    winBar.style.width = `${wr}%`;
-  } else {
-    winBar.style.width = '0%';
-  }
+  winBar.style.width = totalGames > 0 ? `${wr}%` : '0%';
 
-  // Top Champs
+  // Top Champs (Horizontal Row)
   const champsContainer = document.getElementById('detail-top-champs');
   champsContainer.innerHTML = '';
   if (player.topChampions && player.topChampions.length > 0) {
     player.topChampions.slice(0, 3).forEach(champ => {
-      const champId = champ.name; // ID from Riot API
+      const champId = champ.name;
       const ptsStr = champ.points.toLocaleString('es-ES');
       const crestUrl = getMasteryCrest(champ.level);
       
@@ -390,17 +387,14 @@ function openPlayerDetails(player) {
     champsContainer.innerHTML = '<span class="history-empty">Sin datos de campeones</span>';
   }
 
-  // Historial
-  const historyContainer = document.getElementById('detail-history');
-  historyContainer.innerHTML = '';
-  if (player.history && player.history.length > 0) {
-    player.history.slice(-15).reverse().forEach(res => {
-      const cls = res === 'W' ? 'win' : 'loss';
-      historyContainer.innerHTML += `<div class="history-badge ${cls}">${res}</div>`;
-    });
-  } else {
-    historyContainer.innerHTML = '<span class="history-empty">No hay partidas recientes</span>';
-  }
+  // Placeholder stats in the left column for now
+  document.getElementById('detail-kda-title').textContent = '0.00 KDA';
+  document.getElementById('stat-gold').textContent = 'N/A';
+  document.getElementById('stat-deaths').textContent = 'N/A';
+  document.getElementById('stat-cs').textContent = 'N/A';
+  document.getElementById('stat-kp').textContent = 'N/A';
+  document.getElementById('stat-dmg').textContent = 'N/A';
+  document.getElementById('stat-dmg-taken').textContent = 'N/A';
 
   // Bind close button
   modal.querySelector('.close-details').onclick = () => {
