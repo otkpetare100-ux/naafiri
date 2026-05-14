@@ -12,10 +12,51 @@
   --font-family: 'Outfit', sans-serif;
 }
 
+/* =========================================
+   GLOBAL GOLDEN SCROLLBAR
+   ========================================= */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: #d4af37 #0a0a0a;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: linear-gradient(180deg, #050505 0%, #0a0a0a 50%, #050505 100%);
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg,
+    #b8860b 0%,
+    #d4af37 30%,
+    #f1c40f 50%,
+    #d4af37 70%,
+    #b8860b 100%);
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 6px rgba(212, 175, 55, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg,
+    #d4af37 0%,
+    #f1c40f 30%,
+    #ffe066 50%,
+    #f1c40f 70%,
+    #d4af37 100%);
+  box-shadow: 0 0 12px rgba(241, 196, 15, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+*::-webkit-scrollbar-corner {
+  background: #050505;
 }
 
 body {
@@ -1217,11 +1258,7 @@ select option {
   padding: 2rem !important; 
 }
 
-/* Custom Scrollbar para el modal */
-.details-modal::-webkit-scrollbar { width: 8px; }
-.details-modal::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.3); border-radius: 4px; }
-.details-modal::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.3); border-radius: 4px; }
-.details-modal::-webkit-scrollbar-thumb:hover { background: rgba(212, 175, 55, 0.6); }
+/* Scrollbar del modal — heredado del estilo global dorado */
 
 .details-modal .modal-header {
   margin-bottom: 1.5rem; 
