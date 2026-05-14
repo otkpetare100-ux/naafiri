@@ -1006,8 +1006,6 @@ select option {
   }
 }
 
-@keyframes toastOut {}
-
 /* =========================================
    CARD ACTIONS (REFRESH & DELETE)
    ========================================= */
@@ -1046,10 +1044,6 @@ select option {
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   backdrop-filter: blur(4px);
   line-height: 1;
-}
-
-.btn-delete-card {
-  /* Estilo base compartido arriba */
 }
 
 .btn-delete-card:hover {
