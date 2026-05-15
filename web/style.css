@@ -1442,12 +1442,12 @@ select option {
 }
 
 .dash-emblem {
-  width: 85px !important;
-  height: 85px !important;
+  width: 140px !important;
+  height: 140px !important;
   object-fit: contain;
-  margin: 5px auto 10px auto !important;
+  margin: 15px auto !important;
   display: block;
-  filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
+  filter: drop-shadow(0 8px 15px rgba(0,0,0,0.5));
 }
 
 .dash-rank {
