@@ -386,6 +386,7 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
             isRemake: isRemake,
             timestamp: matchData.info.gameCreation
           });
+          console.log(`Descargada partida ${matchId} | Queue: ${matchData.info.queueId} | isRemake: ${isRemake}`);
         }
         await delay(100); // Evitar rate limits
       } catch (e) {

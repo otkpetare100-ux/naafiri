@@ -452,9 +452,9 @@ function openPlayerDetails(player) {
     if (history && history.length > 0) {
       const filteredHistory = history.filter(match => {
         if (queueType === 'soloq') {
-          return !match.queueId || match.queueId === 420; // old matches default to soloq
+          return !match.queueId || match.queueId == 420; // old matches default to soloq
         } else if (queueType === 'flexq') {
-          return match.queueId === 440;
+          return match.queueId == 440;
         }
         return true;
       });
