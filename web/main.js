@@ -444,9 +444,10 @@ function openPlayerDetails(player) {
     
     if (history && history.length > 0) {
       history.forEach(match => {
+        const isRemake = match.isRemake;
         const isWin = match.win;
-        const winClass = isWin ? 'match-win' : 'match-loss';
-        const resultText = isWin ? 'VICTORIA' : 'DERROTA';
+        const winClass = isRemake ? 'match-remake' : (isWin ? 'match-win' : 'match-loss');
+        const resultText = isRemake ? 'REMAKE' : (isWin ? 'VICTORIA' : 'DERROTA');
         
         const kdaStr = `${match.kills} / ${match.deaths} / ${match.assists}`;
         const kdaRatio = match.deaths > 0 ? ((match.kills + match.assists) / match.deaths).toFixed(2) : 'Perfect';

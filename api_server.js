@@ -357,7 +357,8 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
             .reduce((sum, p) => sum + p.kills, 0);
             
           const kp = teamKills > 0 ? ((participant.kills + participant.assists) / teamKills) : 0;
-          
+          const isRemake = durationMins < 4.5 || participant.teamEarlySurrendered;
+
           newMatchStats.push({
             matchId: matchId,
             championName: participant.championName || 'Unknown',
@@ -371,6 +372,7 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
             damageDealt: participant.totalDamageDealtToChampions,
             damageTaken: participant.totalDamageTaken,
             win: participant.win,
+            isRemake: isRemake,
             timestamp: matchData.info.gameCreation
           });
         }
@@ -389,10 +391,12 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
       .sort((a, b) => b.timestamp - a.timestamp)
       .slice(0, 20);
 
-    // Calcular promedios
+    // Calcular promedios (Excluyendo Remakes)
     let sumKills = 0, sumDeaths = 0, sumAssists = 0, sumGold = 0, sumCs = 0, sumMins = 0, sumKp = 0, sumDmgDealt = 0, sumDmgTaken = 0;
     
-    combinedMatches.forEach(m => {
+    const validMatches = combinedMatches.filter(m => !m.isRemake);
+
+    validMatches.forEach(m => {
       sumKills += m.kills;
       sumDeaths += m.deaths;
       sumAssists += m.assists;
@@ -404,15 +408,16 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
       sumDmgTaken += m.damageTaken;
     });
 
-    const count = combinedMatches.length;
+    const count = validMatches.length;
+    
     const avgStats = {
-      kda: sumDeaths > 0 ? ((sumKills + sumAssists) / sumDeaths).toFixed(2) : ((sumKills + sumAssists).toFixed(2)),
-      avgGold: Math.round(sumGold / count),
-      avgDeaths: (sumDeaths / count).toFixed(1),
-      csPerMin: sumMins > 0 ? (sumCs / sumMins).toFixed(1) : 0,
-      avgKp: Math.round((sumKp / count) * 100),
-      avgDamageDealt: Math.round(sumDmgDealt / count),
-      avgDamageTaken: Math.round(sumDmgTaken / count),
+      kda: count > 0 ? (sumDeaths > 0 ? ((sumKills + sumAssists) / sumDeaths).toFixed(2) : ((sumKills + sumAssists).toFixed(2))) : "0.00",
+      avgGold: count > 0 ? Math.round(sumGold / count) : 0,
+      avgDeaths: count > 0 ? (sumDeaths / count).toFixed(1) : "0.0",
+      csPerMin: count > 0 ? (sumMins > 0 ? (sumCs / sumMins).toFixed(1) : 0) : "0.0",
+      avgKp: count > 0 ? Math.round((sumKp / count) * 100) : 0,
+      avgDamageDealt: count > 0 ? Math.round(sumDmgDealt / count) : 0,
+      avgDamageTaken: count > 0 ? Math.round(sumDmgTaken / count) : 0,
       totalMatchesCalculated: count
     };
 

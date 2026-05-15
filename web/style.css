@@ -1692,6 +1692,11 @@ select option {
   background: linear-gradient(90deg, rgba(239, 68, 68, 0.05) 0%, rgba(0,0,0,0) 100%);
 }
 
+.match-item.match-remake {
+  border-left-color: #888888;
+  background: linear-gradient(90deg, rgba(136, 136, 136, 0.05) 0%, rgba(0,0,0,0) 100%);
+}
+
 .match-result {
   font-weight: 900;
   width: 90px;
@@ -1700,6 +1705,7 @@ select option {
 
 .match-win .match-result { color: #4ade80; }
 .match-loss .match-result { color: #ef4444; }
+.match-remake .match-result { color: #aaaaaa; }
 
 .match-stat {
   color: #fff;
