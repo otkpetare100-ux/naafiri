@@ -4049,8 +4049,26 @@ async function settleBets(acc) {
           
           if (queueData) {
             await dbInstance.collection('accounts').updateOne({ puuid: acc.puuid }, { $set: { [dbField]: queueData } });
-            const previousLp = acc[dbField]?.leaguePoints || 0;
-            lpDataObj = { tier: queueData.tier, rank: queueData.rank, lp: queueData.leaguePoints, diff: queueData.leaguePoints - previousLp };
+            
+            // BUG FIX: Obtener cuenta fresca de DB porque el objeto 'acc' pasado por parámetro es antiguo
+            const freshAcc = await dbInstance.collection('accounts').findOne({ puuid: acc.puuid });
+            const startLP = freshAcc?.startLP || 0;
+            const diff = queueData.leaguePoints - startLP;
+            
+            lpDataObj = { 
+              tier: queueData.tier, 
+              rank: queueData.rank, 
+              lp: queueData.leaguePoints, 
+              diff: diff 
+            };
+
+            // Guardar el cambio de LP histórico para la web
+            if (matchIds[0]) {
+              await dbInstance.collection('accounts').updateOne(
+                { puuid: acc.puuid },
+                { $set: { [`lpHistory.${matchIds[0]}`]: diff } }
+              );
+            }
             break;
           }
         } catch (e) {}
@@ -4062,7 +4080,11 @@ async function settleBets(acc) {
     notifyBetResults(acc.gameName, gameResult, winners, p.profileIcon, p.championName, lpDataObj, kda, DDRAGON_VERSION, openBets.length, match.info.queueId);
     liveCache.delete(acc.puuid);
     // Limpiar estado de partida en DB
-    await dbInstance.collection('accounts').updateOne({ puuid: acc.puuid }, { $unset: { liveGameStartedAt: "", lastLiveGameId: "" } });
+    // Limpiar estado de partida en DB (incluyendo LP inicial)
+    await dbInstance.collection('accounts').updateOne(
+      { puuid: acc.puuid }, 
+      { $unset: { liveGameStartedAt: "", lastLiveGameId: "", startLP: "", startQueueId: "" } }
+    );
     await checkChallenges(acc, match);
   } catch (e) {
     console.error(`[Bets Error]`, e);
@@ -4218,10 +4240,17 @@ async function startBot() {
               console.log(`[Scanner] 🎯 Partida VÁLIDA (SoloQ/Flex). Notificando...`);
               liveCache.add(acc.puuid);
 
-              // Sincronizar DB para permitir apuestas
+              // Sincronizar DB para permitir apuestas y guardar LP inicial para cálculo preciso
+              const startLP = (game.gameQueueConfigId === 420) ? (acc.soloQ?.leaguePoints || 0) : (acc.flexQ?.leaguePoints || 0);
+              
               await db.collection('accounts').updateOne(
                 { puuid: acc.puuid },
-                { $set: { liveGameStartedAt: new Date(), lastLiveGameId: game.gameId } }
+                { $set: { 
+                  liveGameStartedAt: new Date(), 
+                  lastLiveGameId: game.gameId,
+                  startLP: startLP,
+                  startQueueId: game.gameQueueConfigId
+                } }
               );
 
               const sentMsg = await notifyLiveGame(acc, { championName: champName, championId: champKey, profileIconId: me.profileIconId, version: DDRAGON_VERSION });

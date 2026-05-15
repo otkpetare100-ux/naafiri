@@ -415,7 +415,14 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
     // Combinar y mantener hasta 40 partidas para cubrir ambas colas
     const combinedMatches = [...newMatchStats, ...existingMatches]
       .sort((a, b) => b.timestamp - a.timestamp)
-      .slice(0, 40);
+      .slice(0, 40)
+      .map(m => {
+        // Adjuntar el cambio de LP si el bot lo registró previamente
+        if (account.lpHistory && account.lpHistory[m.matchId] !== undefined) {
+          m.lpChange = account.lpHistory[m.matchId];
+        }
+        return m;
+      });
 
     // Calcular promedios por cola (Excluyendo Remakes y tomando máx 20 por cola)
     const calculateAverages = (queueIdFilter) => {

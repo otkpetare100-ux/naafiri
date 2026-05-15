@@ -506,6 +506,13 @@ function openPlayerDetails(player) {
           const winClass = isRemake ? 'match-remake' : (isWin ? 'match-win' : 'match-loss');
           const resultText = isRemake ? 'REMAKE' : (isWin ? 'VICTORIA' : 'DERROTA');
           
+          let lpHtml = '';
+          if (match.lpChange !== undefined && match.lpChange !== null && !isRemake) {
+            const sign = match.lpChange > 0 ? '+' : '';
+            const colorClass = match.lpChange > 0 ? 'lp-gain' : 'lp-loss';
+            lpHtml = `<div class="match-lp ${colorClass}">${sign}${match.lpChange} LP</div>`;
+          }
+          
           const kdaStr = `${match.kills} / ${match.deaths} / ${match.assists}`;
           const kdaRatio = match.deaths > 0 ? ((match.kills + match.assists) / match.deaths).toFixed(2) : 'Perfect';
           const goldStr = match.gold.toLocaleString('es-ES');
@@ -522,7 +529,10 @@ function openPlayerDetails(player) {
               <div class="match-champ">
                 <img src="${champIconUrl}" class="match-champ-icon" alt="${champName}" onerror="this.onerror=null; this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png';" title="${champName}" />
               </div>
-              <div class="match-result">${resultText}</div>
+              <div class="match-result-box">
+                <div class="match-result">${resultText}</div>
+                ${lpHtml}
+              </div>
               <div class="match-stat"><strong>KDA:</strong> ${kdaStr} <span style="opacity:0.6;font-size:0.7rem;">(${kdaRatio})</span></div>
               <div class="match-stat"><strong>CS:</strong> ${match.cs}</div>
               <div class="match-stat"><strong>Oro:</strong> ${goldStr}</div>
