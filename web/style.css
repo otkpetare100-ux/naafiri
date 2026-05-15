@@ -1734,9 +1734,14 @@ select option {
 .date-separator {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between; /* Envía los badges al extremo derecho */
   padding: 15px 5px 10px 5px;
   margin-top: 10px;
+}
+
+.ds-badges {
+  display: flex;
+  gap: 12px;
 }
 
 .ds-date {

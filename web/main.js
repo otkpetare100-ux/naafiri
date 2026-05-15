@@ -493,8 +493,10 @@ function openPlayerDetails(player) {
         historyContainer.innerHTML += `
           <div class="date-separator">
             <span class="ds-date">${group.date}</span>
-            <span class="ds-badge win">${group.wins} win</span>
-            <span class="ds-badge loss">${group.losses} loss</span>
+            <div class="ds-badges">
+              <span class="ds-badge win">${group.wins} win</span>
+              <span class="ds-badge loss">${group.losses} loss</span>
+            </div>
           </div>
         `;
 
