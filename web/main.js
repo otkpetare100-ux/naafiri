@@ -227,15 +227,12 @@ const REFRESH_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutos
 // Lógica de Actualización Manual
 async function refreshPlayer(gameName, tagLine, region) {
   const now = Date.now();
-  // Cooldown deshabilitado a petición del usuario
-  /*
   const lastRefresh = refreshCooldowns.get(gameName);
   if (lastRefresh && (now - lastRefresh) < REFRESH_COOLDOWN_MS) {
     const remaining = Math.ceil((REFRESH_COOLDOWN_MS - (now - lastRefresh)) / 60000);
     showToast(`⏳ Espera ${remaining} min antes de actualizar a ${gameName} de nuevo.`, 'error');
     return;
   }
-  */
 
   try {
     refreshCooldowns.set(gameName, now);
@@ -559,7 +556,8 @@ function initModal() {
     const data = {
       region: document.getElementById('region').value,
       gameName: document.getElementById('gameName').value,
-      tagLine: document.getElementById('tagLine').value
+      tagLine: document.getElementById('tagLine').value,
+      isNew: true
     };
 
     try {

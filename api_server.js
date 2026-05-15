@@ -161,16 +161,24 @@ const refreshCooldowns = new Map();
 
 // Añadir o actualizar Invocador
 app.post('/api/summoners', async (req, res) => {
-  const { gameName, tagLine, region } = req.body;
+  const { gameName, tagLine, region, isNew } = req.body;
   const RIOT_API_KEY = process.env.RIOT_API_KEY;
 
   if (!gameName || !tagLine || !region) {
     return res.status(400).json({ message: 'Faltan datos requeridos.' });
   }
 
-  // Cooldown temporalmente deshabilitado por petición del usuario
+  // Comprobar cooldown global (5 min) - excepto si se está agregando de nuevo
   const cooldownKey = `${gameName.toLowerCase()}#${tagLine.toLowerCase()}`;
   const now = Date.now();
+
+  if (!isNew) {
+    const lastRefresh = refreshCooldowns.get(cooldownKey);
+    if (lastRefresh && (now - lastRefresh) < 5 * 60 * 1000) {
+      const remaining = Math.ceil((5 * 60 * 1000 - (now - lastRefresh)) / 60000);
+      return res.status(429).json({ message: `⏳ Espera ${remaining} min antes de actualizar a ${gameName} de nuevo.` });
+    }
+  }
 
   console.log(`[POST] Intentando añadir/actualizar: ${gameName}#${tagLine} en ${region}`);
 
