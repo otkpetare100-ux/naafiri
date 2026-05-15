@@ -416,14 +416,59 @@ function openPlayerDetails(player) {
     champsContainer.innerHTML = '<span class="history-empty">Sin datos de campeones</span>';
   }
 
-  // Placeholder stats in the left column for now
-  document.getElementById('detail-kda-title').textContent = '0.00 KDA';
-  document.getElementById('stat-gold').textContent = 'N/A';
-  document.getElementById('stat-deaths').textContent = 'N/A';
-  document.getElementById('stat-cs').textContent = 'N/A';
-  document.getElementById('stat-kp').textContent = 'N/A';
-  document.getElementById('stat-dmg').textContent = 'N/A';
-  document.getElementById('stat-dmg-taken').textContent = 'N/A';
+  // Cargar Estadísticas si existen
+  const loadStats = (stats) => {
+    if (stats) {
+      document.getElementById('detail-kda-title').textContent = `${stats.kda} KDA`;
+      document.getElementById('stat-gold').textContent = stats.avgGold.toLocaleString('es-ES');
+      document.getElementById('stat-deaths').textContent = stats.avgDeaths;
+      document.getElementById('stat-cs').textContent = stats.csPerMin;
+      document.getElementById('stat-kp').textContent = `${stats.avgKp}%`;
+      document.getElementById('stat-dmg').textContent = stats.avgDamageDealt.toLocaleString('es-ES');
+      document.getElementById('stat-dmg-taken').textContent = stats.avgDamageTaken.toLocaleString('es-ES');
+    } else {
+      document.getElementById('detail-kda-title').textContent = '0.00 KDA';
+      document.getElementById('stat-gold').textContent = 'N/A';
+      document.getElementById('stat-deaths').textContent = 'N/A';
+      document.getElementById('stat-cs').textContent = 'N/A';
+      document.getElementById('stat-kp').textContent = 'N/A';
+      document.getElementById('stat-dmg').textContent = 'N/A';
+      document.getElementById('stat-dmg-taken').textContent = 'N/A';
+    }
+  };
+
+  loadStats(player.advancedStats);
+
+  // Botón para actualizar partidas recientes
+  const btnUpdateMatches = document.getElementById('btn-update-matches');
+  btnUpdateMatches.onclick = async () => {
+    try {
+      btnUpdateMatches.innerText = 'BUSCANDO PARTIDAS...';
+      btnUpdateMatches.disabled = true;
+      
+      const response = await fetch(`${API_BASE}/summoners/${player.puuid}/matches/update`, {
+        method: 'POST'
+      });
+      const data = await response.json();
+      
+      if (response.ok) {
+        showToast(data.message, data.updated ? 'success' : 'info');
+        if (data.updated && data.stats) {
+          loadStats(data.stats); // Actualizar interfaz sin cerrar modal
+          // Opcional: Actualizar el jugador local en la tabla si quisiéramos, 
+          // pero el modal ya se actualizó.
+        }
+      } else {
+        showToast(`❌ ${data.message}`, 'error');
+      }
+    } catch (e) {
+      console.error(e);
+      showToast('❌ Error al actualizar partidas.', 'error');
+    } finally {
+      btnUpdateMatches.innerText = 'ACTUALIZAR PARTIDAS RECIENTES';
+      btnUpdateMatches.disabled = false;
+    }
+  };
 
   // Bind close button
   modal.querySelector('.close-details').onclick = () => {

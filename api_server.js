@@ -299,6 +299,137 @@ app.post('/api/summoners', async (req, res) => {
   }
 });
 
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
+// Actualizar Estadísticas de Partidas (Match-V5)
+app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
+  const { puuid } = req.params;
+  const RIOT_API_KEY = process.env.RIOT_API_KEY;
+
+  try {
+    const account = await db.collection('accounts').findOne({ puuid });
+    if (!account) return res.status(404).json({ message: 'Jugador no encontrado.' });
+
+    const routingMap = {
+      la1: 'americas', la2: 'americas', na1: 'americas', br1: 'americas',
+      euw1: 'europe', eun1: 'europe', tr1: 'europe', ru: 'europe',
+      kr: 'asia', jp1: 'asia',
+      oc1: 'sea', ph2: 'sea', sg2: 'sea', th2: 'sea', tw2: 'sea', vn2: 'sea'
+    };
+    const routing = routingMap[account.region] || 'americas';
+
+    // Obtener IDs de las últimas 20 partidas de Ranked
+    const matchIdsUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?type=ranked&start=0&count=20&api_key=${RIOT_API_KEY}`;
+    const idsResp = await fetch(matchIdsUrl);
+    
+    if (!idsResp.ok) {
+      return res.status(idsResp.status).json({ message: 'Error obteniendo historial de Riot.' });
+    }
+    
+    const fetchedMatchIds = await idsResp.json();
+    const existingMatches = account.matchStatsHistory || [];
+    const existingMatchIds = existingMatches.map(m => m.matchId);
+
+    // Filtrar partidas que no tengamos guardadas
+    const newMatchIds = fetchedMatchIds.filter(id => !existingMatchIds.includes(id));
+
+    if (newMatchIds.length === 0) {
+      return res.json({ message: 'No hay partidas nuevas.', updated: false });
+    }
+
+    const newMatchStats = [];
+    
+    for (const matchId of newMatchIds) {
+      try {
+        const matchUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/${matchId}?api_key=${RIOT_API_KEY}`;
+        const matchResp = await fetch(matchUrl);
+        if (!matchResp.ok) continue;
+
+        const matchData = await matchResp.json();
+        const participant = matchData.info.participants.find(p => p.puuid === puuid);
+        
+        if (participant) {
+          const durationMins = matchData.info.gameDuration / 60;
+          const teamKills = matchData.info.participants
+            .filter(p => p.teamId === participant.teamId)
+            .reduce((sum, p) => sum + p.kills, 0);
+            
+          const kp = teamKills > 0 ? ((participant.kills + participant.assists) / teamKills) : 0;
+          
+          newMatchStats.push({
+            matchId: matchId,
+            kills: participant.kills,
+            deaths: participant.deaths,
+            assists: participant.assists,
+            gold: participant.goldEarned,
+            cs: participant.totalMinionsKilled + participant.neutralMinionsKilled,
+            durationMins: durationMins,
+            kp: kp,
+            damageDealt: participant.totalDamageDealtToChampions,
+            damageTaken: participant.totalDamageTaken,
+            win: participant.win,
+            timestamp: matchData.info.gameCreation
+          });
+        }
+        await delay(100); // Evitar rate limits
+      } catch (e) {
+        console.error(`Error procesando match ${matchId}:`, e);
+      }
+    }
+
+    if (newMatchStats.length === 0) {
+      return res.json({ message: 'No se pudieron procesar las partidas nuevas.', updated: false });
+    }
+
+    // Combinar y mantener solo las últimas 20
+    const combinedMatches = [...newMatchStats, ...existingMatches]
+      .sort((a, b) => b.timestamp - a.timestamp)
+      .slice(0, 20);
+
+    // Calcular promedios
+    let sumKills = 0, sumDeaths = 0, sumAssists = 0, sumGold = 0, sumCs = 0, sumMins = 0, sumKp = 0, sumDmgDealt = 0, sumDmgTaken = 0;
+    
+    combinedMatches.forEach(m => {
+      sumKills += m.kills;
+      sumDeaths += m.deaths;
+      sumAssists += m.assists;
+      sumGold += m.gold;
+      sumCs += m.cs;
+      sumMins += m.durationMins;
+      sumKp += m.kp;
+      sumDmgDealt += m.damageDealt;
+      sumDmgTaken += m.damageTaken;
+    });
+
+    const count = combinedMatches.length;
+    const avgStats = {
+      kda: sumDeaths > 0 ? ((sumKills + sumAssists) / sumDeaths).toFixed(2) : ((sumKills + sumAssists).toFixed(2)),
+      avgGold: Math.round(sumGold / count),
+      avgDeaths: (sumDeaths / count).toFixed(1),
+      csPerMin: sumMins > 0 ? (sumCs / sumMins).toFixed(1) : 0,
+      avgKp: Math.round((sumKp / count) * 100),
+      avgDamageDealt: Math.round(sumDmgDealt / count),
+      avgDamageTaken: Math.round(sumDmgTaken / count),
+      totalMatchesCalculated: count
+    };
+
+    await db.collection('accounts').updateOne(
+      { puuid },
+      { $set: { matchStatsHistory: combinedMatches, advancedStats: avgStats } }
+    );
+
+    res.json({ 
+      message: `¡Se actualizaron ${newMatchStats.length} partidas nuevas!`, 
+      updated: true, 
+      stats: avgStats 
+    });
+
+  } catch (error) {
+    console.error('Error in /api/summoners/:puuid/matches/update:', error);
+    res.status(500).json({ message: 'Error interno actualizando partidas.' });
+  }
+});
+
 // Obtener Invocador Individual
 app.get('/api/summoners/:puuid', async (req, res) => {
   const { puuid } = req.params;
