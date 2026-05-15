@@ -361,7 +361,7 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
 
           newMatchStats.push({
             matchId: matchId,
-            championName: participant.championName || 'Unknown',
+            championName: championMap[participant.championId?.toString()] || participant.championName || 'Unknown',
             kills: participant.kills,
             deaths: participant.deaths,
             assists: participant.assists,

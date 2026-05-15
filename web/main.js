@@ -2,7 +2,7 @@ import './style.css'
 
 const API_BASE = `${window.location.origin}/api`;
 const ASSETS_BASE = '/assets';
-let DDRAGON_VERSION = '16.9.1';
+let DDRAGON_VERSION = '14.9.1';
 
 // Snapshot de datos anteriores por puuid — usado para detectar cambios en el auto-refresh
 const playerSnapshot = new Map();
