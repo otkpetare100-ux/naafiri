@@ -110,57 +110,34 @@
           <h2>Perfil del Invocador</h2>
           <span class="close-modal close-details">&times;</span>
         </div>
-        <div class="modal-body">
+        <div class="modal-body dashboard-layout">
           
-          <!-- Top Row: Perfil y Winrate -->
-          <div class="profile-header-row" style="margin-bottom: 25px;">
-            <div class="profile-info-block">
-              <div class="profile-icon-wrapper">
+          <!-- Panel Izquierdo: Identidad y Rango -->
+          <div class="dash-left-col detail-box">
+            <div class="profile-info-block dash-profile">
+              <div class="profile-icon-wrapper dash-avatar">
                 <img id="detail-profile-icon" src="" alt="Icono" />
-                <div id="detail-level" class="level-badge"></div>
+                <div id="detail-level" class="level-badge dash-level"></div>
               </div>
-              <div class="profile-text">
-                <h3 id="detail-name"></h3>
-                <div id="detail-tags" class="detail-tags">
+              <div class="profile-text dash-name-block">
+                <h3 id="detail-name" class="dash-name"></h3>
+                <div id="detail-tags" class="detail-tags dash-tags">
                   <span id="detail-region" class="region-badge"></span>
                   <span id="detail-status" class="status-badge"></span>
                 </div>
               </div>
             </div>
-            <div class="winrate-block">
-              <div id="detail-wr-big" class="wr-big-text">WINRATE AQUI</div>
-            </div>
-          </div>
 
-          <!-- 3 Columnas Simétricas -->
-          <div class="layout-three-cols">
-            
-            <!-- Izquierda: Estadísticas -->
-            <div class="left-column detail-box">
-              <div class="kda-section">
-                <h3 id="detail-kda-title" style="text-align: center; margin-bottom: 15px; font-size: 2.6rem;">KDA</h3>
-              </div>
-              <ul class="advanced-stats-list">
-                <li>Oro: <span id="stat-gold">--</span></li>
-                <li>Muertes: <span id="stat-deaths">--</span></li>
-                <li>CS/Min: <span id="stat-cs">--</span></li>
-                <li>Kill Particip.: <span id="stat-kp">--</span></li>
-                <li>Daño Prom.: <span id="stat-dmg">--</span></li>
-                <li>Daño Rec.: <span id="stat-dmg-taken">--</span></li>
-              </ul>
-            </div>
-
-            <!-- Centro: Rango -->
-            <div class="center-column detail-box rank-box">
+            <div class="rank-box dash-rank">
               <div class="queue-toggle">
                 <button id="btn-soloq" class="queue-btn active">Solo/Dúo</button>
                 <button id="btn-flexq" class="queue-btn">Flex</button>
               </div>
-              <img id="detail-rank-emblem" src="" alt="Rango" />
-              <div id="detail-tier-rank" class="tier-rank"></div>
-              <div id="detail-lp" class="lp-text"></div>
+              <img id="detail-rank-emblem" src="" alt="Rango" class="dash-emblem" />
+              <div id="detail-tier-rank" class="tier-rank dash-tier"></div>
+              <div id="detail-lp" class="lp-text dash-lp"></div>
               
-              <div class="winrate-bar-container">
+              <div class="winrate-bar-container dash-wr-container">
                 <div class="winrate-bar">
                   <div id="detail-win-bar" class="win-bar"></div>
                 </div>
@@ -170,15 +147,59 @@
                 </div>
               </div>
             </div>
+          </div>
 
-            <!-- Derecha: Campeones -->
-            <div class="right-column detail-box">
-              <h4 style="text-align:center; color:var(--gold-primary); margin-bottom:15px; text-transform:uppercase; font-weight:800; font-size:0.9rem;">Mejores Campeones</h4>
-              <div id="detail-top-champs" class="top-champs-column"></div>
+          <!-- Panel Derecho: Rendimiento -->
+          <div class="dash-right-col">
+            
+            <!-- Bloque Estadísticas: KDA + Winrate + Grid -->
+            <div class="detail-box dash-stats-box">
+              <div class="performance-header">
+                <div class="kda-section">
+                  <h3 id="detail-kda-title" class="dash-kda">KDA</h3>
+                </div>
+                <div class="winrate-block">
+                  <div id="detail-wr-big" class="wr-big-text dash-wr-big">WINRATE</div>
+                </div>
+              </div>
+
+              <!-- Cuadrícula 2x3 o 3x2 -->
+              <div class="advanced-stats-grid">
+                <div class="stat-card">
+                  <span class="stat-label">Oro</span>
+                  <span id="stat-gold" class="stat-value">--</span>
+                </div>
+                <div class="stat-card">
+                  <span class="stat-label">Muertes</span>
+                  <span id="stat-deaths" class="stat-value">--</span>
+                </div>
+                <div class="stat-card">
+                  <span class="stat-label">CS/Min</span>
+                  <span id="stat-cs" class="stat-value">--</span>
+                </div>
+                <div class="stat-card">
+                  <span class="stat-label">Kill Part.</span>
+                  <span id="stat-kp" class="stat-value">--</span>
+                </div>
+                <div class="stat-card">
+                  <span class="stat-label">Daño Prom.</span>
+                  <span id="stat-dmg" class="stat-value">--</span>
+                </div>
+                <div class="stat-card">
+                  <span class="stat-label">Daño Rec.</span>
+                  <span id="stat-dmg-taken" class="stat-value">--</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mejores Campeones -->
+            <div class="detail-box dash-champs-box">
+              <h4 class="dash-champs-title">Mejores Campeones</h4>
+              <div id="detail-top-champs" class="top-champs-row"></div>
             </div>
 
           </div>
-          
+
         </div>
       </div>
     </div>

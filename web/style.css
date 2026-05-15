@@ -1252,72 +1252,72 @@ select option {
   padding-bottom: 10px;
 }
 
-/* Layout de Tres Columnas Simétricas */
-.layout-three-cols {
+/* Dashboard Layout: 2 Columnas Asimétricas */
+.dashboard-layout {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 20px;
-  align-items: stretch;
+  grid-template-columns: 340px 1fr;
+  gap: 30px;
+  align-items: start;
 }
 
-.kda-section h3 {
-  font-size: 3rem;
-  font-weight: 900;
-  background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin: 0 0 25px 0;
-  text-align: left;
-  letter-spacing: -1px;
-  filter: drop-shadow(0 4px 15px rgba(0, 0, 0, 0.8));
-}
-
-.advanced-stats-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+/* Columna Izquierda */
+.dash-left-col {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0;
+  padding: 25px !important;
 }
 
-.advanced-stats-list li {
-  background: linear-gradient(90deg, rgba(200, 155, 60, 0.08) 0%, rgba(0, 0, 0, 0) 100%);
-  border-left: 3px solid var(--gold-primary);
-  padding: 12px 18px;
-  border-radius: 0 8px 8px 0;
-  font-size: 0.75rem;
-  color: var(--text-muted);
+/* Columna Derecha */
+.dash-right-col {
   display: flex;
   flex-direction: column;
-  text-transform: uppercase;
-  font-weight: 700;
-  letter-spacing: 0.08rem;
+}
+
+/* Grid de Estadísticas 3x2 */
+.advanced-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.stat-card {
+  background: linear-gradient(145deg, rgba(200, 155, 60, 0.05) 0%, rgba(0, 0, 0, 0.2) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.1);
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
   transition: all 0.3s ease;
 }
 
-.advanced-stats-list li:hover {
-  background: linear-gradient(90deg, rgba(200, 155, 60, 0.15) 0%, rgba(0, 0, 0, 0) 100%);
-  transform: translateX(5px);
+.stat-card:hover {
+  background: linear-gradient(145deg, rgba(200, 155, 60, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%);
+  border-color: rgba(212, 175, 55, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
 }
 
-.advanced-stats-list span {
-  color: #fff;
-  font-size: 1.15rem;
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.05rem;
+  margin-bottom: 5px;
+}
+
+.stat-value {
+  color: white;
+  font-size: 1.3rem;
   font-weight: 800;
-  margin-top: 4px;
-  text-shadow: 0 2px 10px rgba(255, 255, 255, 0.2);
+  text-shadow: 0 2px 10px rgba(255,255,255,0.2);
 }
 
-
-
-/* Header de Perfil y Winrate */
-.profile-header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* ================== RESTORED CLASSES ================== */
+.detail-box {
   background: linear-gradient(145deg, rgba(15, 15, 18, 0.8) 0%, rgba(5, 5, 5, 0.95) 100%);
-  border: 1px solid rgba(212, 175, 55, 0.2);
+  border: 1px solid rgba(212, 175, 55, 0.15);
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
@@ -1391,22 +1391,11 @@ select option {
 
 .winrate-block {
   text-align: right;
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
-  padding-left: 20px;
 }
 .wr-big-text {
   font-size: 1.4rem;
   color: white;
   font-weight: 300;
-}
-
-/* Rank Box */
-.detail-box {
-  background: linear-gradient(145deg, rgba(15, 15, 18, 0.8) 0%, rgba(5, 5, 5, 0.95) 100%);
-  border: 1px solid rgba(212, 175, 55, 0.15);
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .rank-box {
@@ -1416,7 +1405,7 @@ select option {
   align-items: center;
 }
 
-.rank-box .queue-toggle {
+.queue-toggle {
   display: inline-flex;
   justify-content: center;
   gap: 5px;
@@ -1450,14 +1439,6 @@ select option {
   background: linear-gradient(135deg, var(--gold-primary) 0%, #b8860b 100%);
   color: #000;
   box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
-}
-
-.rank-box img {
-  width: 90px;
-  height: 90px;
-  object-fit: contain;
-  margin-bottom: 5px;
-  filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
 }
 
 .tier-rank {
@@ -1515,43 +1496,49 @@ select option {
 
 .wins-text { color: #4ade80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.4); }
 .losses-text { color: #ef4444; text-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
+/* ============================================== */
 
-/* Top Champs Box */
-.top-champs-column {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.dash-champs-box {
+  margin-top: 20px;
 }
+
+.top-champs-row {
+  display: flex;
+  gap: 15px;
+  justify-content: space-around;
+}
+
 .champ-detail-item {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: 15px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0.4) 100%);
+  gap: 8px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0.4) 100%);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  padding: 12px 15px;
+  padding: 15px 10px;
   border-radius: 10px;
-  width: 100%;
+  width: 30%;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
+
 .champ-detail-item:hover {
   border-color: rgba(212, 175, 55, 0.4);
-  background: linear-gradient(90deg, rgba(212, 175, 55, 0.15) 0%, rgba(0, 0, 0, 0.6) 100%);
-  transform: translateX(-5px);
+  background: linear-gradient(180deg, rgba(212, 175, 55, 0.08) 0%, rgba(0, 0, 0, 0.6) 100%);
+  transform: translateY(-4px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(212, 175, 55, 0.1);
 }
+
 .champ-detail-icon {
-  width: 45px;
-  height: 45px;
+  width: 50px;
+  height: 50px;
   border-radius: 8px;
   border: 2px solid var(--gold-primary);
   box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
 }
+
 .champ-detail-info {
-  text-align: left;
-  flex: 1;
+  text-align: center;
 }
 .champ-detail-name {
   font-weight: 800;
