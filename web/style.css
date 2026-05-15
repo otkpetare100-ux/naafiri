@@ -1258,6 +1258,52 @@ select option {
 .details-modal .modal-header h2 {
   font-size: 2.5rem;
   letter-spacing: 0.1rem;
+  margin: 0;
+}
+
+.btn-refresh-profile {
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid var(--gold-primary);
+  color: var(--gold-primary);
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
+  letter-spacing: 0.05rem;
+}
+
+.btn-refresh-profile:hover {
+  background: var(--gold-primary);
+  color: #000;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+}
+
+.refresh-icon-spin {
+  display: inline-block;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.btn-refresh-profile.loading {
+  opacity: 0.8;
+  cursor: wait;
+  background: rgba(212, 175, 55, 0.3);
+  color: #fff;
+  border-color: rgba(212, 175, 55, 0.5);
+}
+
+.btn-refresh-profile.loading .refresh-icon-spin {
+  animation: spinIcon 1s linear infinite;
+}
+
+@keyframes spinIcon {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Dashboard Layout: 2 Columnas Asimétricas */

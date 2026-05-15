@@ -443,7 +443,7 @@ function openPlayerDetails(player) {
   const btnUpdateMatches = document.getElementById('btn-update-matches');
   btnUpdateMatches.onclick = async () => {
     try {
-      btnUpdateMatches.innerText = 'BUSCANDO PARTIDAS...';
+      btnUpdateMatches.classList.add('loading');
       btnUpdateMatches.disabled = true;
       
       const response = await fetch(`${API_BASE}/summoners/${player.puuid}/matches/update`, {
@@ -454,9 +454,7 @@ function openPlayerDetails(player) {
       if (response.ok) {
         showToast(data.message, data.updated ? 'success' : 'info');
         if (data.updated && data.stats) {
-          loadStats(data.stats); // Actualizar interfaz sin cerrar modal
-          // Opcional: Actualizar el jugador local en la tabla si quisiéramos, 
-          // pero el modal ya se actualizó.
+          loadStats(data.stats);
         }
       } else {
         showToast(`❌ ${data.message}`, 'error');
@@ -465,7 +463,7 @@ function openPlayerDetails(player) {
       console.error(e);
       showToast('❌ Error al actualizar partidas.', 'error');
     } finally {
-      btnUpdateMatches.innerText = 'ACTUALIZAR PARTIDAS RECIENTES';
+      btnUpdateMatches.classList.remove('loading');
       btnUpdateMatches.disabled = false;
     }
   };

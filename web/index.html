@@ -107,7 +107,12 @@
     <div id="player-details-modal" class="modal">
       <div class="modal-content details-modal">
         <div class="modal-header">
-          <h2>Perfil del Invocador</h2>
+          <div style="display: flex; align-items: center; gap: 20px;">
+            <h2>Perfil del Invocador</h2>
+            <button id="btn-update-matches" class="btn-refresh-profile" title="Buscar Partidas Nuevas">
+              <span class="refresh-icon-spin">↻</span> ACTUALIZAR
+            </button>
+          </div>
           <span class="close-modal close-details">&times;</span>
         </div>
         <div class="modal-body dashboard-layout">
@@ -190,9 +195,6 @@
                   <span id="stat-dmg-taken" class="stat-value">--</span>
                 </div>
               </div>
-              <button id="btn-update-matches" class="submit-btn-gold" style="margin-top: 20px; width: 100%; font-size: 0.85rem; padding: 12px; letter-spacing: 0.05rem;">
-                ACTUALIZAR PARTIDAS RECIENTES
-              </button>
             </div>
 
             <!-- Mejores Campeones -->
