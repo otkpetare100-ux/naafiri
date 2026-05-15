@@ -1706,8 +1706,9 @@ select option {
 
 .match-result {
   font-weight: 900;
-  width: 90px;
-  letter-spacing: 1px;
+  width: 125px; /* Aumentado para dar espacio a la fecha */
+  letter-spacing: 0.5px;
+  font-size: 0.85rem;
 }
 
 .match-win .match-result { color: #4ade80; }

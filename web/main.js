@@ -472,7 +472,11 @@ function openPlayerDetails(player) {
         const isRemake = match.isRemake;
         const isWin = match.win;
         const winClass = isRemake ? 'match-remake' : (isWin ? 'match-win' : 'match-loss');
-        const resultText = isRemake ? 'REMAKE' : (isWin ? 'VICTORIA' : 'DERROTA');
+        
+        const dateObj = new Date(match.timestamp || Date.now());
+        const dateStr = `${String(dateObj.getDate()).padStart(2,'0')}/${String(dateObj.getMonth()+1).padStart(2,'0')}/${String(dateObj.getFullYear()).slice(-2)}`;
+        const resultLetter = isRemake ? 'R' : (isWin ? 'W' : 'L');
+        const resultText = `${dateStr} — ${resultLetter}`;
         
         const kdaStr = `${match.kills} / ${match.deaths} / ${match.assists}`;
         const kdaRatio = match.deaths > 0 ? ((match.kills + match.assists) / match.deaths).toFixed(2) : 'Perfect';
