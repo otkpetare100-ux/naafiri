@@ -323,15 +323,22 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
     };
     const routing = routingMap[account.region] || 'americas';
 
-    // Obtener IDs de las últimas 20 partidas de Ranked
-    const matchIdsUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?type=ranked&start=0&count=20&api_key=${RIOT_API_KEY}`;
-    const idsResp = await fetch(matchIdsUrl);
+    // Obtener IDs de las últimas 20 partidas de Solo y Flex por separado
+    const matchIdsSoloUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?queue=420&start=0&count=20&api_key=${RIOT_API_KEY}`;
+    const matchIdsFlexUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?queue=440&start=0&count=20&api_key=${RIOT_API_KEY}`;
     
-    if (!idsResp.ok) {
-      return res.status(idsResp.status).json({ message: 'Error obteniendo historial de Riot.' });
+    const [idsSoloResp, idsFlexResp] = await Promise.all([
+      fetch(matchIdsSoloUrl),
+      fetch(matchIdsFlexUrl)
+    ]);
+    
+    if (!idsSoloResp.ok && !idsFlexResp.ok) {
+      return res.status(500).json({ message: 'Error obteniendo historial de Riot.' });
     }
     
-    const fetchedMatchIds = await idsResp.json();
+    const fetchedSoloIds = idsSoloResp.ok ? await idsSoloResp.json() : [];
+    const fetchedFlexIds = idsFlexResp.ok ? await idsFlexResp.json() : [];
+    const fetchedMatchIds = [...new Set([...fetchedSoloIds, ...fetchedFlexIds])];
     const existingMatches = account.matchStatsHistory || [];
     const existingMatchIds = existingMatches.map(m => m.matchId);
 
@@ -390,39 +397,48 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
       return res.json({ message: 'No se pudieron procesar las partidas nuevas.', updated: false });
     }
 
-    // Combinar y mantener solo las últimas 20
+    // Combinar y mantener hasta 40 partidas para cubrir ambas colas
     const combinedMatches = [...newMatchStats, ...existingMatches]
       .sort((a, b) => b.timestamp - a.timestamp)
-      .slice(0, 20);
+      .slice(0, 40);
 
-    // Calcular promedios (Excluyendo Remakes)
-    let sumKills = 0, sumDeaths = 0, sumAssists = 0, sumGold = 0, sumCs = 0, sumMins = 0, sumKp = 0, sumDmgDealt = 0, sumDmgTaken = 0;
-    
-    const validMatches = combinedMatches.filter(m => !m.isRemake);
+    // Calcular promedios por cola (Excluyendo Remakes y tomando máx 20 por cola)
+    const calculateAverages = (queueIdFilter) => {
+      let sumKills = 0, sumDeaths = 0, sumAssists = 0, sumGold = 0, sumCs = 0, sumMins = 0, sumKp = 0, sumDmgDealt = 0, sumDmgTaken = 0;
+      
+      const validMatches = combinedMatches
+        .filter(m => !m.isRemake && m.queueId === queueIdFilter)
+        .slice(0, 20);
 
-    validMatches.forEach(m => {
-      sumKills += m.kills;
-      sumDeaths += m.deaths;
-      sumAssists += m.assists;
-      sumGold += m.gold;
-      sumCs += m.cs;
-      sumMins += m.durationMins;
-      sumKp += m.kp;
-      sumDmgDealt += m.damageDealt;
-      sumDmgTaken += m.damageTaken;
-    });
+      validMatches.forEach(m => {
+        sumKills += m.kills;
+        sumDeaths += m.deaths;
+        sumAssists += m.assists;
+        sumGold += m.gold;
+        sumCs += m.cs;
+        sumMins += m.durationMins;
+        sumKp += m.kp;
+        sumDmgDealt += m.damageDealt;
+        sumDmgTaken += m.damageTaken;
+      });
 
-    const count = validMatches.length;
-    
+      const count = validMatches.length;
+      
+      return {
+        kda: count > 0 ? (sumDeaths > 0 ? ((sumKills + sumAssists) / sumDeaths).toFixed(2) : ((sumKills + sumAssists).toFixed(2))) : "0.00",
+        avgGold: count > 0 ? Math.round(sumGold / count) : 0,
+        avgDeaths: count > 0 ? (sumDeaths / count).toFixed(1) : "0.0",
+        csPerMin: count > 0 ? (sumMins > 0 ? (sumCs / sumMins).toFixed(1) : 0) : "0.0",
+        avgKp: count > 0 ? Math.round((sumKp / count) * 100) : 0,
+        avgDamageDealt: count > 0 ? Math.round(sumDmgDealt / count) : 0,
+        avgDamageTaken: count > 0 ? Math.round(sumDmgTaken / count) : 0,
+        totalMatchesCalculated: count
+      };
+    };
+
     const avgStats = {
-      kda: count > 0 ? (sumDeaths > 0 ? ((sumKills + sumAssists) / sumDeaths).toFixed(2) : ((sumKills + sumAssists).toFixed(2))) : "0.00",
-      avgGold: count > 0 ? Math.round(sumGold / count) : 0,
-      avgDeaths: count > 0 ? (sumDeaths / count).toFixed(1) : "0.0",
-      csPerMin: count > 0 ? (sumMins > 0 ? (sumCs / sumMins).toFixed(1) : 0) : "0.0",
-      avgKp: count > 0 ? Math.round((sumKp / count) * 100) : 0,
-      avgDamageDealt: count > 0 ? Math.round(sumDmgDealt / count) : 0,
-      avgDamageTaken: count > 0 ? Math.round(sumDmgTaken / count) : 0,
-      totalMatchesCalculated: count
+      soloq: calculateAverages(420),
+      flexq: calculateAverages(440)
     };
 
     await db.collection('accounts').updateOne(

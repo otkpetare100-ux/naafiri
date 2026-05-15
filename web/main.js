@@ -383,6 +383,7 @@ function openPlayerDetails(player) {
     btnFlex.classList.remove('active');
     currentQueue = 'soloq';
     renderQueueStats(player.soloQ);
+    if (typeof loadStats === 'function') loadStats(player.advancedStats ? player.advancedStats.soloq || player.advancedStats : null);
     if (typeof renderHistory === 'function') renderHistory(player.matchStatsHistory, currentQueue);
   };
 
@@ -391,6 +392,7 @@ function openPlayerDetails(player) {
     btnSolo.classList.remove('active');
     currentQueue = 'flexq';
     renderQueueStats(player.flexQ);
+    if (typeof loadStats === 'function') loadStats(player.advancedStats ? player.advancedStats.flexq || player.advancedStats : null);
     if (typeof renderHistory === 'function') renderHistory(player.matchStatsHistory, currentQueue);
   };
 
@@ -496,11 +498,9 @@ function openPlayerDetails(player) {
     } else {
       historyContainer.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-muted); font-size: 0.9rem;">No hay historial guardado. Haz clic en "Actualizar Datos" para cargar tus últimas partidas.</div>';
     }
-  };
-
-  loadStats(player.advancedStats);
   // El primer renderQueueStats invoca btnSolo.onclick() en la línea 392 aprox,
   // pero lo llamaremos explícitamente abajo para evitar condiciones de carrera
+  if (typeof loadStats === 'function') loadStats(player.advancedStats ? player.advancedStats[currentQueue] || player.advancedStats : null);
   if (typeof renderHistory === 'function') renderHistory(player.matchStatsHistory, currentQueue);
 
   // Botón para actualizar partidas recientes
