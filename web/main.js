@@ -425,7 +425,7 @@ function openPlayerDetails(player) {
 
   // Cargar Estadísticas si existen
   function loadStats(stats) {
-    if (stats) {
+    if (stats && stats.avgGold !== undefined) {
       document.getElementById('detail-kda-title').textContent = `${stats.kda} KDA`;
       document.getElementById('stat-gold').textContent = stats.avgGold.toLocaleString('es-ES');
       document.getElementById('stat-deaths').textContent = stats.avgDeaths;
@@ -442,7 +442,7 @@ function openPlayerDetails(player) {
       document.getElementById('stat-dmg').textContent = 'N/A';
       document.getElementById('stat-dmg-taken').textContent = 'N/A';
     }
-  };
+  }
 
   // Render Historial de Partidas
   function renderHistory(history, queueType) {
@@ -520,9 +520,9 @@ function openPlayerDetails(player) {
       if (response.ok) {
         showToast(data.message, data.updated ? 'success' : 'info');
         if (data.updated && data.stats) {
-          loadStats(data.stats);
           player.advancedStats = data.stats; 
           player.matchStatsHistory = data.history; // Guardar historial nuevo
+          loadStats(player.advancedStats[currentQueue]);
           renderHistory(data.history, currentQueue); // Refrescar lista de historial filtrado
         }
       } else {
