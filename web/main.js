@@ -455,6 +455,7 @@ function openPlayerDetails(player) {
         showToast(data.message, data.updated ? 'success' : 'info');
         if (data.updated && data.stats) {
           loadStats(data.stats);
+          player.advancedStats = data.stats; // Guardarlo en memoria para no perderlo al cerrar la ventana
         }
       } else {
         showToast(`❌ ${data.message}`, 'error');

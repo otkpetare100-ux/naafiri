@@ -1262,25 +1262,27 @@ select option {
 }
 
 .btn-refresh-profile {
-  background: rgba(212, 175, 55, 0.1);
-  border: 1px solid var(--gold-primary);
-  color: var(--gold-primary);
-  padding: 6px 14px;
+  background: linear-gradient(135deg, var(--gold-primary) 0%, #b8860b 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #000;
+  padding: 8px 18px;
   border-radius: 8px;
-  font-size: 0.75rem;
-  font-weight: 800;
+  font-size: 0.8rem;
+  font-weight: 900;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.3s;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   letter-spacing: 0.05rem;
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+  text-transform: uppercase;
 }
 
 .btn-refresh-profile:hover {
-  background: var(--gold-primary);
-  color: #000;
-  box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
+  background: linear-gradient(135deg, #fceb9e 0%, var(--gold-primary) 100%);
 }
 
 .refresh-icon-spin {

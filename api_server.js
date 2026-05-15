@@ -133,7 +133,8 @@ app.get('/api/ladder', async (req, res) => {
         topChampions: acc.topChampions || [],
         history: acc.history || [],
         soloQ: soloQ,
-        flexQ: acc.flexQ || { tier: 'UNRANKED', rank: '', leaguePoints: 0, wins: 0, losses: 0 }
+        flexQ: acc.flexQ || { tier: 'UNRANKED', rank: '', leaguePoints: 0, wins: 0, losses: 0 },
+        advancedStats: acc.advancedStats || null
       };
     });
 
