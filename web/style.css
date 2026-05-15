@@ -22,8 +22,8 @@
 }
 
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 4px;
+  height: 4px;
 }
 
 ::-webkit-scrollbar-track {
@@ -32,18 +32,20 @@
 
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg,
-    #d4af37 0%,
-    #c89b3c 40%,
-    #3a2a00 80%,
+    #000000 0%,
+    #c89b3c 30%,
+    #d4af37 50%,
+    #c89b3c 70%,
     #000000 100%);
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg,
-    #f1c40f 0%,
-    #d4af37 40%,
-    #4a3500 80%,
+    #000000 0%,
+    #d4af37 30%,
+    #f1c40f 50%,
+    #d4af37 70%,
     #000000 100%);
 }
 
