@@ -1627,3 +1627,75 @@ select option {
   margin-top: 5px;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
 }
+
+/* Match History Styles */
+.dash-history-box {
+  margin-top: 15px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.match-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.match-history-list::-webkit-scrollbar {
+  width: 6px;
+}
+.match-history-list::-webkit-scrollbar-thumb {
+  background: var(--gold-primary);
+  border-radius: 4px;
+}
+
+.match-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 5px solid #666;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.match-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.match-item.match-win {
+  border-left-color: #22c55e;
+  background: linear-gradient(90deg, rgba(34, 197, 94, 0.05) 0%, rgba(0,0,0,0) 100%);
+}
+
+.match-item.match-loss {
+  border-left-color: #ef4444;
+  background: linear-gradient(90deg, rgba(239, 68, 68, 0.05) 0%, rgba(0,0,0,0) 100%);
+}
+
+.match-result {
+  font-weight: 900;
+  width: 90px;
+  letter-spacing: 1px;
+}
+
+.match-win .match-result { color: #4ade80; }
+.match-loss .match-result { color: #ef4444; }
+
+.match-stat {
+  color: #fff;
+  flex: 1;
+  text-align: center;
+}
+
+.match-stat strong {
+  color: var(--gold-primary);
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  margin-right: 6px;
+}

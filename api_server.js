@@ -134,7 +134,8 @@ app.get('/api/ladder', async (req, res) => {
         history: acc.history || [],
         soloQ: soloQ,
         flexQ: acc.flexQ || { tier: 'UNRANKED', rank: '', leaguePoints: 0, wins: 0, losses: 0 },
-        advancedStats: acc.advancedStats || null
+        advancedStats: acc.advancedStats || null,
+        matchStatsHistory: acc.matchStatsHistory || []
       };
     });
 
@@ -422,7 +423,8 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
     res.json({ 
       message: `¡Se actualizaron ${newMatchStats.length} partidas nuevas!`, 
       updated: true, 
-      stats: avgStats 
+      stats: avgStats,
+      history: combinedMatches
     });
 
   } catch (error) {

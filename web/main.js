@@ -437,7 +437,41 @@ function openPlayerDetails(player) {
     }
   };
 
+  // Render Historial de Partidas
+  const renderHistory = (history) => {
+    const historyContainer = document.getElementById('detail-match-history');
+    historyContainer.innerHTML = '';
+    
+    if (history && history.length > 0) {
+      history.forEach(match => {
+        const isWin = match.win;
+        const winClass = isWin ? 'match-win' : 'match-loss';
+        const resultText = isWin ? 'VICTORIA' : 'DERROTA';
+        
+        const kdaStr = `${match.kills} / ${match.deaths} / ${match.assists}`;
+        const kdaRatio = match.deaths > 0 ? ((match.kills + match.assists) / match.deaths).toFixed(2) : 'Perfect';
+        const goldStr = match.gold.toLocaleString('es-ES');
+        const dmgStr = match.damageDealt.toLocaleString('es-ES');
+        const kpStr = Math.round(match.kp * 100);
+        
+        historyContainer.innerHTML += `
+          <div class="match-item ${winClass}">
+            <div class="match-result">${resultText}</div>
+            <div class="match-stat"><strong>KDA:</strong> ${kdaStr} <span style="opacity:0.6;font-size:0.7rem;">(${kdaRatio})</span></div>
+            <div class="match-stat"><strong>CS:</strong> ${match.cs}</div>
+            <div class="match-stat"><strong>Oro:</strong> ${goldStr}</div>
+            <div class="match-stat"><strong>Daño:</strong> ${dmgStr}</div>
+            <div class="match-stat"><strong>KP:</strong> ${kpStr}%</div>
+          </div>
+        `;
+      });
+    } else {
+      historyContainer.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-muted); font-size: 0.9rem;">No hay historial guardado. Haz clic en "Actualizar Datos" para cargar tus últimas partidas.</div>';
+    }
+  };
+
   loadStats(player.advancedStats);
+  renderHistory(player.matchStatsHistory);
 
   // Botón para actualizar partidas recientes
   const btnUpdateMatches = document.getElementById('btn-update-matches');
@@ -455,7 +489,9 @@ function openPlayerDetails(player) {
         showToast(data.message, data.updated ? 'success' : 'info');
         if (data.updated && data.stats) {
           loadStats(data.stats);
-          player.advancedStats = data.stats; // Guardarlo en memoria para no perderlo al cerrar la ventana
+          player.advancedStats = data.stats; 
+          player.matchStatsHistory = data.history; // Guardar historial nuevo
+          renderHistory(data.history); // Refrescar lista de historial
         }
       } else {
         showToast(`❌ ${data.message}`, 'error');
