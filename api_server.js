@@ -156,6 +156,20 @@ app.get('/api/summoners', async (req, res) => {
   }
 });
 
+// Endpoint rápido para obtener el estado online/offline de todos
+app.get('/api/live-status', async (req, res) => {
+  try {
+    const accounts = await db.collection('accounts').find({}, { projection: { puuid: 1, liveGameStartedAt: 1 } }).toArray();
+    const statusMap = {};
+    accounts.forEach(acc => {
+      statusMap[acc.puuid] = acc.liveGameStartedAt ? true : false;
+    });
+    res.json(statusMap);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Cooldown global en memoria (clave: gameName#tagLine)
 const refreshCooldowns = new Map();
 

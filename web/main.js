@@ -171,7 +171,7 @@ function renderLadder(players) {
         <div class="player-name-row">
           <span class="name">${player.gameName}</span>
           ${player.discordId ? '<span class="discord-badge">Linked</span>' : ''}
-          <span class="status-dot ${player.isLive ? 'online' : ''}"></span>
+          <span class="status-dot ${player.isLive ? 'online' : ''}" id="live-dot-${player.puuid}"></span>
         </div>
         <div class="player-meta">
           <span class="tag">#${player.tagLine}</span>
@@ -317,8 +317,12 @@ function initDeleteLogic() {
 // Hacer funciones disponibles globalmente para los onclick de los strings HTML
 window.openDeleteModal = openDeleteModal;
 
+// Variable global para rastrear modal
+let currentModalPuuid = null;
+
 // Modal de Detalles del Jugador
 function openPlayerDetails(player) {
+  currentModalPuuid = player.puuid;
   const modal = document.getElementById('player-details-modal');
   
   // Header Info
@@ -540,9 +544,9 @@ function openPlayerDetails(player) {
   // Bind close button
   modal.querySelector('.close-details').onclick = () => {
     modal.classList.remove('active');
-    document.body.style.overflow = '';
+    document.body.style.overflow = ''; // Restaurar scroll del body
+    currentModalPuuid = null;
   };
-
   modal.classList.add('active');
   document.body.style.overflow = 'hidden';
 }
@@ -569,6 +573,7 @@ function initModal() {
     if (event.target === detailsModal) {
       detailsModal.classList.remove('active');
       document.body.style.overflow = '';
+      currentModalPuuid = null;
     }
   };
 
@@ -644,4 +649,36 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Auto-refresh cada 5 minutos: solo re-renderiza si hay cambios en historial o LP
   setInterval(smartRefresh, 5 * 60 * 1000);
 });
+
+// Actualización silenciosa del estado en vivo cada 30 segundos
+async function pollLiveStatus() {
+  try {
+    const res = await fetch(`${API_BASE}/live-status`);
+    if (!res.ok) return;
+    const statusMap = await res.json();
+    
+    for (const [puuid, isLive] of Object.entries(statusMap)) {
+      // Actualizar dot en la tarjeta
+      const dot = document.getElementById(`live-dot-${puuid}`);
+      if (dot) {
+        if (isLive) dot.classList.add('online');
+        else dot.classList.remove('online');
+      }
+      
+      // Actualizar el estado en el modal si está abierto y es de este jugador
+      if (currentModalPuuid === puuid) {
+        const statusEl = document.getElementById('detail-status');
+        if (statusEl) {
+          statusEl.className = isLive ? 'status-badge' : 'status-badge offline';
+          statusEl.textContent = isLive ? 'EN PARTIDA' : 'DESCONECTADO';
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Error polling live status:', e);
+  }
+}
+
+// Iniciar polling
+setInterval(pollLiveStatus, 30000);
 
