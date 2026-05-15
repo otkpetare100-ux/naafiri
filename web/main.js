@@ -424,7 +424,7 @@ function openPlayerDetails(player) {
   }
 
   // Cargar Estadísticas si existen
-  const loadStats = (stats) => {
+  function loadStats(stats) {
     if (stats) {
       document.getElementById('detail-kda-title').textContent = `${stats.kda} KDA`;
       document.getElementById('stat-gold').textContent = stats.avgGold.toLocaleString('es-ES');
