@@ -428,9 +428,11 @@ function openPlayerDetails(player) {
   // Bind close button
   modal.querySelector('.close-details').onclick = () => {
     modal.classList.remove('active');
+    document.body.style.overflow = '';
   };
 
   modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
 }
 
 // Lógica del Modal para Añadir Jugador
@@ -452,7 +454,10 @@ function initModal() {
     
     if (event.target === modal) modal.classList.remove('active');
     if (event.target === confirmDeleteModal) confirmDeleteModal.classList.remove('active');
-    if (event.target === detailsModal) detailsModal.classList.remove('active');
+    if (event.target === detailsModal) {
+      detailsModal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
   };
 
   form.onsubmit = async (e) => {
