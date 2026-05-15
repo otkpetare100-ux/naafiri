@@ -498,6 +498,8 @@ function openPlayerDetails(player) {
     } else {
       historyContainer.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-muted); font-size: 0.9rem;">No hay historial guardado. Haz clic en "Actualizar Datos" para cargar tus últimas partidas.</div>';
     }
+  } // <-- Llave de cierre de renderHistory restaurada
+
   // El primer renderQueueStats invoca btnSolo.onclick() en la línea 392 aprox,
   // pero lo llamaremos explícitamente abajo para evitar condiciones de carrera
   if (typeof loadStats === 'function') loadStats(player.advancedStats ? player.advancedStats[currentQueue] || player.advancedStats : null);
