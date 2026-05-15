@@ -457,12 +457,12 @@ function openPlayerDetails(player) {
         const champName = match.championName || 'Unknown';
         const champIconUrl = champName !== 'Unknown' 
           ? `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${champName}.png`
-          : '/assets/placeholder_champ.png';
+          : `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png`;
         
         historyContainer.innerHTML += `
           <div class="match-item ${winClass}">
             <div class="match-champ">
-              <img src="${champIconUrl}" class="match-champ-icon" alt="${champName}" onerror="this.src='/assets/placeholder_champ.png'" title="${champName}" />
+              <img src="${champIconUrl}" class="match-champ-icon" alt="${champName}" onerror="this.onerror=null; this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png';" title="${champName}" />
             </div>
             <div class="match-result">${resultText}</div>
             <div class="match-stat"><strong>KDA:</strong> ${kdaStr} <span style="opacity:0.6;font-size:0.7rem;">(${kdaRatio})</span></div>
