@@ -468,40 +468,67 @@ function openPlayerDetails(player) {
         return;
       }
 
-      filteredHistory.forEach(match => {
-        const isRemake = match.isRemake;
-        const isWin = match.win;
-        const winClass = isRemake ? 'match-remake' : (isWin ? 'match-win' : 'match-loss');
-        
-        const dateObj = new Date(match.timestamp || Date.now());
-        const dateStr = `${String(dateObj.getDate()).padStart(2,'0')}/${String(dateObj.getMonth()+1).padStart(2,'0')}/${String(dateObj.getFullYear()).slice(-2)}`;
-        const resultLetter = isRemake ? 'R' : (isWin ? 'W' : 'L');
-        const resultText = `${dateStr} — ${resultLetter}`;
-        
-        const kdaStr = `${match.kills} / ${match.deaths} / ${match.assists}`;
-        const kdaRatio = match.deaths > 0 ? ((match.kills + match.assists) / match.deaths).toFixed(2) : 'Perfect';
-        const goldStr = match.gold.toLocaleString('es-ES');
-        const dmgStr = match.damageDealt.toLocaleString('es-ES');
-        const kpStr = Math.round(match.kp * 100);
+      // Agrupar partidas por día
+      const grouped = [];
+      let lastDateStr = "";
 
-        const champName = match.championName || 'Unknown';
-        const champIconUrl = champName !== 'Unknown' 
-          ? `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${champName}.png`
-          : `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png`;
+      filteredHistory.forEach(match => {
+        const dateObj = new Date(match.timestamp || Date.now());
+        const dateStr = dateObj.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }).replace('.', '');
         
+        if (dateStr !== lastDateStr) {
+          grouped.push({ date: dateStr, matches: [], wins: 0, losses: 0 });
+          lastDateStr = dateStr;
+        }
+        
+        const currentGroup = grouped[grouped.length - 1];
+        currentGroup.matches.push(match);
+        if (!match.isRemake) {
+          if (match.win) currentGroup.wins++;
+          else currentGroup.losses++;
+        }
+      });
+
+      grouped.forEach(group => {
         historyContainer.innerHTML += `
-          <div class="match-item ${winClass}">
-            <div class="match-champ">
-              <img src="${champIconUrl}" class="match-champ-icon" alt="${champName}" onerror="this.onerror=null; this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png';" title="${champName}" />
-            </div>
-            <div class="match-result">${resultText}</div>
-            <div class="match-stat"><strong>KDA:</strong> ${kdaStr} <span style="opacity:0.6;font-size:0.7rem;">(${kdaRatio})</span></div>
-            <div class="match-stat"><strong>CS:</strong> ${match.cs}</div>
-            <div class="match-stat"><strong>Oro:</strong> ${goldStr}</div>
-            <div class="match-stat"><strong>Daño:</strong> ${dmgStr}</div>
-            <div class="match-stat"><strong>KP:</strong> ${kpStr}%</div>
+          <div class="date-separator">
+            <span class="ds-date">${group.date}</span>
+            <span class="ds-badge win">${group.wins} win</span>
+            <span class="ds-badge loss">${group.losses} loss</span>
           </div>
         `;
+
+        group.matches.forEach(match => {
+          const isRemake = match.isRemake;
+          const isWin = match.win;
+          const winClass = isRemake ? 'match-remake' : (isWin ? 'match-win' : 'match-loss');
+          const resultText = isRemake ? 'REMAKE' : (isWin ? 'VICTORIA' : 'DERROTA');
+          
+          const kdaStr = `${match.kills} / ${match.deaths} / ${match.assists}`;
+          const kdaRatio = match.deaths > 0 ? ((match.kills + match.assists) / match.deaths).toFixed(2) : 'Perfect';
+          const goldStr = match.gold.toLocaleString('es-ES');
+          const dmgStr = match.damageDealt.toLocaleString('es-ES');
+          const kpStr = Math.round(match.kp * 100);
+
+          const champName = match.championName || 'Unknown';
+          const champIconUrl = champName !== 'Unknown' 
+            ? `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${champName}.png`
+            : `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png`;
+          
+          historyContainer.innerHTML += `
+            <div class="match-item ${winClass}">
+              <div class="match-champ">
+                <img src="${champIconUrl}" class="match-champ-icon" alt="${champName}" onerror="this.onerror=null; this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png';" title="${champName}" />
+              </div>
+              <div class="match-result">${resultText}</div>
+              <div class="match-stat"><strong>KDA:</strong> ${kdaStr} <span style="opacity:0.6;font-size:0.7rem;">(${kdaRatio})</span></div>
+              <div class="match-stat"><strong>CS:</strong> ${match.cs}</div>
+              <div class="match-stat"><strong>Oro:</strong> ${goldStr}</div>
+              <div class="match-stat"><strong>Daño:</strong> ${dmgStr}</div>
+              <div class="match-stat"><strong>KP:</strong> ${kpStr}%</div>
+            </div>
+          `;
+        });
       });
     } else {
       historyContainer.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-muted); font-size: 0.9rem;">No hay historial guardado. Haz clic en "Actualizar Datos" para cargar tus últimas partidas.</div>';
