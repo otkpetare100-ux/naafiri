@@ -453,9 +453,17 @@ function openPlayerDetails(player) {
         const goldStr = match.gold.toLocaleString('es-ES');
         const dmgStr = match.damageDealt.toLocaleString('es-ES');
         const kpStr = Math.round(match.kp * 100);
+
+        const champName = match.championName || 'Unknown';
+        const champIconUrl = champName !== 'Unknown' 
+          ? `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${champName}.png`
+          : '/assets/placeholder_champ.png';
         
         historyContainer.innerHTML += `
           <div class="match-item ${winClass}">
+            <div class="match-champ">
+              <img src="${champIconUrl}" class="match-champ-icon" alt="${champName}" onerror="this.src='/assets/placeholder_champ.png'" title="${champName}" />
+            </div>
             <div class="match-result">${resultText}</div>
             <div class="match-stat"><strong>KDA:</strong> ${kdaStr} <span style="opacity:0.6;font-size:0.7rem;">(${kdaRatio})</span></div>
             <div class="match-stat"><strong>CS:</strong> ${match.cs}</div>
