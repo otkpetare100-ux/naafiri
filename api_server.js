@@ -168,14 +168,9 @@ app.post('/api/summoners', async (req, res) => {
     return res.status(400).json({ message: 'Faltan datos requeridos.' });
   }
 
-  // Comprobar cooldown global (5 min)
+  // Cooldown temporalmente deshabilitado por petición del usuario
   const cooldownKey = `${gameName.toLowerCase()}#${tagLine.toLowerCase()}`;
-  const lastRefresh = refreshCooldowns.get(cooldownKey);
   const now = Date.now();
-  if (lastRefresh && (now - lastRefresh) < 5 * 60 * 1000) {
-    const remaining = Math.ceil((5 * 60 * 1000 - (now - lastRefresh)) / 60000);
-    return res.status(429).json({ message: `⏳ Espera ${remaining} min antes de actualizar a ${gameName} de nuevo.` });
-  }
 
   console.log(`[POST] Intentando añadir/actualizar: ${gameName}#${tagLine} en ${region}`);
 
