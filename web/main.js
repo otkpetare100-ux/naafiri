@@ -376,16 +376,22 @@ function openPlayerDetails(player) {
   const btnSolo = document.getElementById('btn-soloq');
   const btnFlex = document.getElementById('btn-flexq');
 
+  let currentQueue = 'soloq';
+
   btnSolo.onclick = () => {
     btnSolo.classList.add('active');
     btnFlex.classList.remove('active');
+    currentQueue = 'soloq';
     renderQueueStats(player.soloQ);
+    if (typeof renderHistory === 'function') renderHistory(player.matchStatsHistory, currentQueue);
   };
 
   btnFlex.onclick = () => {
     btnFlex.classList.add('active');
     btnSolo.classList.remove('active');
+    currentQueue = 'flexq';
     renderQueueStats(player.flexQ);
+    if (typeof renderHistory === 'function') renderHistory(player.matchStatsHistory, currentQueue);
   };
 
   // Render default (SoloQ)
@@ -437,12 +443,26 @@ function openPlayerDetails(player) {
   };
 
   // Render Historial de Partidas
-  const renderHistory = (history) => {
+  function renderHistory(history, queueType) {
     const historyContainer = document.getElementById('detail-match-history');
     historyContainer.innerHTML = '';
     
     if (history && history.length > 0) {
-      history.forEach(match => {
+      const filteredHistory = history.filter(match => {
+        if (queueType === 'soloq') {
+          return !match.queueId || match.queueId === 420; // old matches default to soloq
+        } else if (queueType === 'flexq') {
+          return match.queueId === 440;
+        }
+        return true;
+      });
+
+      if (filteredHistory.length === 0) {
+        historyContainer.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-muted); font-size: 0.9rem;">No hay partidas recientes guardadas para esta cola.</div>';
+        return;
+      }
+
+      filteredHistory.forEach(match => {
         const isRemake = match.isRemake;
         const isWin = match.win;
         const winClass = isRemake ? 'match-remake' : (isWin ? 'match-win' : 'match-loss');
@@ -479,7 +499,9 @@ function openPlayerDetails(player) {
   };
 
   loadStats(player.advancedStats);
-  renderHistory(player.matchStatsHistory);
+  // El primer renderQueueStats invoca btnSolo.onclick() en la línea 392 aprox,
+  // pero lo llamaremos explícitamente abajo para evitar condiciones de carrera
+  if (typeof renderHistory === 'function') renderHistory(player.matchStatsHistory, currentQueue);
 
   // Botón para actualizar partidas recientes
   const btnUpdateMatches = document.getElementById('btn-update-matches');
@@ -499,7 +521,7 @@ function openPlayerDetails(player) {
           loadStats(data.stats);
           player.advancedStats = data.stats; 
           player.matchStatsHistory = data.history; // Guardar historial nuevo
-          renderHistory(data.history); // Refrescar lista de historial
+          renderHistory(data.history, currentQueue); // Refrescar lista de historial filtrado
         }
       } else {
         showToast(`❌ ${data.message}`, 'error');
