@@ -108,10 +108,7 @@
       <div class="modal-content details-modal">
         <div class="modal-header">
           <div style="display: flex; align-items: center; gap: 20px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <h2 id="detail-name" style="margin: 0;"></h2>
-              <div id="otp-badge-container"></div>
-            </div>
+            <h2 id="detail-name" style="margin: 0; color: var(--gold-primary); text-transform: uppercase; letter-spacing: 2px;">PERFIL</h2>
             <button id="btn-update-matches" class="btn-refresh-profile" title="Buscar Partidas Nuevas">
               <span class="refresh-icon-spin">↻</span> ACTUALIZAR DATOS
             </button>
@@ -128,14 +125,15 @@
                 <img id="detail-profile-icon" src="" alt="Icono" />
                 <div id="detail-level" class="level-badge dash-level"></div>
               </div>
-              <div class="profile-text dash-name-block">
-                <h3 id="detail-name" class="dash-name"></h3>
-                <div id="detail-tags" class="detail-tags dash-tags">
+              <div class="profile-main-info">
+                <div class="profile-badges">
                   <span id="detail-region" class="region-badge"></span>
                   <span id="detail-status" class="status-badge"></span>
                 </div>
               </div>
             </div>
+            <!-- Punto Rojo: Posición del Tag OTP -->
+            <div id="otp-badge-container" style="display: flex; justify-content: center; margin-top: 15px; min-height: 30px;"></div>
 
             <div class="rank-box dash-rank">
               <div class="queue-toggle">

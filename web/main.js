@@ -176,6 +176,28 @@ function renderLadder(players) {
         <div class="player-meta">
           <span class="tag">#${player.tagLine}</span>
           <span class="region-badge reg-${(player.region || 'la1').toLowerCase()}">${getRegionName(player.region || 'la1')}</span>
+          ${(() => {
+            if (player.matchStatsHistory && player.matchStatsHistory.length >= 5) {
+              const history = player.matchStatsHistory;
+              const counts = {};
+              history.forEach(m => {
+                const name = m.championName;
+                if (name && name !== 'Unknown') counts[name] = (counts[name] || 0) + 1;
+              });
+              let topChamp = null;
+              let maxCount = 0;
+              for (const champ in counts) {
+                if (counts[champ] > maxCount) {
+                  maxCount = counts[champ];
+                  topChamp = champ;
+                }
+              }
+              if ((maxCount / history.length) >= 0.8) {
+                return `<span class="badge-otp-mini">OTP ${topChamp}</span>`;
+              }
+            }
+            return '';
+          })()}
         </div>
       </div>
 
@@ -496,7 +518,7 @@ function openPlayerDetails(player) {
 
     const otpPercentage = (maxCount / totalGames) * 100;
     if (otpPercentage >= 80) {
-      otpContainer.innerHTML = `<div class="badge-otp" title="¡Este jugador es un especialista con ${topChamp}!">👑 OTP</div>`;
+      otpContainer.innerHTML = `<div class="badge-otp" title="¡Este jugador es un especialista con ${topChamp}!">OTP ${topChamp}</div>`;
     }
   }
 
