@@ -1356,18 +1356,18 @@ select option {
   width: 95%;
   height: auto; 
   position: relative;
-  /* Fondo con tinte rosa oscuro/púrpura */
-  background: linear-gradient(145deg, #0f0a12 0%, #1a0b16 100%) !important;
+  /* Fondo Dinámico basado en el campeón */
+  background: linear-gradient(145deg, #050505 0%, var(--champ-accent-deep, #1a0b16) 100%) !important;
   backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 45, 149, 0.2) !important; /* Borde rosa sutil */
+  border: 1px solid var(--champ-accent-alpha, rgba(212, 175, 55, 0.2)) !important;
   box-shadow: 0 0 80px rgba(0, 0, 0, 0.95), 
-              inset 0 0 30px rgba(214, 51, 132, 0.05),
-              0 0 20px rgba(212, 175, 55, 0.1) !important;
+              inset 0 0 40px var(--champ-accent-alpha, transparent) !important;
   padding: 2.5rem !important; 
   margin: auto; 
   border-radius: 24px;
   overflow: visible; 
   animation: modalScaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background 0.8s ease, border 0.8s ease; /* Transición suave de color */
 }
 
 @keyframes modalScaleIn {
@@ -1414,11 +1414,12 @@ select option {
 }
 
 .dash-right-col {
-    background: rgba(15, 10, 18, 0.4) !important;
+    background: var(--champ-accent-alpha, rgba(0, 0, 0, 0.4)) !important;
     backdrop-filter: blur(5px);
     overflow-y: auto;
     padding: 25px !important;
-    border-left: 1px solid rgba(255, 45, 149, 0.1);
+    border-left: 1px solid var(--champ-accent-alpha, transparent);
+    transition: background 0.8s ease;
 }
 
 .dash-left-bg {

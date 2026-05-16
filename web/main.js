@@ -481,9 +481,26 @@ async function setRandomSplash(rawChampName) {
       const url = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_${selectedSkin.num}.jpg?v=${bust}`;
       
       const img = new Image();
+      img.crossOrigin = "Anonymous"; // Necesario para leer píxeles de DDragon
       img.onload = () => {
         bgEl.style.backgroundImage = `url('${url}')`;
-        console.log(`✅ Splash y Región cargados: ${champId}`);
+        
+        // Extraer color dominante para la interfaz dinámica
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 1; canvas.height = 1;
+        ctx.drawImage(img, 0, 0, 1, 1);
+        const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+        
+        // Actualizar variable CSS en el modal
+        const modal = document.getElementById('player-details-modal');
+        if (modal) {
+          modal.style.setProperty('--champ-accent', `rgb(${r}, ${g}, ${b})`);
+          modal.style.setProperty('--champ-accent-alpha', `rgba(${r}, ${g}, ${b}, 0.2)`);
+          modal.style.setProperty('--champ-accent-deep', `rgba(${Math.max(0, r-50)}, ${Math.max(0, g-50)}, ${Math.max(0, b-50)}, 0.8)`);
+        }
+        
+        console.log(`✅ Splash y Color Dinámico cargados: ${champId} (rgb ${r},${g},${b})`);
       };
       img.onerror = () => {
         const remainingSpecials = specials.filter(s => s.num !== selectedSkin.num);
