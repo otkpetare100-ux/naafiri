@@ -1435,8 +1435,8 @@ select option {
   background-position: center 10%;
   background-repeat: no-repeat;
   z-index: 0;
-  opacity: 0.85; /* Mucho más visible */
-  filter: brightness(1.1) contrast(1.05); /* Más vibrante y nítido */
+  opacity: 0.7; /* Punto medio ideal */
+  filter: brightness(0.85) contrast(1.05); /* Elegante y equilibrado */
   transition: background-image 0.5s ease-in-out;
 }
 
@@ -1448,10 +1448,10 @@ select option {
   width: 100%;
   height: 100%;
   background: linear-gradient(to bottom, 
-    rgba(0,0,0,0.7) 0%, 
-    rgba(0,0,0,0) 25%, 
-    rgba(0,0,0,0) 75%, 
-    rgba(0,0,0,0.9) 100%
+    rgba(0,0,0,0.75) 0%, 
+    rgba(0,0,0,0.2) 25%, 
+    rgba(0,0,0,0.2) 75%, 
+    rgba(0,0,0,0.95) 100%
   );
   z-index: 1;
 }
