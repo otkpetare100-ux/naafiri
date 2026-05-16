@@ -699,30 +699,36 @@ function openPlayerDetails(player) {
   // Render default (SoloQ)
   btnSolo.onclick();
 
-  // Lógica de "Mejores Campeones" Inteligente (Prioriza Historial Solo Q)
+  // Lógica de "Mejores Campeones" Inteligente (Prioriza Historial Solo Q + Winrate)
   const soloQMatchesDetailed = (player.matchStatsHistory || [])
     .filter(m => (m.queueId === 420 || m.queueType === 'RANKED_SOLO_5x5') && !m.isRemake);
   
   let champsToDisplay = [];
   
   if (soloQMatchesDetailed.length > 0) {
-    const counts = {};
+    const stats = {};
     soloQMatchesDetailed.forEach(m => {
       const name = m.championName;
-      if (name && name !== 'Unknown') counts[name] = (counts[name] || 0) + 1;
+      if (name && name !== 'Unknown') {
+        if (!stats[name]) stats[name] = { count: 0, wins: 0 };
+        stats[name].count++;
+        if (m.win) stats[name].wins++;
+      }
     });
     
-    const sorted = Object.entries(counts)
-      .sort((a, b) => b[1] - a[1])
+    const sorted = Object.entries(stats)
+      .sort((a, b) => b[1].count - a[1].count)
       .slice(0, 3);
       
-    champsToDisplay = sorted.map(([name, count]) => {
+    champsToDisplay = sorted.map(([name, data]) => {
       const mastery = (player.topChampions || []).find(c => c.name === name);
+      const wr = Math.round((data.wins / data.count) * 100);
       return {
         name: name,
         level: mastery ? mastery.level : 1,
         points: mastery ? mastery.points : 0,
-        recentCount: count
+        recentCount: data.count,
+        winRate: wr
       };
     });
   }
@@ -736,7 +742,14 @@ function openPlayerDetails(player) {
   
   if (champsToDisplay.length > 0) {
     champsToDisplay.forEach(champ => {
-      const ptsStr = champ.recentCount ? `${champ.recentCount} partidas rec.` : `${champ.points.toLocaleString('es-ES')} Pts`;
+      let subText = "";
+      if (champ.recentCount) {
+        const wrClass = champ.winRate >= 50 ? 'wr-positive' : 'wr-negative';
+        subText = `${champ.recentCount} partidas · <span class="${wrClass}">${champ.winRate}% WR</span>`;
+      } else {
+        subText = `${champ.points.toLocaleString('es-ES')} Pts`;
+      }
+      
       const crestUrl = getMasteryCrest(champ.level);
       
       champsContainer.innerHTML += `
@@ -747,7 +760,7 @@ function openPlayerDetails(player) {
             : '<div class="champ-detail-crest-spacer"></div>'}
           <div class="champ-detail-info">
             <div class="champ-detail-name">${champ.name}</div>
-            <div class="champ-detail-pts">${ptsStr}</div>
+            <div class="champ-detail-pts">${subText}</div>
           </div>
         </div>
       `;
