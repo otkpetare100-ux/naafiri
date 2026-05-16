@@ -1309,30 +1309,77 @@ select option {
 /* =========================================
    Player Details Modal Styles
    ========================================= */
+/* MODAL DETALLES: MODO RUNATERRA FULL */
 .details-modal {
-  max-width: 1200px; 
-  width: 100%;
-  position: relative;
-  background: #000 !important;
-  border: 1px solid rgba(212, 175, 55, 0.2) !important;
-  box-shadow: 0 0 50px rgba(0, 0, 0, 0.8) !important;
-  padding: 2.5rem !important; 
-  margin: auto; 
-  border-radius: 20px;
-  overflow: hidden;
+    max-width: 1200px !important;
+    width: 95% !important;
+    height: 92vh !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    border: 1px solid rgba(240, 185, 11, 0.4) !important;
+    position: relative;
+    padding: 0 !important;
+    overflow: hidden !important;
+    transition: background 0.8s ease-in-out;
+    border-radius: 20px !important;
 }
 
-/* Columna Izquierda con Splash Art Mejorado */
+/* Capa de oscurecimiento para legibilidad */
+.details-modal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1;
+}
+
+.modal-header, .modal-body {
+    position: relative;
+    z-index: 2; /* Por encima del fondo de región */
+}
+
+.modal-header {
+    background: rgba(0, 0, 0, 0.65) !important;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(240, 185, 11, 0.2) !important;
+    padding: 15px 25px !important;
+    margin-bottom: 0 !important;
+}
+
+.dashboard-layout {
+    display: grid;
+    grid-template-columns: 360px 1fr !important;
+    height: calc(100% - 65px);
+    gap: 0 !important;
+}
+
+.detail-box {
+    background: rgba(0, 0, 0, 0.6) !important;
+    backdrop-filter: blur(15px);
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
 .dash-left-col {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  padding: 25px !important;
-  border-radius: 15px;
-  overflow: hidden;
-  border: 1px solid rgba(212, 175, 55, 0.25);
-  background: #050505 !important;
+    border-right: 1px solid rgba(240, 185, 11, 0.25) !important;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 30px !important;
+    background: rgba(0, 0, 0, 0.7) !important;
+    height: 100%;
+}
+
+.dash-right-col {
+    background: rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(5px);
+    overflow-y: auto;
+    padding: 25px !important;
 }
 
 .dash-left-bg {

@@ -391,7 +391,42 @@ function getMostPlayedFromHistory(history) {
   return entries.length > 0 ? entries.sort((a, b) => b[1] - a[1])[0][0] : null;
 }
 
-// Función para cargar un Splash Art vertical aleatorio (TOTALMENTE ASEGURADA)
+// MAPEO DE REGIONES DE RUNATERRA
+const REGION_WALLPAPERS = {
+  'demacia': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blt022067756e18f21e/5eb061c02824701648a73199/demacia-background.jpg',
+  'noxus': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blte54721a976194781/5eb061c3608ed11649987819/noxus-background.jpg',
+  'ionia': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blta8ca7f45778a4872/5eb061be6b8e8f6040b2f8a5/ionia-background.jpg',
+  'freljord': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blt06a2872338c03730/5eb061baf180e06041ec1d9d/freljord-background.jpg',
+  'shurima': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blt8e938953154f85e4/5eb061c0f180e06041ec1d9f/shurima-background.jpg',
+  'void': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/bltdc857700e12f0f49/5eb061c0f180e06041ec1da1/void-background.jpg',
+  'shadow-isles': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blt6d987d603a11887e/5eb061c0608ed11649987817/shadow-isles-background.jpg',
+  'targon': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/bltf36e3e13d969796e/5eb061c094627211620a2335/mt-targon-background.jpg',
+  'piltover': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blt5692634458df589e/5eb061c385f94411647895e6/piltover-background.jpg',
+  'zaun': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/bltd49e8964d939a34a/5eb061c27c626d116345a324/zaun-background.jpg',
+  'bilgewater': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blta0049e75529f7988/5eb061c285f94411647895e4/bilgewater-background.jpg',
+  'ixtal': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blta075e7a96525164f/5eb061c02824701648a7319b/ixtal-background.jpg',
+  'bandle-city': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blt0302488f729226ba/5eb061bebd476d1646271a39/bandle-city-background.jpg',
+  'runeterra': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blt50731f8b19356f96/5eb061ba3f550911624f2b91/runeterra-background.jpg'
+};
+
+const CHAMP_REGIONS = {
+  'Aatrox': 'shurima', 'Ahri': 'ionia', 'Akali': 'ionia', 'Akshan': 'shurima', 'Alistar': 'targon', 'Amumu': 'shurima', 'Anivia': 'freljord', 'Annie': 'noxus', 'Aphelios': 'targon', 'Ashe': 'freljord', 'AurelionSol': 'targon', 'Azir': 'shurima', 'Bard': 'runeterra', 'Belveth': 'void', 'Blitzcrank': 'zaun', 'Brand': 'freljord', 'Braum': 'freljord', 'Briar': 'noxus', 'Caitlyn': 'piltover', 'Camille': 'piltover', 'Cassiopeia': 'noxus', 'Chogath': 'void', 'Corki': 'bandle-city', 'Darius': 'noxus', 'Diana': 'targon', 'DrMundo': 'zaun', 'Draven': 'noxus', 'Ekko': 'zaun', 'Elise': 'shadow-isles', 'Evelynn': 'runeterra', 'Ezreal': 'piltover', 'Fiddlesticks': 'runeterra', 'Fiora': 'demacia', 'Fizz': 'bilgewater', 'Galio': 'demacia', 'Gangplank': 'bilgewater', 'Garen': 'demacia', 'Gnar': 'freljord', 'Gragas': 'freljord', 'Graves': 'bilgewater', 'Gwen': 'shadow-isles', 'Hecarim': 'shadow-isles', 'Heimerdinger': 'piltover', 'Hwei': 'ionia', 'Illaoi': 'bilgewater', 'Irelia': 'ionia', 'Ivern': 'ionia', 'Janna': 'zaun', 'JarvanIV': 'demacia', 'Jax': 'runeterra', 'Jayce': 'piltover', 'Jhin': 'ionia', 'Jinx': 'zaun', 'Kaisa': 'void', 'Kalista': 'shadow-isles', 'Karma': 'ionia', 'Karthus': 'shadow-isles', 'Kassadin': 'void', 'Katarina': 'noxus', 'Kayle': 'demacia', 'Kayn': 'ionia', 'Kennen': 'ionia', 'Khazix': 'void', 'Kindred': 'runeterra', 'Kled': 'noxus', 'KogMaw': 'void', 'Ksante': 'shurima', 'Leblanc': 'noxus', 'LeeSin': 'ionia', 'Leona': 'targon', 'Lillia': 'ionia', 'Lissandra': 'freljord', 'Lucian': 'demacia', 'Lulu': 'bandle-city', 'Lux': 'demacia', 'Malphite': 'ixtal', 'Malzahar': 'shurima', 'Maokai': 'shadow-isles', 'MasterYi': 'ionia', 'Milio': 'ixtal', 'MissFortune': 'bilgewater', 'MonkeyKing': 'ionia', 'Mordekaiser': 'noxus', 'Morgana': 'demacia', 'Naafiri': 'shurima', 'Nami': 'runeterra', 'Nasus': 'shurima', 'Nautilus': 'bilgewater', 'Neeko': 'ixtal', 'Nidalee': 'ixtal', 'Nilah': 'bilgewater', 'Nocturne': 'runeterra', 'Nunu': 'freljord', 'Olaf': 'freljord', 'Orianna': 'piltover', 'Ornn': 'freljord', 'Pantheon': 'targon', 'Poppy': 'demacia', 'Pyke': 'bilgewater', 'Qiyana': 'ixtal', 'Quinn': 'demacia', 'Rakan': 'ionia', 'Rammus': 'shurima', 'RekSai': 'void', 'Rell': 'noxus', 'Renata': 'zaun', 'Renekton': 'shurima', 'Rengar': 'ixtal', 'Riven': 'noxus', 'Rumble': 'bandle-city', 'Ryze': 'runeterra', 'Samira': 'noxus', 'Sejuani': 'freljord', 'Senna': 'shadow-isles', 'Seraphine': 'piltover', 'Sett': 'ionia', 'Shaco': 'runeterra', 'Shen': 'ionia', 'Shyvana': 'demacia', 'Singed': 'zaun', 'Sion': 'noxus', 'Sivir': 'shurima', 'Skarner': 'ixtal', 'Smolder': 'runeterra', 'Sona': 'demacia', 'Soraka': 'targon', 'Swain': 'noxus', 'Sylas': 'demacia', 'Syndra': 'ionia', 'TahmKench': 'bilgewater', 'Taliyah': 'shurima', 'Talon': 'noxus', 'Taric': 'targon', 'Teemo': 'bandle-city', 'Thresh': 'shadow-isles', 'Tristana': 'bandle-city', 'Trundle': 'freljord', 'Tryndamere': 'freljord', 'TwistedFate': 'bilgewater', 'Twitch': 'zaun', 'Udyr': 'freljord', 'Urgot': 'zaun', 'Varus': 'ionia', 'Vayne': 'demacia', 'Veigar': 'bandle-city', 'Velkoz': 'void', 'Vex': 'shadow-isles', 'Vi': 'piltover', 'Viego': 'shadow-isles', 'Viktor': 'zaun', 'Vladimir': 'noxus', 'Volibear': 'freljord', 'Warwick': 'zaun', 'Xayah': 'ionia', 'Xerath': 'shurima', 'XinZhao': 'demacia', 'Yasuo': 'ionia', 'Yone': 'ionia', 'Yorick': 'shadow-isles', 'Yuumi': 'bandle-city', 'Zac': 'zaun', 'Zed': 'ionia', 'Zeri': 'zaun', 'Ziggs': 'zaun', 'Zilean': 'runeterra', 'Zoe': 'targon', 'Zyra': 'ixtal'
+};
+
+function updateRegionBackground(champName) {
+  const modalContent = document.querySelector('.details-modal');
+  if (!modalContent) return;
+
+  const champId = cleanChampId(champName);
+  const region = CHAMP_REGIONS[champId] || 'runeterra';
+  const wallpaperUrl = REGION_WALLPAPERS[region];
+
+  if (wallpaperUrl) {
+    modalContent.style.background = `url('${wallpaperUrl}')`;
+  }
+}
+
+// Reemplazar la anterior setRandomSplash con la nueva que también actualiza la región
 async function setRandomSplash(rawChampName) {
   const bgEl = document.getElementById('dash-left-bg');
   if (!bgEl) return;
@@ -400,28 +435,22 @@ async function setRandomSplash(rawChampName) {
   const champId = cleanChampId(rawChampName);
   if (!champId) return;
 
+  // Actualizar fondo de región del modal completo
+  updateRegionBackground(champId);
+
   try {
-    // Petición específica del campeón para obtener sus skins reales
     const resp = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/en_US/champion/${champId}.json`);
     if (!resp.ok) return;
     const data = await resp.json();
     
     if (data.data[champId]) {
       const skins = data.data[champId].skins;
-      // FILTRO DEFINITIVO: Quitamos la base (0), cualquier cosa que diga 'Chroma' 
-      // y CUALQUIER nombre que tenga paréntesis '(', que es como Riot marca los chromas ahora.
-      const specials = skins.filter(s => 
-        s.num !== 0 && 
-        !s.name.includes('(') && 
-        !s.name.toLowerCase().includes('chroma')
-      );
+      const specials = skins.filter(s => s.num !== 0 && !s.name.includes('(') && !s.name.toLowerCase().includes('chroma'));
       
       let selectedSkin;
       if (specials.length > 0 && Math.random() > 0.01) {
-        // 99% de probabilidad para skins especiales
         selectedSkin = specials[Math.floor(Math.random() * specials.length)];
       } else {
-        // 1% de probabilidad (o si no tiene skins) para la predeterminada
         selectedSkin = skins[0];
       }
 
@@ -431,40 +460,29 @@ async function setRandomSplash(rawChampName) {
       const img = new Image();
       img.onload = () => {
         bgEl.style.backgroundImage = `url('${url}')`;
-        console.log(`✅ Splash cargado con éxito: ${champId} skin ${selectedSkin.num} (${selectedSkin.name})`);
+        console.log(`✅ Splash y Región cargados: ${champId} (${CHAMP_REGIONS[champId] || 'Runeterra'})`);
       };
       img.onerror = () => {
-        console.warn(`⚠️ La skin ${selectedSkin.num} (${selectedSkin.name}) no tiene arte. Buscando otra...`);
-        
-        // Intentar con otra skin de la lista de especiales que no sea la que acaba de fallar
+        // Lógica de reintento ya implementada anteriormente...
         const remainingSpecials = specials.filter(s => s.num !== selectedSkin.num);
-        
         if (remainingSpecials.length > 0) {
           const nextSkin = remainingSpecials[Math.floor(Math.random() * remainingSpecials.length)];
           const nextUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_${nextSkin.num}.jpg?v=${bust}`;
-          
-          // Reintento con la nueva skin
           const nextImg = new Image();
-          nextImg.onload = () => {
-            bgEl.style.backgroundImage = `url('${nextUrl}')`;
-            console.log(`✅ Recuperado con éxito: ${champId} skin ${nextSkin.num} (${nextSkin.name})`);
-          };
-          nextImg.onerror = () => {
-            // Si el segundo intento también falla, ponemos la base
-            bgEl.style.backgroundImage = `url('https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_0.jpg')`;
-          };
+          nextImg.onload = () => { bgEl.style.backgroundImage = `url('${nextUrl}')`; };
+          nextImg.onerror = () => { bgEl.style.backgroundImage = `url('https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_0.jpg')`; };
           nextImg.src = nextUrl;
         } else {
-          // Si no hay más especiales, a la base
           bgEl.style.backgroundImage = `url('https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_0.jpg')`;
         }
       };
       img.src = url;
     }
   } catch (error) {
-    console.error("Error en Splash:", error);
+    console.error("Error en Splash/Región:", error);
   }
 }
+
 
 function openPlayerDetails(player) {
   currentModalPuuid = player.puuid;
