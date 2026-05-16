@@ -235,7 +235,7 @@ function renderLadder(players) {
           <img src="${emblemUrl}" class="rank-emblem" alt="${player.tier}" onerror="this.style.opacity='0'" />
         </div>
         <div class="rank-info-text">
-          <div class="tier-text">${player.tier} ${player.rank}</div>
+          <div class="tier-text">${['MASTER', 'GRANDMASTER', 'CHALLENGER'].includes((player.tier || '').toUpperCase()) ? player.tier : `${player.tier} ${player.rank}`}</div>
           <div class="rank-stats">
             <span class="lp">${player.lp} LP</span>
             <span class="separator">·</span>
@@ -638,7 +638,13 @@ function openPlayerDetails(player) {
       cardFrameEl.classList.add(`frame-${tier}`);
     }
 
-    document.getElementById('detail-tier-rank').textContent = queueData.tier === 'UNRANKED' ? 'UNRANKED' : `${queueData.tier} ${queueData.rank}`;
+    const isApexTier = ['MASTER', 'GRANDMASTER', 'CHALLENGER'].includes((queueData.tier || '').toUpperCase());
+    document.getElementById('detail-tier-rank').textContent = 
+      queueData.tier === 'UNRANKED' 
+        ? 'UNRANKED' 
+        : isApexTier 
+          ? queueData.tier 
+          : `${queueData.tier} ${queueData.rank}`;
     document.getElementById('detail-lp').textContent = `${queueData.leaguePoints || 0} LP`;
     
     const w = queueData.wins || 0;
