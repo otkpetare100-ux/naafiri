@@ -1462,23 +1462,85 @@ select option {
   border-radius: 24px 0 0 24px;
   transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   box-sizing: border-box;
+  
+  /* Borde base y sombra exterior con brillo dinámico */
+  border: 4px solid var(--rank-color, #78716c) !important;
+  box-shadow: 0 0 25px var(--rank-glow-outer, rgba(120, 113, 108, 0.25)),
+              inset 0 0 0 2px rgba(0, 0, 0, 0.85),
+              inset 0 0 30px var(--rank-glow-inner, rgba(120, 113, 108, 0.45));
 }
 
-/* Esquinas metálicas decorativas universales */
+/* Moldura dorada interior súper premium */
 .dash-loading-frame::after {
   content: "";
   position: absolute;
   top: 4px; left: 4px; right: 4px; bottom: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(197, 160, 89, 0.35); /* Filete dorado sutil */
   pointer-events: none;
-  border-radius: 20px 0 0 20px;
+  border-radius: 18px 0 0 18px;
 }
+
+/* ==========================================
+   ESQUINEROS HEXTECH / RIVETS DE RANGO
+   ========================================== */
+.frame-corner {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--rank-color, #c5a059);
+  z-index: 5;
+  pointer-events: none;
+  filter: drop-shadow(0 0 2px var(--rank-color, #c5a059));
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.frame-corner.top-left {
+  top: 6px; left: 6px;
+  border-right: none; border-bottom: none;
+  border-radius: 10px 0 0 0;
+}
+.frame-corner.top-right {
+  top: 6px; right: 6px;
+  border-left: none; border-bottom: none;
+  border-radius: 0 10px 0 0;
+}
+.frame-corner.bottom-left {
+  bottom: 6px; left: 6px;
+  border-right: none; border-top: none;
+  border-radius: 0 0 0 10px;
+}
+.frame-corner.bottom-right {
+  bottom: 6px; right: 6px;
+  border-left: none; border-top: none;
+  border-radius: 0 0 10px 0;
+}
+
+/* Remaches/Joyas miniatura en las esquinas */
+.frame-corner::after {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 5px #ffffff, 0 0 10px var(--rank-color, #c5a059);
+  transition: all 0.6s ease;
+}
+
+.frame-corner.top-left::after { top: -2px; left: -2px; }
+.frame-corner.top-right::after { top: -2px; right: -2px; }
+.frame-corner.bottom-left::after { bottom: -2px; left: -2px; }
+.frame-corner.bottom-right::after { bottom: -2px; right: -2px; }
+
+/* ==========================================
+   DEFINICIÓN DE PALETA DINÁMICA POR RANGO
+   ========================================== */
 
 /* IRON */
 .dash-loading-frame.frame-iron {
-  border: 4px solid #57534e;
-  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.85),
-              inset 0 0 20px rgba(87, 83, 78, 0.4);
+  --rank-color: #57534e;
+  --rank-glow-outer: rgba(87, 83, 78, 0.2);
+  --rank-glow-inner: rgba(87, 83, 78, 0.4);
 }
 .dash-loading-frame.frame-iron::before {
   content: "";
@@ -1494,9 +1556,9 @@ select option {
 
 /* BRONZE */
 .dash-loading-frame.frame-bronze {
-  border: 4px solid #8f533c;
-  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.85),
-              inset 0 0 20px rgba(143, 83, 60, 0.5);
+  --rank-color: #8f533c;
+  --rank-glow-outer: rgba(143, 83, 60, 0.25);
+  --rank-glow-inner: rgba(143, 83, 60, 0.5);
 }
 .dash-loading-frame.frame-bronze::before {
   content: "";
@@ -1512,9 +1574,9 @@ select option {
 
 /* SILVER */
 .dash-loading-frame.frame-silver {
-  border: 4px solid #64748b;
-  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.85),
-              inset 0 0 20px rgba(100, 116, 139, 0.5);
+  --rank-color: #64748b;
+  --rank-glow-outer: rgba(100, 116, 139, 0.25);
+  --rank-glow-inner: rgba(100, 116, 139, 0.5);
 }
 .dash-loading-frame.frame-silver::before {
   content: "";
@@ -1529,9 +1591,9 @@ select option {
 
 /* GOLD */
 .dash-loading-frame.frame-gold {
-  border: 4px solid #c5a059;
-  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.85),
-              inset 0 0 25px rgba(197, 160, 89, 0.5);
+  --rank-color: #c5a059;
+  --rank-glow-outer: rgba(197, 160, 89, 0.35);
+  --rank-glow-inner: rgba(197, 160, 89, 0.55);
 }
 .dash-loading-frame.frame-gold::before {
   content: "";
@@ -1547,9 +1609,9 @@ select option {
 
 /* PLATINUM */
 .dash-loading-frame.frame-platinum {
-  border: 4px solid #14b8a6;
-  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.85),
-              inset 0 0 25px rgba(20, 184, 166, 0.5);
+  --rank-color: #14b8a6;
+  --rank-glow-outer: rgba(20, 184, 166, 0.35);
+  --rank-glow-inner: rgba(20, 184, 166, 0.55);
 }
 .dash-loading-frame.frame-platinum::before {
   content: "";
@@ -1564,9 +1626,9 @@ select option {
 
 /* EMERALD */
 .dash-loading-frame.frame-emerald {
-  border: 4px solid #059669;
-  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.85),
-              inset 0 0 25px rgba(5, 150, 105, 0.5);
+  --rank-color: #059669;
+  --rank-glow-outer: rgba(5, 150, 105, 0.35);
+  --rank-glow-inner: rgba(5, 150, 105, 0.55);
 }
 .dash-loading-frame.frame-emerald::before {
   content: "";
@@ -1582,9 +1644,9 @@ select option {
 
 /* DIAMOND */
 .dash-loading-frame.frame-diamond {
-  border: 4px solid #38bdf8;
-  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.85),
-              inset 0 0 28px rgba(56, 189, 248, 0.55);
+  --rank-color: #38bdf8;
+  --rank-glow-outer: rgba(56, 189, 248, 0.4);
+  --rank-glow-inner: rgba(56, 189, 248, 0.6);
 }
 .dash-loading-frame.frame-diamond::before {
   content: "";
@@ -1599,9 +1661,9 @@ select option {
 
 /* MASTER */
 .dash-loading-frame.frame-master {
-  border: 4px solid #a855f7;
-  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.85),
-              inset 0 0 30px rgba(168, 85, 247, 0.6);
+  --rank-color: #a855f7;
+  --rank-glow-outer: rgba(168, 85, 247, 0.45);
+  --rank-glow-inner: rgba(168, 85, 247, 0.65);
 }
 .dash-loading-frame.frame-master::before {
   content: "";
@@ -1617,9 +1679,9 @@ select option {
 
 /* GRANDMASTER */
 .dash-loading-frame.frame-grandmaster {
-  border: 4px solid #ef4444;
-  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.85),
-              inset 0 0 30px rgba(239, 68, 68, 0.6);
+  --rank-color: #ef4444;
+  --rank-glow-outer: rgba(239, 68, 68, 0.45);
+  --rank-glow-inner: rgba(239, 68, 68, 0.65);
 }
 .dash-loading-frame.frame-grandmaster::before {
   content: "";
@@ -1635,9 +1697,9 @@ select option {
 
 /* CHALLENGER */
 .dash-loading-frame.frame-challenger {
-  border: 4px solid #f59e0b;
-  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.85),
-              inset 0 0 35px rgba(245, 158, 11, 0.7);
+  --rank-color: #f59e0b;
+  --rank-glow-outer: rgba(245, 158, 11, 0.5);
+  --rank-glow-inner: rgba(245, 158, 11, 0.75);
 }
 .dash-loading-frame.frame-challenger::before {
   content: "";
@@ -1660,9 +1722,9 @@ select option {
 /* UNRANKED / PROVISIONAL */
 .dash-loading-frame.frame-unranked,
 .dash-loading-frame.frame-provisional {
-  border: 4px solid #78716c;
-  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.85),
-              inset 0 0 15px rgba(120, 113, 108, 0.3);
+  --rank-color: #78716c;
+  --rank-glow-outer: rgba(120, 113, 108, 0.2);
+  --rank-glow-inner: rgba(120, 113, 108, 0.35);
 }
 .dash-loading-frame.frame-unranked::before,
 .dash-loading-frame.frame-provisional::before {
