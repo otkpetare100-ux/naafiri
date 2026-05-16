@@ -1900,7 +1900,7 @@ select option {
   width: 65px;
   height: 65px;
   border-radius: 12px; /* Más elegante y menos redondo */
-  border: 1.5px solid var(--gold-primary); /* Borde más fino */
+  border: 2.5px solid var(--gold-primary); /* Marco más sólido */
   object-fit: cover;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.6);
   transition: all 0.3s ease;
