@@ -1317,8 +1317,10 @@ select option {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.9);
   backdrop-filter: blur(10px);
-  align-items: center;
+  align-items: flex-start; /* Importante para que el scroll empiece arriba */
   justify-content: center;
+  overflow-y: auto; /* El scroll ahora está aquí, a la derecha del todo */
+  padding: 5vh 0; /* Espacio arriba y abajo para que respire */
   background-size: cover;
   background-position: center;
 }
@@ -1330,15 +1332,15 @@ select option {
 .details-modal {
   max-width: 1200px; 
   width: 95%;
-  max-height: 90vh;
+  height: auto; /* Crece con el contenido */
   position: relative;
-  background: #000 !important; /* El fondo negro ahora queda por DETRÁS de la región */
+  background: #000 !important;
   border: 1px solid rgba(212, 175, 55, 0.2) !important;
   box-shadow: 0 0 60px rgba(0, 0, 0, 0.9) !important;
   padding: 2.5rem !important; 
   margin: auto; 
   border-radius: 20px;
-  overflow-y: auto;
+  overflow: visible; /* Dejamos que el padre maneje el scroll */
   animation: modalScaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
