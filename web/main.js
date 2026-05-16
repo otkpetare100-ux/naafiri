@@ -391,22 +391,22 @@ function getMostPlayedFromHistory(history) {
   return entries.length > 0 ? entries.sort((a, b) => b[1] - a[1])[0][0] : null;
 }
 
-// MAPEO DE REGIONES: PAISAJES REALES DE RUNATERRA
+// MAPEO DE REGIONES: PAISAJES REALES (Wiki Oficial - Enlaces Públicos)
 const REGION_WALLPAPERS = {
-  'demacia': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blt022067756e18f21e/5eb061c02824701648a73199/demacia-background.jpg',
-  'noxus': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blte54721a976194781/5eb061c3608ed11649987819/noxus-background.jpg',
-  'ionia': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blta8ca7f45778a4872/5eb061be6b8e8f6040b2f8a5/ionia-background.jpg',
-  'freljord': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blt06a2872338c03730/5eb061baf180e06041ec1d9d/freljord-background.jpg',
-  'shurima': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blt8e938953154f85e4/5eb061c0f180e06041ec1d9f/shurima-background.jpg',
-  'void': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/bltdc857700e12f0f49/5eb061c0f180e06041ec1da1/void-background.jpg',
-  'shadow-isles': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blt6d987d603a11887e/5eb061c0608ed11649987817/shadow-isles-background.jpg',
-  'targon': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/bltf36e3e13d969796e/5eb061c094627211620a2335/mt-targon-background.jpg',
-  'piltover': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blt5692634458df589e/5eb061c385f94411647895e6/piltover-background.jpg',
-  'zaun': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/bltd49e8964d939a34a/5eb061c27c626d116345a324/zaun-background.jpg',
-  'bilgewater': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blta0049e75529f7988/5eb061c285f94411647895e4/bilgewater-background.jpg',
-  'ixtal': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blta075e7a96525164f/5eb061c02824701648a7319b/ixtal-background.jpg',
-  'bandle-city': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blt0302488f729226ba/5eb061bebd476d1646271a39/bandle-city-background.jpg',
-  'runeterra': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blt50731f8b19356f96/5eb061ba3f550911624f2b91/runeterra-background.jpg'
+  'demacia': 'https://static.wikia.nocookie.net/leagueoflegends/images/1/15/Demacia_Concept_Art_01.jpg',
+  'noxus': 'https://static.wikia.nocookie.net/leagueoflegends/images/d/d1/Noxus_Concept_Art_04.jpg',
+  'ionia': 'https://static.wikia.nocookie.net/leagueoflegends/images/a/a5/Ionia_Concept_Art_05.jpg',
+  'freljord': 'https://static.wikia.nocookie.net/leagueoflegends/images/a/a2/Freljord_Concept_Art_03.jpg',
+  'shurima': 'https://static.wikia.nocookie.net/leagueoflegends/images/a/a2/Shurima_Concept_Art_01.jpg',
+  'void': 'https://static.wikia.nocookie.net/leagueoflegends/images/d/d2/Void_Concept_Art_02.jpg',
+  'shadow-isles': 'https://static.wikia.nocookie.net/leagueoflegends/images/4/4b/Shadow_Isles_Concept_Art_01.jpg',
+  'targon': 'https://static.wikia.nocookie.net/leagueoflegends/images/5/52/Mount_Targon_Concept_Art_05.jpg',
+  'piltover': 'https://static.wikia.nocookie.net/leagueoflegends/images/3/3d/Piltover_Concept_Art_01.jpg',
+  'zaun': 'https://static.wikia.nocookie.net/leagueoflegends/images/5/53/Zaun_Concept_Art_02.jpg',
+  'bilgewater': 'https://static.wikia.nocookie.net/leagueoflegends/images/d/df/Bilgewater_Concept_Art_01.jpg',
+  'ixtal': 'https://static.wikia.nocookie.net/leagueoflegends/images/4/45/Ixtal_Concept_Art_01.jpg',
+  'bandle-city': 'https://static.wikia.nocookie.net/leagueoflegends/images/4/4e/Bandle_City_Concept_Art_02.jpg',
+  'runeterra': 'https://static.wikia.nocookie.net/leagueoflegends/images/0/03/Runeterra_Concept_Art_01.jpg'
 };
 
 const CHAMP_REGIONS = {
