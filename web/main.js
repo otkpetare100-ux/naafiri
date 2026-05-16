@@ -1023,7 +1023,7 @@ function openPlayerDetails(player) {
           <div class="lane-vertical-bar-container">
             <div class="lane-vertical-bar-fill" style="height: ${pct}%" title="${meta.name}: ${pct}%"></div>
           </div>
-          <img src="https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-positions/${meta.icon}" class="lane-vertical-icon" alt="${meta.name}" title="${meta.name}: ${pct}%" />
+          <img src="https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-career-stats/global/default/assets/images/${meta.icon}" class="lane-vertical-icon" alt="${meta.name}" title="${meta.name}: ${pct}%" />
         </div>
       `;
     });
