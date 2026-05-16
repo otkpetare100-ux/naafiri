@@ -1365,10 +1365,6 @@ select option {
   align-items: start;
 }
 
-.dash-left-col {
-  border-right: 1px solid rgba(212, 175, 55, 0.15);
-  padding-right: 30px;
-}
 
 .modal-header {
   margin-bottom: 2rem; 
@@ -1385,13 +1381,16 @@ select option {
 }
 
 .dash-left-col {
-    border-right: 1px solid rgba(240, 185, 11, 0.25) !important;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    padding: 30px !important;
-    background: rgba(0, 0, 0, 0.7) !important;
-    height: 100%;
+  position: relative; /* Crucial para que el splash se quede en su sitio */
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 30px !important;
+  border-right: 1px solid rgba(212, 175, 55, 0.15) !important;
+  background: rgba(0, 0, 0, 0.7) !important;
+  min-height: 500px;
+  border-radius: 15px 0 0 15px;
+  overflow: hidden;
 }
 
 .dash-right-col {
