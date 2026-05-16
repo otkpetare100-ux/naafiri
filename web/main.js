@@ -625,7 +625,8 @@ function openPlayerDetails(player) {
     
     formContainer.innerHTML = '';
     if (streakBadge) {
-      streakBadge.style.display = 'none';
+      streakBadge.style.visibility = 'hidden';
+      streakBadge.innerHTML = ''; // Vaciar para mantener el ancho mínimo del CSS
       streakBadge.className = 'streak-badge';
     }
     
@@ -658,7 +659,7 @@ function openPlayerDetails(player) {
       }
 
       if (streakCount >= 2) {
-        streakBadge.style.display = 'flex';
+        streakBadge.style.visibility = 'visible';
         if (firstResult) {
           streakBadge.innerHTML = `x${streakCount} <span class="streak-emoji">🔥</span>`;
           streakBadge.classList.add('streak-fire');
