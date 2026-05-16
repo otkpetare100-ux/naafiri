@@ -391,11 +391,12 @@ async function setRandomSplash(rawChampName) {
       const specials = skins.filter(s => s.num !== 0 && !s.name.toLowerCase().includes('chroma'));
       
       let selectedSkin;
-      if (specials.length > 0) {
-        // Elegimos una skin especial al azar
+      if (specials.length > 0 && Math.random() > 0.01) {
+        // 99% de probabilidad para skins especiales
         selectedSkin = specials[Math.floor(Math.random() * specials.length)];
       } else {
-        selectedSkin = skins[0]; // Fallback a la base si no hay más
+        // 1% de probabilidad (o si no tiene skins) para la predeterminada
+        selectedSkin = skins[0];
       }
 
       const bust = Math.random().toString(36).substring(7);
