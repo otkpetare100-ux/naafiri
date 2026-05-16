@@ -386,9 +386,13 @@ async function setRandomSplash(rawChampName) {
     
     if (data.data[champId]) {
       const skins = data.data[champId].skins;
-      // IMPORTANTE: Quitamos el filtro !s.chromas porque las skins reales suelen tener chromas
-      // Solo filtramos la 0 (predeterminada) y nombres que contengan 'Chroma' explícitamente
-      const specials = skins.filter(s => s.num !== 0 && !s.name.toLowerCase().includes('chroma'));
+      // FILTRO DEFINITIVO: Quitamos la base (0), cualquier cosa que diga 'Chroma' 
+      // y CUALQUIER nombre que tenga paréntesis '(', que es como Riot marca los chromas ahora.
+      const specials = skins.filter(s => 
+        s.num !== 0 && 
+        !s.name.includes('(') && 
+        !s.name.toLowerCase().includes('chroma')
+      );
       
       let selectedSkin;
       if (specials.length > 0 && Math.random() > 0.01) {
