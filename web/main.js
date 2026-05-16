@@ -513,13 +513,9 @@ function openPlayerDetails(player) {
     statusEl.textContent = 'EN PARTIDA';
     statusEl.className = 'status-badge';
   } else {
-      if (player.isLive) {
-        statusEl.textContent = 'EN PARTIDA';
-        statusEl.className = 'status-badge';
-      } else {
-        statusEl.textContent = 'DESCONECTADO';
-        statusEl.className = 'status-badge offline';
-      }
+    statusEl.textContent = 'DESCONECTADO';
+    statusEl.className = 'status-badge offline';
+  }
 
       // LÓGICA DE TAG OTP PREMIUM
       const otpContainer = document.getElementById('otp-badge-container');
