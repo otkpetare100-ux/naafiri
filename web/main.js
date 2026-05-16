@@ -153,6 +153,7 @@ function renderLadder(players) {
     // Si es top 1 o 2, mostramos la tarjeta abajo para que no se salga de la pantalla
     const cardPositionClass = rankNum <= 2 ? 'm-card-bottom' : '';
 
+
     // Top Campeones HTML
     const topChampsHtml = (player.topChampions || []).map(champ => `
       <div class="champ-item">
@@ -698,21 +699,52 @@ function openPlayerDetails(player) {
   // Render default (SoloQ)
   btnSolo.onclick();
 
-  // Top Champs (Horizontal Row)
+  // Lógica de "Mejores Campeones" Inteligente (Prioriza Historial Solo Q)
+  const soloQMatchesDetailed = (player.matchStatsHistory || [])
+    .filter(m => (m.queueId === 420 || m.queueType === 'RANKED_SOLO_5x5') && !m.isRemake);
+  
+  let champsToDisplay = [];
+  
+  if (soloQMatchesDetailed.length > 0) {
+    const counts = {};
+    soloQMatchesDetailed.forEach(m => {
+      const name = m.championName;
+      if (name && name !== 'Unknown') counts[name] = (counts[name] || 0) + 1;
+    });
+    
+    const sorted = Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3);
+      
+    champsToDisplay = sorted.map(([name, count]) => {
+      const mastery = (player.topChampions || []).find(c => c.name === name);
+      return {
+        name: name,
+        level: mastery ? mastery.level : 1,
+        points: mastery ? mastery.points : 0,
+        recentCount: count
+      };
+    });
+  }
+  
+  if (champsToDisplay.length === 0) {
+    champsToDisplay = (player.topChampions || []).slice(0, 3);
+  }
+
   const champsContainer = document.getElementById('detail-top-champs');
   champsContainer.innerHTML = '';
-  if (player.topChampions && player.topChampions.length > 0) {
-    player.topChampions.slice(0, 3).forEach(champ => {
-      const champId = champ.name;
-      const ptsStr = champ.points.toLocaleString('es-ES');
+  
+  if (champsToDisplay.length > 0) {
+    champsToDisplay.forEach(champ => {
+      const ptsStr = champ.recentCount ? `${champ.recentCount} partidas rec.` : `${champ.points.toLocaleString('es-ES')} Pts`;
       const crestUrl = getMasteryCrest(champ.level);
       
       champsContainer.innerHTML += `
         <div class="champ-detail-item">
-          <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${champId}.png" class="champ-detail-icon" onerror="this.src='/assets/placeholder_champ.png'" />
+          <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${champ.name}.png" class="champ-detail-icon" onerror="this.src='/assets/placeholder_champ.png'" />
           <div class="champ-detail-info">
-            <div class="champ-detail-name">${champId}</div>
-            <div class="champ-detail-pts">${ptsStr} Pts</div>
+            <div class="champ-detail-name">${champ.name}</div>
+            <div class="champ-detail-pts">${ptsStr}</div>
           </div>
           <img src="${crestUrl}" class="champ-detail-crest" onerror="this.style.display='none'" />
         </div>
