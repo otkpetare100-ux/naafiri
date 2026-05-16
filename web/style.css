@@ -722,9 +722,9 @@ h1::after {
     background: linear-gradient(135deg, #f0b90b 0%, #8a6d3b 50%, #f0b90b 100%);
     background-size: 200% auto;
     color: #000;
-    padding: 4px 12px;
+    padding: 6px 20px;
     border-radius: 4px;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     font-weight: 900;
     letter-spacing: 1.5px;
     text-transform: uppercase;
@@ -735,9 +735,12 @@ h1::after {
     animation: otp-shine 3s linear infinite, otp-glow 2s ease-in-out infinite alternate;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 5px;
     cursor: default;
     user-select: none;
+    min-width: 180px;
+    margin: 0 auto;
 }
 
 .badge-otp::before {
