@@ -1452,13 +1452,13 @@ select option {
    MARCOS DE PANTALLA DE CARGA DE RANGO (LOADING SCREEN CARDS)
    ========================================================== */
 .dash-loading-frame {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
   pointer-events: none;
-  z-index: 2; /* Sobre el splash de fondo pero detrás del texto principal */
+  z-index: 3 !important; /* Garantiza estar sobre los degradados y fondos */
   border-radius: 24px 0 0 24px;
   transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   box-sizing: border-box;
@@ -1483,8 +1483,8 @@ select option {
 .dash-loading-frame.frame-iron::before {
   content: "";
   position: absolute;
-  top: 0; left: 50%;
-  transform: translate(-50%, -50%);
+  top: 4px; left: 50%;
+  transform: translateX(-50%);
   width: 14px; height: 14px;
   background: #44403c;
   border: 2px solid #8c857b;
@@ -1501,8 +1501,8 @@ select option {
 .dash-loading-frame.frame-bronze::before {
   content: "";
   position: absolute;
-  top: 0; left: 50%;
-  transform: translate(-50%, -50%);
+  top: 4px; left: 50%;
+  transform: translateX(-50%);
   width: 14px; height: 14px;
   background: #78350f;
   border: 2px solid #b45309;
@@ -1519,8 +1519,8 @@ select option {
 .dash-loading-frame.frame-silver::before {
   content: "";
   position: absolute;
-  top: 0; left: 50%;
-  transform: translate(-50%, -50%) rotate(45deg);
+  top: 6px; left: 50%;
+  transform: translateX(-50%) rotate(45deg);
   width: 12px; height: 12px;
   background: #475569;
   border: 2px solid #cbd5e1;
@@ -1536,8 +1536,8 @@ select option {
 .dash-loading-frame.frame-gold::before {
   content: "";
   position: absolute;
-  top: 0; left: 50%;
-  transform: translate(-50%, -50%);
+  top: 4px; left: 50%;
+  transform: translateX(-50%);
   width: 16px; height: 16px;
   background: linear-gradient(135deg, #f3d17c 0%, #c5a059 100%);
   border: 2px solid #fff;
@@ -1554,8 +1554,8 @@ select option {
 .dash-loading-frame.frame-platinum::before {
   content: "";
   position: absolute;
-  top: 0; left: 50%;
-  transform: translate(-50%, -50%) rotate(45deg);
+  top: 6px; left: 50%;
+  transform: translateX(-50%) rotate(45deg);
   width: 12px; height: 12px;
   background: #0f766e;
   border: 2px solid #5eead4;
@@ -1571,8 +1571,8 @@ select option {
 .dash-loading-frame.frame-emerald::before {
   content: "";
   position: absolute;
-  top: 0; left: 50%;
-  transform: translate(-50%, -50%);
+  top: 4px; left: 50%;
+  transform: translateX(-50%);
   width: 16px; height: 16px;
   background: #047857;
   border: 2px solid #34d399;
@@ -1589,8 +1589,8 @@ select option {
 .dash-loading-frame.frame-diamond::before {
   content: "";
   position: absolute;
-  top: 0; left: 50%;
-  transform: translate(-50%, -50%) rotate(45deg);
+  top: 6px; left: 50%;
+  transform: translateX(-50%) rotate(45deg);
   width: 14px; height: 14px;
   background: linear-gradient(135deg, #bae6fd 0%, #0284c7 100%);
   border: 2px solid #fff;
@@ -1606,8 +1606,8 @@ select option {
 .dash-loading-frame.frame-master::before {
   content: "";
   position: absolute;
-  top: 0; left: 50%;
-  transform: translate(-50%, -50%);
+  top: 4px; left: 50%;
+  transform: translateX(-50%);
   width: 16px; height: 16px;
   background: linear-gradient(135deg, #d8b4fe 0%, #7e22ce 100%);
   border: 2px solid #f3e8ff;
@@ -1624,8 +1624,8 @@ select option {
 .dash-loading-frame.frame-grandmaster::before {
   content: "";
   position: absolute;
-  top: 0; left: 50%;
-  transform: translate(-50%, -50%);
+  top: 4px; left: 50%;
+  transform: translateX(-50%);
   width: 16px; height: 16px;
   background: linear-gradient(135deg, #fca5a5 0%, #b91c1c 100%);
   border: 2px solid #fee2e2;
@@ -1642,8 +1642,8 @@ select option {
 .dash-loading-frame.frame-challenger::before {
   content: "";
   position: absolute;
-  top: 0; left: 50%;
-  transform: translate(-50%, -50%);
+  top: 4px; left: 50%;
+  transform: translateX(-50%);
   width: 18px; height: 18px;
   background: linear-gradient(135deg, #fef08a 0%, #b45309 100%);
   border: 2px solid #fff;
@@ -1653,8 +1653,8 @@ select option {
 }
 
 @keyframes pulseChallenger {
-  0% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 12px rgba(245, 158, 11, 0.7); }
-  100% { transform: translate(-50%, -50%) scale(1.1); box-shadow: 0 0 20px rgba(245, 158, 11, 1); }
+  0% { transform: translateX(-50%) scale(1); box-shadow: 0 0 12px rgba(245, 158, 11, 0.7); }
+  100% { transform: translateX(-50%) scale(1.1); box-shadow: 0 0 20px rgba(245, 158, 11, 1); }
 }
 
 /* UNRANKED / PROVISIONAL */
