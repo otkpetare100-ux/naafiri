@@ -545,20 +545,6 @@ function openPlayerDetails(player) {
         }
       }
 
-      // LÓGICA DE PUNTOS DE FORMA (Últimas 5 Partidas)
-      const formContainer = document.getElementById('player-form');
-      if (formContainer) {
-        formContainer.innerHTML = '';
-        // Tomamos las últimas 5 partidas del historial (las más recientes primero)
-        const recentMatches = (player.matchStatsHistory || []).slice(0, 5);
-        recentMatches.forEach(match => {
-          const dot = document.createElement('div');
-          dot.className = `form-dot ${match.win ? 'win' : 'loss'}`;
-          dot.title = match.win ? 'Victoria' : 'Derrota';
-          formContainer.appendChild(dot);
-        });
-        // Si tiene menos de 5 partidas, rellenamos con puntos vacíos o simplemente mostramos los que hay
-      }
 
   // W/L Calculation
   const historyArr = player.history || [];
@@ -596,28 +582,79 @@ function openPlayerDetails(player) {
     winBar.style.width = t > 0 ? `${qWr}%` : '0%';
   };
 
+  // Función para actualizar los puntos de forma según la cola
+  const updateFormDots = (queueType) => {
+    const formContainer = document.getElementById('player-form');
+    const streakBadge = document.getElementById('streak-badge');
+    if (!formContainer) return;
+    
+    formContainer.innerHTML = '';
+    if (streakBadge) {
+      streakBadge.style.display = 'none';
+      streakBadge.className = 'streak-badge';
+    }
+    
+    // Mapeo de IDs de cola de Riot (420: Solo, 440: Flex)
+    const queueIds = queueType === 'flex' ? [440, 'RANKED_FLEX_SR'] : [420, 'RANKED_SOLO_5x5'];
+
+    const filteredMatches = (player.matchStatsHistory || [])
+      .filter(m => queueIds.includes(m.queueId) || queueIds.includes(m.queueType))
+      .slice(0, 5);
+
+    // Renderizar los puntos
+    filteredMatches.forEach(match => {
+      const dot = document.createElement('div');
+      dot.className = `form-dot ${match.win ? 'win' : 'loss'}`;
+      dot.title = `${queueType === 'flex' ? 'Flex' : 'Solo Q'} - ${match.win ? 'Victoria' : 'Derrota'}`;
+      formContainer.appendChild(dot);
+    });
+
+    // Lógica de Racha (🔥 / ❄️)
+    if (filteredMatches.length >= 2 && streakBadge) {
+      let streakCount = 0;
+      const firstResult = filteredMatches[0].win;
+      
+      for (const match of filteredMatches) {
+        if (match.win === firstResult) {
+          streakCount++;
+        } else {
+          break;
+        }
+      }
+
+      if (streakCount >= 2) {
+        streakBadge.style.display = 'flex';
+        if (firstResult) {
+          streakBadge.innerHTML = `x${streakCount} <span class="streak-emoji">🔥</span>`;
+          streakBadge.classList.add('streak-fire');
+        } else {
+          streakBadge.innerHTML = `x${streakCount} <span class="streak-emoji">❄️</span>`;
+          streakBadge.classList.add('streak-cold');
+        }
+      }
+    }
+  };
+
   // Setup toggle buttons
   const btnSolo = document.getElementById('btn-soloq');
   const btnFlex = document.getElementById('btn-flexq');
 
-  let currentQueue = 'soloq';
-
   btnSolo.onclick = () => {
     btnSolo.classList.add('active');
     btnFlex.classList.remove('active');
-    currentQueue = 'soloq';
     renderQueueStats(player.soloQ);
+    updateFormDots('solo'); // Sincronizar puntos
     if (typeof loadStats === 'function') loadStats(player.advancedStats ? player.advancedStats.soloq || player.advancedStats : null);
-    if (typeof renderHistory === 'function') renderHistory(player.matchStatsHistory, currentQueue);
+    if (typeof renderHistory === 'function') renderHistory(player.matchStatsHistory, 'soloq');
   };
 
   btnFlex.onclick = () => {
     btnFlex.classList.add('active');
     btnSolo.classList.remove('active');
-    currentQueue = 'flexq';
     renderQueueStats(player.flexQ);
+    updateFormDots('flex'); // Sincronizar puntos
     if (typeof loadStats === 'function') loadStats(player.advancedStats ? player.advancedStats.flexq || player.advancedStats : null);
-    if (typeof renderHistory === 'function') renderHistory(player.matchStatsHistory, currentQueue);
+    if (typeof renderHistory === 'function') renderHistory(player.matchStatsHistory, 'flexq');
   };
 
   // Render default (SoloQ)
