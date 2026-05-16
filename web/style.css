@@ -1676,56 +1676,55 @@ select option {
 }
 
 .profile-icon-wrapper img#detail-profile-icon {
-  width: 60%; /* Más pequeño para que el marco dorado se vea imponente */
-  height: 60%;
+  width: 75%; /* Revertido al tamaño que te gustaba */
+  height: 75%;
   border-radius: 50%;
   object-fit: cover;
   z-index: 2;
-  border: 1px solid rgba(212, 175, 55, 0.2);
+  border: 2px solid rgba(212, 175, 55, 0.4);
 }
 
 /* Alas de Rango (Fondo) */
 .rank-wings-asset {
   position: absolute;
-  width: 270%; 
-  height: 270%;
-  top: 58%; /* Bajadas para que "abracen" la parte inferior del círculo */
+  width: 250%; 
+  height: 250%;
+  top: 75%; /* Bajadas para compensar el desplazamiento hacia arriba */
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1;
   pointer-events: none;
-  filter: drop-shadow(0 0 15px rgba(0,0,0,0.9));
+  filter: drop-shadow(0 0 15px rgba(0,0,0,0.8));
 }
 
 /* Marco de Rango (Frente) */
 .rank-frame-asset {
   position: absolute;
-  width: 140%; 
-  height: 140%;
-  top: 50%;
+  width: 130%; 
+  height: 130%;
+  top: 68%; /* Bajada para que encaje perfectamente con el icono */
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 3;
   pointer-events: none;
-  filter: drop-shadow(0 5px 15px rgba(0,0,0,0.6));
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
 }
 
 .level-badge {
   position: absolute;
-  bottom: -22px; /* Bajado drásticamente para salir del marco dorado */
+  bottom: -15px; /* Ajustado para que no estorbe al nuevo posicionamiento */
   left: 50%;
   transform: translateX(-50%);
   background: #111;
   border: 1px solid var(--gold-primary);
   color: #fff;
-  font-size: 0.8rem;
-  font-weight: 900;
-  padding: 2px 10px;
-  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 1px 8px;
+  border-radius: 10px;
   white-space: nowrap;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.9);
-  z-index: 20; /* Por encima de todo */
-  text-shadow: 0 0 5px var(--gold-primary);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.8);
+  z-index: 10;
 }
 
 .profile-text h3 {
