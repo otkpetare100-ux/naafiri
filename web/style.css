@@ -854,10 +854,7 @@ h1::after {
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(10px);
-  align-items: center;
-  justify-content: center;
+  background-color: #000; /* Negro sólido para simular nueva pestaña */
 }
 
 .modal.active {
@@ -1309,19 +1306,19 @@ select option {
 /* =========================================
    Player Details Modal Styles
    ========================================= */
-/* MODAL DETALLES ORIGINAL */
+/* MODAL DETALLES: ESTILO "NUEVA PESTAÑA" (SIN MARCO) */
 .details-modal {
   max-width: 1200px; 
   width: 100%;
   position: relative;
   background: #000 !important;
-  border: 1px solid rgba(212, 175, 55, 0.2) !important;
-  box-shadow: 0 0 50px rgba(0, 0, 0, 0.8) !important;
+  border: none !important; /* Quitar línea dorada */
+  box-shadow: none !important; /* Quitar sombra */
   padding: 2.5rem !important; 
   margin: auto; 
-  border-radius: 20px;
+  border-radius: 0; /* Quitar redondeado para que parezca pestaña */
   overflow: hidden;
-  display: block; /* Volver al flujo normal */
+  display: block;
 }
 
 .modal-header {
