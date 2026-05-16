@@ -9,7 +9,8 @@
   --accent-green: #4ade80;
   --border-gold: rgba(200, 155, 60, 0.4);
   --border-muted: rgba(255, 255, 255, 0.1);
-  --font-family: 'Outfit', sans-serif;
+  --font-main: 'Outfit', sans-serif;
+  --font-headers: 'Montserrat', sans-serif;
 }
 
 /* =========================================
@@ -54,10 +55,17 @@
 body {
   background-color: var(--bg-dark);
   color: var(--text-main);
-  font-family: var(--font-family);
+  font-family: var(--font-main);
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
+}
+
+h1, h2, h3, h4, .summoner-name, #detail-name {
+  font-family: var(--font-headers);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 /* Fondo con imagen y overlay */
