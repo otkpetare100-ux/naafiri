@@ -1003,11 +1003,11 @@ function openPlayerDetails(player) {
     }
 
     const LANE_METADATA = {
-      TOP: { name: 'TOP', icon: 'position-top.png', color: 'rgb(240, 110, 110)', rgb: '240, 110, 110' },
-      JUNGLE: { name: 'JUNGLA', icon: 'position-jungle.png', color: 'rgb(74, 222, 128)', rgb: '74, 222, 128' },
-      MID: { name: 'MID', icon: 'position-mid.png', color: 'rgb(192, 132, 252)', rgb: '192, 132, 252' },
-      BOTTOM: { name: 'ADC', icon: 'position-bottom.png', color: 'rgb(56, 189, 248)', rgb: '56, 189, 248' },
-      UTILITY: { name: 'SOPORTE', icon: 'position-utility.png', color: 'rgb(251, 191, 36)', rgb: '251, 191, 36' }
+      TOP: { name: 'TOP', icon: 'icon-position-top.png', color: 'rgb(240, 110, 110)', rgb: '240, 110, 110' },
+      JUNGLE: { name: 'JUNGLA', icon: 'icon-position-jungle.png', color: 'rgb(74, 222, 128)', rgb: '74, 222, 128' },
+      MID: { name: 'MID', icon: 'icon-position-mid.png', color: 'rgb(192, 132, 252)', rgb: '192, 132, 252' },
+      BOTTOM: { name: 'ADC', icon: 'icon-position-bottom.png', color: 'rgb(56, 189, 248)', rgb: '56, 189, 248' },
+      UTILITY: { name: 'SOPORTE', icon: 'icon-position-utility.png', color: 'rgb(251, 191, 36)', rgb: '251, 191, 36' }
     };
 
     const orderedLanes = ['TOP', 'JUNGLE', 'MID', 'BOTTOM', 'UTILITY'];
@@ -1023,7 +1023,7 @@ function openPlayerDetails(player) {
           <div class="lane-vertical-bar-container">
             <div class="lane-vertical-bar-fill" style="height: ${pct}%" title="${meta.name}: ${pct}%"></div>
           </div>
-          <img src="https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-career-stats/global/default/assets/images/${meta.icon}" class="lane-vertical-icon" alt="${meta.name}" title="${meta.name}: ${pct}%" />
+          <img src="https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/${meta.icon}" class="lane-vertical-icon" alt="${meta.name}" title="${meta.name}: ${pct}%" />
         </div>
       `;
     });
