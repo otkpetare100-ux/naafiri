@@ -2384,22 +2384,22 @@ select option {
 
 .emblem-backlight {
   position: absolute;
-  width: 120px;
-  height: 120px;
+  width: 125px;
+  height: 125px;
   border-radius: 50%;
   background: var(--champ-accent, #d4af37);
   filter: blur(35px); /* Desenfoque súper fuerte para crear un halo suave y difuso */
-  opacity: 0.32; /* Opacidad elegante y balanceada */
+  opacity: 0.65; /* ¡Brillo siempre presente, radiante y permanente! */
   pointer-events: none;
   z-index: 0;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 0 35px var(--champ-accent, rgba(212, 175, 55, 0.4)); /* Brillo extra en el núcleo */
+  box-shadow: 0 0 45px var(--champ-accent, rgba(212, 175, 55, 0.45)); /* Brillo extra en el núcleo siempre activo */
 }
 
 .emblem-container-glow:hover .emblem-backlight {
-  transform: scale(1.18);
-  opacity: 0.65; /* Se enciende con brillo en el hover */
-  filter: blur(40px);
+  transform: scale(1.12);
+  opacity: 0.85; /* Se intensifica sutilmente al pasar el cursor */
+  filter: blur(38px);
 }
 
 .dash-emblem {
