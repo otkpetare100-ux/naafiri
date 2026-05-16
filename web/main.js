@@ -412,8 +412,30 @@ async function setRandomSplash(rawChampName) {
         console.log(`✅ Splash cargado con éxito: ${champId} skin ${selectedSkin.num} (${selectedSkin.name})`);
       };
       img.onerror = () => {
-        console.warn(`❌ Error al cargar skin: ${champId} skin ${selectedSkin.num} (${selectedSkin.name}). Usando predeterminada.`);
-        bgEl.style.backgroundImage = `url('https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_0.jpg')`;
+        console.warn(`⚠️ La skin ${selectedSkin.num} (${selectedSkin.name}) no tiene arte. Buscando otra...`);
+        
+        // Intentar con otra skin de la lista de especiales que no sea la que acaba de fallar
+        const remainingSpecials = specials.filter(s => s.num !== selectedSkin.num);
+        
+        if (remainingSpecials.length > 0) {
+          const nextSkin = remainingSpecials[Math.floor(Math.random() * remainingSpecials.length)];
+          const nextUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_${nextSkin.num}.jpg?v=${bust}`;
+          
+          // Reintento con la nueva skin
+          const nextImg = new Image();
+          nextImg.onload = () => {
+            bgEl.style.backgroundImage = `url('${nextUrl}')`;
+            console.log(`✅ Recuperado con éxito: ${champId} skin ${nextSkin.num} (${nextSkin.name})`);
+          };
+          nextImg.onerror = () => {
+            // Si el segundo intento también falla, ponemos la base
+            bgEl.style.backgroundImage = `url('https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_0.jpg')`;
+          };
+          nextImg.src = nextUrl;
+        } else {
+          // Si no hay más especiales, a la base
+          bgEl.style.backgroundImage = `url('https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_0.jpg')`;
+        }
       };
       img.src = url;
     }
