@@ -2444,3 +2444,20 @@ select option {
   color: #fca5a5;
   text-shadow: 0 1px 2px rgba(0,0,0,0.8);
 }
+
+/* ==========================================================
+   AJUSTES FINALES DE SIMETRÍA Y HOLGURA DEL PERFIL (OVERLOAD)
+   ========================================================== */
+.dash-loading-frame {
+  border-radius: 24px !important; /* Esquinas perfectamente redondeadas y simétricas en las 4 esquinas */
+}
+
+/* Moldura dorada interior en las 4 esquinas redondeadas */
+.dash-loading-frame::after {
+  border-radius: 18px !important;
+}
+
+/* Reducimos el gap lateral para evitar compresión y desbordamiento en badges */
+.profile-info-block.dash-profile {
+  gap: 50px !important;
+}
