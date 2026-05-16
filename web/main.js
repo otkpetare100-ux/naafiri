@@ -321,19 +321,26 @@ window.openDeleteModal = openDeleteModal;
 let currentModalPuuid = null;
 
 // Modal de Detalles del Jugador
-// Función para obtener el campeón más jugado del historial reciente
+// Función para obtener el campeón más jugado del historial reciente (Más fiable)
 function getMostPlayedFromHistory(history) {
   if (!history || history.length === 0) return null;
   const counts = {};
   history.forEach(m => {
+    // Usamos el championName que viene directamente de la partida
     const name = m.championName;
-    if (name) counts[name] = (counts[name] || 0) + 1;
+    if (name && name !== 'Unknown') {
+      counts[name] = (counts[name] || 0) + 1;
+    }
   });
-  // Devolver el nombre del campeón con más apariciones
-  return Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b, null);
+  
+  const entries = Object.entries(counts);
+  if (entries.length === 0) return null;
+  
+  // Ordenar por cantidad de partidas y devolver el primero
+  return entries.sort((a, b) => b[1] - a[1])[0][0];
 }
 
-// Función para cargar un Splash Art vertical (loading) aleatorio con Fallback mejorado
+// Función para cargar un Splash Art vertical aleatorio (Usando fuente Pro de Community Dragon)
 async function setRandomSplash(champId) {
   const bgEl = document.getElementById('dash-left-bg');
   if (!bgEl) return;
@@ -344,38 +351,40 @@ async function setRandomSplash(champId) {
   }
 
   try {
+    // 1. Obtener datos del campeón para saber sus skins
     const resp = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/es_MX/champion/${champId}.json`);
     const data = await resp.json();
     
     if (data.data[champId] && data.data[champId].skins) {
-      // Filtramos skins reales (no chromas y que no sean la 0 si hay más)
       const allSkins = data.data[champId].skins;
-      const specialSkins = allSkins.filter(s => s.num !== 0 && !s.chromas && !s.name.includes('Chroma'));
+      // Filtrar skins reales
+      const specialSkins = allSkins.filter(s => s.num !== 0 && !s.chromas && !s.name.toLowerCase().includes('chroma'));
       
       let selectedSkin;
       if (specialSkins.length > 0) {
-        // Forzamos una skin especial el 100% de las veces si tiene alguna
+        // 100% de probabilidad de skin especial si existe
         selectedSkin = specialSkins[Math.floor(Math.random() * specialSkins.length)];
       } else {
-        selectedSkin = allSkins[0]; // Fallback a la base si no tiene nada más
+        selectedSkin = allSkins[0];
       }
 
-      const splashUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_${selectedSkin.num}.jpg`;
-      const baseSplashUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_0.jpg`;
-
+      // 2. Construir URL (Usamos DDragon Loading con Cache Buster para evitar la predeterminada pegada)
+      const timestamp = new Date().getTime();
+      const splashUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_${selectedSkin.num}.jpg?v=${timestamp}`;
+      
       const img = new Image();
       img.onload = () => {
         bgEl.style.backgroundImage = `url('${splashUrl}')`;
       };
       img.onerror = () => {
-        bgEl.style.backgroundImage = `url('${baseSplashUrl}')`;
+        // Si falla la skin, ponemos la base pero con cache buster también
+        bgEl.style.backgroundImage = `url('https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_0.jpg?v=${timestamp}')`;
       };
       img.src = splashUrl;
-    } else {
-      bgEl.style.backgroundImage = `url('https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_0.jpg')`;
     }
   } catch (error) {
-    bgEl.style.backgroundImage = `url('https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_0.jpg')`;
+    console.error("Error en Splash Art:", error);
+    bgEl.style.backgroundImage = `none`;
   }
 }
 
@@ -383,17 +392,15 @@ function openPlayerDetails(player) {
   currentModalPuuid = player.puuid;
   const modal = document.getElementById('player-details-modal');
 
-  // Lógica de Campeón más jugado en el historial reciente
-  const mostPlayed = getMostPlayedFromHistory(player.matchStatsHistory);
+  // Lógica de fondo basada en el historial real de partidas
+  let targetChamp = getMostPlayedFromHistory(player.matchStatsHistory);
   
-  if (mostPlayed) {
-    setRandomSplash(mostPlayed);
-  } else if (player.topChampions && player.topChampions.length > 0) {
-    // Si no hay historial, usamos el de más maestría como respaldo
-    setRandomSplash(player.topChampions[0].name);
-  } else {
-    setRandomSplash(null);
+  // Si no hay historial reciente, usamos el top maestría
+  if (!targetChamp && player.topChampions && player.topChampions.length > 0) {
+    targetChamp = player.topChampions[0].name;
   }
+  
+  setRandomSplash(targetChamp);
   
   // Header Info
   document.getElementById('detail-profile-icon').src = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${player.profileIconId || 1}.png`;
