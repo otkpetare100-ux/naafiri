@@ -189,7 +189,6 @@ function renderLadder(players) {
       <div class="avatar-wrapper">
         ${rankNum === 1 ? `<img src="${ASSETS_BASE}/estetica/corona.png?t=${Date.now()}" class="rank-crown" alt="Crown" />` : ''}
         <img src="${avatarUrl}" class="player-avatar" alt="${player.gameName}" onerror="this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png'" />
-        <img src="${getRankFrame(player.tier)}" class="rank-frame-mini" onerror="this.style.display='none'" />
         <div class="level-tag">${player.summonerLevel}</div>
       </div>
 
