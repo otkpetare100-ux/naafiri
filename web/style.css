@@ -1676,7 +1676,7 @@ select option {
 }
 
 .profile-icon-wrapper img#detail-profile-icon {
-  width: 75%; /* Revertido al tamaño que te gustaba */
+  width: 75%;
   height: 75%;
   border-radius: 50%;
   object-fit: cover;
@@ -1689,7 +1689,7 @@ select option {
   position: absolute;
   width: 250%; 
   height: 250%;
-  top: 75%; /* Bajadas para compensar el desplazamiento hacia arriba */
+  top: 50%; /* Reseteado al centro */
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1;
@@ -1702,7 +1702,7 @@ select option {
   position: absolute;
   width: 130%; 
   height: 130%;
-  top: 68%; /* Bajada para que encaje perfectamente con el icono */
+  top: 50%; /* Reseteado al centro */
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 3;
@@ -1712,7 +1712,7 @@ select option {
 
 .level-badge {
   position: absolute;
-  bottom: -15px; /* Ajustado para que no estorbe al nuevo posicionamiento */
+  bottom: -5px;
   left: 50%;
   transform: translateX(-50%);
   background: #111;
