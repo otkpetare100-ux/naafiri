@@ -82,8 +82,13 @@ function getRegionName(region) {
 
 const getMasteryCrest = (level) => {
   const lv = Math.min(Math.max(parseInt(level) || 1, 1), 10);
-  const idx = lv - 1; // nivel 1→0, nivel 2→1, ..., nivel 10→9
+  const idx = lv - 1; 
   return `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-collections/global/default/images/item-element/crest-and-banner-mastery-${idx}.png`;
+};
+
+const getRankFrame = (tier) => {
+  const t = (tier || 'unranked').toLowerCase();
+  return `${ASSETS_BASE}/frame/${t}-frame.png`;
 };
 
 function renderLadder(players) {
@@ -184,6 +189,7 @@ function renderLadder(players) {
       <div class="avatar-wrapper">
         ${rankNum === 1 ? `<img src="${ASSETS_BASE}/estetica/corona.png?t=${Date.now()}" class="rank-crown" alt="Crown" />` : ''}
         <img src="${avatarUrl}" class="player-avatar" alt="${player.gameName}" onerror="this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png'" />
+        <img src="${getRankFrame(player.tier)}" class="rank-frame-mini" onerror="this.style.display='none'" />
         <div class="level-tag">${player.summonerLevel}</div>
       </div>
 
@@ -538,6 +544,7 @@ function openPlayerDetails(player) {
   
   // Header Info
   document.getElementById('detail-profile-icon').src = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${player.profileIconId || 1}.png`;
+  document.getElementById('detail-rank-frame').src = getRankFrame(player.tier);
   document.getElementById('detail-level').textContent = player.summonerLevel || 0;
   document.getElementById('detail-name').textContent = player.gameName;
   document.getElementById('detail-region').textContent = getRegionName(player.region);

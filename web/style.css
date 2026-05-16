@@ -394,6 +394,27 @@ h1::after {
   align-items: center;
 }
 
+.avatar-wrapper {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rank-frame-mini {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 155%; 
+  height: 155%;
+  pointer-events: none;
+  z-index: 5;
+}
+
 .champ-item {
   position: relative;
   width: 52px;
@@ -1660,26 +1681,33 @@ select option {
   backdrop-filter: blur(10px);
 }
 
-.profile-info-block.dash-profile {
+.profile-info-block {
   display: flex;
   align-items: center;
-  gap: 20px;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(8px);
-  padding: 20px;
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  margin-bottom: 15px !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  gap: 15px;
 }
 
 .profile-icon-wrapper {
   position: relative;
   width: 70px;
   height: 70px;
-  border-radius: 50%;
-  border: 2px solid var(--gold-primary);
-  box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+  /* Eliminamos el borde circular para que el marco luzca mejor */
+  border: none;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rank-frame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 145%; /* Ajuste para que rodee el icono */
+  height: 145%;
+  pointer-events: none;
+  z-index: 10;
 }
 
 .profile-icon-wrapper img {
@@ -1742,19 +1770,11 @@ select option {
   font-weight: 300;
 }
 
-.rank-box.dash-rank {
+.rank-box {
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: rgba(0, 0, 0, 0.55) !important;
-  backdrop-filter: blur(12px) !important;
-  border: 1px solid rgba(212, 175, 55, 0.2) !important;
-  border-radius: 20px !important;
-  padding: 30px 20px !important;
-  margin-top: 20px !important;
-  width: 100%;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
 }
 
 .queue-toggle {
@@ -1802,7 +1822,11 @@ select option {
   filter: drop-shadow(0 8px 15px rgba(0,0,0,0.5));
 }
 
-/* dash-rank consolidated into rank-box above */
+.dash-rank {
+  margin-top: 25px;
+  padding-top: 25px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
 
 .tier-rank {
   font-size: 1.3rem;
@@ -1820,11 +1844,7 @@ select option {
 .winrate-bar-container {
   width: 100%;
   max-width: 300px;
-  margin-top: 20px;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 15px;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  margin-top: 10px;
 }
 
 .winrate-bar {
