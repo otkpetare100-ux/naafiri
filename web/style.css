@@ -1930,6 +1930,11 @@ select option {
   transition: transform 0.3s ease;
 }
 
+.champ-detail-crest-spacer {
+  height: 50px; /* Espacio reservado para mantener alineación */
+  width: 65px;
+}
+
 .champ-detail-item:hover .champ-detail-crest {
   transform: scale(1.1);
 }
