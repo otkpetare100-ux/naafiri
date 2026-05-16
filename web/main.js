@@ -614,9 +614,9 @@ function openPlayerDetails(player) {
     } else {
       wingsEl.style.display = 'block';
       frameEl.style.display = 'block';
-      // URLs oficiales verificadas
+      // Marco y Alas Oficiales (Regalia)
       wingsEl.src = `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-emblem/wings/wings_${tier}.png`;
-      frameEl.src = `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-emblem/emblem-${tier}.png`;
+      frameEl.src = `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/regalia/borders/ranked_${tier}_level_3.png`;
     }
 
     document.getElementById('detail-tier-rank').textContent = queueData.tier === 'UNRANKED' ? 'UNRANKED' : `${queueData.tier} ${queueData.rank}`;
