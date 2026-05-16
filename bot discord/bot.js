@@ -911,7 +911,7 @@ function initBot(db) {
         
         let content = `<@${msg.author.id}> 🎰 **¡GACHAPON DE LA PERRERA!**\n💰 Saldo restante: **${finalBalance} Naafiri Coins**`;
         if (selected.rarity === 'Legendario') {
-          content = `@everyone 🎊 ¡ATENCIÓN! **${msg.author.username}** consiguió un objeto **LEGENDARIO**! 🎊\n💰 Saldo: **${finalBalance}**`;
+          content = `🎊 ¡ATENCIÓN! **${msg.author.username}** consiguió un objeto **LEGENDARIO**! 🎊\n💰 Saldo: **${finalBalance}**`;
         }
 
         return msg.channel.send({ content, files: [attachment] });

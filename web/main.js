@@ -321,9 +321,43 @@ window.openDeleteModal = openDeleteModal;
 let currentModalPuuid = null;
 
 // Modal de Detalles del Jugador
+// Función para cargar un Splash Art aleatorio del campeón más usado
+async function setRandomSplash(champId) {
+  const bgEl = document.getElementById('modal-splash-bg');
+  if (!bgEl) return;
+  
+  if (!champId) {
+    bgEl.style.backgroundImage = 'none';
+    return;
+  }
+
+  try {
+    const resp = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/es_MX/champion/${champId}.json`);
+    const data = await resp.json();
+    
+    if (data.data[champId] && data.data[champId].skins) {
+      const skins = data.data[champId].skins;
+      const randomSkin = skins[Math.floor(Math.random() * skins.length)];
+      const splashUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champId}_${randomSkin.num}.jpg`;
+      bgEl.style.backgroundImage = `url('${splashUrl}')`;
+    } else {
+      bgEl.style.backgroundImage = `url('https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champId}_0.jpg')`;
+    }
+  } catch (error) {
+    bgEl.style.backgroundImage = `url('https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champId}_0.jpg')`;
+  }
+}
+
 function openPlayerDetails(player) {
   currentModalPuuid = player.puuid;
   const modal = document.getElementById('player-details-modal');
+
+  // Fondo Dinámico Aleatorio
+  if (player.topChampions && player.topChampions.length > 0) {
+    setRandomSplash(player.topChampions[0].name);
+  } else {
+    setRandomSplash(null);
+  }
   
   // Header Info
   document.getElementById('detail-profile-icon').src = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${player.profileIconId || 1}.png`;
