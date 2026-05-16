@@ -1702,7 +1702,7 @@ select option {
   position: absolute;
   width: 140%; 
   height: auto;
-  top: 12%; /* Elevado más para que el círculo rodee finalmente el icono */
+  top: 10%; /* Elevado */
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 5; 
@@ -1712,7 +1712,7 @@ select option {
 
 .level-badge {
   position: absolute;
-  bottom: 25px; /* Reajustado para la nueva posición del marco */
+  bottom: -10px; /* Devuelto a su sitio abajo */
   left: 50%;
   transform: translateX(-50%);
   background: #111;
