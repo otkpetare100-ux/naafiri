@@ -513,38 +513,56 @@ function openPlayerDetails(player) {
     statusEl.textContent = 'EN PARTIDA';
     statusEl.className = 'status-badge';
   } else {
-    statusEl.textContent = 'DESCONECTADO';
-    statusEl.className = 'status-badge offline';
-  }
-
-  // LÓGICA DE TAG OTP PREMIUM
-  const otpContainer = document.getElementById('otp-badge-container');
-  otpContainer.innerHTML = '';
-  
-  if (player.matchStatsHistory && player.matchStatsHistory.length >= 5) {
-    const history = player.matchStatsHistory;
-    const totalGames = history.length;
-    const counts = {};
-    
-    history.forEach(m => {
-      const name = m.championName;
-      if (name && name !== 'Unknown') counts[name] = (counts[name] || 0) + 1;
-    });
-
-    let topChamp = null;
-    let maxCount = 0;
-    for (const champ in counts) {
-      if (counts[champ] > maxCount) {
-        maxCount = counts[champ];
-        topChamp = champ;
+      if (player.isLive) {
+        statusEl.textContent = 'EN PARTIDA';
+        statusEl.className = 'status-badge';
+      } else {
+        statusEl.textContent = 'DESCONECTADO';
+        statusEl.className = 'status-badge offline';
       }
-    }
 
-    const otpPercentage = (maxCount / totalGames) * 100;
-    if (otpPercentage >= 80) {
-      otpContainer.innerHTML = `<div class="badge-otp" title="¡Este jugador es un especialista con ${topChamp}!">OTP ${topChamp}</div>`;
-    }
-  }
+      // LÓGICA DE TAG OTP PREMIUM
+      const otpContainer = document.getElementById('otp-badge-container');
+      otpContainer.innerHTML = '';
+      if (player.matchStatsHistory && player.matchStatsHistory.length >= 5) {
+        const history = player.matchStatsHistory;
+        const totalGames = history.length;
+        const counts = {};
+        
+        history.forEach(m => {
+          const name = m.championName;
+          if (name && name !== 'Unknown') counts[name] = (counts[name] || 0) + 1;
+        });
+
+        let topChamp = null;
+        let maxCount = 0;
+        for (const champ in counts) {
+          if (counts[champ] > maxCount) {
+            maxCount = counts[champ];
+            topChamp = champ;
+          }
+        }
+
+        const otpPercentage = (maxCount / totalGames) * 100;
+        if (otpPercentage >= 80) {
+          otpContainer.innerHTML = `<div class="badge-otp" title="¡Este jugador es un especialista con ${topChamp}!">OTP ${topChamp}</div>`;
+        }
+      }
+
+      // LÓGICA DE PUNTOS DE FORMA (Últimas 5 Partidas)
+      const formContainer = document.getElementById('player-form');
+      if (formContainer) {
+        formContainer.innerHTML = '';
+        // Tomamos las últimas 5 partidas del historial (las más recientes primero)
+        const recentMatches = (player.matchStatsHistory || []).slice(0, 5);
+        recentMatches.forEach(match => {
+          const dot = document.createElement('div');
+          dot.className = `form-dot ${match.win ? 'win' : 'loss'}`;
+          dot.title = match.win ? 'Victoria' : 'Derrota';
+          formContainer.appendChild(dot);
+        });
+        // Si tiene menos de 5 partidas, rellenamos con puntos vacíos o simplemente mostramos los que hay
+      }
 
   // W/L Calculation
   const historyArr = player.history || [];

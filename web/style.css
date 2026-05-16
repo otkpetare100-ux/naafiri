@@ -1447,6 +1447,24 @@ select option {
 
 /* Scrollbar del modal — heredado del estilo global dorado */
 
+.form-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,0,0,0.3);
+  box-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+
+.form-dot.win {
+  background-color: #4ade80;
+  box-shadow: 0 0 10px rgba(74, 222, 128, 0.4);
+}
+
+.form-dot.loss {
+  background-color: #f87171;
+  box-shadow: 0 0 10px rgba(248, 113, 113, 0.4);
+}
+
 .details-modal .modal-header {
   margin-bottom: 2rem; 
   border-bottom: none;
