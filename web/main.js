@@ -474,7 +474,7 @@ function openPlayerDetails(player) {
 
     const otpPercentage = (maxCount / totalGames) * 100;
     if (otpPercentage >= 80) {
-      otpContainer.innerHTML = `<div class="badge-otp" title="¡Este jugador es un especialista con ${topChamp}!">👑 OTP ${topChamp}</div>`;
+      otpContainer.innerHTML = `<div class="badge-otp" title="¡Este jugador es un especialista con ${topChamp}!">👑 OTP</div>`;
     }
   }
 
