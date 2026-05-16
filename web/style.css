@@ -1445,7 +1445,15 @@ select option {
   z-index: 0;
   opacity: 0.7; /* Punto medio ideal */
   filter: brightness(0.85) contrast(1.05); /* Elegante y equilibrado */
-  transition: background-image 0.5s ease-in-out;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
+              filter 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
+              background-image 0.5s ease-in-out;
+}
+
+/* Efecto de zoom parallax interactivo en el splash de fondo */
+.dash-left-col:hover .dash-left-bg {
+  transform: scale(1.05);
+  filter: brightness(0.95) contrast(1.1); /* Realza los contrastes mágicamente */
 }
 
 /* ==========================================================
@@ -1470,14 +1478,30 @@ select option {
               inset 0 0 30px var(--rank-glow-inner, rgba(120, 113, 108, 0.45));
 }
 
-/* Moldura dorada interior súper premium */
+/* Reacción de iluminación mágica interactiva en hover */
+.dash-left-col:hover .dash-loading-frame {
+  box-shadow: 0 0 40px var(--rank-glow-outer, rgba(120, 113, 108, 0.45)),
+              inset 0 0 0 2px rgba(255, 255, 255, 0.15),
+              inset 0 0 45px var(--rank-glow-inner, rgba(120, 113, 108, 0.6));
+  filter: brightness(1.12); /* Le da un destello mágico al metal */
+}
+
+/* Moldura dorada interior súper premium con relieve biselado */
 .dash-loading-frame::after {
   content: "";
   position: absolute;
   top: 4px; left: 4px; right: 4px; bottom: 4px;
   border: 1px solid rgba(197, 160, 89, 0.35); /* Filete dorado sutil */
+  border-bottom: 2px solid rgba(197, 160, 89, 0.5); /* Simulación de peso metálico abajo */
+  border-right: 2px solid rgba(197, 160, 89, 0.45);
   pointer-events: none;
   border-radius: 18px 0 0 18px;
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dash-left-col:hover .dash-loading-frame::after {
+  border-color: rgba(197, 160, 89, 0.55);
+  background: rgba(255, 255, 255, 0.01); /* Leve iluminación interna */
 }
 
 /* ==========================================
@@ -1485,12 +1509,17 @@ select option {
    ========================================== */
 .frame-corner {
   position: absolute;
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border: 2px solid var(--rank-color, #c5a059);
+  
+  /* Doble línea de filigrana metálica usando outline interno */
+  outline: 1px solid rgba(255, 255, 255, 0.18);
+  outline-offset: -3px;
+  
   z-index: 5;
   pointer-events: none;
-  filter: drop-shadow(0 0 2px var(--rank-color, #c5a059));
+  filter: drop-shadow(0 0 3px var(--rank-color, #c5a059));
   transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -1515,6 +1544,11 @@ select option {
   border-radius: 0 0 10px 0;
 }
 
+/* Expansión del diseño Hextech en hover */
+.dash-left-col:hover .frame-corner {
+  filter: drop-shadow(0 0 5px var(--rank-color, #c5a059)) brightness(1.2);
+}
+
 /* Remaches/Joyas miniatura en las esquinas */
 .frame-corner::after {
   content: "";
@@ -1524,13 +1558,49 @@ select option {
   background: #ffffff;
   border-radius: 50%;
   box-shadow: 0 0 5px #ffffff, 0 0 10px var(--rank-color, #c5a059);
-  transition: all 0.6s ease;
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .frame-corner.top-left::after { top: -2px; left: -2px; }
 .frame-corner.top-right::after { top: -2px; right: -2px; }
 .frame-corner.bottom-left::after { bottom: -2px; left: -2px; }
 .frame-corner.bottom-right::after { bottom: -2px; right: -2px; }
+
+/* Efecto de destello/supernova en los remaches al pasar el mouse */
+.dash-left-col:hover .frame-corner::after {
+  transform: scale(1.3);
+  box-shadow: 0 0 8px #ffffff, 0 0 15px var(--rank-color, #c5a059);
+}
+
+/* ==========================================
+   MEDALLONES / CRESTAS INFERIORES
+   ========================================== */
+.frame-crest-bottom {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 11px;
+  background: var(--rank-color, #78716c);
+  border: 2px solid #ffffff;
+  border-radius: 2px 2px 6px 6px;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.5), 0 0 10px var(--rank-glow-inner);
+  z-index: 5;
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Interacción con el medallón inferior */
+.dash-left-col:hover .frame-crest-bottom {
+  transform: translateX(-50%) scale(1.15);
+  box-shadow: 0 -3px 12px rgba(0,0,0,0.6), 0 0 15px var(--rank-color);
+  filter: brightness(1.2);
+}
+
+.dash-left-col:hover .dash-loading-frame::before {
+  transform: translateX(-50%) scale(1.15);
+  filter: drop-shadow(0 0 8px var(--rank-color));
+}
 
 /* ==========================================
    DEFINICIÓN DE PALETA DINÁMICA POR RANGO
