@@ -1487,7 +1487,7 @@ select option {
 
 .streak-badge {
   font-family: var(--font-headers);
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   font-weight: 900;
   display: flex;
   align-items: center;
@@ -1496,13 +1496,9 @@ select option {
   height: 28px;
   justify-content: center;
   
-  /* ESTILO PREMIUM */
-  background: rgba(0, 0, 0, 0.6);
-  border: 1px solid var(--gold-primary);
-  border-radius: 4px;
-  box-shadow: 
-    0 2px 10px rgba(0, 0, 0, 0.5),
-    inset 0 0 5px rgba(212, 175, 55, 0.2);
+  background: none;
+  border: none;
+  box-shadow: none;
   
   transition: all 0.3s ease;
   animation: streakIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -1510,18 +1506,12 @@ select option {
 
 .streak-badge.streak-fire {
   color: #ff9f43;
-  border-color: #ff9f43;
-  box-shadow: 
-    0 0 15px rgba(255, 159, 67, 0.4),
-    inset 0 0 8px rgba(255, 159, 67, 0.2);
+  text-shadow: 0 0 15px rgba(255, 159, 67, 0.8);
 }
 
 .streak-badge.streak-cold {
   color: #00d2ff;
-  border-color: #00d2ff;
-  box-shadow: 
-    0 0 15px rgba(0, 210, 255, 0.4),
-    inset 0 0 8px rgba(0, 210, 255, 0.2);
+  text-shadow: 0 0 15px rgba(0, 210, 255, 0.8);
 }
 
 @keyframes streakIn {
