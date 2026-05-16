@@ -321,18 +321,40 @@ window.openDeleteModal = openDeleteModal;
 let currentModalPuuid = null;
 
 // Modal de Detalles del Jugador
+// Memoria global de campeones y skins para búsqueda instantánea
+let CHAMPION_SKINS_DATA = null;
+
+// Función para inicializar la base de datos de skins (Se llama al cargar la web)
+async function initSkinsDatabase() {
+  try {
+    const resp = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/en_US/champion.json`);
+    const data = await resp.json();
+    CHAMPION_SKINS_DATA = data.data;
+    console.log("Base de datos de campeones lista.");
+  } catch (e) {
+    console.error("Error cargando base de datos de campeones:", e);
+  }
+}
+
 // Función para limpiar nombres de campeones (Ej: "Lee Sin" -> "LeeSin")
 function cleanChampId(name) {
   if (!name) return null;
+  // Normalizar: quitar espacios, puntos y poner en formato Riot (Lee Sin -> LeeSin)
+  const normalized = name.replace(/[^a-zA-Z]/g, '').toLowerCase();
+  
+  // Buscar en nuestra base de datos ignorando mayúsculas
+  if (CHAMPION_SKINS_DATA) {
+    const found = Object.keys(CHAMPION_SKINS_DATA).find(id => id.toLowerCase() === normalized);
+    if (found) return found;
+  }
+
+  // Excepciones manuales si falla lo anterior
   const exceptions = {
-    "Wukong": "MonkeyKing", "LeBlanc": "Leblanc", "Kha'Zix": "Khazix",
-    "Cho'Gath": "Chogath", "Vel'Koz": "Velkoz", "Kai'Sa": "Kaisa",
-    "Bel'Veth": "Belveth", "Renata Glasc": "Renata", "Nunu y Willump": "Nunu"
+    "wukong": "MonkeyKing", "leblanc": "Leblanc", "khazix": "Khazix",
+    "chogath": "Chogath", "velkoz": "Velkoz", "kaisa": "Kaisa",
+    "belveth": "Belveth", "renata": "Renata", "nunu": "Nunu"
   };
-  if (exceptions[name]) return exceptions[name];
-  // Eliminar espacios y caracteres no alfabéticos, capitalizando la primera letra
-  let clean = name.replace(/[^a-zA-Z]/g, '');
-  return clean;
+  return exceptions[normalized] || name.replace(/[^a-zA-Z]/g, '');
 }
 
 // Función para obtener el campeón más jugado del historial reciente
@@ -347,33 +369,30 @@ function getMostPlayedFromHistory(history) {
   return entries.length > 0 ? entries.sort((a, b) => b[1] - a[1])[0][0] : null;
 }
 
-// Función para cargar un Splash Art vertical aleatorio (SÚPER REFORZADA)
+// Función para cargar un Splash Art vertical aleatorio (TOTALMENTE ASEGURADA)
 async function setRandomSplash(rawChampName) {
   const bgEl = document.getElementById('dash-left-bg');
   if (!bgEl) return;
   
-  // 1. Limpiar fondo inmediatamente para evitar "fantasmas" de la skin anterior
   bgEl.style.backgroundImage = 'none';
-  
   const champId = cleanChampId(rawChampName);
   if (!champId) return;
 
   try {
-    // 2. Usamos en_US que es el más fiable para obtener la lista de skins
+    // Petición específica del campeón para obtener sus skins reales
     const resp = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/en_US/champion/${champId}.json`);
+    if (!resp.ok) return;
     const data = await resp.json();
     
     if (data.data[champId]) {
       const skins = data.data[champId].skins;
-      // Filtramos cualquier cosa que parezca un chroma o la base
+      // Filtramos Chromas y Base
       const specials = skins.filter(s => s.num !== 0 && !s.chromas && !s.name.toLowerCase().includes('chroma'));
       
-      // Elegimos skin (100% especial si existe)
       const skinNum = specials.length > 0 
         ? specials[Math.floor(Math.random() * specials.length)].num 
         : 0;
 
-      // 3. Fuente de imagen Ultra-Fiable con Cache Buster Dinámico
       const bust = Math.random().toString(36).substring(7);
       const url = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_${skinNum}.jpg?v=${bust}`;
       
@@ -387,7 +406,7 @@ async function setRandomSplash(rawChampName) {
       img.src = url;
     }
   } catch (error) {
-    console.error("Error crítico en Splash:", error);
+    console.error("Error en Splash:", error);
   }
 }
 
@@ -763,6 +782,7 @@ function showToast(message, type = 'success') {
 // Carga inicial
 document.addEventListener('DOMContentLoaded', async () => {
   await updateVersion();
+  initSkinsDatabase(); // Cargar base de datos de skins
   fetchLadder();
   initModal();
   initDeleteLogic();
