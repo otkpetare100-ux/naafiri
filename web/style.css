@@ -1425,12 +1425,32 @@ select option {
 }
 
 .dash-right-col {
+    position: relative !important;
     background: transparent !important;
     border: none !important;
     backdrop-filter: none !important;
     overflow-y: auto;
     padding: 0 25px 25px 25px !important; /* Padding superior a 0 para subir el contenido */
     transition: background 0.8s ease;
+}
+
+/* Grabado metálico ultra-sutil de fondo con la marca de la jauría */
+.dash-right-col::before {
+  content: "";
+  position: absolute;
+  top: 48%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 320px;
+  height: 320px;
+  background-image: url('/assets/estetica/logo.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.035; /* Súper sutil y ultra-elegante */
+  pointer-events: none;
+  z-index: 0;
+  filter: grayscale(1) brightness(1.6);
 }
 
 .dash-left-bg {
@@ -1924,12 +1944,28 @@ select option {
   padding-bottom: 0;
   display: flex;
   justify-content: space-between;
+  align-items: center; /* Asegura alineamiento vertical perfecto */
 }
 
 .details-modal .modal-header h2 {
   font-size: 2.5rem;
   letter-spacing: 0.1rem;
   margin: 0;
+}
+
+.detail-modal-logo {
+  height: 38px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.25));
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  pointer-events: none; /* Deja que el cursor pase y active el hover de la cabecera */
+}
+
+.details-modal .modal-header:hover .detail-modal-logo {
+  transform: scale(1.08) rotate(4deg);
+  filter: drop-shadow(0 0 16px var(--champ-accent-alpha, rgba(212, 175, 55, 0.5))) brightness(1.1);
 }
 
 #detail-name {
