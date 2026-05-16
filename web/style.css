@@ -1663,9 +1663,9 @@ select option {
 .profile-info-block {
   display: flex;
   align-items: center;
-  gap: 65px; /* Aumentado para dar espacio a las alas */
-  padding-left: 25px; /* Separar un poco del borde izquierdo */
-  margin-bottom: 20px;
+  gap: 85px; /* Aumentado drásticamente para dejar vía libre a las alas */
+  padding-left: 20px;
+  margin-bottom: 25px;
 }
 
 .profile-icon-wrapper {
@@ -1675,7 +1675,7 @@ select option {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0; /* Evitar que se aplaste */
+  flex-shrink: 0;
 }
 
 .profile-icon-wrapper img#detail-profile-icon {
