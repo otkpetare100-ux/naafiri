@@ -1689,7 +1689,7 @@ select option {
   position: absolute;
   width: 270%; 
   height: auto;
-  top: 30%; /* Elevado para compensar el espacio vacío del activo */
+  top: 20%; /* Subida drástica para centrar el círculo con el icono */
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1;
@@ -1700,19 +1700,19 @@ select option {
 /* Marco de Rango (Frente) */
 .rank-frame-asset {
   position: absolute;
-  width: 140%; /* Reducido un poco como pediste */
+  width: 140%; 
   height: auto;
-  top: 30%; /* Elevado para que el círculo rodee el icono */
+  top: 20%; /* Elevado para que el círculo dorado rodee el icono */
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 3;
+  z-index: 5; /* Por encima del icono de invocador */
   pointer-events: none;
   filter: drop-shadow(0 4px 12px rgba(0,0,0,0.6));
 }
 
 .level-badge {
   position: absolute;
-  bottom: 0px; /* Ajustado para la nueva elevación */
+  bottom: 10px; /* Reajustado para la nueva posición elevada */
   left: 50%;
   transform: translateX(-50%);
   background: #111;
