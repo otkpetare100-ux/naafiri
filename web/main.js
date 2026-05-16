@@ -82,22 +82,8 @@ function getRegionName(region) {
 
 const getMasteryCrest = (level) => {
   const lv = Math.min(Math.max(parseInt(level) || 1, 1), 10);
-  const idx = lv - 1; 
+  const idx = lv - 1; // nivel 1→0, nivel 2→1, ..., nivel 10→9
   return `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-collections/global/default/images/item-element/crest-and-banner-mastery-${idx}.png`;
-};
-
-const getRegaliaUrl = (tier) => {
-  const t = (tier || 'unranked').toLowerCase();
-  return `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-emblems/regalia/${t}.png`;
-};
-
-const getDivisionUrl = (tier, rank) => {
-  if (!tier || !rank) return '';
-  const t = tier.toUpperCase();
-  if (['MASTER', 'GRANDMASTER', 'CHALLENGER', 'UNRANKED'].includes(t)) return '';
-  const romanToNum = { 'I': 1, 'II': 2, 'III': 3, 'IV': 4 };
-  const num = romanToNum[rank] || 1;
-  return `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-emblems/divisions/${t.toLowerCase()}-${num}.png`;
 };
 
 function renderLadder(players) {
@@ -552,19 +538,6 @@ function openPlayerDetails(player) {
   
   // Header Info
   document.getElementById('detail-profile-icon').src = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${player.profileIconId || 1}.png`;
-  
-  const regaliaImg = document.getElementById('detail-rank-regalia');
-  const divisionImg = document.getElementById('detail-rank-division');
-  
-  regaliaImg.src = getRegaliaUrl(player.tier);
-  const divUrl = getDivisionUrl(player.tier, player.rank);
-  if (divUrl) {
-    divisionImg.src = divUrl;
-    divisionImg.style.display = 'block';
-  } else {
-    divisionImg.style.display = 'none';
-  }
-
   document.getElementById('detail-level').textContent = player.summonerLevel || 0;
   document.getElementById('detail-name').textContent = player.gameName;
   document.getElementById('detail-region').textContent = getRegionName(player.region);
