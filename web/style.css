@@ -1671,7 +1671,7 @@ select option {
 .profile-info-block {
   display: flex;
   align-items: center;
-  gap: 65px !important; /* Espaciado ajustado para 85px */
+  gap: 85px !important; /* Espaciado ajustado para evitar solapamiento con las alas del avatar */
   padding-left: 20px;
   padding-top: 35px; /* Espacio para que las alas no se corten */
   margin-bottom: 25px;
