@@ -143,6 +143,10 @@ function renderLadder(players) {
       }
     }
 
+    // Clase para el Winrate (Restaurado)
+    const wrValue = parseInt(player.winRate) || 0;
+    const wrClass = wrValue >= 50 ? 'wr-positive' : 'wr-negative';
+
     // Si es top 1 o 2, mostramos la tarjeta abajo para que no se salga de la pantalla
     const cardPositionClass = rankNum <= 2 ? 'm-card-bottom' : '';
 
