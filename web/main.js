@@ -654,7 +654,29 @@ function openPlayerDetails(player) {
     
     document.getElementById('detail-wins').textContent = `${w} W`;
     document.getElementById('detail-losses').textContent = `${l} L`;
-    wrEl.textContent = `${qWr}% Winrate`;
+    
+    // Winrate dinámico con color y medalla de calificación
+    let wrColor = '#ef4444'; // Red
+    let wrRating = 'Deficiente';
+    if (qWr >= 60) {
+      wrColor = '#ff9f43'; // Fuego/Oro
+      wrRating = '¡SMURF!';
+    } else if (qWr >= 50) {
+      wrColor = '#22c55e'; // Green
+      wrRating = 'Positivo';
+    } else if (qWr > 0) {
+      wrColor = '#ef4444'; // Red
+      wrRating = 'Mejorable';
+    } else {
+      wrColor = '#94a3b8'; // Grey (no games)
+      wrRating = 'Sin datos';
+    }
+    
+    if (t > 0) {
+      wrEl.innerHTML = `<span class="wr-num" style="color: ${wrColor}; font-size: 2.0rem; font-weight: 900; text-shadow: 0 0 15px ${wrColor}33; font-family: 'Outfit', sans-serif;">${qWr}%</span> <span class="wr-label" style="font-size: 0.8rem; font-weight: 800; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin-left: 4px;">WR</span> <span class="wr-badge" style="background: ${wrColor}15; border: 1px solid ${wrColor}33; color: ${wrColor}; font-size: 0.65rem; font-weight: 900; padding: 2px 8px; border-radius: 6px; margin-left: 8px; text-transform: uppercase; letter-spacing: 0.5px; vertical-align: middle;">${wrRating}</span>`;
+    } else {
+      wrEl.innerHTML = `<span class="wr-num" style="color: #94a3b8; font-size: 2.0rem; font-weight: 900; font-family: 'Outfit', sans-serif;">--%</span> <span class="wr-label" style="font-size: 0.8rem; font-weight: 800; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin-left: 4px;">WR</span>`;
+    }
     
     const winBar = document.getElementById('detail-win-bar');
     winBar.style.width = t > 0 ? `${qWr}%` : '0%';
@@ -825,10 +847,29 @@ function openPlayerDetails(player) {
     champsContainer.innerHTML = '<span class="history-empty">Sin datos de campeones</span>';
   }
 
-  // Cargar Estadísticas si existen
+  // Cargar Estadísticas si existen con colores dinámicos y medallas de calificación
   function loadStats(stats) {
+    const kdaTitle = document.getElementById('detail-kda-title');
     if (stats && stats.avgGold !== undefined) {
-      document.getElementById('detail-kda-title').textContent = `${stats.kda} KDA`;
+      const kdaVal = parseFloat(stats.kda) || 0.0;
+      let kdaColor = '#94a3b8'; // Slate Silver
+      let kdaRating = 'Normal';
+      if (kdaVal >= 4.0) {
+        kdaColor = '#ff9f43'; // Fuego/Oro Legendario
+        kdaRating = '¡LEYENDA!';
+      } else if (kdaVal >= 3.0) {
+        kdaColor = '#a855f7'; // Amatista Excelente
+        kdaRating = 'Excelente';
+      } else if (kdaVal >= 2.0) {
+        kdaColor = '#38bdf8'; // Sky Blue Sólido
+        kdaRating = 'Sólido';
+      } else if (kdaVal > 0) {
+        kdaColor = '#ef4444'; // Soft Red Mejorable
+        kdaRating = 'Mejorable';
+      }
+      
+      kdaTitle.innerHTML = `<span class="kda-num" style="color: ${kdaColor}; font-size: 2.0rem; font-weight: 900; text-shadow: 0 0 15px ${kdaColor}33; font-family: 'Outfit', sans-serif;">${stats.kda}</span> <span class="kda-label" style="font-size: 0.8rem; font-weight: 800; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin-left: 4px;">KDA</span> <span class="kda-badge" style="background: ${kdaColor}15; border: 1px solid ${kdaColor}33; color: ${kdaColor}; font-size: 0.65rem; font-weight: 900; padding: 2px 8px; border-radius: 6px; margin-left: 8px; text-transform: uppercase; letter-spacing: 0.5px; vertical-align: middle;">${kdaRating}</span>`;
+      
       document.getElementById('stat-gold').textContent = stats.avgGold.toLocaleString('es-ES');
       document.getElementById('stat-deaths').textContent = stats.avgDeaths;
       document.getElementById('stat-cs').textContent = stats.csPerMin;
@@ -836,7 +877,7 @@ function openPlayerDetails(player) {
       document.getElementById('stat-dmg').textContent = stats.avgDamageDealt.toLocaleString('es-ES');
       document.getElementById('stat-dmg-taken').textContent = stats.avgDamageTaken.toLocaleString('es-ES');
     } else {
-      document.getElementById('detail-kda-title').textContent = '0.00 KDA';
+      kdaTitle.innerHTML = `<span class="kda-num" style="color: #94a3b8; font-size: 2.0rem; font-weight: 900; font-family: 'Outfit', sans-serif;">0.00</span> <span class="kda-label" style="font-size: 0.8rem; font-weight: 800; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin-left: 4px;">KDA</span>`;
       document.getElementById('stat-gold').textContent = 'N/A';
       document.getElementById('stat-deaths').textContent = 'N/A';
       document.getElementById('stat-cs').textContent = 'N/A';

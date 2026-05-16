@@ -189,29 +189,108 @@
 
               <!-- Cuadrícula 2x3 o 3x2 -->
               <div class="advanced-stats-grid">
+                <!-- Oro Promedio -->
                 <div class="stat-card">
-                  <span class="stat-label">Oro</span>
-                  <span id="stat-gold" class="stat-value">--</span>
+                  <div class="stat-accent-strip stat-gold"></div>
+                  <div class="stat-card-content">
+                    <div class="stat-header-row">
+                      <span class="stat-label">Oro Prom.</span>
+                      <span class="stat-icon-wrapper stat-gold-icon">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="8"></circle>
+                          <line x1="12" y1="8" x2="12" y2="16"></line>
+                          <path d="M16 10a2 2 0 0 0-2-2h-3a2 2 0 0 0 0 4h3a2 2 0 0 1 0 4h-3a2 2 0 0 1-2-2"></path>
+                        </svg>
+                      </span>
+                    </div>
+                    <span id="stat-gold" class="stat-value">--</span>
+                  </div>
                 </div>
+
+                <!-- Muertes -->
                 <div class="stat-card">
-                  <span class="stat-label">Muertes</span>
-                  <span id="stat-deaths" class="stat-value">--</span>
+                  <div class="stat-accent-strip stat-deaths"></div>
+                  <div class="stat-card-content">
+                    <div class="stat-header-row">
+                      <span class="stat-label">Muertes</span>
+                      <span class="stat-icon-wrapper stat-deaths-icon">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M12 2a5 5 0 0 0-5 5v3a3 3 0 0 0 3 3h4a3 3 0 0 0 3-3V7a5 5 0 0 0-5-5z"></path>
+                          <path d="M9 13v4a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-4"></path>
+                          <path d="M10 16h4"></path>
+                        </svg>
+                      </span>
+                    </div>
+                    <span id="stat-deaths" class="stat-value">--</span>
+                  </div>
                 </div>
+
+                <!-- CS / Min -->
                 <div class="stat-card">
-                  <span class="stat-label">CS/Min</span>
-                  <span id="stat-cs" class="stat-value">--</span>
+                  <div class="stat-accent-strip stat-cs"></div>
+                  <div class="stat-card-content">
+                    <div class="stat-header-row">
+                      <span class="stat-label">CS / Min</span>
+                      <span class="stat-icon-wrapper stat-cs-icon">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M20 20a8 8 0 0 0-8-8 8 8 0 0 0-8 8"></path>
+                          <line x1="12" y1="4" x2="12" y2="12"></line>
+                          <path d="M9 7l3-3 3 3"></path>
+                        </svg>
+                      </span>
+                    </div>
+                    <span id="stat-cs" class="stat-value">--</span>
+                  </div>
                 </div>
+
+                <!-- Kill Participation -->
                 <div class="stat-card">
-                  <span class="stat-label">Kill Part.</span>
-                  <span id="stat-kp" class="stat-value">--</span>
+                  <div class="stat-accent-strip stat-kp"></div>
+                  <div class="stat-card-content">
+                    <div class="stat-header-row">
+                      <span class="stat-label">Kill Part.</span>
+                      <span class="stat-icon-wrapper stat-kp-icon">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <circle cx="12" cy="12" r="5"></circle>
+                          <circle cx="12" cy="12" r="1"></circle>
+                        </svg>
+                      </span>
+                    </div>
+                    <span id="stat-kp" class="stat-value">--</span>
+                  </div>
                 </div>
+
+                <!-- Daño Promedio -->
                 <div class="stat-card">
-                  <span class="stat-label">Daño Prom.</span>
-                  <span id="stat-dmg" class="stat-value">--</span>
+                  <div class="stat-accent-strip stat-dmg"></div>
+                  <div class="stat-card-content">
+                    <div class="stat-header-row">
+                      <span class="stat-label">Daño Prom.</span>
+                      <span class="stat-icon-wrapper stat-dmg-icon">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
+                        </svg>
+                      </span>
+                    </div>
+                    <span id="stat-dmg" class="stat-value">--</span>
+                  </div>
                 </div>
+
+                <!-- Daño Recibido -->
                 <div class="stat-card">
-                  <span class="stat-label">Daño Rec.</span>
-                  <span id="stat-dmg-taken" class="stat-value">--</span>
+                  <div class="stat-accent-strip stat-dmg-taken"></div>
+                  <div class="stat-card-content">
+                    <div class="stat-header-row">
+                      <span class="stat-label">Daño Rec.</span>
+                      <span class="stat-icon-wrapper stat-dmg-taken-icon">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                      </span>
+                    </div>
+                    <span id="stat-dmg-taken" class="stat-value">--</span>
+                  </div>
                 </div>
               </div>
             </div>
