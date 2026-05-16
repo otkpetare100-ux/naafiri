@@ -2784,27 +2784,9 @@ select option {
   100% { transform: rotate(360deg); }
 }
 
-/* ================== FILA DE LÍNEAS Y CAMPEONES LADO A LADO ================== */
-.dash-lanes-champs-row {
-  display: grid;
-  grid-template-columns: 285px 1fr; /* 285px para el heatmap de 5 barras, el resto para los 3 campeones */
-  gap: 20px;
-  margin-bottom: 25px;
-}
-
-.dash-lanes-champs-row .detail-box {
-  margin-bottom: 0 !important;
-}
-
-@media (max-width: 1024px) {
-  .dash-lanes-champs-row {
-    grid-template-columns: 1fr;
-  }
-}
-
 /* ================== HEATMAP DE LÍNEAS VERTICAL (SHADOW ROSE & GOLD) ================== */
 .dash-lanes-box {
-  margin-bottom: 0 !important;
+  margin-bottom: 25px !important;
 }
 
 .dash-lanes-title {
