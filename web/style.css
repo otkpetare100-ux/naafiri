@@ -2393,17 +2393,17 @@ select option {
   z-index: 1;
   object-fit: contain;
   display: block;
-  /* El efecto definitivo de Outer Glow perfilado de alta intensidad como en el ejemplo */
-  filter: drop-shadow(0 0 5px var(--champ-accent, #d4af37))
-          drop-shadow(0 0 15px var(--champ-accent-glow, rgba(212, 175, 55, 0.35)))
-          drop-shadow(0 8px 16px rgba(0, 0, 0, 0.65)) !important;
+  /* Brillo Outer Glow ultra-brillante al 100% de opacidad y permanente por defecto */
+  filter: drop-shadow(0 0 8px var(--champ-accent, #d4af37))
+          drop-shadow(0 0 20px var(--champ-accent, #d4af37))
+          drop-shadow(0 8px 16px rgba(0, 0, 0, 0.7)) !important;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .emblem-container-glow:hover .dash-emblem {
   transform: scale(1.06);
-  filter: drop-shadow(0 0 8px var(--champ-accent, #d4af37))
-          drop-shadow(0 0 25px var(--champ-accent, #d4af37))
+  filter: drop-shadow(0 0 12px var(--champ-accent, #d4af37))
+          drop-shadow(0 0 30px var(--champ-accent, #d4af37))
           drop-shadow(0 12px 24px rgba(0, 0, 0, 0.8)) !important;
 }
 
