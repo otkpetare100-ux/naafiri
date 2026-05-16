@@ -391,22 +391,22 @@ function getMostPlayedFromHistory(history) {
   return entries.length > 0 ? entries.sort((a, b) => b[1] - a[1])[0][0] : null;
 }
 
-// MAPEO DE REGIONES: PAISAJES REALES (Wiki Oficial - Enlaces Públicos)
+// MAPEO DE REGIONES: ATMÓSFERA REGIONAL (Data Dragon - 100% Estable)
 const REGION_WALLPAPERS = {
-  'demacia': 'https://static.wikia.nocookie.net/leagueoflegends/images/1/15/Demacia_Concept_Art_01.jpg',
-  'noxus': 'https://static.wikia.nocookie.net/leagueoflegends/images/d/d1/Noxus_Concept_Art_04.jpg',
-  'ionia': 'https://static.wikia.nocookie.net/leagueoflegends/images/a/a5/Ionia_Concept_Art_05.jpg',
-  'freljord': 'https://static.wikia.nocookie.net/leagueoflegends/images/a/a2/Freljord_Concept_Art_03.jpg',
-  'shurima': 'https://static.wikia.nocookie.net/leagueoflegends/images/a/a2/Shurima_Concept_Art_01.jpg',
-  'void': 'https://static.wikia.nocookie.net/leagueoflegends/images/d/d2/Void_Concept_Art_02.jpg',
-  'shadow-isles': 'https://static.wikia.nocookie.net/leagueoflegends/images/4/4b/Shadow_Isles_Concept_Art_01.jpg',
-  'targon': 'https://static.wikia.nocookie.net/leagueoflegends/images/5/52/Mount_Targon_Concept_Art_05.jpg',
-  'piltover': 'https://static.wikia.nocookie.net/leagueoflegends/images/3/3d/Piltover_Concept_Art_01.jpg',
-  'zaun': 'https://static.wikia.nocookie.net/leagueoflegends/images/5/53/Zaun_Concept_Art_02.jpg',
-  'bilgewater': 'https://static.wikia.nocookie.net/leagueoflegends/images/d/df/Bilgewater_Concept_Art_01.jpg',
-  'ixtal': 'https://static.wikia.nocookie.net/leagueoflegends/images/4/45/Ixtal_Concept_Art_01.jpg',
-  'bandle-city': 'https://static.wikia.nocookie.net/leagueoflegends/images/4/4e/Bandle_City_Concept_Art_02.jpg',
-  'runeterra': 'https://static.wikia.nocookie.net/leagueoflegends/images/0/03/Runeterra_Concept_Art_01.jpg'
+  'demacia': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Garen_0.jpg',
+  'noxus': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Darius_0.jpg',
+  'ionia': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Irelia_0.jpg',
+  'freljord': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ashe_0.jpg',
+  'shurima': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Azir_0.jpg',
+  'void': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Chogath_0.jpg',
+  'shadow-isles': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Thresh_0.jpg',
+  'targon': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Leona_0.jpg',
+  'piltover': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Caitlyn_0.jpg',
+  'zaun': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Jinx_0.jpg',
+  'bilgewater': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Gangplank_0.jpg',
+  'ixtal': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Qiyana_0.jpg',
+  'bandle-city': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Teemo_0.jpg',
+  'runeterra': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ryze_0.jpg'
 };
 
 const CHAMP_REGIONS = {
@@ -417,13 +417,20 @@ const CHAMP_REGIONS_LOWER = {};
 Object.keys(CHAMP_REGIONS).forEach(k => CHAMP_REGIONS_LOWER[k.toLowerCase()] = CHAMP_REGIONS[k]);
 
 function updateRegionBackground(champName) {
-  const bgLayer = document.getElementById('region-bg-layer');
-  if (!bgLayer) return;
+  const modal = document.getElementById('player-details-modal');
+  if (!modal) return;
   const champId = cleanChampId(champName);
   if (!champId) return;
   const region = CHAMP_REGIONS_LOWER[champId.toLowerCase()] || 'runeterra';
   const wallpaperUrl = REGION_WALLPAPERS[region];
-  if (wallpaperUrl) bgLayer.style.backgroundImage = `url('${wallpaperUrl}')`;
+  
+  if (wallpaperUrl) {
+    // Aplicamos el fondo al modal entero (backdrop) con un oscurecimiento para elegancia
+    modal.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('${wallpaperUrl}')`;
+    modal.style.backgroundSize = 'cover';
+    modal.style.backgroundPosition = 'center';
+    modal.style.transition = 'background-image 1s ease-in-out';
+  }
 }
 
 // Función para cargar un Splash Art vertical aleatorio (TOTALMENTE ASEGURADA)
