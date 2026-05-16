@@ -123,22 +123,25 @@ function renderLadder(players) {
     // Icono de invocador
     const avatarUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${player.profileIconId}.png`;
 
-    // Historial (W/L) - Viene de la API
-    const history = player.history || []; 
-    const historyHtml = history.map(res => `<span class="history-dot dot-${res.toLowerCase()}"></span>`).join('');
+    // Historial Sincronizado (Solo Q 420 + Sin Remakes)
+    const soloQMatches = (player.matchStatsHistory || [])
+      .filter(m => (m.queueId === 420 || m.queueType === 'RANKED_SOLO_5x5') && !m.isRemake)
+      .slice(0, 5);
 
-    // Cálculo de Racha Minimalista para la tarjeta
+    const historyHtml = soloQMatches.map(m => `<span class="history-dot dot-${m.win ? 'w' : 'l'}"></span>`).join('');
+
+    // Cálculo de Racha Sincronizada
     let cardStreakHtml = '';
-    if (history.length >= 2) {
+    if (soloQMatches.length >= 2) {
       let streakCount = 0;
-      const firstResult = history[0]; // 'W' o 'L'
-      for (const res of history) {
-        if (res === firstResult) streakCount++;
+      const firstWin = soloQMatches[0].win;
+      for (const m of soloQMatches) {
+        if (m.win === firstWin) streakCount++;
         else break;
       }
       if (streakCount >= 2) {
-        const emoji = firstResult === 'W' ? '🔥' : '❄️';
-        const color = firstResult === 'W' ? '#ff9f43' : '#00d2ff';
+        const emoji = firstWin ? '🔥' : '❄️';
+        const color = firstWin ? '#ff9f43' : '#00d2ff';
         cardStreakHtml = `<span style="color: ${color}; font-weight: 900; margin-left: 8px; font-size: 0.85rem; text-shadow: 0 0 8px ${color}66;"><span class="streak-emoji">${emoji}</span> x${streakCount}</span>`;
       }
     }
