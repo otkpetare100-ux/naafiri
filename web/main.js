@@ -704,10 +704,10 @@ function openPlayerDetails(player) {
       if (streakCount >= 2) {
         streakBadge.style.visibility = 'visible';
         if (firstResult) {
-          streakBadge.innerHTML = `x${streakCount} <span class="streak-emoji">🔥</span>`;
+          streakBadge.innerHTML = `<span class="streak-emoji">🔥</span> x${streakCount}`;
           streakBadge.classList.add('streak-fire');
         } else {
-          streakBadge.innerHTML = `x${streakCount} <span class="streak-emoji">❄️</span>`;
+          streakBadge.innerHTML = `<span class="streak-emoji">❄️</span> x${streakCount}`;
           streakBadge.classList.add('streak-cold');
         }
       }
