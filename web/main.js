@@ -386,19 +386,25 @@ async function setRandomSplash(rawChampName) {
     
     if (data.data[champId]) {
       const skins = data.data[champId].skins;
-      // Filtramos Chromas y Base
-      const specials = skins.filter(s => s.num !== 0 && !s.chromas && !s.name.toLowerCase().includes('chroma'));
+      // IMPORTANTE: Quitamos el filtro !s.chromas porque las skins reales suelen tener chromas
+      // Solo filtramos la 0 (predeterminada) y nombres que contengan 'Chroma' explícitamente
+      const specials = skins.filter(s => s.num !== 0 && !s.name.toLowerCase().includes('chroma'));
       
-      const skinNum = specials.length > 0 
-        ? specials[Math.floor(Math.random() * specials.length)].num 
-        : 0;
+      let selectedSkin;
+      if (specials.length > 0) {
+        // Elegimos una skin especial al azar
+        selectedSkin = specials[Math.floor(Math.random() * specials.length)];
+      } else {
+        selectedSkin = skins[0]; // Fallback a la base si no hay más
+      }
 
       const bust = Math.random().toString(36).substring(7);
-      const url = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_${skinNum}.jpg?v=${bust}`;
+      const url = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_${selectedSkin.num}.jpg?v=${bust}`;
       
       const img = new Image();
       img.onload = () => {
         bgEl.style.backgroundImage = `url('${url}')`;
+        console.log(`Splash cargado con éxito: ${champId} skin ${selectedSkin.num} (${selectedSkin.name})`);
       };
       img.onerror = () => {
         bgEl.style.backgroundImage = `url('https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_0.jpg')`;
