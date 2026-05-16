@@ -1611,13 +1611,14 @@ select option {
 }
 
 .stat-card {
-  background: rgba(255, 255, 255, 0.03); /* Fondo muy sutil */
-  border: none !important; /* Quitar bordes de cajitas */
-  border-radius: 12px;
-  padding: 15px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: 18px; /* Más redondeado */
+  padding: 18px;
   display: flex;
   flex-direction: column;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .stat-card:hover {
@@ -1643,11 +1644,13 @@ select option {
 
 /* ================== RESTORED CLASSES ================== */
 .detail-box {
-  background: linear-gradient(145deg, rgba(15, 15, 18, 0.5) 0%, rgba(5, 5, 5, 0.7) 100%);
-  border: 1px solid rgba(212, 175, 55, 0.15);
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  background: linear-gradient(145deg, rgba(20, 20, 25, 0.6) 0%, rgba(10, 10, 12, 0.8) 100%);
+  border: 1px solid var(--champ-accent-alpha, rgba(212, 175, 55, 0.15));
+  border-radius: 22px; /* Más redondeado */
+  padding: 24px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 
+              inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  margin-bottom: 20px;
 }
 
 .profile-info-block {
