@@ -321,7 +321,7 @@ window.openDeleteModal = openDeleteModal;
 let currentModalPuuid = null;
 
 // Modal de Detalles del Jugador
-// Función para cargar un Splash Art vertical (loading) aleatorio con Fallback
+// Función para cargar un Splash Art vertical (loading) aleatorio con Fallback mejorado
 async function setRandomSplash(champId) {
   const bgEl = document.getElementById('dash-left-bg');
   if (!bgEl) return;
@@ -336,10 +336,20 @@ async function setRandomSplash(champId) {
     const data = await resp.json();
     
     if (data.data[champId] && data.data[champId].skins) {
-      const skins = data.data[champId].skins;
-      const randomSkin = skins[Math.floor(Math.random() * skins.length)];
+      // FILTRAR CHROMAS: Los chromas no tienen splash art propio y causan fallback a la base
+      const availableSkins = data.data[champId].skins.filter(s => !s.chromas);
       
-      const splashUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_${randomSkin.num}.jpg`;
+      // Si hay skins disponibles además de la base, elegimos una al azar
+      // (Damos un 90% de probabilidad a skins especiales si existen)
+      let selectedSkin;
+      if (availableSkins.length > 1 && Math.random() > 0.1) {
+        const specialSkins = availableSkins.filter(s => s.num !== 0);
+        selectedSkin = specialSkins[Math.floor(Math.random() * specialSkins.length)];
+      } else {
+        selectedSkin = availableSkins[Math.floor(Math.random() * availableSkins.length)];
+      }
+
+      const splashUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_${selectedSkin.num}.jpg`;
       const baseSplashUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_0.jpg`;
 
       const img = new Image();
