@@ -1660,10 +1660,17 @@ select option {
   backdrop-filter: blur(10px);
 }
 
-.profile-info-block {
+.profile-info-block.dash-profile {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 20px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  padding: 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 15px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .profile-icon-wrapper {
@@ -1735,11 +1742,19 @@ select option {
   font-weight: 300;
 }
 
-.rank-box {
+.rank-box.dash-rank {
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
+  background: rgba(0, 0, 0, 0.55) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(212, 175, 55, 0.2) !important;
+  border-radius: 20px !important;
+  padding: 30px 20px !important;
+  margin-top: 20px !important;
+  width: 100%;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
 }
 
 .queue-toggle {
@@ -1787,11 +1802,7 @@ select option {
   filter: drop-shadow(0 8px 15px rgba(0,0,0,0.5));
 }
 
-.dash-rank {
-  margin-top: 25px;
-  padding-top: 25px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-}
+/* dash-rank consolidated into rank-box above */
 
 .tier-rank {
   font-size: 1.3rem;
@@ -1809,7 +1820,11 @@ select option {
 .winrate-bar-container {
   width: 100%;
   max-width: 300px;
-  margin-top: 10px;
+  margin-top: 20px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 15px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 .winrate-bar {
