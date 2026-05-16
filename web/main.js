@@ -802,6 +802,7 @@ function openPlayerDetails(player) {
     updateFormDots('solo'); 
     if (typeof loadStats === 'function') loadStats(player.advancedStats ? player.advancedStats.soloq || player.advancedStats : null);
     if (typeof renderHistory === 'function') renderHistory(player.matchStatsHistory, currentQueue);
+    if (typeof renderLanesDistribution === 'function') renderLanesDistribution(player.matchStatsHistory, currentQueue);
   };
 
   btnFlex.onclick = () => {
@@ -812,6 +813,7 @@ function openPlayerDetails(player) {
     updateFormDots('flex'); 
     if (typeof loadStats === 'function') loadStats(player.advancedStats ? player.advancedStats.flexq || player.advancedStats : null);
     if (typeof renderHistory === 'function') renderHistory(player.matchStatsHistory, currentQueue);
+    if (typeof renderLanesDistribution === 'function') renderLanesDistribution(player.matchStatsHistory, currentQueue);
   };
 
   // Render default (SoloQ)
@@ -939,6 +941,99 @@ function openPlayerDetails(player) {
     }
   }
 
+  // Mapeador de Campeones a Posición/Línea
+  function getChampionLane(champName) {
+    const name = (champName || '').toLowerCase().trim();
+    
+    // TOP
+    if ([
+      'aatrox', 'akali', 'camille', 'chogath', 'darius', 'drmundo', 'fiora', 'gangplank', 'garen', 'gnar', 'gragas', 'gwen', 'illaoi', 'irelia', 'jax', 'jayce', 'ksante', 'kayle', 'kennen', 'kled', 'malphite', 'mordekaiser', 'nasus', 'olaf', 'ornn', 'pantheon', 'poppy', 'quinn', 'renekton', 'riven', 'rumble', 'shen', 'singed', 'sion', 'teemo', 'tryndamere', 'urgot', 'volibear', 'yorick'
+    ].includes(name)) return 'TOP';
+    
+    // JUNGLE
+    if ([
+      'amumu', 'belveth', 'briar', 'elise', 'evelynn', 'fiddlesticks', 'graves', 'hecarim', 'ivern', 'jarvaniv', 'karthus', 'kayn', 'khazix', 'kindred', 'leesin', 'lillia', 'masteryi', 'nidalee', 'nocturne', 'nunu', 'rammus', 'reksai', 'rengar', 'sejuani', 'shaco', 'shyvana', 'skarner', 'trundle', 'udyr', 'vi', 'viego', 'warwick', 'xinzhao', 'xin zhao', 'zac'
+    ].includes(name)) return 'JUNGLE';
+    
+    // ADC / BOTTOM
+    if ([
+      'aphelios', 'ashe', 'caitlyn', 'draven', 'ezreal', 'jhin', 'jinx', 'kaisa', 'kalista', 'kogmaw', 'lucian', 'missfortune', 'nilah', 'samira', 'sivir', 'smolder', 'tristana', 'twitch', 'varus', 'vayne', 'xayah', 'zeri'
+    ].includes(name)) return 'BOTTOM';
+    
+    // SUPPORT / UTILITY
+    if ([
+      'alistar', 'bard', 'blitzcrank', 'braum', 'janna', 'karma', 'leona', 'lulu', 'milio', 'morgana', 'nami', 'nautilus', 'pyke', 'rakan', 'rell', 'renata', 'senna', 'seraphine', 'sona', 'soraka', 'taric', 'thresh', 'yuumi', 'zyra'
+    ].includes(name)) return 'UTILITY';
+    
+    // MID (default standard mages / assassins)
+    if ([
+      'ahri', 'akshan', 'anivia', 'annie', 'aurelionsol', 'azir', 'cassiopeia', 'corki', 'diana', 'ekko', 'fizz', 'galio', 'heimerdinger', 'hwei', 'kassadin', 'katarina', 'leblanc', 'lissandra', 'lux', 'malzahar', 'naafiri', 'neeko', 'orianna', 'ryze', 'swain', 'syndra', 'taliyah', 'talon', 'twistedfate', 'veigar', 'velkoz', 'viktor', 'vladimir', 'xerath', 'yasuo', 'yone', 'zoe'
+    ].includes(name)) return 'MID';
+    
+    // Fallbacks
+    return 'MID';
+  }
+
+  // Render Mapa de Calor de Líneas
+  function renderLanesDistribution(history, queueType) {
+    const container = document.getElementById('detail-lanes-distribution');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const laneCounts = { TOP: 0, JUNGLE: 0, MID: 0, BOTTOM: 0, UTILITY: 0 };
+    let activeMatches = 0;
+
+    if (history && history.length > 0) {
+      const filteredHistory = history.filter(match => {
+        if (queueType === 'soloq') {
+          return !match.queueId || match.queueId == 420;
+        } else if (queueType === 'flexq') {
+          return match.queueId == 440;
+        }
+        return true;
+      });
+
+      filteredHistory.forEach(match => {
+        const lane = getChampionLane(match.championName);
+        if (laneCounts[lane] !== undefined) {
+          laneCounts[lane]++;
+          activeMatches++;
+        }
+      });
+    }
+
+    const LANE_METADATA = {
+      TOP: { name: 'TOP', icon: 'position-top.png', color: 'rgb(240, 110, 110)', rgb: '240, 110, 110' },
+      JUNGLE: { name: 'JUNGLA', icon: 'position-jungle.png', color: 'rgb(74, 222, 128)', rgb: '74, 222, 128' },
+      MID: { name: 'MID', icon: 'position-mid.png', color: 'rgb(192, 132, 252)', rgb: '192, 132, 252' },
+      BOTTOM: { name: 'ADC', icon: 'position-bottom.png', color: 'rgb(56, 189, 248)', rgb: '56, 189, 248' },
+      UTILITY: { name: 'SOPORTE', icon: 'position-utility.png', color: 'rgb(251, 191, 36)', rgb: '251, 191, 36' }
+    };
+
+    const orderedLanes = ['TOP', 'JUNGLE', 'MID', 'BOTTOM', 'UTILITY'];
+
+    orderedLanes.forEach(laneKey => {
+      const count = laneCounts[laneKey];
+      const pct = activeMatches > 0 ? Math.round((count / activeMatches) * 100) : 0;
+      const meta = LANE_METADATA[laneKey];
+      const isActive = pct > 0;
+
+      container.innerHTML += `
+        <div class="lane-heat-card ${isActive ? 'active' : 'inactive'}" style="--lane-color: ${meta.color}; --lane-color-rgb: ${meta.rgb};">
+          <div class="lane-heat-bg"></div>
+          <img src="https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-positions/${meta.icon}" class="lane-heat-icon" alt="${meta.name}" />
+          <div class="lane-heat-info">
+            <span class="lane-heat-name">${meta.name}</span>
+            <span class="lane-heat-pct">${pct}%</span>
+          </div>
+          <div class="lane-heat-progress-container">
+            <div class="lane-heat-progress" style="width: ${pct}%"></div>
+          </div>
+        </div>
+      `;
+    });
+  }
+
   // Render Historial de Partidas
   function renderHistory(history, queueType) {
     const historyContainer = document.getElementById('detail-match-history');
@@ -1042,6 +1137,7 @@ function openPlayerDetails(player) {
   // pero lo llamaremos explícitamente abajo para evitar condiciones de carrera
   if (typeof loadStats === 'function') loadStats(player.advancedStats ? player.advancedStats[currentQueue] || player.advancedStats : null);
   if (typeof renderHistory === 'function') renderHistory(player.matchStatsHistory, currentQueue);
+  if (typeof renderLanesDistribution === 'function') renderLanesDistribution(player.matchStatsHistory, currentQueue);
 
   // Botón para actualizar partidas recientes
   const btnUpdateMatches = document.getElementById('btn-update-matches');
@@ -1063,6 +1159,7 @@ function openPlayerDetails(player) {
           player.matchStatsHistory = data.history; // Guardar historial nuevo
           loadStats(player.advancedStats[currentQueue]);
           renderHistory(data.history, currentQueue); // Refrescar lista de historial filtrado
+          if (typeof renderLanesDistribution === 'function') renderLanesDistribution(data.history, currentQueue);
         }
       } else {
         showToast(`❌ ${data.message}`, 'error');
