@@ -994,9 +994,30 @@ function openPlayerDetails(player) {
       });
 
       filteredHistory.forEach(match => {
-        const lane = getChampionLane(match.championName);
-        if (laneCounts[lane] !== undefined) {
-          laneCounts[lane]++;
+        let rawLane = match.lane;
+        
+        // Si no tiene la línea (partida antigua en DB), usamos el adivinador de respaldo
+        if (!rawLane || rawLane === 'Unknown') {
+          rawLane = getChampionLane(match.championName);
+        }
+        
+        // Normalizar a nuestras claves internas estándar
+        let finalLane = 'MID';
+        const l = rawLane.toUpperCase().trim();
+        if (l === 'TOP') {
+          finalLane = 'TOP';
+        } else if (l === 'JUNGLE') {
+          finalLane = 'JUNGLE';
+        } else if (l === 'MIDDLE' || l === 'MID') {
+          finalLane = 'MID';
+        } else if (l === 'BOTTOM' || l === 'BOTTOM_CARRY' || l === 'ADC') {
+          finalLane = 'BOTTOM';
+        } else if (l === 'UTILITY' || l === 'BOTTOM_SUPPORT' || l === 'SUPPORT') {
+          finalLane = 'UTILITY';
+        }
+
+        if (laneCounts[finalLane] !== undefined) {
+          laneCounts[finalLane]++;
           activeMatches++;
         }
       });
