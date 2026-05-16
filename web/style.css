@@ -1689,7 +1689,7 @@ select option {
   position: absolute;
   width: 270%; 
   height: auto;
-  top: 20%; /* Subida drástica para centrar el círculo con el icono */
+  top: 20%; 
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1;
@@ -1702,17 +1702,17 @@ select option {
   position: absolute;
   width: 140%; 
   height: auto;
-  top: 20%; /* Elevado para que el círculo dorado rodee el icono */
+  top: 12%; /* Elevado más para que el círculo rodee finalmente el icono */
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 5; /* Por encima del icono de invocador */
+  z-index: 5; 
   pointer-events: none;
   filter: drop-shadow(0 4px 12px rgba(0,0,0,0.6));
 }
 
 .level-badge {
   position: absolute;
-  bottom: 10px; /* Reajustado para la nueva posición elevada */
+  bottom: 25px; /* Reajustado para la nueva posición del marco */
   left: 50%;
   transform: translateX(-50%);
   background: #111;
