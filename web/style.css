@@ -1688,8 +1688,8 @@ select option {
 .rank-wings-asset {
   position: absolute;
   width: 250%; 
-  height: 250%;
-  top: 50%; /* Reseteado al centro */
+  height: auto; /* Usar auto para mantener proporción y evitar que se vea ovalado */
+  top: 45%; /* Subido un poco para encajar el círculo */
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1;
@@ -1701,8 +1701,8 @@ select option {
 .rank-frame-asset {
   position: absolute;
   width: 130%; 
-  height: 130%;
-  top: 50%; /* Reseteado al centro */
+  height: auto; /* Mantener ratio oficial */
+  top: 45%; /* Subido para alinear el círculo del marco con el icono */
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 3;
@@ -1712,7 +1712,7 @@ select option {
 
 .level-badge {
   position: absolute;
-  bottom: -5px;
+  bottom: 0px; /* Ajustado para el nuevo centro */
   left: 50%;
   transform: translateX(-50%);
   background: #111;
