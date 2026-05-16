@@ -482,26 +482,9 @@ async function setRandomSplash(rawChampName) {
       const url = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_${selectedSkin.num}.jpg?v=${bust}`;
       
       const img = new Image();
-      img.crossOrigin = "Anonymous"; // Necesario para leer píxeles de DDragon
       img.onload = () => {
         bgEl.style.backgroundImage = `url('${url}')`;
-        
-        // Extraer color dominante para la interfaz dinámica
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = 1; canvas.height = 1;
-        ctx.drawImage(img, 0, 0, 1, 1);
-        const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
-        
-        // Actualizar variable CSS en el modal
-        const modal = document.getElementById('player-details-modal');
-        if (modal) {
-          modal.style.setProperty('--champ-accent', `rgb(${r}, ${g}, ${b})`);
-          modal.style.setProperty('--champ-accent-alpha', `rgba(${r}, ${g}, ${b}, 0.2)`);
-          modal.style.setProperty('--champ-accent-deep', `rgba(${Math.max(0, r-50)}, ${Math.max(0, g-50)}, ${Math.max(0, b-50)}, 0.8)`);
-        }
-        
-        console.log(`✅ Splash y Color Dinámico cargados: ${champId} (rgb ${r},${g},${b})`);
+        console.log(`✅ Splash cargado con éxito: ${champId}`);
       };
       img.onerror = () => {
         const remainingSpecials = specials.filter(s => s.num !== selectedSkin.num);
@@ -604,6 +587,30 @@ function openPlayerDetails(player) {
     if (!queueData) queueData = { tier: 'UNRANKED', rank: '', leaguePoints: 0, wins: 0, losses: 0 };
     
     const tier = (queueData.tier || 'UNRANKED').toLowerCase();
+    
+    // Mapeo oficial de colores por Rango para tintado dinámico y armonía cromática total
+    const TIER_RGB = {
+      challenger: { r: 245, g: 158, b: 11 },    // Oro/Ámbar ardiente
+      grandmaster: { r: 239, g: 68, b: 68 },    // Rojo carmesí
+      master: { r: 168, g: 85, b: 247 },         // Violeta místico
+      diamond: { r: 56, g: 189, b: 248 },        // Azul hielo/celeste
+      emerald: { r: 5, g: 150, b: 105 },         // Esmeralda brillante
+      platinum: { r: 20, g: 184, b: 166 },       // Turquesa/Teal
+      gold: { r: 197, g: 160, b: 89 },           // Oro templado
+      silver: { r: 100, g: 116, b: 139 },        // Plata pizarra
+      bronze: { r: 143, g: 83, b: 60 },          // Bronce tierra
+      iron: { r: 87, g: 83, b: 78 },             // Acero oscuro
+      unranked: { r: 120, g: 113, b: 108 },      // Gris de control
+      provisional: { r: 120, g: 113, b: 108 }
+    };
+    
+    const color = TIER_RGB[tier] || TIER_RGB.unranked;
+    const modal = document.getElementById('player-details-modal');
+    if (modal) {
+      modal.style.setProperty('--champ-accent', `rgb(${color.r}, ${color.g}, ${color.b})`);
+      modal.style.setProperty('--champ-accent-alpha', `rgba(${color.r}, ${color.g}, ${color.b}, 0.18)`);
+      modal.style.setProperty('--champ-accent-deep', `rgba(${Math.max(0, color.r - 40)}, ${Math.max(0, color.g - 40)}, ${Math.max(0, color.b - 40)}, 0.85)`);
+    }
     
     // 1. Emblema clásico en el cuadro de rango
     document.getElementById('detail-rank-emblem').src = `${ASSETS_BASE}/ranks/${tier}.png`;
