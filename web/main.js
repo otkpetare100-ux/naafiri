@@ -533,15 +533,17 @@ function openPlayerDetails(player) {
     statusEl.className = 'status-badge offline';
   }
 
-      // LÓGICA DE TAG OTP PREMIUM
+      // LÓGICA DE TAG OTP PREMIUM (Sincronizada a 20 SoloQ)
       const otpContainer = document.getElementById('otp-badge-container');
       otpContainer.innerHTML = '';
-      if (player.matchStatsHistory && player.matchStatsHistory.length >= 5) {
-        const history = player.matchStatsHistory;
-        const totalGames = history.length;
+      
+      const soloQ20 = (player.matchStatsHistory || [])
+        .filter(m => (m.queueId === 420 || m.queueType === 'RANKED_SOLO_5x5') && !m.isRemake)
+        .slice(0, 20);
+
+      if (soloQ20.length >= 5) {
         const counts = {};
-        
-        history.forEach(m => {
+        soloQ20.forEach(m => {
           const name = m.championName;
           if (name && name !== 'Unknown') counts[name] = (counts[name] || 0) + 1;
         });
@@ -555,8 +557,7 @@ function openPlayerDetails(player) {
           }
         }
 
-        const otpPercentage = (maxCount / totalGames) * 100;
-        if (otpPercentage >= 80) {
+        if ((maxCount / soloQ20.length) >= 0.8) {
           otpContainer.innerHTML = `<div class="badge-otp" title="¡Este jugador es un especialista con ${topChamp}!">OTP ${topChamp}</div>`;
         }
       }
