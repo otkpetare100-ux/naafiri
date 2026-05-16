@@ -1867,7 +1867,7 @@ select option {
   width: 31%;
   position: relative;
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  overflow: hidden;
+  /* overflow: hidden;  <- ELIMINADO PARA VER EL BRILLO */
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }
 
