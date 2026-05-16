@@ -639,22 +639,26 @@ function openPlayerDetails(player) {
   const btnSolo = document.getElementById('btn-soloq');
   const btnFlex = document.getElementById('btn-flexq');
 
+  let currentQueue = 'soloq'; // Definición necesaria para el renderizado inicial
+
   btnSolo.onclick = () => {
     btnSolo.classList.add('active');
     btnFlex.classList.remove('active');
+    currentQueue = 'soloq';
     renderQueueStats(player.soloQ);
-    updateFormDots('solo'); // Sincronizar puntos
+    updateFormDots('solo'); 
     if (typeof loadStats === 'function') loadStats(player.advancedStats ? player.advancedStats.soloq || player.advancedStats : null);
-    if (typeof renderHistory === 'function') renderHistory(player.matchStatsHistory, 'soloq');
+    if (typeof renderHistory === 'function') renderHistory(player.matchStatsHistory, currentQueue);
   };
 
   btnFlex.onclick = () => {
     btnFlex.classList.add('active');
     btnSolo.classList.remove('active');
+    currentQueue = 'flexq';
     renderQueueStats(player.flexQ);
-    updateFormDots('flex'); // Sincronizar puntos
+    updateFormDots('flex'); 
     if (typeof loadStats === 'function') loadStats(player.advancedStats ? player.advancedStats.flexq || player.advancedStats : null);
-    if (typeof renderHistory === 'function') renderHistory(player.matchStatsHistory, 'flexq');
+    if (typeof renderHistory === 'function') renderHistory(player.matchStatsHistory, currentQueue);
   };
 
   // Render default (SoloQ)
