@@ -1663,15 +1663,16 @@ select option {
 .profile-info-block {
   display: flex;
   align-items: center;
-  gap: 45px !important; /* Espaciado equilibrado */
-  padding-left: 15px;
+  gap: 65px !important; /* Espaciado ajustado para 85px */
+  padding-left: 20px;
+  padding-top: 35px; /* Espacio para que las alas no se corten */
   margin-bottom: 25px;
 }
 
 .profile-icon-wrapper {
   position: relative;
-  width: 50px; 
-  height: 50px;
+  width: 85px; 
+  height: 85px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1684,7 +1685,7 @@ select option {
   border-radius: 50%;
   object-fit: cover;
   z-index: 2;
-  border: 1px solid rgba(212, 175, 55, 0.4);
+  border: 2px solid rgba(212, 175, 55, 0.4);
 }
 
 /* Alas de Rango (Fondo) */
@@ -1697,7 +1698,7 @@ select option {
   transform: translate(-50%, -50%);
   z-index: 1;
   pointer-events: none;
-  filter: drop-shadow(0 0 8px rgba(0,0,0,0.8));
+  filter: drop-shadow(0 0 12px rgba(0,0,0,0.8));
 }
 
 /* Marco de Rango (Frente) */
@@ -1710,23 +1711,23 @@ select option {
   transform: translate(-50%, -50%);
   z-index: 5; 
   pointer-events: none;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.6));
 }
 
 .level-badge {
   position: absolute;
-  bottom: -8px; 
+  bottom: -15px; /* Ajustado para 85px */
   left: 50%;
   transform: translateX(-50%);
   background: #111;
   border: 1px solid var(--gold-primary);
   color: #fff;
-  font-size: 0.6rem;
+  font-size: 0.72rem;
   font-weight: 800;
-  padding: 1px 4px;
+  padding: 1px 6px;
   border-radius: 10px;
   white-space: nowrap;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.8);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.8);
   z-index: 10;
 }
 
