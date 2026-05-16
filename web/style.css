@@ -1354,6 +1354,7 @@ select option {
 .details-modal {
   max-width: 1200px; 
   width: 95%;
+  min-height: 820px; /* Altura mínima fija para evitar que el modal "baile" */
   height: auto; 
   position: relative;
   /* Fondo Dinámico basado en el campeón */
