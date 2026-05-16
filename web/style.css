@@ -1899,8 +1899,9 @@ select option {
   transition: transform 0.3s ease;
 }
 
+/* Animación de hover simplificada */
 .champ-detail-item:hover .champ-detail-icon {
-  transform: scale(1.1) rotate(2deg);
+  transform: scale(1.05); /* Solo un pequeño pulso, sin rotación */
 }
 
 .champ-detail-info {
@@ -1921,10 +1922,16 @@ select option {
   font-weight: 600;
 }
 .champ-detail-crest {
-  width: 26px;
+  width: 65px; /* Mismo tamaño que el icono de campeón */
+  height: 65px;
   object-fit: contain;
-  margin-top: 5px;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+  margin-top: -5px; /* Un poco más cerca del icono */
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
+  transition: transform 0.3s ease;
+}
+
+.champ-detail-item:hover .champ-detail-crest {
+  transform: scale(1.1);
 }
 
 /* Match History Styles */
