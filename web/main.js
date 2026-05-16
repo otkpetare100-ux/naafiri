@@ -321,6 +321,18 @@ window.openDeleteModal = openDeleteModal;
 let currentModalPuuid = null;
 
 // Modal de Detalles del Jugador
+// Función para obtener el campeón más jugado del historial reciente
+function getMostPlayedFromHistory(history) {
+  if (!history || history.length === 0) return null;
+  const counts = {};
+  history.forEach(m => {
+    const name = m.championName;
+    if (name) counts[name] = (counts[name] || 0) + 1;
+  });
+  // Devolver el nombre del campeón con más apariciones
+  return Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b, null);
+}
+
 // Función para cargar un Splash Art vertical (loading) aleatorio con Fallback mejorado
 async function setRandomSplash(champId) {
   const bgEl = document.getElementById('dash-left-bg');
@@ -336,19 +348,16 @@ async function setRandomSplash(champId) {
     const data = await resp.json();
     
     if (data.data[champId] && data.data[champId].skins) {
-      // FILTRAR CHROMAS Y ASEGURAR VARIEDAD
-      const availableSkins = data.data[champId].skins.filter(s => !s.chromas && !s.name.includes('Chroma'));
+      // Filtramos skins reales (no chromas y que no sean la 0 si hay más)
+      const allSkins = data.data[champId].skins;
+      const specialSkins = allSkins.filter(s => s.num !== 0 && !s.chromas && !s.name.includes('Chroma'));
       
-      const specialSkins = availableSkins.filter(s => s.num !== 0);
       let selectedSkin;
-      
       if (specialSkins.length > 0) {
-        // 95% de probabilidad para skins especiales, 5% para la base
-        selectedSkin = Math.random() > 0.05 
-          ? specialSkins[Math.floor(Math.random() * specialSkins.length)] 
-          : availableSkins[0];
+        // Forzamos una skin especial el 100% de las veces si tiene alguna
+        selectedSkin = specialSkins[Math.floor(Math.random() * specialSkins.length)];
       } else {
-        selectedSkin = availableSkins[0];
+        selectedSkin = allSkins[0]; // Fallback a la base si no tiene nada más
       }
 
       const splashUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_${selectedSkin.num}.jpg`;
@@ -374,8 +383,13 @@ function openPlayerDetails(player) {
   currentModalPuuid = player.puuid;
   const modal = document.getElementById('player-details-modal');
 
-  // Fondo Dinámico Aleatorio
-  if (player.topChampions && player.topChampions.length > 0) {
+  // Lógica de Campeón más jugado en el historial reciente
+  const mostPlayed = getMostPlayedFromHistory(player.matchStatsHistory);
+  
+  if (mostPlayed) {
+    setRandomSplash(mostPlayed);
+  } else if (player.topChampions && player.topChampions.length > 0) {
+    // Si no hay historial, usamos el de más maestría como respaldo
     setRandomSplash(player.topChampions[0].name);
   } else {
     setRandomSplash(null);
