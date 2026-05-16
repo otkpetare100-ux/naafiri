@@ -323,11 +323,11 @@ let currentModalPuuid = null;
 // Modal de Detalles del Jugador
 // Función para cargar un Splash Art vertical (loading) aleatorio con Fallback
 async function setRandomSplash(champId) {
-  const leftCol = document.querySelector('.dash-left-col');
-  if (!leftCol) return;
+  const bgEl = document.getElementById('dash-left-bg');
+  if (!bgEl) return;
   
   if (!champId) {
-    leftCol.style.backgroundImage = 'none';
+    bgEl.style.backgroundImage = 'none';
     return;
   }
 
@@ -339,23 +339,22 @@ async function setRandomSplash(champId) {
       const skins = data.data[champId].skins;
       const randomSkin = skins[Math.floor(Math.random() * skins.length)];
       
-      // Usamos 'loading' que es el formato vertical oficial y siempre está centrado
       const splashUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_${randomSkin.num}.jpg`;
       const baseSplashUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_0.jpg`;
 
       const img = new Image();
       img.onload = () => {
-        leftCol.style.backgroundImage = `url('${splashUrl}')`;
+        bgEl.style.backgroundImage = `url('${splashUrl}')`;
       };
       img.onerror = () => {
-        leftCol.style.backgroundImage = `url('${baseSplashUrl}')`;
+        bgEl.style.backgroundImage = `url('${baseSplashUrl}')`;
       };
       img.src = splashUrl;
     } else {
-      leftCol.style.backgroundImage = `url('https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_0.jpg')`;
+      bgEl.style.backgroundImage = `url('https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_0.jpg')`;
     }
   } catch (error) {
-    leftCol.style.backgroundImage = `url('https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_0.jpg')`;
+    bgEl.style.backgroundImage = `url('https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_0.jpg')`;
   }
 }
 
@@ -590,7 +589,7 @@ function openPlayerDetails(player) {
     } else {
       historyContainer.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-muted); font-size: 0.9rem;">No hay historial guardado. Haz clic en "Actualizar Datos" para cargar tus últimas partidas.</div>';
     }
-  } // <-- Llave de cierre de renderHistory restaurada
+  }
 
   // El primer renderQueueStats invoca btnSolo.onclick() en la línea 392 aprox,
   // pero lo llamaremos explícitamente abajo para evitar condiciones de carrera
