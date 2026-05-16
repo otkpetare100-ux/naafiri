@@ -1676,8 +1676,8 @@ select option {
 }
 
 .profile-icon-wrapper img#detail-profile-icon {
-  width: 75%;
-  height: 75%;
+  width: 92%; /* Agrandado para rellenar el círculo del marco */
+  height: 92%;
   border-radius: 50%;
   object-fit: cover;
   z-index: 2;
@@ -1687,9 +1687,9 @@ select option {
 /* Alas de Rango (Fondo) */
 .rank-wings-asset {
   position: absolute;
-  width: 250%; 
-  height: auto; /* Usar auto para mantener proporción y evitar que se vea ovalado */
-  top: 45%; /* Subido un poco para encajar el círculo */
+  width: 270%; 
+  height: auto;
+  top: 45%; 
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1;
@@ -1700,19 +1700,19 @@ select option {
 /* Marco de Rango (Frente) */
 .rank-frame-asset {
   position: absolute;
-  width: 130%; 
-  height: auto; /* Mantener ratio oficial */
-  top: 45%; /* Subido para alinear el círculo del marco con el icono */
+  width: 155%; /* Un poco más grande para que el círculo dorado rodee bien al icono */
+  height: auto;
+  top: 45%; 
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 3;
   pointer-events: none;
-  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.6));
 }
 
 .level-badge {
   position: absolute;
-  bottom: 0px; /* Ajustado para el nuevo centro */
+  bottom: -10px; /* Ajustado para que quede justo debajo del marco */
   left: 50%;
   transform: translateX(-50%);
   background: #111;
