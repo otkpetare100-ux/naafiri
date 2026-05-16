@@ -1248,17 +1248,6 @@ select option {
 }
 
 /* Columna Izquierda con Splash Centrado */
-.dash-left-col {
-  position: relative;
-  background-size: cover;
-  background-position: 50% 25%; /* Ajuste para centrar el rostro del campeón */
-  border-radius: 15px;
-  overflow: hidden;
-  transition: background-image 0.5s ease-in-out;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-/* Máscara degradada para la columna izquierda */
 .dash-left-col::before {
   content: "";
   position: absolute;
@@ -1266,7 +1255,7 @@ select option {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 30%, #000 95%);
+  background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.2) 30%, #000 90%);
   z-index: 0;
 }
 
@@ -1359,6 +1348,13 @@ select option {
   flex-direction: column;
   gap: 0;
   padding: 25px !important;
+  position: relative;
+  background-size: cover;
+  background-position: center 20%; /* Posición centrada definitiva */
+  border-radius: 15px;
+  overflow: hidden;
+  transition: background-image 0.5s ease-in-out;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Columna Derecha */
