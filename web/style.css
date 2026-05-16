@@ -2372,21 +2372,50 @@ select option {
   box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
 }
 
+.emblem-container-glow {
+  position: relative;
+  width: 178px;
+  height: 178px;
+  margin: -5px auto -15px auto !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emblem-backlight {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: var(--champ-accent, #d4af37);
+  filter: blur(35px); /* Desenfoque súper fuerte para crear un halo suave y difuso */
+  opacity: 0.32; /* Opacidad elegante y balanceada */
+  pointer-events: none;
+  z-index: 0;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 35px var(--champ-accent, rgba(212, 175, 55, 0.4)); /* Brillo extra en el núcleo */
+}
+
+.emblem-container-glow:hover .emblem-backlight {
+  transform: scale(1.18);
+  opacity: 0.65; /* Se enciende con brillo en el hover */
+  filter: blur(40px);
+}
+
 .dash-emblem {
-  width: 178px !important;
-  height: 178px !important;
+  width: 100% !important;
+  height: 100% !important;
+  position: relative;
+  z-index: 1; /* Por encima del backlight */
   object-fit: contain;
-  margin: -5px auto -15px auto !important; /* Margen negativo para mantener la posición estable de los elementos circundantes */
   display: block;
-  filter: drop-shadow(0 0 16px var(--champ-accent-glow, rgba(212, 175, 55, 0.35)))
-          drop-shadow(0 8px 20px rgba(0, 0, 0, 0.65)) !important;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.6)) !important;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.dash-emblem:hover {
+.emblem-container-glow:hover .dash-emblem {
   transform: scale(1.05);
-  filter: drop-shadow(0 0 28px var(--champ-accent, rgba(212, 175, 55, 0.8)))
-          drop-shadow(0 12px 28px rgba(0, 0, 0, 0.8)) !important;
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.75)) !important;
 }
 
 .dash-rank {
