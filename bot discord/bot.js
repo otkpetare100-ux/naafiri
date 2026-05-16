@@ -233,7 +233,7 @@ function initBot(db) {
     if (msg.author.bot) return;
 
     const prefix = '!';
-    const isMention = msg.mentions.has(client.user);
+    const isMention = msg.mentions.has(client.user, { ignoreEveryone: true });
     const startsWithPrefix = msg.content.startsWith(prefix);
 
     if (!startsWithPrefix && !isMention) return;
@@ -911,7 +911,7 @@ function initBot(db) {
         
         let content = `<@${msg.author.id}> 🎰 **¡GACHAPON DE LA PERRERA!**\n💰 Saldo restante: **${finalBalance} Naafiri Coins**`;
         if (selected.rarity === 'Legendario') {
-          content = `🎊 ¡ATENCIÓN! **${msg.author.username}** consiguió un objeto **LEGENDARIO**! 🎊\n💰 Saldo: **${finalBalance}**`;
+          content = `@everyone 🎊 ¡ATENCIÓN! **${msg.author.username}** consiguió un objeto **LEGENDARIO**! 🎊\n💰 Saldo: **${finalBalance}**`;
         }
 
         return msg.channel.send({ content, files: [attachment] });
