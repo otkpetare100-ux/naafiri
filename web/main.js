@@ -196,10 +196,13 @@ function renderLadder(players) {
           <span class="tag">#${player.tagLine}</span>
           <span class="region-badge reg-${(player.region || 'la1').toLowerCase()}">${getRegionName(player.region || 'la1')}</span>
           ${(() => {
-            if (player.matchStatsHistory && player.matchStatsHistory.length >= 5) {
-              const history = player.matchStatsHistory;
+            const soloQ20 = (player.matchStatsHistory || [])
+              .filter(m => (m.queueId === 420 || m.queueType === 'RANKED_SOLO_5x5') && !m.isRemake)
+              .slice(0, 20);
+
+            if (soloQ20.length >= 5) {
               const counts = {};
-              history.forEach(m => {
+              soloQ20.forEach(m => {
                 const name = m.championName;
                 if (name && name !== 'Unknown') counts[name] = (counts[name] || 0) + 1;
               });
@@ -211,7 +214,7 @@ function renderLadder(players) {
                   topChamp = champ;
                 }
               }
-              if ((maxCount / history.length) >= 0.8) {
+              if ((maxCount / soloQ20.length) >= 0.8) {
                 return `<span class="badge-otp-mini">OTP ${topChamp}</span>`;
               }
             }
