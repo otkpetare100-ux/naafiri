@@ -661,6 +661,7 @@ function openPlayerDetails(player) {
       // Inyección ultra-sutil y opaca para integrarse con el Shadow Rose & Gold oscuro
       modal.style.setProperty('--champ-accent', `rgb(${color.r}, ${color.g}, ${color.b})`);
       modal.style.setProperty('--champ-accent-alpha', `rgba(${color.r}, ${color.g}, ${color.b}, 0.06)`); // Solo 6% para un brillo ambiental susurrado
+      modal.style.setProperty('--champ-accent-glow', `rgba(${color.r}, ${color.g}, ${color.b}, 0.35)`); // 35% para el Outer Glow del rango
       modal.style.setProperty('--champ-accent-deep', `rgba(${Math.max(0, color.r - 35)}, ${Math.max(0, color.g - 35)}, ${Math.max(0, color.b - 35)}, 0.45)`);
     }
     

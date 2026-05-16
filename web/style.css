@@ -2378,7 +2378,15 @@ select option {
   object-fit: contain;
   margin: -5px auto -15px auto !important; /* Margen negativo para mantener la posición estable de los elementos circundantes */
   display: block;
-  filter: drop-shadow(0 8px 15px rgba(0,0,0,0.5));
+  filter: drop-shadow(0 0 16px var(--champ-accent-glow, rgba(212, 175, 55, 0.35)))
+          drop-shadow(0 8px 20px rgba(0, 0, 0, 0.65)) !important;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dash-emblem:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 0 28px var(--champ-accent, rgba(212, 175, 55, 0.8)))
+          drop-shadow(0 12px 28px rgba(0, 0, 0, 0.8)) !important;
 }
 
 .dash-rank {
