@@ -1689,7 +1689,7 @@ select option {
   position: absolute;
   width: 270%; 
   height: auto;
-  top: 50%; /* Reseteado al centro para evitar cortes */
+  top: 15%; /* Elevación final para centrado milimétrico */
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1;
@@ -1702,7 +1702,7 @@ select option {
   position: absolute;
   width: 110%; 
   height: auto;
-  top: 50%; /* Reseteado al centro */
+  top: 15%; /* Rodear el icono por completo */
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 5; 
@@ -1712,7 +1712,7 @@ select option {
 
 .level-badge {
   position: absolute;
-  bottom: 0px; /* Ajustado para el centro absoluto */
+  bottom: -15px; /* Ajustado para el nuevo tamaño */
   left: 50%;
   transform: translateX(-50%);
   background: #111;
