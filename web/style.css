@@ -2205,10 +2205,10 @@ select option {
 }
 
 .dash-emblem {
-  width: 140px !important;
-  height: 140px !important;
+  width: 178px !important;
+  height: 178px !important;
   object-fit: contain;
-  margin: 15px auto !important;
+  margin: -5px auto -15px auto !important; /* Margen negativo para mantener la posición estable de los elementos circundantes */
   display: block;
   filter: drop-shadow(0 8px 15px rgba(0,0,0,0.5));
 }
