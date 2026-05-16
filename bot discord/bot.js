@@ -4053,7 +4053,8 @@ async function settleBets(acc) {
             // BUG FIX: Obtener cuenta fresca de DB porque el objeto 'acc' pasado por parámetro es antiguo
             const freshAcc = await dbInstance.collection('accounts').findOne({ puuid: acc.puuid });
             const startLP = freshAcc?.startLP || 0;
-            const diff = queueData.leaguePoints - startLP;
+            const endLP = getAbsoluteLP(queueData.tier, queueData.rank, queueData.leaguePoints);
+            const diff = endLP - startLP;
             
             lpDataObj = { 
               tier: queueData.tier, 
@@ -4240,8 +4241,9 @@ async function startBot() {
               console.log(`[Scanner] 🎯 Partida VÁLIDA (SoloQ/Flex). Notificando...`);
               liveCache.add(acc.puuid);
 
-              // Sincronizar DB para permitir apuestas y guardar LP inicial para cálculo preciso
-              const startLP = (game.gameQueueConfigId === 420) ? (acc.soloQ?.leaguePoints || 0) : (acc.flexQ?.leaguePoints || 0);
+              // Sincronizar DB para permitir apuestas y guardar LP inicial absoluto (soporta subidas de liga)
+              const qData = (game.gameQueueConfigId === 420) ? acc.soloQ : acc.flexQ;
+              const startLP = getAbsoluteLP(qData?.tier, qData?.rank, qData?.leaguePoints || 0);
               
               await db.collection('accounts').updateOne(
                 { puuid: acc.puuid },
