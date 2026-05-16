@@ -2554,3 +2554,15 @@ select option {
 .profile-info-block.dash-profile {
   gap: 50px !important;
 }
+
+/* ==========================================================
+   LOOK ULTRA-MINIMALISTA: REMOCIÓN DE GEMAS CENTRALES
+   ========================================================== */
+/* Removemos por completo la gema superior e inferior para obtener un marco limpio y despejado */
+.dash-loading-frame::before {
+  display: none !important;
+}
+
+.frame-crest-bottom {
+  display: none !important;
+}
