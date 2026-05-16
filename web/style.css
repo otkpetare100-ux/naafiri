@@ -1689,7 +1689,7 @@ select option {
   position: absolute;
   width: 270%; 
   height: auto;
-  top: 50%; /* Centrado con el icono */
+  top: 35%; /* Subido para centrar con el nuevo marco circular */
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1;
@@ -1700,9 +1700,9 @@ select option {
 /* Marco de Rango (Frente) */
 .rank-frame-asset {
   position: absolute;
-  width: 105%; /* El anillo circular oficial encaja perfecto al 105% */
+  width: 110%; 
   height: auto;
-  top: 50%; /* Centrado perfecto para el anillo */
+  top: 35%; /* Elevado para rodear el icono */
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 5; 
@@ -1712,7 +1712,7 @@ select option {
 
 .level-badge {
   position: absolute;
-  bottom: -15px; /* Ajustado para que el nuevo centro no lo tape */
+  bottom: -5px; /* Ajustado para la nueva posición */
   left: 50%;
   transform: translateX(-50%);
   background: #111;
