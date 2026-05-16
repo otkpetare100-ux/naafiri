@@ -1611,14 +1611,14 @@ select option {
 }
 
 .stat-card {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
-  border-radius: 18px; /* Más redondeado */
-  padding: 18px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%) !important;
+  border: 1.5px solid var(--champ-accent-alpha, rgba(255, 255, 255, 0.1)) !important;
+  border-radius: 20px !important; /* Más redondeado y suave */
+  padding: 20px !important;
   display: flex;
   flex-direction: column;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3) !important;
 }
 
 .stat-card:hover {
@@ -1644,13 +1644,14 @@ select option {
 
 /* ================== RESTORED CLASSES ================== */
 .detail-box {
-  background: linear-gradient(145deg, rgba(20, 20, 25, 0.6) 0%, rgba(10, 10, 12, 0.8) 100%);
-  border: 1px solid var(--champ-accent-alpha, rgba(212, 175, 55, 0.15));
-  border-radius: 22px; /* Más redondeado */
-  padding: 24px;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 
-              inset 0 1px 1px rgba(255, 255, 255, 0.05);
-  margin-bottom: 20px;
+  background: linear-gradient(165deg, rgba(30, 30, 35, 0.4) 0%, rgba(10, 10, 12, 0.9) 100%) !important;
+  border: 1px solid var(--champ-accent-alpha, rgba(212, 175, 55, 0.2)) !important;
+  border-radius: 25px !important; /* Gran radio para suavidad total */
+  padding: 28px !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 
+              inset 0 0 20px var(--champ-accent-alpha, transparent) !important;
+  margin-bottom: 25px !important;
+  backdrop-filter: blur(10px);
 }
 
 .profile-info-block {
