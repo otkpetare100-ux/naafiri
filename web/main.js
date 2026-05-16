@@ -728,6 +728,8 @@ function openPlayerDetails(player) {
         level: mastery ? mastery.level : 1,
         points: mastery ? mastery.points : 0,
         recentCount: data.count,
+        wins: data.wins,
+        losses: data.count - data.wins,
         winRate: wr
       };
     });
@@ -743,9 +745,9 @@ function openPlayerDetails(player) {
   if (champsToDisplay.length > 0) {
     champsToDisplay.forEach(champ => {
       let subText = "";
-      if (champ.recentCount) {
+      if (champ.recentCount !== undefined) {
         const wrClass = champ.winRate >= 50 ? 'wr-positive' : 'wr-negative';
-        subText = `${champ.recentCount} partidas · <span class="${wrClass}">${champ.winRate}% WR</span>`;
+        subText = `<span style="opacity:0.9">${champ.wins}W / ${champ.losses}L</span> · <span class="${wrClass}">${champ.winRate}% WR</span>`;
       } else {
         subText = `${champ.points.toLocaleString('es-ES')} Pts`;
       }
