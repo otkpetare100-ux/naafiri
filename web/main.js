@@ -158,70 +158,62 @@ function renderLadder(players) {
       </div>
     `).join('');
 
+    // Cálculo de Racha para la tarjeta
+    let streakHtml = '';
+    const soloQMatches = (player.matchStatsHistory || [])
+      .filter(m => (m.queueId === 420 || m.queueType === 'RANKED_SOLO_5x5') && !m.isRemake)
+      .slice(0, 5);
+    
+    if (soloQMatches.length >= 2) {
+      let streakCount = 0;
+      const firstWin = soloQMatches[0].win;
+      for (const m of soloQMatches) {
+        if (m.win === firstWin) streakCount++;
+        else break;
+      }
+      if (streakCount >= 2) {
+        const emoji = firstWin ? '🔥' : '❄️';
+        const color = firstWin ? '#ff9f43' : '#00d2ff';
+        streakHtml = `<span style="color: ${color}; font-weight: 900; text-shadow: 0 0 10px ${color}66;">x${streakCount} <span class="streak-emoji">${emoji}</span></span>`;
+      }
+    }
+
+    const miniHistoryHtml = soloQMatches.map(m => `<div class="form-dot ${m.win ? 'win' : 'loss'}" style="width: 8px; height: 8px;"></div>`).join('');
+
     card.innerHTML = `
       <div class="rank-text">#${rankNum}</div>
       
       <div class="avatar-wrapper">
         ${rankNum === 1 ? `<img src="${ASSETS_BASE}/estetica/corona.png?t=${Date.now()}" class="rank-crown" alt="Crown" />` : ''}
-        <img src="${avatarUrl}" class="player-avatar" alt="${player.gameName}" onerror="this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png'" />
+        <img src="${avatarUrl}" class="player-avatar" alt="${player.gameName}" onerror="this.onerror=null; this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png'" />
         <div class="level-tag">${player.summonerLevel}</div>
       </div>
 
       <div class="player-main-info">
         <div class="player-name-row">
           <span class="name">${player.gameName}</span>
-          ${player.discordId ? '<span class="discord-badge">Linked</span>' : ''}
           <span class="status-dot ${player.isLive ? 'online' : ''}" id="live-dot-${player.puuid}"></span>
         </div>
         <div class="player-meta">
           <span class="tag">#${player.tagLine}</span>
           <span class="region-badge reg-${(player.region || 'la1').toLowerCase()}">${getRegionName(player.region || 'la1')}</span>
-          ${(() => {
-            if (player.matchStatsHistory && player.matchStatsHistory.length >= 5) {
-              const history = player.matchStatsHistory;
-              const counts = {};
-              history.forEach(m => {
-                const name = m.championName;
-                if (name && name !== 'Unknown') counts[name] = (counts[name] || 0) + 1;
-              });
-              let topChamp = null;
-              let maxCount = 0;
-              for (const champ in counts) {
-                if (counts[champ] > maxCount) {
-                  maxCount = counts[champ];
-                  topChamp = champ;
-                }
-              }
-              if ((maxCount / history.length) >= 0.8) {
-                return `<span class="badge-otp-mini">OTP ${topChamp}</span>`;
-              }
-            }
-            return '';
-          })()}
         </div>
       </div>
 
       <div class="rank-data">
-        <div class="player-champions">
-          ${topChampsHtml || '<span class="no-champs">No data</span>'}
-        </div>
         <div class="player-performance">
-          <div class="streak-container">
-            <span class="streak-tag ${Math.abs(player.streak) >= 2 ? (player.streak > 0 ? 'streak-win' : 'streak-loss') : 'streak-hidden'}">
-              <span class="streak-emoji">${player.streak >= 2 ? '🔥' : player.streak <= -2 ? '❄️' : '🔥'}</span> 
-              ${Math.abs(player.streak) >= 2 ? `${Math.abs(player.streak)} ${player.streak > 0 ? 'Wins' : 'Loss'}` : '0 Wins'}
-            </span>
-          </div>
-          <div class="history-dots">${historyHtml}</div>
+          <div class="streak-container" style="min-height: 20px;">${streakHtml}</div>
+          <div class="history-dots">${miniHistoryHtml}</div>
         </div>
+        
         <div class="rank-emblem-container">
-          <img src="${emblemUrl}" class="rank-emblem" alt="${player.tier}" onerror="this.style.opacity='0'" />
+          <img src="${emblemUrl}" class="rank-emblem" alt="${player.tier}" />
         </div>
+
         <div class="rank-info-text">
           <div class="tier-text">${player.tier} ${player.rank}</div>
           <div class="rank-stats">
             <span class="lp">${player.lp} LP</span>
-            <span class="separator">·</span>
             <span class="wr ${wrClass}">${player.winRate} WR</span>
           </div>
         </div>
@@ -229,12 +221,8 @@ function renderLadder(players) {
 
       <!-- Botones de Acción -->
       <div class="card-actions">
-        <button class="btn-delete-card" onclick="openDeleteModal('${player.puuid}', '${player.gameName.replace(/'/g, "\\'")}')" title="Eliminar de la jauría">
-          ✕
-        </button>
-        <button class="btn-refresh-card" onclick="refreshPlayer('${player.gameName}', '${player.tagLine}', '${player.region}')" title="Actualizar datos">
-          <span class="refresh-icon">↻</span>
-        </button>
+        <button class="btn-delete-card" onclick="openDeleteModal('${player.puuid}', '${player.gameName.replace(/'/g, "\\'")}')" title="Eliminar">✕</button>
+        <button class="btn-refresh-card" onclick="refreshPlayer('${player.gameName}', '${player.tagLine}', '${player.region}')" title="Actualizar">↻</button>
       </div>
     `;
 

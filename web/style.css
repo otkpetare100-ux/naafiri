@@ -181,93 +181,52 @@ h1::after {
   /* Espacio para que la corona del Top 1 no se corte */
 }
 
+/* Tarjetas de Jugadores - Sistema Premium */
 .player-card {
   background: var(--bg-card);
   border: 1px solid var(--border-muted);
-  border-radius: 12px;
-  padding: 0.5rem 2.5rem;
-  display: grid;
-  grid-template-columns: 60px 80px 1fr 620px;
+  border-radius: 16px;
+  display: flex;
   align-items: center;
+  padding: 1rem 2rem;
+  gap: 25px;
   position: relative;
-  transition: all 0.3s ease;
-  overflow: visible;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  cursor: pointer;
+  margin-bottom: 10px;
 }
 
 .player-card:hover {
-  background: rgba(255, 255, 255, 0.08);
-  transform: translateX(12px) scale(1.005);
-  border-color: rgba(255, 255, 255, 0.4);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 255, 255, 0.05);
+  transform: translateX(8px);
+  background: rgba(22, 22, 26, 0.98);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
+/* Estilos específicos por Rango */
 .player-card.rank-1 {
   border-color: var(--gold-primary);
-  background: linear-gradient(90deg, rgba(200, 155, 60, 0.15) 0%, var(--bg-card) 40%);
-  box-shadow: 0 0 30px rgba(200, 155, 60, 0.1);
-  overflow: visible !important;
-  /* Forzamos que sobresalga */
-  z-index: 100;
+  background: linear-gradient(90deg, rgba(212, 175, 55, 0.1) 0%, var(--bg-card) 40%);
   margin-top: 1.5rem;
-  /* Espacio extra individual */
 }
+.player-card.rank-1:hover { box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); border-color: #fff; }
 
-.player-card.rank-1:hover {
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.15) 0%, rgba(200, 155, 60, 0.2) 20%, var(--bg-card) 60%);
-  border-color: #fff;
-  box-shadow: 0 0 40px hsla(66, 72%, 43%, 0.795);
-}
-
-.rank-1 .player-avatar {
-  border-color: var(--gold-primary);
-}
-
-/* Especial para el Top 2 (Plata) */
-.player-card.rank-2 {
-  border-color: #cbd5e1;
-  background: linear-gradient(90deg, rgba(203, 213, 225, 0.1) 0%, var(--bg-card) 40%);
-}
-
-.player-card.rank-2:hover {
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.15) 0%, rgba(203, 213, 225, 0.15) 20%, var(--bg-card) 60%);
-  border-color: #fff;
-  box-shadow: 0 0 35px rgba(255, 255, 255, 0.15);
-}
-
-.rank-2 .player-avatar {
-  border-color: #cbd5e1;
-}
-
-.rank-2 .rank-text {
-  color: #e2e8f0;
-}
-
-/* Especial para el Top 3 (Bronce) */
-.player-card.rank-3 {
-  border-color: #b45309;
-  background: linear-gradient(90deg, rgba(180, 83, 9, 0.1) 0%, var(--bg-card) 40%);
-}
-
-.player-card.rank-3:hover {
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.15) 0%, rgba(180, 83, 9, 0.15) 20%, var(--bg-card) 60%);
-  border-color: #fff;
-  box-shadow: 0 0 35px rgba(255, 255, 255, 0.15);
-}
-
-.rank-3 .player-avatar {
-  border-color: #b45309;
-}
-
-.rank-3 .rank-text {
-  color: #d97706;
-}
+.player-card.rank-2 { border-color: #cbd5e1; background: linear-gradient(90deg, rgba(203, 213, 225, 0.05) 0%, var(--bg-card) 40%); }
+.player-card.rank-3 { border-color: #b45309; background: linear-gradient(90deg, rgba(180, 83, 9, 0.05) 0%, var(--bg-card) 40%); }
 
 .rank-text {
-  font-size: 2.2rem;
-  font-weight: 800;
-  text-align: center;
+  font-family: var(--font-headers);
+  font-size: 1.8rem;
+  font-weight: 900;
   color: var(--text-muted);
+  min-width: 60px;
+  font-style: italic;
+  opacity: 0.4;
 }
+
+.rank-1 .rank-text { color: var(--gold-primary); opacity: 1; }
+.rank-2 .rank-text { color: #e2e8f0; opacity: 1; }
+.rank-3 .rank-text { color: #d97706; opacity: 1; }
 
 /* Avatar Section */
 .avatar-wrapper {
