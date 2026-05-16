@@ -228,7 +228,7 @@ function renderLadder(players) {
               ${Math.abs(player.streak) >= 2 ? `${Math.abs(player.streak)} ${player.streak > 0 ? 'Wins' : 'Loss'}` : '0 Wins'}
             </span>
           </div>
-          <div class="history-dots">${historyHtml} ${cardStreakHtml}</div>
+          <div class="history-dots">${cardStreakHtml} ${historyHtml}</div>
         </div>
         <div class="rank-emblem-container">
           <img src="${emblemUrl}" class="rank-emblem" alt="${player.tier}" onerror="this.style.opacity='0'" />
