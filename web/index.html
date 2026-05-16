@@ -167,7 +167,9 @@
               <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 10px;">
                 <div id="streak-badge" class="streak-badge"></div>
                 <div class="player-form-container" id="player-form" style="display: flex; gap: 6px;"></div>
-                            <div class="winrate-bar-container dash-wr-container">
+              </div>
+              
+              <div class="winrate-bar-container dash-wr-container">
                 <div class="winrate-bar">
                   <div id="detail-win-bar" class="win-bar"></div>
                 </div>
@@ -176,12 +178,6 @@
                   <span id="detail-losses" class="losses-text"></span>
                 </div>
               </div>
-            </div>
-
-            <!-- Distribución de Líneas Integrada con Divisor Fino -->
-            <div class="dash-lanes-box-left" style="margin-top: 25px; border-top: 1px solid rgba(212,175,55,0.15); padding-top: 20px;">
-              <h4 class="dash-lanes-title" style="font-size: 0.85rem; border-bottom: none; padding-bottom: 0; margin-bottom: 10px; text-align: center;">Distribución de Líneas</h4>
-              <div id="detail-lanes-distribution" class="lanes-distribution-row" style="padding: 10px 0 0 0; justify-content: center; gap: 22px;"></div>
             </div>
           </div>
 
@@ -307,11 +303,18 @@
               </div>
             </div>
 
-            <!-- Mejores Campeones (¡Ancho Completo y Holgado!) -->
-            <div class="detail-box dash-champs-box" style="margin-top: 20px;">
+            <!-- Distribución de Líneas (Mapa de Calor) -->
+            <div class="detail-box dash-lanes-box">
+              <h4 class="dash-lanes-title">Distribución de Líneas</h4>
+              <div id="detail-lanes-distribution" class="lanes-distribution-row"></div>
+            </div>
+
+            <!-- Mejores Campeones -->
+            <div class="detail-box dash-champs-box">
               <h4 class="dash-champs-title">Mejores Campeones</h4>
               <div id="detail-top-champs" class="top-champs-row"></div>
             </div>
+
           </div>
 
           <!-- Historial de Partidas -->
