@@ -1410,6 +1410,13 @@ select option {
   z-index: 2; /* Por encima de la región */
 }
 
+.dash-left-col-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 400px;
+}
+
 .dash-left-col {
   position: relative; /* Crucial para que el splash se quede en su sitio */
   display: flex;
@@ -1422,6 +1429,8 @@ select option {
   border-radius: 24px 0 0 24px;
   overflow: hidden;
   box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5); /* Sombra de profundidad */
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .dash-right-col {
