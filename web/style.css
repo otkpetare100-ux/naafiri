@@ -1343,22 +1343,32 @@ select option {
 .modal-header, .modal-body {
     position: relative;
     z-index: 2;
+    max-width: 1250px; /* Ancho máximo de la información */
+    width: 90%;
+    margin: 0 auto; /* Centrado horizontal */
 }
 
 .modal-header {
-    background: rgba(0, 0, 0, 0.8) !important;
+    background: rgba(0, 0, 0, 0.85) !important;
     backdrop-filter: blur(15px);
-    border-bottom: 1px solid rgba(240, 185, 11, 0.3) !important;
+    border: 1px solid rgba(240, 185, 11, 0.3) !important;
+    border-top: none;
     padding: 20px 30px !important;
     position: sticky;
     top: 0;
+    border-radius: 0 0 15px 15px; /* Redondear solo abajo para elegancia */
+}
+
+.modal-body {
+    margin-top: 30px;
+    margin-bottom: 30px;
+    height: auto;
 }
 
 .dashboard-layout {
     display: grid;
     grid-template-columns: 360px 1fr !important;
-    gap: 0 !important;
-    min-height: 100%;
+    gap: 25px !important; /* Recuperar el espacio entre columnas */
 }
 
 .detail-box {
