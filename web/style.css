@@ -1354,15 +1354,16 @@ select option {
 .details-modal {
   max-width: 1200px; 
   width: 95%;
-  height: auto; /* Crece con el contenido */
+  height: auto; 
   position: relative;
-  background: #000 !important;
-  border: 1px solid rgba(212, 175, 55, 0.2) !important;
-  box-shadow: 0 0 60px rgba(0, 0, 0, 0.9) !important;
+  background: linear-gradient(145deg, #0d0d0f 0%, #16161a 100%) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(212, 175, 55, 0.25) !important;
+  box-shadow: 0 0 80px rgba(0, 0, 0, 0.95), inset 0 0 20px rgba(212, 175, 55, 0.05) !important;
   padding: 2.5rem !important; 
   margin: auto; 
   border-radius: 20px;
-  overflow: visible; /* Dejamos que el padre maneje el scroll */
+  overflow: visible; 
   animation: modalScaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
