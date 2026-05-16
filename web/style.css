@@ -1663,7 +1663,7 @@ select option {
 .profile-info-block {
   display: flex;
   align-items: center;
-  gap: 85px; /* Aumentado drásticamente para dejar vía libre a las alas */
+  gap: 85px !important; /* Forzado para evitar solapamientos con las alas */
   padding-left: 20px;
   margin-bottom: 25px;
 }
