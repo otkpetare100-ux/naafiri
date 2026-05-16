@@ -414,25 +414,18 @@ const CHAMP_REGIONS = {
 };
 
 function updateRegionBackground(champName) {
-  const modalContent = document.querySelector('.details-modal');
-  if (!modalContent) return;
+  const bgLayer = document.getElementById('region-bg-layer');
+  if (!bgLayer) return;
 
   const champId = cleanChampId(champName);
   if (!champId) return;
 
-  // Normalizar a minúsculas para el mapeo
   const searchId = champId.toLowerCase();
-  
-  // Buscar la región en minúsculas
   const region = CHAMP_REGIONS_LOWER[searchId] || 'runeterra';
   const wallpaperUrl = REGION_WALLPAPERS[region];
 
-  console.log(`Buscando región para ${champId} -> ${region}`);
-
   if (wallpaperUrl) {
-    modalContent.style.setProperty('background-image', `url('${wallpaperUrl}')`, 'important');
-    modalContent.style.setProperty('background-size', 'cover', 'important');
-    modalContent.style.setProperty('background-position', 'center', 'important');
+    bgLayer.style.backgroundImage = `url('${wallpaperUrl}')`;
   }
 }
 

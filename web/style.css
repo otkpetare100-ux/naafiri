@@ -1313,34 +1313,66 @@ select option {
 .details-modal {
     max-width: 1200px !important;
     width: 95% !important;
-    height: 92vh !important;
-    background: #000; /* Fondo de seguridad */
-    background-size: cover !important;
-    background-position: center !important;
-    background-repeat: no-repeat !important;
+    max-height: 94vh !important;
+    background: #050505 !important;
     border: 1px solid rgba(240, 185, 11, 0.4) !important;
     position: relative;
     padding: 0 !important;
-    overflow: hidden !important;
-    transition: background 1s ease-in-out;
+    overflow-y: auto !important; /* Restaurar scroll */
     border-radius: 20px !important;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Capa de oscurecimiento para legibilidad */
-.details-modal::before {
-    content: '';
+#region-bg-layer {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 1;
+    background-size: cover !important;
+    background-position: center !important;
+    z-index: 0;
+    opacity: 0.6; /* Un poco más claro para que se vea bien */
+    transition: background-image 1s ease-in-out;
 }
 
 .modal-header, .modal-body {
     position: relative;
-    z-index: 2; /* Por encima del fondo de región */
+    z-index: 2;
+}
+
+.modal-header {
+    background: rgba(0, 0, 0, 0.8) !important;
+    backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(240, 185, 11, 0.3) !important;
+    padding: 20px 30px !important;
+    position: sticky;
+    top: 0;
+}
+
+.dashboard-layout {
+    display: grid;
+    grid-template-columns: 360px 1fr !important;
+    gap: 0 !important;
+    min-height: 100%;
+}
+
+.detail-box {
+    background: rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: blur(10px);
+    border: none !important;
+}
+
+.dash-left-col {
+    border-right: 1px solid rgba(240, 185, 11, 0.25) !important;
+    padding: 30px !important;
+    background: rgba(0, 0, 0, 0.4) !important;
+}
+
+.dash-right-col {
+    background: rgba(0, 0, 0, 0.2) !important;
+    padding: 30px !important;
 }
 
 .modal-header {
