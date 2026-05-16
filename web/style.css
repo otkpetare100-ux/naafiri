@@ -1882,11 +1882,18 @@ select option {
 }
 
 .champ-detail-item:hover {
-  transform: translateY(-8px) scale(1.02);
   background: linear-gradient(165deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%) !important;
-  border-color: var(--champ-accent, var(--gold-primary)) !important;
-  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.6), 0 0 20px var(--champ-accent-alpha, rgba(212, 175, 55, 0.15));
+  border-color: rgba(255, 255, 255, 0.2) !important;
 }
+
+/* Brillos por Maestría al Hover */
+.champ-detail-item.m-lvl-4:hover { box-shadow: 0 0 30px rgba(166, 121, 77, 0.4); border-color: #a6794d !important; }
+.champ-detail-item.m-lvl-5:hover { box-shadow: 0 0 30px rgba(239, 68, 68, 0.4); border-color: #ef4444 !important; }
+.champ-detail-item.m-lvl-6:hover { box-shadow: 0 0 30px rgba(168, 85, 247, 0.4); border-color: #a855f7 !important; }
+.champ-detail-item.m-lvl-7:hover { box-shadow: 0 0 30px rgba(34, 211, 238, 0.4); border-color: #22d3ee !important; }
+.champ-detail-item.m-lvl-8:hover, 
+.champ-detail-item.m-lvl-9:hover, 
+.champ-detail-item.m-lvl-10:hover { box-shadow: 0 0 35px rgba(250, 204, 21, 0.5); border-color: #facc15 !important; }
 
 .champ-detail-icon {
   width: 65px; /* Un poco más grande para que luzca */
@@ -1901,7 +1908,7 @@ select option {
 
 /* Animación de hover simplificada */
 .champ-detail-item:hover .champ-detail-icon {
-  transform: scale(1.05); /* Solo un pequeño pulso, sin rotación */
+  transform: none;
 }
 
 .champ-detail-info {
@@ -1936,7 +1943,7 @@ select option {
 }
 
 .champ-detail-item:hover .champ-detail-crest {
-  transform: scale(1.1);
+  transform: scale(1.05); /* Un pulso muy ligero */
 }
 
 /* Match History Styles */
