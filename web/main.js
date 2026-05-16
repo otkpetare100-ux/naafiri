@@ -1033,14 +1033,24 @@ function openPlayerDetails(player) {
 
     const orderedLanes = ['TOP', 'JUNGLE', 'MID', 'BOTTOM', 'UTILITY'];
 
+    // Encontrar el porcentaje máximo para el rol principal
+    let maxPct = 0;
+    orderedLanes.forEach(laneKey => {
+      const count = laneCounts[laneKey];
+      const pct = activeMatches > 0 ? Math.round((count / activeMatches) * 100) : 0;
+      if (pct > maxPct) maxPct = pct;
+    });
+
     orderedLanes.forEach(laneKey => {
       const count = laneCounts[laneKey];
       const pct = activeMatches > 0 ? Math.round((count / activeMatches) * 100) : 0;
       const meta = LANE_METADATA[laneKey];
       const isActive = pct > 0;
+      const isMostPlayed = isActive && pct === maxPct && maxPct > 0;
 
       container.innerHTML += `
-        <div class="lane-vertical-card ${isActive ? 'active' : 'inactive'}" style="--lane-color: ${meta.color}; --lane-color-rgb: ${meta.rgb};">
+        <div class="lane-vertical-card ${isActive ? 'active' : 'inactive'} ${isMostPlayed ? 'most-played' : ''}" style="--lane-color: ${meta.color}; --lane-color-rgb: ${meta.rgb};">
+          ${isMostPlayed ? `<div class="lane-most-played-crown" title="Rol Principal">👑</div>` : ''}
           <div class="lane-vertical-bar-container">
             <div class="lane-vertical-bar-fill" style="height: ${pct}%" title="${meta.name}: ${pct}%"></div>
           </div>
