@@ -590,26 +590,27 @@ function openPlayerDetails(player) {
     
     // Mapeo oficial de colores por Rango para tintado dinámico y armonía cromática total
     const TIER_RGB = {
-      challenger: { r: 245, g: 158, b: 11 },    // Oro/Ámbar ardiente
-      grandmaster: { r: 239, g: 68, b: 68 },    // Rojo carmesí
-      master: { r: 168, g: 85, b: 247 },         // Violeta místico
-      diamond: { r: 56, g: 189, b: 248 },        // Azul hielo/celeste
-      emerald: { r: 5, g: 150, b: 105 },         // Esmeralda brillante
-      platinum: { r: 20, g: 184, b: 166 },       // Turquesa/Teal
-      gold: { r: 197, g: 160, b: 89 },           // Oro templado
-      silver: { r: 100, g: 116, b: 139 },        // Plata pizarra
-      bronze: { r: 143, g: 83, b: 60 },          // Bronce tierra
-      iron: { r: 87, g: 83, b: 78 },             // Acero oscuro
-      unranked: { r: 120, g: 113, b: 108 },      // Gris de control
-      provisional: { r: 120, g: 113, b: 108 }
+      challenger: { r: 210, g: 140, b: 25 },     // Cobre/Oro envejecido sofisticado
+      grandmaster: { r: 165, g: 45, b: 45 },     // Carmesí oscuro profundo
+      master: { r: 125, g: 60, b: 180 },          // Amatista imperial profunda
+      diamond: { r: 50, g: 135, b: 175 },         // Azul acero glaciar apagado
+      emerald: { r: 20, g: 115, b: 75 },          // Verde jade imperial sobrio
+      platinum: { r: 25, g: 125, b: 115 },        // Turquesa oscuro mate
+      gold: { r: 165, g: 130, b: 70 },            // Oro viejo / Latón pulido satinado
+      silver: { r: 85, g: 95, b: 110 },           // Plata pizarra mate
+      bronze: { r: 115, g: 70, b: 50 },           // Bronce terracota apagado
+      iron: { r: 75, g: 70, b: 65 },              // Acero de forja oscuro
+      unranked: { r: 85, g: 80, b: 75 },          // Gris carbón neutro
+      provisional: { r: 85, g: 80, b: 75 }
     };
     
     const color = TIER_RGB[tier] || TIER_RGB.unranked;
     const modal = document.getElementById('player-details-modal');
     if (modal) {
+      // Inyección ultra-sutil y opaca para integrarse con el Shadow Rose & Gold oscuro
       modal.style.setProperty('--champ-accent', `rgb(${color.r}, ${color.g}, ${color.b})`);
-      modal.style.setProperty('--champ-accent-alpha', `rgba(${color.r}, ${color.g}, ${color.b}, 0.18)`);
-      modal.style.setProperty('--champ-accent-deep', `rgba(${Math.max(0, color.r - 40)}, ${Math.max(0, color.g - 40)}, ${Math.max(0, color.b - 40)}, 0.85)`);
+      modal.style.setProperty('--champ-accent-alpha', `rgba(${color.r}, ${color.g}, ${color.b}, 0.06)`); // Solo 6% para un brillo ambiental susurrado
+      modal.style.setProperty('--champ-accent-deep', `rgba(${Math.max(0, color.r - 35)}, ${Math.max(0, color.g - 35)}, ${Math.max(0, color.b - 35)}, 0.45)`);
     }
     
     // 1. Emblema clásico en el cuadro de rango
