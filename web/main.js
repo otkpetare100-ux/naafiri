@@ -391,6 +391,41 @@ function getMostPlayedFromHistory(history) {
   return entries.length > 0 ? entries.sort((a, b) => b[1] - a[1])[0][0] : null;
 }
 
+// MAPEO DE REGIONES ESTILO MAPA OFICIAL
+const REGION_WALLPAPERS = {
+  'demacia': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Garen_0.jpg', 
+  'noxus': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Darius_0.jpg',
+  'ionia': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Irelia_0.jpg',
+  'freljord': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ashe_0.jpg',
+  'shurima': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Azir_0.jpg',
+  'void': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Chogath_0.jpg',
+  'shadow-isles': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Thresh_0.jpg',
+  'targon': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Leona_0.jpg',
+  'piltover': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Caitlyn_0.jpg',
+  'zaun': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Jinx_0.jpg',
+  'bilgewater': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Gangplank_0.jpg',
+  'ixtal': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Qiyana_0.jpg',
+  'bandle-city': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Teemo_0.jpg',
+  'runeterra': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ryze_0.jpg'
+};
+
+const CHAMP_REGIONS = {
+  'Aatrox': 'shurima', 'Ahri': 'ionia', 'Akali': 'ionia', 'Akshan': 'shurima', 'Alistar': 'targon', 'Amumu': 'shurima', 'Anivia': 'freljord', 'Annie': 'noxus', 'Aphelios': 'targon', 'Ashe': 'freljord', 'AurelionSol': 'targon', 'Azir': 'shurima', 'Bard': 'runeterra', 'Belveth': 'void', 'Blitzcrank': 'zaun', 'Brand': 'freljord', 'Braum': 'freljord', 'Briar': 'noxus', 'Caitlyn': 'piltover', 'Camille': 'piltover', 'Cassiopeia': 'noxus', 'Chogath': 'void', 'Corki': 'bandle-city', 'Darius': 'noxus', 'Diana': 'targon', 'DrMundo': 'zaun', 'Draven': 'noxus', 'Ekko': 'zaun', 'Elise': 'shadow-isles', 'Evelynn': 'runeterra', 'Ezreal': 'piltover', 'Fiddlesticks': 'runeterra', 'Fiora': 'demacia', 'Fizz': 'bilgewater', 'Galio': 'demacia', 'Gangplank': 'bilgewater', 'Garen': 'demacia', 'Gnar': 'freljord', 'Gragas': 'freljord', 'Graves': 'bilgewater', 'Gwen': 'shadow-isles', 'Hecarim': 'shadow-isles', 'Heimerdinger': 'piltover', 'Hwei': 'ionia', 'Illaoi': 'bilgewater', 'Irelia': 'ionia', 'Ivern': 'ionia', 'Janna': 'zaun', 'JarvanIV': 'demacia', 'Jax': 'runeterra', 'Jayce': 'piltover', 'Jhin': 'ionia', 'Jinx': 'zaun', 'Kaisa': 'void', 'Kalista': 'shadow-isles', 'Karma': 'ionia', 'Karthus': 'shadow-isles', 'Kassadin': 'void', 'Katarina': 'noxus', 'Kayle': 'demacia', 'Kayn': 'ionia', 'Kennen': 'ionia', 'Khazix': 'void', 'Kindred': 'runeterra', 'Kled': 'noxus', 'KogMaw': 'void', 'Ksante': 'shurima', 'Leblanc': 'noxus', 'LeeSin': 'ionia', 'Leona': 'targon', 'Lillia': 'ionia', 'Lissandra': 'freljord', 'Lucian': 'demacia', 'Lulu': 'bandle-city', 'Lux': 'demacia', 'Malphite': 'ixtal', 'Malzahar': 'shurima', 'Maokai': 'shadow-isles', 'MasterYi': 'ionia', 'Milio': 'ixtal', 'MissFortune': 'bilgewater', 'MonkeyKing': 'ionia', 'Mordekaiser': 'noxus', 'Morgana': 'demacia', 'Naafiri': 'shurima', 'Nami': 'runeterra', 'Nasus': 'shurima', 'Nautilus': 'bilgewater', 'Neeko': 'ixtal', 'Nidalee': 'ixtal', 'Nilah': 'bilgewater', 'Nocturne': 'runeterra', 'Nunu': 'freljord', 'Olaf': 'freljord', 'Orianna': 'piltover', 'Ornn': 'freljord', 'Pantheon': 'targon', 'Poppy': 'demacia', 'Pyke': 'bilgewater', 'Qiyana': 'ixtal', 'Quinn': 'demacia', 'Rakan': 'ionia', 'Rammus': 'shurima', 'RekSai': 'void', 'Rell': 'noxus', 'Renata': 'zaun', 'Renekton': 'shurima', 'Rengar': 'ixtal', 'Riven': 'noxus', 'Rumble': 'bandle-city', 'Ryze': 'runeterra', 'Samira': 'noxus', 'Sejuani': 'freljord', 'Senna': 'shadow-isles', 'Seraphine': 'piltover', 'Sett': 'ionia', 'Shaco': 'runeterra', 'Shen': 'ionia', 'Shyvana': 'demacia', 'Singed': 'zaun', 'Sion': 'noxus', 'Sivir': 'shurima', 'Skarner': 'ixtal', 'Smolder': 'runeterra', 'Sona': 'demacia', 'Soraka': 'targon', 'Swain': 'noxus', 'Sylas': 'demacia', 'Syndra': 'ionia', 'TahmKench': 'bilgewater', 'Taliyah': 'shurima', 'Talon': 'noxus', 'Taric': 'targon', 'Teemo': 'bandle-city', 'Thresh': 'shadow-isles', 'Tristana': 'bandle-city', 'Trundle': 'freljord', 'Tryndamere': 'freljord', 'TwistedFate': 'bilgewater', 'Twitch': 'zaun', 'Udyr': 'freljord', 'Urgot': 'zaun', 'Varus': 'ionia', 'Vayne': 'demacia', 'Veigar': 'bandle-city', 'Velkoz': 'void', 'Vex': 'shadow-isles', 'Vi': 'piltover', 'Viego': 'shadow-isles', 'Viktor': 'zaun', 'Vladimir': 'noxus', 'Volibear': 'freljord', 'Warwick': 'zaun', 'Xayah': 'ionia', 'Xerath': 'shurima', 'XinZhao': 'demacia', 'Yasuo': 'ionia', 'Yone': 'ionia', 'Yorick': 'shadow-isles', 'Yuumi': 'bandle-city', 'Zac': 'zaun', 'Zed': 'ionia', 'Zeri': 'zaun', 'Ziggs': 'zaun', 'Zilean': 'runeterra', 'Zoe': 'targon', 'Zyra': 'ixtal'
+};
+
+const CHAMP_REGIONS_LOWER = {};
+Object.keys(CHAMP_REGIONS).forEach(k => CHAMP_REGIONS_LOWER[k.toLowerCase()] = CHAMP_REGIONS[k]);
+
+function updateRegionBackground(champName) {
+  const bgLayer = document.getElementById('region-bg-layer');
+  if (!bgLayer) return;
+  const champId = cleanChampId(champName);
+  if (!champId) return;
+  const region = CHAMP_REGIONS_LOWER[champId.toLowerCase()] || 'runeterra';
+  const wallpaperUrl = REGION_WALLPAPERS[region];
+  if (wallpaperUrl) bgLayer.style.backgroundImage = `url('${wallpaperUrl}')`;
+}
+
 // Función para cargar un Splash Art vertical aleatorio (TOTALMENTE ASEGURADA)
 async function setRandomSplash(rawChampName) {
   const bgEl = document.getElementById('dash-left-bg');
@@ -399,6 +434,9 @@ async function setRandomSplash(rawChampName) {
   bgEl.style.backgroundImage = 'none';
   const champId = cleanChampId(rawChampName);
   if (!champId) return;
+
+  // Actualizar fondo de región del modal completo
+  updateRegionBackground(champId);
 
   try {
     const resp = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/en_US/champion/${champId}.json`);
@@ -422,7 +460,7 @@ async function setRandomSplash(rawChampName) {
       const img = new Image();
       img.onload = () => {
         bgEl.style.backgroundImage = `url('${url}')`;
-        console.log(`✅ Splash cargado con éxito: ${champId} skin ${selectedSkin.num}`);
+        console.log(`✅ Splash y Región cargados: ${champId}`);
       };
       img.onerror = () => {
         const remainingSpecials = specials.filter(s => s.num !== selectedSkin.num);
