@@ -336,17 +336,19 @@ async function setRandomSplash(champId) {
     const data = await resp.json();
     
     if (data.data[champId] && data.data[champId].skins) {
-      // FILTRAR CHROMAS: Los chromas no tienen splash art propio y causan fallback a la base
-      const availableSkins = data.data[champId].skins.filter(s => !s.chromas);
+      // FILTRAR CHROMAS Y ASEGURAR VARIEDAD
+      const availableSkins = data.data[champId].skins.filter(s => !s.chromas && !s.name.includes('Chroma'));
       
-      // Si hay skins disponibles además de la base, elegimos una al azar
-      // (Damos un 90% de probabilidad a skins especiales si existen)
+      const specialSkins = availableSkins.filter(s => s.num !== 0);
       let selectedSkin;
-      if (availableSkins.length > 1 && Math.random() > 0.1) {
-        const specialSkins = availableSkins.filter(s => s.num !== 0);
-        selectedSkin = specialSkins[Math.floor(Math.random() * specialSkins.length)];
+      
+      if (specialSkins.length > 0) {
+        // 95% de probabilidad para skins especiales, 5% para la base
+        selectedSkin = Math.random() > 0.05 
+          ? specialSkins[Math.floor(Math.random() * specialSkins.length)] 
+          : availableSkins[0];
       } else {
-        selectedSkin = availableSkins[Math.floor(Math.random() * availableSkins.length)];
+        selectedSkin = availableSkins[0];
       }
 
       const splashUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_${selectedSkin.num}.jpg`;
