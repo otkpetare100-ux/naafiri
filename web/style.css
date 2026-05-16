@@ -1897,14 +1897,14 @@ select option {
 .champ-detail-item.m-lvl-10:hover { box-shadow: 0 0 45px rgba(250, 204, 21, 0.8) !important; border-color: #facc15 !important; }
 
 .champ-detail-icon {
-  width: 65px; /* Un poco más grande para que luzca */
+  width: 65px;
   height: 65px;
-  border-radius: 16px;
-  border: 2px solid var(--gold-primary);
-  padding: 2px;
+  border-radius: 12px; /* Más elegante y menos redondo */
+  border: 1.5px solid var(--gold-primary); /* Borde más fino */
+  object-fit: cover;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.6);
+  transition: all 0.3s ease;
   background: #000;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-  transition: transform 0.3s ease;
 }
 
 /* Animación de hover simplificada */
