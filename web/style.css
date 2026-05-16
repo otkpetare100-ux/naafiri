@@ -1980,9 +1980,6 @@ select option {
 
 /* Botón de cerrar ultra-premium para el modal de detalles */
 .details-modal .close-modal {
-  position: absolute;
-  right: 25px;
-  top: 25px;
   width: 38px;
   height: 38px;
   border-radius: 50%;
@@ -1996,7 +1993,6 @@ select option {
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
   opacity: 1 !important;
-  z-index: 10;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
