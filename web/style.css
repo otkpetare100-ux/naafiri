@@ -1308,6 +1308,7 @@ select option {
   height: 8px;
   border-radius: 50%;
   background: #333;
+  flex-shrink: 0; /* Evita que se vuelvan óvalos */
 }
 
 .history-dot.dot-w {
