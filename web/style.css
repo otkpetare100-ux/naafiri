@@ -1663,8 +1663,8 @@ select option {
 .profile-info-block {
   display: flex;
   align-items: center;
-  gap: 85px !important; /* Forzado para evitar solapamientos con las alas */
-  padding-left: 20px;
+  gap: 45px !important; /* Espaciado equilibrado */
+  padding-left: 15px;
   margin-bottom: 25px;
 }
 
@@ -1742,6 +1742,7 @@ select option {
   color: #fff;
   text-shadow: 0 2px 10px rgba(0,0,0,0.5);
   font-family: 'Outfit', sans-serif;
+  white-space: nowrap; /* Evitar que el nombre se parta en dos */
 }
 
 .detail-tags {
