@@ -1237,45 +1237,42 @@ select option {
 .details-modal {
   max-width: 1200px; 
   width: 100%;
-  position: relative; /* Importante para el posicionamiento del fondo */
-  /* Eliminamos max-height y overflow para que el scroll pase al padre */
-  background: #000 !important; /* Fondo base negro */
-  border: 1px solid rgba(212, 175, 55, 0.2) !important; /* Borde sutil dorado */
+  position: relative;
+  background: #000 !important;
+  border: 1px solid rgba(212, 175, 55, 0.2) !important;
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.8) !important;
   padding: 2.5rem !important; 
   margin: auto; 
   border-radius: 20px;
-  overflow: hidden; /* Para que el splash art no se salga */
+  overflow: hidden;
 }
 
-.modal-splash-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+/* Columna Izquierda con Splash Centrado */
+.dash-left-col {
+  position: relative;
   background-size: cover;
-  background-position: center 20%;
-  z-index: 0;
-  opacity: 0.5; /* Aumentado para mayor visibilidad */
+  background-position: center top;
+  border-radius: 15px;
+  overflow: hidden;
   transition: background-image 0.5s ease-in-out;
-  pointer-events: none;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Máscara para que el fondo se funda a negro hacia abajo y los lados */
-.modal-splash-bg::after {
+/* Máscara degradada para la columna izquierda */
+.dash-left-col::before {
   content: "";
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at 30% 30%, transparent 0%, rgba(0, 0, 0, 0.4) 40%, #000 85%);
+  background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 40%, #000 100%);
+  z-index: 0;
 }
 
-.details-modal > *:not(.modal-splash-bg) {
+.dash-left-col > * {
   position: relative;
-  z-index: 1; /* Todo el contenido real por encima del fondo */
+  z-index: 1;
 }
 
 /* Configuramos el contenedor del modal completo para que maneje el scroll */
