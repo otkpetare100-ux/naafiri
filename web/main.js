@@ -4,6 +4,49 @@ const API_BASE = `${window.location.origin}/api`;
 const ASSETS_BASE = '/assets';
 let DDRAGON_VERSION = '14.9.1';
 
+// Controladores de la barra de carga minimalista dorado premium
+let loadingBarTimer = null;
+
+function startLoadingBar() {
+  const bar = document.getElementById('top-loading-bar');
+  if (!bar) return;
+  
+  if (loadingBarTimer) clearInterval(loadingBarTimer);
+  bar.style.transition = 'width 0.4s cubic-bezier(0.08, 0.8, 0.1, 1), opacity 0.3s ease';
+  bar.style.opacity = '1';
+  bar.style.width = '0%';
+  
+  // Force reflow
+  bar.offsetWidth;
+  
+  bar.style.width = '25%';
+  
+  let currentWidth = 25;
+  loadingBarTimer = setInterval(() => {
+    if (currentWidth < 85) {
+      currentWidth += Math.random() * 5;
+      bar.style.width = `${currentWidth}%`;
+    }
+  }, 400);
+}
+
+function finishLoadingBar() {
+  const bar = document.getElementById('top-loading-bar');
+  if (!bar) return;
+  
+  if (loadingBarTimer) clearInterval(loadingBarTimer);
+  
+  bar.style.transition = 'width 0.3s ease, opacity 0.3s ease';
+  bar.style.width = '100%';
+  
+  setTimeout(() => {
+    bar.style.opacity = '0';
+    setTimeout(() => {
+      bar.style.width = '0%';
+    }, 300);
+  }, 300);
+}
+
 // Snapshot de datos anteriores por puuid — usado para detectar cambios en el auto-refresh
 const playerSnapshot = new Map();
 
@@ -24,6 +67,7 @@ async function fetchLadder() {
   const container = document.getElementById('ladder-container');
   
   try {
+    startLoadingBar();
     const response = await fetch(`${API_BASE}/ladder`);
     if (!response.ok) throw new Error('Error al obtener datos');
     
@@ -33,6 +77,8 @@ async function fetchLadder() {
     console.error('API Error:', error);
     showToast('⚠️ Error al conectar con la API de Naafiri.', 'error');
     container.innerHTML = `<div class="error">⚠️ Jauría desconectada. Reintenta en unos momentos.</div>`;
+  } finally {
+    finishLoadingBar();
   }
 }
 
@@ -274,6 +320,7 @@ async function refreshPlayer(gameName, tagLine, region) {
   }
 
   try {
+    startLoadingBar();
     refreshCooldowns.set(gameName, now);
     showToast(`Actualizando a ${gameName}...`);
     
@@ -297,6 +344,8 @@ async function refreshPlayer(gameName, tagLine, region) {
     refreshCooldowns.delete(gameName);
     console.error('Refresh error:', error);
     showToast('Error de conexión.', 'error');
+  } finally {
+    finishLoadingBar();
   }
 }
 
@@ -329,6 +378,7 @@ function initDeleteLogic() {
     if (!playerToDelete) return;
 
     try {
+      startLoadingBar();
       confirmBtn.innerText = 'Eliminando...';
       confirmBtn.disabled = true;
 
@@ -349,6 +399,7 @@ function initDeleteLogic() {
     } finally {
       confirmBtn.innerText = 'Quitar';
       confirmBtn.disabled = false;
+      finishLoadingBar();
     }
   };
 }
@@ -995,6 +1046,7 @@ function openPlayerDetails(player) {
   const btnUpdateMatches = document.getElementById('btn-update-matches');
   btnUpdateMatches.onclick = async () => {
     try {
+      startLoadingBar();
       btnUpdateMatches.classList.add('loading');
       btnUpdateMatches.disabled = true;
       
@@ -1020,6 +1072,7 @@ function openPlayerDetails(player) {
     } finally {
       btnUpdateMatches.classList.remove('loading');
       btnUpdateMatches.disabled = false;
+      finishLoadingBar();
     }
   };
 
@@ -1072,6 +1125,7 @@ function initModal() {
     };
 
     try {
+      startLoadingBar();
       submitBtn.innerText = 'Registrando...';
       submitBtn.disabled = true;
 
@@ -1097,6 +1151,7 @@ function initModal() {
     } finally {
       submitBtn.innerText = originalText;
       submitBtn.disabled = false;
+      finishLoadingBar();
     }
   };
 }

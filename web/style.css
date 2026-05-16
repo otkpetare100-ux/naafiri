@@ -2698,3 +2698,26 @@ select option {
 .frame-crest-bottom {
   display: none !important;
 }
+
+/* ==========================================================
+   BARRA DE CARGA MINIMALISTA DORADO PREMIUM
+   ========================================================== */
+.top-loading-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3.5px;
+  width: 0%;
+  background: linear-gradient(to right, #b8860b 0%, #d4af37 30%, #fceb9e 50%, #d4af37 70%, #b8860b 100%);
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.95), 0 0 8px rgba(241, 196, 15, 0.6);
+  z-index: 99999;
+  opacity: 0;
+  pointer-events: none;
+  transition: width 0.4s cubic-bezier(0.08, 0.8, 0.1, 1), opacity 0.3s ease;
+}
+
+/* Keyframes de rotación suave para el spinner Hextech */
+@keyframes spinIcon {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
