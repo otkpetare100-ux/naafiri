@@ -576,7 +576,11 @@ function openPlayerDetails(player) {
         }
 
         if ((maxCount / soloQ20.length) >= 0.8) {
-          otpContainer.innerHTML = `<div class="badge-otp" title="¡Este jugador es un especialista con ${topChamp}!">OTP ${topChamp}</div>`;
+          otpContainer.innerHTML = `
+            <div class="badge-otp" title="¡Este jugador es un especialista con ${topChamp}!">
+              <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${topChamp}.png" class="otp-mini-icon" alt="${topChamp}" />
+              <span>OTP ${topChamp}</span>
+            </div>`;
         }
       }
 

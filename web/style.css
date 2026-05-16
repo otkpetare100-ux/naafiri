@@ -753,11 +753,11 @@ h1::after {
     background: linear-gradient(135deg, #f0b90b 0%, #8a6d3b 50%, #f0b90b 100%);
     background-size: 200% auto;
     color: #000;
-    padding: 6px 16px; /* Ajustado ligeramente */
+    padding: 4px 10px; /* Más compacto lateralmente manteniendo la altura y presencia */
     border-radius: 4px;
     font-size: 0.8rem;
     font-weight: 900;
-    letter-spacing: 1.5px;
+    letter-spacing: 0.8px;
     text-transform: uppercase;
     box-shadow: 0 0 15px rgba(240, 185, 11, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.3);
@@ -767,11 +767,18 @@ h1::after {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 5px;
+    gap: 6px;
     cursor: default;
     user-select: none;
     white-space: nowrap; /* Evita que el tag se rompa en dos filas */
-    min-width: 120px; /* Ajustado para mejor respuesta */
+    min-width: 100px; /* Más flexible para acoplarse mejor en la misma fila */
+}
+.otp-mini-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.6);
+    object-fit: cover;
 }
 
 .badge-otp::before {
@@ -1396,7 +1403,7 @@ select option {
 
 .dashboard-layout {
   display: grid;
-  grid-template-columns: 340px 1fr;
+  grid-template-columns: 400px 1fr; /* Ampliado para que quepan los tags en la misma fila con elegancia */
   gap: 30px;
   align-items: start;
   position: relative;
@@ -1408,7 +1415,7 @@ select option {
   display: flex;
   flex-direction: column;
   gap: 0;
-  padding: 30px !important;
+  padding: 20px !important; /* Optimizado de 30px a 20px para ampliar espacio útil */
   border-right: 2px solid var(--gold-primary) !important;
   background: rgba(0, 0, 0, 0.7) !important;
   min-height: 500px;
@@ -1598,7 +1605,7 @@ select option {
 /* Dashboard Layout: 2 Columnas Asimétricas */
 .dashboard-layout {
   display: grid;
-  grid-template-columns: 340px 1fr;
+  grid-template-columns: 400px 1fr; /* Ampliado para simetría perfecta */
   gap: 30px;
   align-items: start;
 }
