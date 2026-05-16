@@ -1019,16 +1019,11 @@ function openPlayerDetails(player) {
       const isActive = pct > 0;
 
       container.innerHTML += `
-        <div class="lane-heat-card ${isActive ? 'active' : 'inactive'}" style="--lane-color: ${meta.color}; --lane-color-rgb: ${meta.rgb};">
-          <div class="lane-heat-bg"></div>
-          <img src="https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-positions/${meta.icon}" class="lane-heat-icon" alt="${meta.name}" />
-          <div class="lane-heat-info">
-            <span class="lane-heat-name">${meta.name}</span>
-            <span class="lane-heat-pct">${pct}%</span>
+        <div class="lane-vertical-card ${isActive ? 'active' : 'inactive'}" style="--lane-color: ${meta.color}; --lane-color-rgb: ${meta.rgb};">
+          <div class="lane-vertical-bar-container">
+            <div class="lane-vertical-bar-fill" style="height: ${pct}%" title="${meta.name}: ${pct}%"></div>
           </div>
-          <div class="lane-heat-progress-container">
-            <div class="lane-heat-progress" style="width: ${pct}%"></div>
-          </div>
+          <img src="https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-positions/${meta.icon}" class="lane-vertical-icon" alt="${meta.name}" title="${meta.name}: ${pct}%" />
         </div>
       `;
     });
