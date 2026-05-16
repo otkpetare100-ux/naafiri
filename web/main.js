@@ -622,6 +622,13 @@ function openPlayerDetails(player) {
       wingsEl.src = `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-emblem/wings/wings_${tier}.png`;
       frameEl.src = `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/regalia/borders/ranked_${tier}_level_3.png`;
     }
+    
+    // 3. Marco de pantalla de carga (Loading Card Frame)
+    const cardFrameEl = document.getElementById('dash-loading-frame');
+    if (cardFrameEl) {
+      cardFrameEl.className = 'dash-loading-frame';
+      cardFrameEl.classList.add(`frame-${tier}`);
+    }
 
     document.getElementById('detail-tier-rank').textContent = queueData.tier === 'UNRANKED' ? 'UNRANKED' : `${queueData.tier} ${queueData.rank}`;
     document.getElementById('detail-lp').textContent = `${queueData.leaguePoints || 0} LP`;
