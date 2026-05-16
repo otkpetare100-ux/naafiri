@@ -324,20 +324,15 @@ let currentModalPuuid = null;
 // Función para limpiar nombres de campeones (Ej: "Lee Sin" -> "LeeSin")
 function cleanChampId(name) {
   if (!name) return null;
-  // Diccionario de excepciones comunes de Riot
   const exceptions = {
-    "Wukong": "MonkeyKing",
-    "LeBlanc": "Leblanc",
-    "Kha'Zix": "Khazix",
-    "Cho'Gath": "Chogath",
-    "Vel'Koz": "Velkoz",
-    "Kai'Sa": "Kaisa",
-    "Bel'Veth": "Belveth",
-    "Renata Glasc": "Renata",
-    "Nunu y Willump": "Nunu"
+    "Wukong": "MonkeyKing", "LeBlanc": "Leblanc", "Kha'Zix": "Khazix",
+    "Cho'Gath": "Chogath", "Vel'Koz": "Velkoz", "Kai'Sa": "Kaisa",
+    "Bel'Veth": "Belveth", "Renata Glasc": "Renata", "Nunu y Willump": "Nunu"
   };
   if (exceptions[name]) return exceptions[name];
-  return name.replace(/[^a-zA-Z]/g, ''); // Quita espacios, puntos y comas
+  // Eliminar espacios y caracteres no alfabéticos, capitalizando la primera letra
+  let clean = name.replace(/[^a-zA-Z]/g, '');
+  return clean;
 }
 
 // Función para obtener el campeón más jugado del historial reciente
@@ -346,60 +341,53 @@ function getMostPlayedFromHistory(history) {
   const counts = {};
   history.forEach(m => {
     const name = m.championName;
-    if (name && name !== 'Unknown') {
-      counts[name] = (counts[name] || 0) + 1;
-    }
+    if (name && name !== 'Unknown') counts[name] = (counts[name] || 0) + 1;
   });
   const entries = Object.entries(counts);
-  if (entries.length === 0) return null;
-  return entries.sort((a, b) => b[1] - a[1])[0][0];
+  return entries.length > 0 ? entries.sort((a, b) => b[1] - a[1])[0][0] : null;
 }
 
-// Función para cargar un Splash Art vertical aleatorio
+// Función para cargar un Splash Art vertical aleatorio (SÚPER REFORZADA)
 async function setRandomSplash(rawChampName) {
   const bgEl = document.getElementById('dash-left-bg');
   if (!bgEl) return;
   
+  // 1. Limpiar fondo inmediatamente para evitar "fantasmas" de la skin anterior
+  bgEl.style.backgroundImage = 'none';
+  
   const champId = cleanChampId(rawChampName);
-  if (!champId) {
-    bgEl.style.backgroundImage = 'none';
-    return;
-  }
+  if (!champId) return;
 
   try {
-    const resp = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/es_MX/champion/${champId}.json`);
-    if (!resp.ok) throw new Error('Error fetch');
+    // 2. Usamos en_US que es el más fiable para obtener la lista de skins
+    const resp = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/en_US/champion/${champId}.json`);
     const data = await resp.json();
     
-    if (data.data[champId] && data.data[champId].skins) {
-      const allSkins = data.data[champId].skins;
-      // Filtramos skins que no sean la 0 y que no sean chromas
-      const validSkins = allSkins.filter(s => s.num !== 0 && !s.chromas && !s.name.toLowerCase().includes('chroma'));
+    if (data.data[champId]) {
+      const skins = data.data[champId].skins;
+      // Filtramos cualquier cosa que parezca un chroma o la base
+      const specials = skins.filter(s => s.num !== 0 && !s.chromas && !s.name.toLowerCase().includes('chroma'));
       
-      let selectedSkin;
-      if (validSkins.length > 0) {
-        // Elegimos una skin especial al azar
-        selectedSkin = validSkins[Math.floor(Math.random() * validSkins.length)];
-      } else {
-        selectedSkin = allSkins[0];
-      }
+      // Elegimos skin (100% especial si existe)
+      const skinNum = specials.length > 0 
+        ? specials[Math.floor(Math.random() * specials.length)].num 
+        : 0;
 
-      const timestamp = new Date().getTime();
-      const splashUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_${selectedSkin.num}.jpg?v=${timestamp}`;
+      // 3. Fuente de imagen Ultra-Fiable con Cache Buster Dinámico
+      const bust = Math.random().toString(36).substring(7);
+      const url = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_${skinNum}.jpg?v=${bust}`;
       
       const img = new Image();
       img.onload = () => {
-        bgEl.style.backgroundImage = `url('${splashUrl}')`;
-        console.log(`Splash cargado: ${champId} skin ${selectedSkin.num}`);
+        bgEl.style.backgroundImage = `url('${url}')`;
       };
       img.onerror = () => {
         bgEl.style.backgroundImage = `url('https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_0.jpg')`;
       };
-      img.src = splashUrl;
+      img.src = url;
     }
   } catch (error) {
-    console.error("Error cargando Splash Art para:", champId, error);
-    bgEl.style.backgroundImage = `none`;
+    console.error("Error crítico en Splash:", error);
   }
 }
 
@@ -407,15 +395,13 @@ function openPlayerDetails(player) {
   currentModalPuuid = player.puuid;
   const modal = document.getElementById('player-details-modal');
 
-  // Intentar sacar el más jugado del historial
-  let targetChamp = getMostPlayedFromHistory(player.matchStatsHistory);
-  
-  // Fallback a top maestría si no hay historial
-  if (!targetChamp && player.topChampions && player.topChampions.length > 0) {
-    targetChamp = player.topChampions[0].name;
+  // Determinar campeón objetivo
+  let target = getMostPlayedFromHistory(player.matchStatsHistory);
+  if (!target && player.topChampions && player.topChampions.length > 0) {
+    target = player.topChampions[0].name;
   }
   
-  setRandomSplash(targetChamp);
+  setRandomSplash(target);
   
   // Header Info
   document.getElementById('detail-profile-icon').src = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${player.profileIconId || 1}.png`;
