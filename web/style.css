@@ -1668,18 +1668,46 @@ select option {
 
 .profile-icon-wrapper {
   position: relative;
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  border: 2px solid var(--gold-primary);
-  box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+  width: 90px; /* Un poco más grande para el modal */
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.profile-icon-wrapper img {
-  width: 100%;
-  height: 100%;
+.profile-icon-wrapper img#detail-profile-icon {
+  width: 75%;
+  height: 75%;
   border-radius: 50%;
   object-fit: cover;
+  z-index: 2;
+  border: 2px solid rgba(212, 175, 55, 0.5);
+}
+
+/* Alas de Rango (Fondo) */
+.rank-wings-asset {
+  position: absolute;
+  width: 250%; /* Las alas son mucho más anchas */
+  height: 250%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  pointer-events: none;
+  filter: drop-shadow(0 0 15px rgba(0,0,0,0.8));
+}
+
+/* Marco de Rango (Frente) */
+.rank-frame-asset {
+  position: absolute;
+  width: 130%; /* El marco sobresale un poco del icono */
+  height: 130%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
 }
 
 .level-badge {

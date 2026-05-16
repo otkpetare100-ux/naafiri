@@ -600,7 +600,25 @@ function openPlayerDetails(player) {
     if (!queueData) queueData = { tier: 'UNRANKED', rank: '', leaguePoints: 0, wins: 0, losses: 0 };
     
     const tier = (queueData.tier || 'UNRANKED').toLowerCase();
+    
+    // 1. Emblema clásico en el cuadro de rango
     document.getElementById('detail-rank-emblem').src = `${ASSETS_BASE}/ranks/${tier}.png`;
+    
+    // 2. Alas y Marco Oficiales en el Avatar
+    const wingsEl = document.getElementById('detail-rank-wings');
+    const frameEl = document.getElementById('detail-rank-frame');
+    
+    if (tier === 'unranked' || tier === 'provisional') {
+      wingsEl.style.display = 'none';
+      frameEl.style.display = 'none';
+    } else {
+      wingsEl.style.display = 'block';
+      frameEl.style.display = 'block';
+      // URLs oficiales verificadas
+      wingsEl.src = `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-emblem/wings/wings_${tier}.png`;
+      frameEl.src = `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-emblem/emblem-${tier}.png`;
+    }
+
     document.getElementById('detail-tier-rank').textContent = queueData.tier === 'UNRANKED' ? 'UNRANKED' : `${queueData.tier} ${queueData.rank}`;
     document.getElementById('detail-lp').textContent = `${queueData.leaguePoints || 0} LP`;
     
