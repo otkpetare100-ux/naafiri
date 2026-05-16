@@ -222,12 +222,6 @@ function renderLadder(players) {
           ${topChampsHtml || '<span class="no-champs">No data</span>'}
         </div>
         <div class="player-performance">
-          <div class="streak-container">
-            <span class="streak-tag ${Math.abs(player.streak) >= 2 ? (player.streak > 0 ? 'streak-win' : 'streak-loss') : 'streak-hidden'}">
-              <span class="streak-emoji">${player.streak >= 2 ? '🔥' : player.streak <= -2 ? '❄️' : '🔥'}</span> 
-              ${Math.abs(player.streak) >= 2 ? `${Math.abs(player.streak)} ${player.streak > 0 ? 'Wins' : 'Loss'}` : '0 Wins'}
-            </span>
-          </div>
           <div class="history-dots">${cardStreakHtml} ${historyHtml}</div>
         </div>
         <div class="rank-emblem-container">
