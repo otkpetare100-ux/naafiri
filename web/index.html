@@ -120,20 +120,20 @@
           <!-- Panel Izquierdo: Identidad y Rango -->
           <div class="dash-left-col detail-box">
             <div id="dash-left-bg" class="dash-left-bg"></div>
-            <div class="profile-info-block dash-profile" style="flex-direction: column; align-items: center; text-align: center; gap: 15px;">
-              <div class="profile-icon-wrapper dash-avatar">
+            <div class="profile-info-block dash-profile" style="flex-direction: row; align-items: center; gap: 20px; justify-content: flex-start; text-align: left; margin-bottom: 20px;">
+              <div class="profile-icon-wrapper dash-avatar" style="margin: 0;">
                 <img id="detail-profile-icon" src="" alt="Icono" />
                 <div id="detail-level" class="level-badge dash-level"></div>
               </div>
-              <div class="profile-main-info" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
-                <div class="profile-badges" style="justify-content: center; margin: 0;">
+              <div class="profile-main-info" style="display: flex; flex-direction: column; align-items: flex-start; gap: 10px;">
+                <div class="profile-badges" style="justify-content: flex-start; margin: 0;">
                   <span id="detail-region" class="region-badge"></span>
                   <span id="detail-status" class="status-badge"></span>
                 </div>
+                <!-- Tag OTP al lado del icono -->
+                <div id="otp-badge-container" style="display: flex; justify-content: flex-start; min-height: 25px;"></div>
               </div>
             </div>
-            <!-- Tag OTP Centrado -->
-            <div id="otp-badge-container" style="display: flex; justify-content: center; margin: 5px 0 15px 0; min-height: 25px;"></div>
 
             <div class="rank-box dash-rank">
               <div class="queue-toggle">

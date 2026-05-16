@@ -739,8 +739,7 @@ h1::after {
     gap: 5px;
     cursor: default;
     user-select: none;
-    min-width: 180px;
-    margin: 0 auto;
+    min-width: 140px;
 }
 
 .badge-otp::before {
