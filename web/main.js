@@ -321,69 +321,84 @@ window.openDeleteModal = openDeleteModal;
 let currentModalPuuid = null;
 
 // Modal de Detalles del Jugador
-// Función para obtener el campeón más jugado del historial reciente (Más fiable)
+// Función para limpiar nombres de campeones (Ej: "Lee Sin" -> "LeeSin")
+function cleanChampId(name) {
+  if (!name) return null;
+  // Diccionario de excepciones comunes de Riot
+  const exceptions = {
+    "Wukong": "MonkeyKing",
+    "LeBlanc": "Leblanc",
+    "Kha'Zix": "Khazix",
+    "Cho'Gath": "Chogath",
+    "Vel'Koz": "Velkoz",
+    "Kai'Sa": "Kaisa",
+    "Bel'Veth": "Belveth",
+    "Renata Glasc": "Renata",
+    "Nunu y Willump": "Nunu"
+  };
+  if (exceptions[name]) return exceptions[name];
+  return name.replace(/[^a-zA-Z]/g, ''); // Quita espacios, puntos y comas
+}
+
+// Función para obtener el campeón más jugado del historial reciente
 function getMostPlayedFromHistory(history) {
   if (!history || history.length === 0) return null;
   const counts = {};
   history.forEach(m => {
-    // Usamos el championName que viene directamente de la partida
     const name = m.championName;
     if (name && name !== 'Unknown') {
       counts[name] = (counts[name] || 0) + 1;
     }
   });
-  
   const entries = Object.entries(counts);
   if (entries.length === 0) return null;
-  
-  // Ordenar por cantidad de partidas y devolver el primero
   return entries.sort((a, b) => b[1] - a[1])[0][0];
 }
 
-// Función para cargar un Splash Art vertical aleatorio (Usando fuente Pro de Community Dragon)
-async function setRandomSplash(champId) {
+// Función para cargar un Splash Art vertical aleatorio
+async function setRandomSplash(rawChampName) {
   const bgEl = document.getElementById('dash-left-bg');
   if (!bgEl) return;
   
+  const champId = cleanChampId(rawChampName);
   if (!champId) {
     bgEl.style.backgroundImage = 'none';
     return;
   }
 
   try {
-    // 1. Obtener datos del campeón para saber sus skins
     const resp = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/es_MX/champion/${champId}.json`);
+    if (!resp.ok) throw new Error('Error fetch');
     const data = await resp.json();
     
     if (data.data[champId] && data.data[champId].skins) {
       const allSkins = data.data[champId].skins;
-      // Filtrar skins reales
-      const specialSkins = allSkins.filter(s => s.num !== 0 && !s.chromas && !s.name.toLowerCase().includes('chroma'));
+      // Filtramos skins que no sean la 0 y que no sean chromas
+      const validSkins = allSkins.filter(s => s.num !== 0 && !s.chromas && !s.name.toLowerCase().includes('chroma'));
       
       let selectedSkin;
-      if (specialSkins.length > 0) {
-        // 100% de probabilidad de skin especial si existe
-        selectedSkin = specialSkins[Math.floor(Math.random() * specialSkins.length)];
+      if (validSkins.length > 0) {
+        // Elegimos una skin especial al azar
+        selectedSkin = validSkins[Math.floor(Math.random() * validSkins.length)];
       } else {
         selectedSkin = allSkins[0];
       }
 
-      // 2. Construir URL (Usamos DDragon Loading con Cache Buster para evitar la predeterminada pegada)
       const timestamp = new Date().getTime();
       const splashUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_${selectedSkin.num}.jpg?v=${timestamp}`;
       
       const img = new Image();
       img.onload = () => {
         bgEl.style.backgroundImage = `url('${splashUrl}')`;
+        console.log(`Splash cargado: ${champId} skin ${selectedSkin.num}`);
       };
       img.onerror = () => {
-        // Si falla la skin, ponemos la base pero con cache buster también
-        bgEl.style.backgroundImage = `url('https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_0.jpg?v=${timestamp}')`;
+        bgEl.style.backgroundImage = `url('https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_0.jpg')`;
       };
       img.src = splashUrl;
     }
   } catch (error) {
-    console.error("Error en Splash Art:", error);
+    console.error("Error cargando Splash Art para:", champId, error);
     bgEl.style.backgroundImage = `none`;
   }
 }
@@ -392,10 +407,10 @@ function openPlayerDetails(player) {
   currentModalPuuid = player.puuid;
   const modal = document.getElementById('player-details-modal');
 
-  // Lógica de fondo basada en el historial real de partidas
+  // Intentar sacar el más jugado del historial
   let targetChamp = getMostPlayedFromHistory(player.matchStatsHistory);
   
-  // Si no hay historial reciente, usamos el top maestría
+  // Fallback a top maestría si no hay historial
   if (!targetChamp && player.topChampions && player.topChampions.length > 0) {
     targetChamp = player.topChampions[0].name;
   }
