@@ -1689,7 +1689,7 @@ select option {
   position: absolute;
   width: 270%; 
   height: auto;
-  top: 20%; 
+  top: 15%; /* Elevado un poco para acompañar al marco */
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1;
@@ -1702,7 +1702,7 @@ select option {
   position: absolute;
   width: 140%; 
   height: auto;
-  top: 10%; /* Elevado */
+  top: 7%; /* Elevado al máximo para cubrir el borde superior del icono */
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 5; 
@@ -1712,7 +1712,7 @@ select option {
 
 .level-badge {
   position: absolute;
-  bottom: -10px; /* Devuelto a su sitio abajo */
+  bottom: -15px; /* Ajustado para que el nuevo centro no lo tape */
   left: 50%;
   transform: translateX(-50%);
   background: #111;
