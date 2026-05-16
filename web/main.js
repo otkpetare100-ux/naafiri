@@ -830,9 +830,12 @@ function openPlayerDetails(player) {
     soloQMatchesDetailed.forEach(m => {
       const name = m.championName;
       if (name && name !== 'Unknown') {
-        if (!stats[name]) stats[name] = { count: 0, wins: 0 };
+        if (!stats[name]) stats[name] = { count: 0, wins: 0, kills: 0, deaths: 0, assists: 0 };
         stats[name].count++;
         if (m.win) stats[name].wins++;
+        stats[name].kills += m.kills || 0;
+        stats[name].deaths += m.deaths || 0;
+        stats[name].assists += m.assists || 0;
       }
     });
     
@@ -843,6 +846,27 @@ function openPlayerDetails(player) {
     champsToDisplay = sorted.map(([name, data]) => {
       const mastery = (player.topChampions || []).find(c => c.name === name);
       const wr = Math.round((data.wins / data.count) * 100);
+      
+      const avgKills = (data.kills / data.count).toFixed(1);
+      const avgDeaths = (data.deaths / data.count).toFixed(1);
+      const avgAssists = (data.assists / data.count).toFixed(1);
+      
+      const kdaRatioVal = data.deaths > 0 
+        ? ((data.kills + data.assists) / data.deaths)
+        : (data.kills + data.assists);
+      const kdaRatio = kdaRatioVal.toFixed(2);
+      
+      let kdaColor = '#94a3b8'; // Slate Silver
+      if (kdaRatioVal >= 4.0) {
+        kdaColor = '#ff9f43'; // Fuego/Oro Legendario
+      } else if (kdaRatioVal >= 3.0) {
+        kdaColor = '#a855f7'; // Amatista Excelente
+      } else if (kdaRatioVal >= 2.0) {
+        kdaColor = '#38bdf8'; // Sky Blue Sólido
+      } else if (kdaRatioVal > 0) {
+        kdaColor = '#ef4444'; // Soft Red Mejorable
+      }
+      
       return {
         name: name,
         level: mastery ? mastery.level : 1,
@@ -850,7 +874,12 @@ function openPlayerDetails(player) {
         recentCount: data.count,
         wins: data.wins,
         losses: data.count - data.wins,
-        winRate: wr
+        winRate: wr,
+        avgKills,
+        avgDeaths,
+        avgAssists,
+        kdaRatio,
+        kdaColor
       };
     });
   }
@@ -893,6 +922,12 @@ function openPlayerDetails(player) {
           <div class="champ-detail-info">
             <div class="champ-detail-name">${champ.name}</div>
             <div class="champ-detail-pts">${subText}</div>
+            ${champ.kdaRatio !== undefined ? `
+              <div class="champ-detail-kda" style="font-size: 0.72rem; color: rgba(255,255,255,0.85); font-weight: 700; margin-top: 5px; font-family: 'Outfit', sans-serif; letter-spacing: 0.3px;">
+                <span style="color: ${champ.kdaColor}; font-weight: 900;">${champ.kdaRatio}</span> KDA
+                <span style="font-size: 0.62rem; color: rgba(255,255,255,0.45); font-weight: 500; margin-left: 2px;">(${champ.avgKills}/${champ.avgDeaths}/${champ.avgAssists})</span>
+              </div>
+            ` : ''}
           </div>
         </div>
       `;
