@@ -2871,25 +2871,7 @@ select option {
 
 /* ================== EFECTOS PARA ROL PRINCIPAL (MOST PLAYED) ================== */
 .lane-vertical-card {
-  position: relative; /* Para posicionar la corona */
-}
-
-/* Animación de la corona flotante */
-.lane-most-played-crown {
-  position: absolute;
-  top: -15px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 11px;
-  filter: drop-shadow(0 0 5px #d4af37);
-  animation: crownFloat 2.2s ease-in-out infinite;
-  z-index: 10;
-  pointer-events: none;
-}
-
-@keyframes crownFloat {
-  0%, 100% { transform: translateX(-50%) translateY(0) scale(1); }
-  50% { transform: translateX(-50%) translateY(-3px) scale(1.1); }
+  position: relative;
 }
 
 /* El icono del rol principal siempre está encendido en su color natural */

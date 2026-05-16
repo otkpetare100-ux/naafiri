@@ -1050,7 +1050,6 @@ function openPlayerDetails(player) {
 
       container.innerHTML += `
         <div class="lane-vertical-card ${isActive ? 'active' : 'inactive'} ${isMostPlayed ? 'most-played' : ''}" style="--lane-color: ${meta.color}; --lane-color-rgb: ${meta.rgb};">
-          ${isMostPlayed ? `<div class="lane-most-played-crown" title="Rol Principal">👑</div>` : ''}
           <div class="lane-vertical-bar-container">
             <div class="lane-vertical-bar-fill" style="height: ${pct}%" title="${meta.name}: ${pct}%"></div>
           </div>
