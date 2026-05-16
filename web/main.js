@@ -321,7 +321,7 @@ window.openDeleteModal = openDeleteModal;
 let currentModalPuuid = null;
 
 // Modal de Detalles del Jugador
-// Función para cargar un Splash Art centrado aleatorio del campeón más usado
+// Función para cargar un Splash Art centrado aleatorio del campeón más usado con Fallback
 async function setRandomSplash(champId) {
   const leftCol = document.querySelector('.dash-left-col');
   if (!leftCol) return;
@@ -338,13 +338,25 @@ async function setRandomSplash(champId) {
     if (data.data[champId] && data.data[champId].skins) {
       const skins = data.data[champId].skins;
       const randomSkin = skins[Math.floor(Math.random() * skins.length)];
-      // Usamos el formato 'centered' de Riot
+      
       const splashUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/centered/${champId}_${randomSkin.num}.jpg`;
-      leftCol.style.backgroundImage = `url('${splashUrl}')`;
+      const baseSplashUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/centered/${champId}_0.jpg`;
+
+      // Pre-cargar imagen para verificar si existe
+      const img = new Image();
+      img.onload = () => {
+        leftCol.style.backgroundImage = `url('${splashUrl}')`;
+      };
+      img.onerror = () => {
+        // Si la skin aleatoria falla (404), usamos la base que siempre existe
+        leftCol.style.backgroundImage = `url('${baseSplashUrl}')`;
+      };
+      img.src = splashUrl;
     } else {
       leftCol.style.backgroundImage = `url('https://ddragon.leagueoflegends.com/cdn/img/champion/centered/${champId}_0.jpg')`;
     }
   } catch (error) {
+    console.error('Error cargando splash art:', error);
     leftCol.style.backgroundImage = `url('https://ddragon.leagueoflegends.com/cdn/img/champion/centered/${champId}_0.jpg')`;
   }
 }
