@@ -598,7 +598,7 @@ function openPlayerDetails(player) {
     const queueIds = queueType === 'flex' ? [440, 'RANKED_FLEX_SR'] : [420, 'RANKED_SOLO_5x5'];
 
     const filteredMatches = (player.matchStatsHistory || [])
-      .filter(m => queueIds.includes(m.queueId) || queueIds.includes(m.queueType))
+      .filter(m => (queueIds.includes(m.queueId) || queueIds.includes(m.queueType)) && !m.isRemake)
       .slice(0, 5);
 
     // Renderizar los puntos
