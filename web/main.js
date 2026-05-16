@@ -405,9 +405,10 @@ async function setRandomSplash(rawChampName) {
       const img = new Image();
       img.onload = () => {
         bgEl.style.backgroundImage = `url('${url}')`;
-        console.log(`Splash cargado con éxito: ${champId} skin ${selectedSkin.num} (${selectedSkin.name})`);
+        console.log(`✅ Splash cargado con éxito: ${champId} skin ${selectedSkin.num} (${selectedSkin.name})`);
       };
       img.onerror = () => {
+        console.warn(`❌ Error al cargar skin: ${champId} skin ${selectedSkin.num} (${selectedSkin.name}). Usando predeterminada.`);
         bgEl.style.backgroundImage = `url('https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_0.jpg')`;
       };
       img.src = url;
