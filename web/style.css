@@ -1689,12 +1689,14 @@ select option {
   position: absolute;
   width: 270%; 
   height: auto;
-  top: 15%; /* Elevado un poco para acompañar al marco */
+  top: 15%; 
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1;
   pointer-events: none;
   filter: drop-shadow(0 0 15px rgba(0,0,0,0.8));
+  /* Cortar la parte superior para eliminar ornamentos que sobresalgan */
+  clip-path: inset(10% 0 0 0);
 }
 
 /* Marco de Rango (Frente) */
@@ -1702,12 +1704,14 @@ select option {
   position: absolute;
   width: 140%; 
   height: auto;
-  top: 7%; /* Elevado al máximo para cubrir el borde superior del icono */
+  top: 8%; /* Ajustado ligeramente por el clip */
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 5; 
   pointer-events: none;
   filter: drop-shadow(0 4px 12px rgba(0,0,0,0.6));
+  /* Cortar el adorno superior (el pájaro/joya) */
+  clip-path: inset(12% 0 0 0);
 }
 
 .level-badge {
