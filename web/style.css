@@ -1858,7 +1858,7 @@ select option {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 5px;
   background: linear-gradient(165deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%) !important;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(212, 175, 55, 0.1) !important;
@@ -1925,7 +1925,7 @@ select option {
   width: 65px; /* Mismo tamaño que el icono de campeón */
   height: 65px;
   object-fit: contain;
-  margin-top: -5px; /* Un poco más cerca del icono */
+  margin-top: -15px; /* ¡Pegado al icono! */
   filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
   transition: transform 0.3s ease;
 }
