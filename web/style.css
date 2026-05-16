@@ -1858,42 +1858,67 @@ select option {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
-  padding: 18px 12px;
-  border-radius: 18px; /* ¡Suavizado! */
-  width: 30%;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  gap: 12px;
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(212, 175, 55, 0.1) !important;
+  padding: 22px 15px;
+  border-radius: 22px;
+  width: 31%;
+  position: relative;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* Brillo superior dinámico */
+.champ-detail-item::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--champ-accent, var(--gold-primary)), transparent);
+  opacity: 0.5;
 }
 
 .champ-detail-item:hover {
-  border-color: rgba(212, 175, 55, 0.4);
-  background: linear-gradient(180deg, rgba(212, 175, 55, 0.08) 0%, rgba(0, 0, 0, 0.6) 100%);
-  transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(212, 175, 55, 0.1);
+  transform: translateY(-8px) scale(1.02);
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%) !important;
+  border-color: var(--champ-accent, var(--gold-primary)) !important;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.6), 0 0 20px var(--champ-accent-alpha, rgba(212, 175, 55, 0.15));
 }
 
 .champ-detail-icon {
-  width: 50px;
-  height: 50px;
-  border-radius: 12px; /* ¡Suavizado! */
+  width: 65px; /* Un poco más grande para que luzca */
+  height: 65px;
+  border-radius: 16px;
   border: 2px solid var(--gold-primary);
-  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
+  padding: 2px;
+  background: #000;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  transition: transform 0.3s ease;
+}
+
+.champ-detail-item:hover .champ-detail-icon {
+  transform: scale(1.1) rotate(2deg);
 }
 
 .champ-detail-info {
   text-align: center;
 }
 .champ-detail-name {
-  font-weight: 800;
-  color: white;
-  font-size: 0.9rem;
+  font-weight: 900;
+  color: #fff;
+  font-size: 1rem;
   margin-bottom: 2px;
+  letter-spacing: 0.02rem;
 }
 .champ-detail-pts {
-  font-size: 0.75rem;
-  color: var(--text-muted);
+  font-size: 0.7rem;
+  color: var(--text-gold);
+  opacity: 0.8;
+  font-style: italic;
+  font-weight: 600;
 }
 .champ-detail-crest {
   width: 26px;
