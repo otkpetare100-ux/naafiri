@@ -1668,8 +1668,8 @@ select option {
 
 .profile-icon-wrapper {
   position: relative;
-  width: 60px; /* Reducción drástica para evitar que las alas se corten */
-  height: 60px;
+  width: 50px; /* Reducción final para encajar perfectamente en el modal */
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1694,7 +1694,7 @@ select option {
   transform: translate(-50%, -50%);
   z-index: 1;
   pointer-events: none;
-  filter: drop-shadow(0 0 10px rgba(0,0,0,0.8));
+  filter: drop-shadow(0 0 8px rgba(0,0,0,0.8));
 }
 
 /* Marco de Rango (Frente) */
@@ -1707,23 +1707,23 @@ select option {
   transform: translate(-50%, -50%);
   z-index: 5; 
   pointer-events: none;
-  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.6));
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
 }
 
 .level-badge {
   position: absolute;
-  bottom: -10px; /* Ajustado para el nuevo tamaño de 60px */
+  bottom: -8px; /* Ajustado para 50px */
   left: 50%;
   transform: translateX(-50%);
   background: #111;
   border: 1px solid var(--gold-primary);
   color: #fff;
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 800;
-  padding: 1px 5px;
+  padding: 1px 4px;
   border-radius: 10px;
   white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.8);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.8);
   z-index: 10;
 }
 
