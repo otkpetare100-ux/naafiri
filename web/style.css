@@ -1360,8 +1360,9 @@ select option {
   /* Fondo Dinámico basado en el campeón */
   background: linear-gradient(145deg, #050505 0%, var(--champ-accent-deep, #1a0b16) 100%) !important;
   backdrop-filter: blur(15px);
-  border: 1px solid var(--champ-accent-alpha, rgba(212, 175, 55, 0.2)) !important;
+  border: 2px solid var(--gold-primary) !important;
   box-shadow: 0 0 80px rgba(0, 0, 0, 0.95), 
+              0 0 20px rgba(212, 175, 55, 0.2),
               inset 0 0 40px var(--champ-accent-alpha, transparent) !important;
   padding: 2.5rem !important; 
   margin: auto; 
