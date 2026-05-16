@@ -127,9 +127,21 @@ function renderLadder(players) {
     const history = player.history || []; 
     const historyHtml = history.map(res => `<span class="history-dot dot-${res.toLowerCase()}"></span>`).join('');
 
-    // Clase para el Winrate
-    const wrValue = parseInt(player.winRate) || 0;
-    const wrClass = wrValue >= 50 ? 'wr-positive' : 'wr-negative';
+    // Cálculo de Racha Minimalista para la tarjeta
+    let cardStreakHtml = '';
+    if (history.length >= 2) {
+      let streakCount = 0;
+      const firstResult = history[0]; // 'W' o 'L'
+      for (const res of history) {
+        if (res === firstResult) streakCount++;
+        else break;
+      }
+      if (streakCount >= 2) {
+        const emoji = firstResult === 'W' ? '🔥' : '❄️';
+        const color = firstResult === 'W' ? '#ff9f43' : '#00d2ff';
+        cardStreakHtml = `<span style="color: ${color}; font-weight: 900; margin-left: 8px; font-size: 0.85rem; text-shadow: 0 0 8px ${color}66;">x${streakCount} <span class="streak-emoji">${emoji}</span></span>`;
+      }
+    }
 
     // Si es top 1 o 2, mostramos la tarjeta abajo para que no se salga de la pantalla
     const cardPositionClass = rankNum <= 2 ? 'm-card-bottom' : '';
@@ -212,7 +224,7 @@ function renderLadder(players) {
               ${Math.abs(player.streak) >= 2 ? `${Math.abs(player.streak)} ${player.streak > 0 ? 'Wins' : 'Loss'}` : '0 Wins'}
             </span>
           </div>
-          <div class="history-dots">${historyHtml}</div>
+          <div class="history-dots">${historyHtml} ${cardStreakHtml}</div>
         </div>
         <div class="rank-emblem-container">
           <img src="${emblemUrl}" class="rank-emblem" alt="${player.tier}" onerror="this.style.opacity='0'" />
