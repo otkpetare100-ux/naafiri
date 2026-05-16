@@ -449,6 +449,35 @@ function openPlayerDetails(player) {
     statusEl.className = 'status-badge offline';
   }
 
+  // LÓGICA DE TAG OTP PREMIUM
+  const otpContainer = document.getElementById('otp-badge-container');
+  otpContainer.innerHTML = '';
+  
+  if (player.matchStatsHistory && player.matchStatsHistory.length >= 5) {
+    const history = player.matchStatsHistory;
+    const totalGames = history.length;
+    const counts = {};
+    
+    history.forEach(m => {
+      const name = m.championName;
+      if (name && name !== 'Unknown') counts[name] = (counts[name] || 0) + 1;
+    });
+
+    let topChamp = null;
+    let maxCount = 0;
+    for (const champ in counts) {
+      if (counts[champ] > maxCount) {
+        maxCount = counts[champ];
+        topChamp = champ;
+      }
+    }
+
+    const otpPercentage = (maxCount / totalGames) * 100;
+    if (otpPercentage >= 80) {
+      otpContainer.innerHTML = `<div class="badge-otp" title="¡Este jugador es un especialista con ${topChamp}!">👑 OTP ${topChamp}</div>`;
+    }
+  }
+
   // W/L Calculation
   const historyArr = player.history || [];
   const wins = historyArr.filter(r => r === 'W').length;

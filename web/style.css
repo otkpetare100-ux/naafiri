@@ -717,6 +717,61 @@ h1::after {
   }
 }
 
+/* TAG OTP SUPER PREMIUM */
+.badge-otp {
+    background: linear-gradient(135deg, #f0b90b 0%, #8a6d3b 50%, #f0b90b 100%);
+    background-size: 200% auto;
+    color: #000;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    box-shadow: 0 0 15px rgba(240, 185, 11, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+    animation: otp-shine 3s linear infinite, otp-glow 2s ease-in-out infinite alternate;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: default;
+    user-select: none;
+}
+
+.badge-otp::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.6), transparent);
+    transform: rotate(45deg);
+    animation: shine-sweep 3s infinite;
+}
+
+@keyframes otp-shine {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}
+
+@keyframes otp-glow {
+    from { box-shadow: 0 0 10px rgba(240, 185, 11, 0.4); transform: scale(1); }
+    to { box-shadow: 0 0 20px rgba(240, 185, 11, 0.7); transform: scale(1.05); }
+}
+
+@keyframes shine-sweep {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+.badge-otp i {
+    font-size: 0.8rem;
+    color: #000;
+}
+
 /* Responsive */
 @media (max-width: 1000px) {
   .player-card {
