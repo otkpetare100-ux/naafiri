@@ -391,22 +391,22 @@ function getMostPlayedFromHistory(history) {
   return entries.length > 0 ? entries.sort((a, b) => b[1] - a[1])[0][0] : null;
 }
 
-// MAPEO DE REGIONES ESTILO MAPA OFICIAL
+// MAPEO DE REGIONES: PAISAJES REALES DE RUNATERRA
 const REGION_WALLPAPERS = {
-  'demacia': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Garen_0.jpg', 
-  'noxus': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Darius_0.jpg',
-  'ionia': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Irelia_0.jpg',
-  'freljord': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ashe_0.jpg',
-  'shurima': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Azir_0.jpg',
-  'void': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Chogath_0.jpg',
-  'shadow-isles': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Thresh_0.jpg',
-  'targon': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Leona_0.jpg',
-  'piltover': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Caitlyn_0.jpg',
-  'zaun': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Jinx_0.jpg',
-  'bilgewater': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Gangplank_0.jpg',
-  'ixtal': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Qiyana_0.jpg',
-  'bandle-city': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Teemo_0.jpg',
-  'runeterra': 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ryze_0.jpg'
+  'demacia': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blt022067756e18f21e/5eb061c02824701648a73199/demacia-background.jpg',
+  'noxus': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blte54721a976194781/5eb061c3608ed11649987819/noxus-background.jpg',
+  'ionia': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blta8ca7f45778a4872/5eb061be6b8e8f6040b2f8a5/ionia-background.jpg',
+  'freljord': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blt06a2872338c03730/5eb061baf180e06041ec1d9d/freljord-background.jpg',
+  'shurima': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blt8e938953154f85e4/5eb061c0f180e06041ec1d9f/shurima-background.jpg',
+  'void': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/bltdc857700e12f0f49/5eb061c0f180e06041ec1da1/void-background.jpg',
+  'shadow-isles': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blt6d987d603a11887e/5eb061c0608ed11649987817/shadow-isles-background.jpg',
+  'targon': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/bltf36e3e13d969796e/5eb061c094627211620a2335/mt-targon-background.jpg',
+  'piltover': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blt5692634458df589e/5eb061c385f94411647895e6/piltover-background.jpg',
+  'zaun': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/bltd49e8964d939a34a/5eb061c27c626d116345a324/zaun-background.jpg',
+  'bilgewater': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blta0049e75529f7988/5eb061c285f94411647895e4/bilgewater-background.jpg',
+  'ixtal': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blta075e7a96525164f/5eb061c02824701648a7319b/ixtal-background.jpg',
+  'bandle-city': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blt0302488f729226ba/5eb061bebd476d1646271a39/bandle-city-background.jpg',
+  'runeterra': 'https://images.contentstack.io/v3/assets/blt2ac87257a2f646c4/blt50731f8b19356f96/5eb061ba3f550911624f2b91/runeterra-background.jpg'
 };
 
 const CHAMP_REGIONS = {
