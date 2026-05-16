@@ -142,7 +142,7 @@ function renderLadder(players) {
       if (streakCount >= 2) {
         const emoji = firstWin ? '🔥' : '❄️';
         const color = firstWin ? '#ff9f43' : '#00d2ff';
-        cardStreakHtml = `<span style="color: ${color}; font-weight: 900; margin-left: 8px; font-size: 0.85rem; text-shadow: 0 0 8px ${color}66;"><span class="streak-emoji">${emoji}</span> x${streakCount}</span>`;
+        cardStreakHtml = `<span style="color: ${color}; font-weight: 900; margin-left: 8px; font-size: 0.85rem; text-shadow: 0 0 8px ${color}66; display: inline-flex; align-items: center; gap: 4px;"><span class="streak-emoji">${emoji}</span> x${streakCount}</span>`;
       }
     }
 
