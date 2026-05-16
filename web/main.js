@@ -749,14 +749,14 @@ function openPlayerDetails(player) {
         const wrClass = champ.winRate >= 50 ? 'wr-positive' : 'wr-negative';
         const wColor = '#22c55e'; // Verde intenso
         const lColor = '#ef4444'; // Rojo intenso
-        const gColor = 'var(--gold-primary)'; // Oro premium
+        const gColor = '#f0b90b'; // Oro más intenso y vibrante
         
         subText = `
-          <span class="${wrClass}">${champ.winRate}% WR</span> 
-          <span style="opacity:0.4; margin: 0 4px;">-</span> 
           <span style="color:${wColor}; font-weight:800;">${champ.wins}W</span> 
-          <span style="color:${gColor}; margin: 0 2px;">/</span> 
+          <span style="color:${gColor}; margin: 0 2px; font-weight:800;">/</span> 
           <span style="color:${lColor}; font-weight:800;">${champ.losses}L</span>
+          <span style="color:${gColor}; margin: 0 6px; font-weight:800;">-</span> 
+          <span class="${wrClass}" style="font-weight:800;">${champ.winRate}% WR</span>
         `;
       } else {
         subText = `${champ.points.toLocaleString('es-ES')} Pts`;
