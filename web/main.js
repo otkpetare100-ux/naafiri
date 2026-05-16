@@ -418,13 +418,29 @@ function updateRegionBackground(champName) {
   if (!modalContent) return;
 
   const champId = cleanChampId(champName);
-  const region = CHAMP_REGIONS[champId] || 'runeterra';
+  if (!champId) return;
+
+  // Normalizar a minúsculas para el mapeo
+  const searchId = champId.toLowerCase();
+  
+  // Buscar la región en minúsculas
+  const region = CHAMP_REGIONS_LOWER[searchId] || 'runeterra';
   const wallpaperUrl = REGION_WALLPAPERS[region];
 
+  console.log(`Buscando región para ${champId} -> ${region}`);
+
   if (wallpaperUrl) {
-    modalContent.style.background = `url('${wallpaperUrl}')`;
+    modalContent.style.setProperty('background-image', `url('${wallpaperUrl}')`, 'important');
+    modalContent.style.setProperty('background-size', 'cover', 'important');
+    modalContent.style.setProperty('background-position', 'center', 'important');
   }
 }
+
+// Convertir diccionario a minúsculas una sola vez
+const CHAMP_REGIONS_LOWER = {};
+Object.keys(CHAMP_REGIONS).forEach(key => {
+  CHAMP_REGIONS_LOWER[key.toLowerCase()] = CHAMP_REGIONS[key];
+});
 
 // Reemplazar la anterior setRandomSplash con la nueva que también actualiza la región
 async function setRandomSplash(rawChampName) {

@@ -1314,6 +1314,7 @@ select option {
     max-width: 1200px !important;
     width: 95% !important;
     height: 92vh !important;
+    background: #000; /* Fondo de seguridad */
     background-size: cover !important;
     background-position: center !important;
     background-repeat: no-repeat !important;
@@ -1321,7 +1322,7 @@ select option {
     position: relative;
     padding: 0 !important;
     overflow: hidden !important;
-    transition: background 0.8s ease-in-out;
+    transition: background 1s ease-in-out;
     border-radius: 20px !important;
 }
 
