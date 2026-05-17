@@ -1884,10 +1884,10 @@ function openPlayerDetails(player) {
           if (match.lpChange !== undefined && match.lpChange !== null && !isRemake) {
             const sign = match.lpChange > 0 ? '+' : '';
             const colorClass = match.lpChange > 0 ? 'lp-gain' : 'lp-loss';
-            lpHtml = `<div class="match-lp ${colorClass}">${sign}${match.lpChange} LP</div>`;
+            lpHtml = `<div class="match-lp-badge ${colorClass}">${sign}${match.lpChange} LP</div>`;
           } else if (!isRemake) {
             lpHtml = `
-              <div class="match-lp lp-unknown" data-lp-tooltip="Cambio de LP no registrado (partida previa al rastreo o datos no sincronizados)">
+              <div class="match-lp-badge lp-unknown" data-lp-tooltip="Cambio de LP no registrado (partida previa al rastreo o datos no sincronizados)">
                 ? LP <span class="lp-question-mark">?</span>
               </div>
             `;
@@ -2070,10 +2070,12 @@ function openPlayerDetails(player) {
                 <div class="meta-time">${timeAgoStr}</div>
                 <div class="meta-divider"></div>
                 <div class="meta-result">${resultText}</div>
-                <div class="meta-duration-lp">
-                  <span class="meta-duration">${durationStr}</span>
-                  ${lpHtml}
-                </div>
+                <span class="meta-duration">${durationStr}</span>
+              </div>
+
+              <!-- CONTENEDOR DE LP A LA IZQUIERDA DEL ICONO DE CAMPEÓN -->
+              <div class="match-lp-container">
+                ${lpHtml}
               </div>
 
               <!-- 2. CAMPEÓN, HECHIZOS Y RUNAS CON INSIGNIAS ABAJO -->

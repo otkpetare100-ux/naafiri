@@ -3779,45 +3779,113 @@ select option {
   letter-spacing: 0.5px;
 }
 
-/* Indicador LP Desconocido */
-.match-lp.lp-unknown {
-  color: rgba(255, 255, 255, 0.45);
-  font-size: 0.78rem;
-  font-weight: 700;
+/* LP Contenedor e Indicadores Premium */
+.match-lp-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 84px; /* Espaciado simétrico elegante */
+  font-family: 'Outfit', sans-serif;
+  text-align: center;
+}
+
+/* Cápsula de Cristal Premium para LP */
+.match-lp-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px; /* Forma de píldora/cápsula ultra-moderna */
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  backdrop-filter: blur(4px);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+}
+
+/* Ganancia de LP (Victoria) */
+.match-lp-badge.lp-gain {
+  background: rgba(34, 197, 94, 0.06);
+  border: 1.5px solid rgba(34, 197, 94, 0.22);
+  color: #4ade80;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.05);
+  text-shadow: 0 0 6px rgba(74, 222, 128, 0.2);
+}
+
+.match-lp-badge.lp-gain:hover {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: rgba(34, 197, 94, 0.45);
+  box-shadow: 0 0 16px rgba(34, 197, 94, 0.25);
+  transform: translateY(-1.5px);
+  color: #5eff90;
+}
+
+/* Pérdida de LP (Derrota) */
+.match-lp-badge.lp-loss {
+  background: rgba(239, 68, 68, 0.06);
+  border: 1.5px solid rgba(239, 68, 68, 0.22);
+  color: #fca5a5;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.05);
+  text-shadow: 0 0 6px rgba(252, 165, 165, 0.2);
+}
+
+.match-lp-badge.lp-loss:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.45);
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.25);
+  transform: translateY(-1.5px);
+  color: #ffa1a1;
+}
+
+/* LP Desconocido (Píldora Especial) */
+.match-lp-badge.lp-unknown {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1.5px dashed rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.45);
   cursor: help;
 }
 
+.match-lp-badge.lp-unknown:hover {
+  background: rgba(212, 175, 55, 0.08);
+  border-color: rgba(212, 175, 55, 0.4);
+  color: #ff9f0a;
+  box-shadow: 0 0 14px rgba(212, 175, 55, 0.15);
+  transform: translateY(-1.5px);
+}
+
 .lp-question-mark {
-  width: 13px;
-  height: 13px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.62rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.6rem;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.25s ease;
+  margin-left: 2px;
 }
 
-.match-lp.lp-unknown:hover .lp-question-mark {
+.match-lp-badge.lp-unknown:hover .lp-question-mark {
   background: rgba(212, 175, 55, 0.2);
   color: #ff9f0a;
   border-color: rgba(212, 175, 55, 0.5);
   box-shadow: 0 0 6px rgba(212, 175, 55, 0.3);
 }
 
+/* Tooltip de LP */
 .lp-custom-tooltip-style {
   display: none;
   position: absolute;
   pointer-events: none;
   background: rgba(10, 12, 16, 0.96);
-  border: 1.5px solid rgba(212, 175, 55, 0.35); /* Elegant glowing gold border */
+  border: 1.5px solid rgba(212, 175, 55, 0.35); /* Borde de oro brillante */
   border-radius: 8px;
   padding: 10px 12px;
   max-width: 250px;
