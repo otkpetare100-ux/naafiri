@@ -923,17 +923,23 @@ function openUntrackedPlayerLoader() {
   }
 }
 
-async function handleParticipantClick(puuid, summonerName) {
+async function handleParticipantClick(puuid, summonerName, element) {
   // 1. Si está en nuestra jauría, cargarlo de forma instantánea
   const trackedPlayer = GLOBAL_PLAYERS_LIST.find(p => p.puuid === puuid);
   if (trackedPlayer) {
+    if (element) element.classList.add('loading-click');
     const modal = document.getElementById('player-details-modal');
     if (modal) modal.classList.remove('active');
-    setTimeout(() => openPlayerDetails(trackedPlayer), 150);
+    setTimeout(() => {
+      if (element) element.classList.remove('loading-click');
+      openPlayerDetails(trackedPlayer);
+    }, 150);
     return;
   }
 
   // 2. Si es externo, abrir el modal en estado de carga
+  if (element) element.classList.add('loading-click');
+  if (typeof startLoadingBar === 'function') startLoadingBar();
   openUntrackedPlayerLoader();
 
   try {
@@ -952,6 +958,9 @@ async function handleParticipantClick(puuid, summonerName) {
       modal.classList.remove('active');
       document.body.style.overflow = '';
     }
+  } finally {
+    if (element) element.classList.remove('loading-click');
+    if (typeof finishLoadingBar === 'function') finishLoadingBar();
   }
 }
 
@@ -2074,7 +2083,7 @@ function openPlayerDetails(player) {
               const safePuuid = (p.puuid || '').replace(/'/g, "\\'");
 
               return `
-                <div class="team-player ${isMe}" title="${p.summonerName} (${champDisplayName})" onclick="handleParticipantClick('${safePuuid}', '${safeSummonerName}')">
+                <div class="team-player ${isMe}" title="${p.summonerName} (${champDisplayName})" onclick="handleParticipantClick('${safePuuid}', '${safeSummonerName}', this)">
                   <img src="${iconUrl}" class="team-player-champ-icon" alt="${champDisplayName}" onerror="this.onerror=null; this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png';" />
                 </div>
               `;
