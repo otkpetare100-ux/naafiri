@@ -3512,3 +3512,34 @@ select option {
   font-size: 1.1rem;
   animation: spinIcon 1s linear infinite;
 }
+
+/* Insignias de Honor: MVP y ACE */
+.match-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 11px;
+  border-radius: 12px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-family: 'Outfit', sans-serif;
+  margin-top: 5px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  align-self: flex-start;
+}
+
+.match-badge.mvp {
+  background: #ff9f0a; /* Naranja/Oro brillante idéntico a tu captura */
+  color: #fff;
+  border: 1px solid #d98200;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.match-badge.ace {
+  background: #bf5af2; /* Púrpura prémium de ACE */
+  color: #fff;
+  border: 1px solid #9437cd;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}

@@ -1566,6 +1566,21 @@ function openPlayerDetails(player) {
           const dmgStr = match.damageDealt.toLocaleString('es-ES');
           const kpStr = Math.round(match.kp * 100);
 
+          // 4. Calcular si merece insignia de honor (MVP o ACE)
+          let badgeHtml = '';
+          if (!isRemake) {
+            const kdaNum = kdaRatio === 'Perfect' ? 10.0 : parseFloat(kdaRatio);
+            if (isWin) {
+              if (kdaNum >= 4.0 || match.kills >= 10 || kpStr >= 60) {
+                badgeHtml = `<div class="match-badge mvp">MVP</div>`;
+              }
+            } else {
+              if (kdaNum >= 3.0 || match.kills >= 8 || kpStr >= 50) {
+                badgeHtml = `<div class="match-badge ace">ACE</div>`;
+              }
+            }
+          }
+
           const champName = match.championName || 'Unknown';
           const champIconUrl = champName !== 'Unknown' 
             ? `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${champName}.png`
@@ -1713,6 +1728,7 @@ function openPlayerDetails(player) {
                   <span class="meta-duration">${durationStr}</span>
                   ${lpHtml}
                 </div>
+                ${badgeHtml}
               </div>
 
               <!-- 2. CAMPEÓN, HECHIZOS Y RUNAS -->
