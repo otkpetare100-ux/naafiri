@@ -2699,6 +2699,17 @@ select option {
   height: 20px;
 }
 
+@keyframes matchFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .match-item {
   display: flex;
   justify-content: space-between;
@@ -2709,6 +2720,7 @@ select option {
   border-left: 5px solid #666;
   font-size: 0.85rem;
   transition: all 0.2s;
+  animation: matchFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .match-item:hover {

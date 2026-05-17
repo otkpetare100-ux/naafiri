@@ -59,6 +59,10 @@ const BOOTS_ITEM_IDS = new Set([
   1001, 2422, 3006, 3009, 3047, 3111, 3158, 3020, 3117, 3184, 3181, 3285
 ]);
 
+let visibleMatchesCount = 5;
+let currentHistory = [];
+let currentQueueType = 'soloq';
+
 function isLaneQuestCompleted(match) {
   const lane = (match.lane || 'Unknown').toUpperCase();
   const level = match.champLevel;
@@ -732,6 +736,7 @@ async function setRandomSplash(rawChampName) {
 
 
 function openPlayerDetails(player) {
+  visibleMatchesCount = 5; // Resetear la paginación a 5 partidas al abrir cualquier perfil
   currentModalPuuid = player.puuid;
   const modal = document.getElementById('player-details-modal');
 
@@ -1426,6 +1431,10 @@ function openPlayerDetails(player) {
     const historyContainer = document.getElementById('detail-match-history');
     historyContainer.innerHTML = '';
     
+    // Guardar el historial completo en variables globales para scroll infinito
+    currentHistory = history || [];
+    currentQueueType = queueType;
+    
     if (history && history.length > 0) {
       const filteredHistory = history.filter(match => {
         if (queueType === 'soloq') {
@@ -1441,11 +1450,14 @@ function openPlayerDetails(player) {
         return;
       }
 
+      // Rebanar el historial según la paginación activa
+      const slicedHistory = filteredHistory.slice(0, visibleMatchesCount);
+
       // Agrupar partidas por día
       const grouped = [];
       let lastDateStr = "";
 
-      filteredHistory.forEach(match => {
+      slicedHistory.forEach(match => {
         const dateObj = new Date(match.timestamp || Date.now());
         const dateStr = dateObj.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }).replace('.', '');
         
@@ -1645,6 +1657,36 @@ function openPlayerDetails(player) {
   };
   modal.classList.add('active');
   document.body.style.overflow = 'hidden';
+
+  // Lógica de Scroll Infinito Premium
+  const historyContainer = document.getElementById('detail-match-history');
+  if (historyContainer) {
+    historyContainer.onscroll = () => {
+      // Detección matemática del final del scroll con tolerancia de 20px
+      if (historyContainer.scrollTop + historyContainer.clientHeight >= historyContainer.scrollHeight - 20) {
+        // Filtrar historial según la cola activa
+        const filtered = currentHistory.filter(match => {
+          if (currentQueueType === 'soloq') {
+            return !match.queueId || match.queueId == 420;
+          } else if (currentQueueType === 'flexq') {
+            return match.queueId == 440;
+          }
+          return true;
+        });
+
+        if (visibleMatchesCount < filtered.length) {
+          visibleMatchesCount += 5; // Aumentar en 5 partidas
+          
+          // Guardamos la posición actual del scroll para evitar saltos bruscos
+          const prevScrollTop = historyContainer.scrollTop;
+          renderHistory(currentHistory, currentQueueType);
+          
+          // Restauramos la posición
+          historyContainer.scrollTop = prevScrollTop;
+        }
+      }
+    };
+  }
 }
 
 // Lógica del Modal para Añadir Jugador
