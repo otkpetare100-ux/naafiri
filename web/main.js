@@ -2498,7 +2498,17 @@ function initModal() {
 }
 
 // Sistema de Notificaciones Premium (Toast)
+let lastToastMessage = '';
+let lastToastTime = 0;
+
 function showToast(message, type = 'success') {
+  const now = Date.now();
+  if (message === lastToastMessage && now - lastToastTime < 2500) {
+    return; // Evitar spam de la misma notificación en 2.5 segundos
+  }
+  lastToastMessage = message;
+  lastToastTime = now;
+
   const container = document.getElementById('toast-container');
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
@@ -2512,7 +2522,7 @@ function showToast(message, type = 'success') {
   setTimeout(() => {
     toast.classList.add('removing');
     setTimeout(() => {
-      toast.remove();
+      if (toast.parentNode) toast.remove();
     }, 500);
   }, 4000);
 }
