@@ -2887,6 +2887,18 @@ select option {
   box-shadow: 0 0 8px #d4af37, 0 0 16px rgba(212, 175, 55, 0.4);
 }
 
+.ds-date-total {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.45);
+  margin-left: 8px;
+  letter-spacing: 0.5px;
+  user-select: none;
+  flex-shrink: 0;
+  margin-top: 1px; /* Pequeño ajuste para alinear la línea de base con la fecha */
+}
+
 /* Divisor de cristal fluido */
 .ds-line {
   flex: 1;
