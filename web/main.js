@@ -1365,6 +1365,35 @@ function openPlayerDetails(player) {
           const champIconUrl = champName !== 'Unknown' 
             ? `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${champName}.png`
             : `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png`;
+
+          // Resolver el Carril / Rol con predicción de respaldo
+          let rawLane = match.lane;
+          if (!rawLane || rawLane === 'Unknown') {
+            rawLane = getChampionLane(match.championName);
+          }
+          let finalLane = 'MID';
+          const l = rawLane.toUpperCase().trim();
+          if (l === 'TOP') {
+            finalLane = 'TOP';
+          } else if (l === 'JUNGLE') {
+            finalLane = 'JUNGLE';
+          } else if (l === 'MIDDLE' || l === 'MID') {
+            finalLane = 'MID';
+          } else if (l === 'BOTTOM' || l === 'BOTTOM_CARRY' || l === 'ADC') {
+            finalLane = 'BOTTOM';
+          } else if (l === 'UTILITY' || l === 'BOTTOM_SUPPORT' || l === 'SUPPORT') {
+            finalLane = 'UTILITY';
+          }
+
+          const laneMeta = {
+            TOP: { name: 'TOP', icon: 'icon-position-top.png' },
+            JUNGLE: { name: 'JUNGLA', icon: 'icon-position-jungle.png' },
+            MID: { name: 'MID', icon: 'icon-position-middle.png' },
+            BOTTOM: { name: 'ADC', icon: 'icon-position-bottom.png' },
+            UTILITY: { name: 'SOPORTE', icon: 'icon-position-utility.png' }
+          }[finalLane];
+
+          const laneIconUrl = `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/${laneMeta.icon}`;
           
           // Renderizado de hechizos y runas de invocador
           let spellsRunesHtml = '';
@@ -1398,6 +1427,7 @@ function openPlayerDetails(player) {
               <div class="match-champ">
                 <div class="match-champ-avatar-container">
                   <img src="${champIconUrl}" class="match-champ-icon" alt="${champName}" onerror="this.onerror=null; this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png';" title="${champName}" />
+                  <img src="${laneIconUrl}" class="match-lane-icon" title="${laneMeta.name}" alt="${laneMeta.name}" />
                 </div>
                 ${spellsRunesHtml}
               </div>
