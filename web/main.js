@@ -929,17 +929,29 @@ async function handleParticipantClick(puuid, summonerName, element) {
   if (trackedPlayer) {
     if (element) element.classList.add('loading-click');
     const modal = document.getElementById('player-details-modal');
-    if (modal) modal.classList.remove('active');
+    
+    // Guardar en el historial de navegación si el modal ya estaba abierto y es otro jugador
+    if (modal && modal.classList.contains('active') && activePlayerDetails && activePlayerDetails.puuid !== trackedPlayer.puuid) {
+      profileNavigationStack.push(activePlayerDetails);
+    }
+    
     setTimeout(() => {
       if (element) element.classList.remove('loading-click');
       openPlayerDetails(trackedPlayer);
-    }, 150);
+    }, 100);
     return;
   }
 
   // 2. Si es externo, abrir el modal en estado de carga
   if (element) element.classList.add('loading-click');
   if (typeof startLoadingBar === 'function') startLoadingBar();
+  
+  // Guardar en el historial de navegación si el modal ya estaba abierto y es otro jugador
+  const modal = document.getElementById('player-details-modal');
+  if (modal && modal.classList.contains('active') && activePlayerDetails && activePlayerDetails.puuid !== puuid) {
+    profileNavigationStack.push(activePlayerDetails);
+  }
+  
   openUntrackedPlayerLoader();
 
   try {
@@ -951,11 +963,11 @@ async function handleParticipantClick(puuid, summonerName, element) {
   } catch (error) {
     console.error(error);
     showToast('⚠️ Error al consultar el perfil de Riot en tiempo real.', 'error');
-    const modal = document.getElementById('player-details-modal');
+    const modalEl = document.getElementById('player-details-modal');
     const loader = document.getElementById('details-modal-loader');
     if (loader) loader.classList.remove('active');
-    if (modal) {
-      modal.classList.remove('active');
+    if (modalEl) {
+      modalEl.classList.remove('active');
       document.body.style.overflow = '';
     }
   } finally {
@@ -968,8 +980,9 @@ async function handleParticipantClick(puuid, summonerName, element) {
 window.openDeleteModal = openDeleteModal;
 window.handleParticipantClick = handleParticipantClick;
 
-// Variable global para rastrear modal
+// Variable global para rastrear modal e historial de navegación
 let currentModalPuuid = null;
+let profileNavigationStack = [];
 
 // Modal de Detalles del Jugador
 // Memoria global de campeones y skins para búsqueda instantánea
@@ -1124,11 +1137,22 @@ function openPlayerDetails(player) {
   const loader = document.getElementById('details-modal-loader');
   if (loader) loader.classList.remove('active');
 
+  const modal = document.getElementById('player-details-modal');
+
+  // Si el modal NO estaba abierto, vaciamos el historial de navegación
+  if (modal && !modal.classList.contains('active')) {
+    profileNavigationStack = [];
+  }
+
+  // Resetear el scroll al inicio (arriba del todo)
+  const historyContainer = document.getElementById('detail-match-history');
+  if (historyContainer) historyContainer.scrollTop = 0;
+  if (modal) modal.scrollTop = 0;
+
   visibleMatchesCount = 10; // Resetear la paginación a 10 partidas al abrir cualquier perfil
   hasReachedHistoryEnd = false; // Resetear bandera de fin de historial
   activePlayerDetails = player; // Guardar referencia al jugador activo
   currentModalPuuid = player.puuid;
-  const modal = document.getElementById('player-details-modal');
 
   // Ocultar el logo de la jauría si es un jugador externo (untracked)
   const logo = modal.querySelector('.detail-modal-logo');
@@ -2256,15 +2280,19 @@ function openPlayerDetails(player) {
 
   // Bind close button
   modal.querySelector('.close-details').onclick = () => {
-    modal.classList.remove('active');
-    document.body.style.overflow = ''; // Restaurar scroll del body
-    currentModalPuuid = null;
+    if (profileNavigationStack.length > 0) {
+      const prevPlayer = profileNavigationStack.pop();
+      openPlayerDetails(prevPlayer);
+    } else {
+      modal.classList.remove('active');
+      document.body.style.overflow = ''; // Restaurar scroll del body
+      currentModalPuuid = null;
+    }
   };
   modal.classList.add('active');
   document.body.style.overflow = 'hidden';
 
   // Lógica de Scroll Infinito Premium (Conexión Directa con Servidor y Riot API)
-  const historyContainer = document.getElementById('detail-match-history');
   let isFetchingMore = false; // Bandera de seguridad para evitar peticiones duplicadas
 
   if (historyContainer) {
