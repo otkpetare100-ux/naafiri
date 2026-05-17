@@ -3750,3 +3750,31 @@ select option {
   gap: 4px;
   text-shadow: 0 0 4px rgba(255, 159, 10, 0.2);
 }
+
+/* Tooltip de Hechizos y Runas */
+.spell-rune-custom-tooltip {
+  display: none;
+  position: absolute;
+  pointer-events: none;
+  background: rgba(10, 12, 16, 0.96);
+  border: 1.5px solid rgba(212, 175, 55, 0.35); /* Elegant glowing gold border */
+  border-radius: 8px;
+  padding: 12px;
+  max-width: 280px;
+  font-family: 'Outfit', sans-serif;
+  color: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.85), 0 0 15px rgba(212, 175, 55, 0.1);
+  z-index: 10000;
+  backdrop-filter: blur(12px);
+  animation: tooltipFadeIn 0.12s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.spell-rune-type-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #ff9f0a;
+  background: rgba(255, 159, 10, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}

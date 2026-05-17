@@ -271,6 +271,118 @@ document.addEventListener('mouseout', (e) => {
   hideQuestTooltip();
 });
 
+const SUMMONER_SPELLS_ES = {
+  'SummonerFlash': { name: 'Destello', desc: 'Te desplaza una corta distancia hacia la posición del cursor.' },
+  'SummonerDot': { name: 'Ignición', desc: 'Quema a un campeón enemigo, infligiéndole daño verdadero en el tiempo y reduciendo las curaciones.' },
+  'SummonerSmite': { name: 'Castigo', desc: 'Inflige daño verdadero elevado a monstruos de la jungla o súbditos.' },
+  'SummonerTeleport': { name: 'Teleportación', desc: 'Tras canalizar por unos segundos, te teletransporta a una estructura, súbdito o centinela aliado.' },
+  'SummonerHeal': { name: 'Curación', desc: 'Restaura vida y otorga un breve aumento de velocidad de movimiento a ti y a un aliado cercano.' },
+  'SummonerHaste': { name: 'Fantasma', desc: 'Otorga velocidad de movimiento e inmunidad a colisiones con unidades por un tiempo.' },
+  'SummonerBarrier': { name: 'Barrera', desc: 'Otorga un escudo temporal de absorción de daño a tu campeón.' },
+  'SummonerExhaust': { name: 'Extenuación', desc: 'Ralentiza a un campeón enemigo y reduce su daño infligido temporalmente.' },
+  'SummonerBoost': { name: 'Purificación', desc: 'Elimina todas las debilitaciones de control de masas y reduce la duración de las siguientes.' },
+  'SummonerMana': { name: 'Claridad', desc: 'Restaura una parte de tu maná máximo y el de los aliados cercanos.' },
+  'SummonerSnowball': { name: 'Marca (Bola de Nieve)', desc: 'Lanza una bola de nieve en línea recta; si impacta a un enemigo, puedes reactivarla para desplazarte hacia él.' }
+};
+
+const KEYSTONE_RUNES_ES = {
+  8005: { name: 'Estrategia Ofensiva', desc: 'Tres ataques básicos consecutivos infligen daño adaptable adicional y exponen al objetivo.' },
+  8008: { name: 'Compás Letal', desc: 'Atacar a un campeón otorga velocidad de ataque acumulable, aumentando el rango al máximo nivel.' },
+  8010: { name: 'Conquistador', desc: 'Acumula fuerza adaptable al atacar; al máximo de acumulaciones, cura una parte del daño infligido.' },
+  8021: { name: 'Sobre la marcha', desc: 'Moverse y atacar genera energía; al máximo de acumulaciones, cura y otorga velocidad de movimiento.' },
+  8112: { name: 'Electrocutar', desc: 'Impactar con 3 habilidades o ataques únicos en 3 segundos inflige daño adaptable adicional.' },
+  8124: { name: 'Depredador', desc: 'Añade una activa a tus botas que otorga un gran aumento de velocidad de movimiento y daño adicional.' },
+  8128: { name: 'Cosecha Oscura', desc: 'Dañar a un enemigo con menos del 50% de vida inflige daño adaptable adicional y cosecha su alma.' },
+  9923: { name: 'Lluvia de Cuchillas', desc: 'Otorga un gran aumento de velocidad de ataque para los primeros 3 ataques básicos.' },
+  8214: { name: 'Invocar a Aery', desc: 'Tus ataques y habilidades envían a Aery hacia un objetivo para dañar enemigos o dar escudo a aliados.' },
+  8229: { name: 'Cometa Arcano', desc: 'Dañar a un campeón con una habilidad lanza un cometa que inflige daño adaptable en su zona de impacto.' },
+  8230: { name: 'Fase Veloz', desc: 'Impactar con 3 ataques o habilidades únicos otorga un gran aumento de velocidad de movimiento y resistencia a la ralentización.' },
+  8437: { name: 'Garras del Inmortal', desc: 'Cada 4 segundos en combate, tu próximo ataque básico inflige daño mágico adicional, cura y otorga vida máxima permanente.' },
+  8439: { name: 'Repercusión', desc: 'Inmovilizar a un campeón enemigo aumenta tus defensas y luego provoca una explosión que inflige daño mágico.' },
+  8465: { name: 'Protector', desc: 'Protege a los aliados cercanos; si alguno recibe daño, ambos obtienen un escudo y velocidad de movimiento.' },
+  8351: { name: 'Aumento Glacial', desc: 'Inmovilizar a un campeón enemigo lanza rayos de hielo que ralentizan y reducen el daño de los enemigos afectados.' },
+  8360: { name: 'Libro de Hechizos Abierto', desc: 'Te permite cambiar uno de tus hechizos de invocador activos por otro diferente durante la partida.' },
+  8369: { name: 'Primer Golpe', desc: 'Atacar primero a un campeón otorga oro adicional y aumenta el daño infligido temporalmente.' }
+};
+
+const RUNE_STYLES_ES = {
+  8000: { name: 'Precisión', desc: 'Ataques mejorados y daño sostenido.' },
+  8100: { name: 'Dominación', desc: 'Daño explosivo y acceso a objetivos.' },
+  8200: { name: 'Brujería', desc: 'Habilidades potenciadas y caos de recursos.' },
+  8300: { name: 'Inspiración', desc: 'Herramientas creativas y reglas modificadas.' },
+  8400: { name: 'Valor', desc: 'Durabilidad y control de masas.' }
+};
+
+function showSpellRuneTooltip(e, titleText, descText, typeLabel) {
+  let tooltip = document.getElementById('spell-rune-tooltip');
+  if (!tooltip) {
+    tooltip = document.createElement('div');
+    tooltip.id = 'spell-rune-tooltip';
+    tooltip.className = 'spell-rune-custom-tooltip';
+    document.body.appendChild(tooltip);
+  }
+
+  tooltip.innerHTML = `
+    <div class="tooltip-header">
+      <span class="tooltip-name">${titleText}</span>
+      <span class="spell-rune-type-badge">${typeLabel}</span>
+    </div>
+    <div class="tooltip-divider"></div>
+    <div class="tooltip-description">${descText}</div>
+  `;
+  
+  tooltip.style.display = 'block';
+  positionTooltip(e, tooltip);
+}
+
+function hideSpellRuneTooltip() {
+  const tooltip = document.getElementById('spell-rune-tooltip');
+  if (tooltip) {
+    tooltip.style.display = 'none';
+  }
+}
+
+// Global mouse event listeners for spells and runes tooltips
+document.addEventListener('mouseover', (e) => {
+  const spellImg = e.target.closest('.match-spell-icon');
+  if (spellImg) {
+    const rawName = spellImg.getAttribute('data-spell-name');
+    if (!rawName) return;
+    const spellMeta = SUMMONER_SPELLS_ES[rawName] || { name: rawName, desc: 'Hechizo de invocador.' };
+    showSpellRuneTooltip(e, spellMeta.name, spellMeta.desc, 'HECHIZO');
+    return;
+  }
+
+  const runeImg = e.target.closest('.match-rune-icon');
+  if (runeImg) {
+    const runeId = parseInt(runeImg.getAttribute('data-rune-id'));
+    const runeType = runeImg.getAttribute('data-rune-type');
+    if (!runeId) return;
+
+    if (runeType === 'keystone') {
+      const runeMeta = KEYSTONE_RUNES_ES[runeId] || { name: 'Runa Clave', desc: 'Runa keystone principal.' };
+      showSpellRuneTooltip(e, runeMeta.name, runeMeta.desc, 'RUNA CLAVE');
+    } else if (runeType === 'style') {
+      const styleMeta = RUNE_STYLES_ES[runeId] || { name: 'Árbol de Runas', desc: 'Estilo secundario.' };
+      showSpellRuneTooltip(e, styleMeta.name, styleMeta.desc, 'ÁRBOL SECUNDARIO');
+    }
+    return;
+  }
+});
+
+document.addEventListener('mousemove', (e) => {
+  const tooltip = document.getElementById('spell-rune-tooltip');
+  if (tooltip && tooltip.style.display !== 'none') {
+    positionTooltip(e, tooltip);
+  }
+});
+
+document.addEventListener('mouseout', (e) => {
+  if (e.target.closest('.match-spell-icon') || e.target.closest('.match-rune-icon')) {
+    hideSpellRuneTooltip();
+  }
+});
+
 function renderQuestSlot(isCompleted, laneKey, match) {
   const questTooltip = QUEST_TOOLTIPS[laneKey] || 'Misión de Carril';
   
@@ -1822,12 +1934,12 @@ function openPlayerDetails(player) {
             spellsRunesHtml = `
               <div class="match-spells-runes">
                 <div class="match-spells">
-                  <img src="${s1Url}" class="match-spell-icon" title="${s1Name}" onerror="this.style.opacity='0'" />
-                  <img src="${s2Url}" class="match-spell-icon" title="${s2Name}" onerror="this.style.opacity='0'" />
+                  <img src="${s1Url}" class="match-spell-icon" data-spell-name="${s1Name}" onerror="this.style.opacity='0'" />
+                  <img src="${s2Url}" class="match-spell-icon" data-spell-name="${s2Name}" onerror="this.style.opacity='0'" />
                 </div>
                 <div class="match-runes">
-                  ${keystoneUrl ? `<img src="${keystoneUrl}" class="match-rune-icon primary" title="Runa Clave" onerror="this.style.opacity='0'" />` : '<div class="match-rune-placeholder"></div>'}
-                  ${subStyleUrl ? `<img src="${subStyleUrl}" class="match-rune-icon secondary" title="Árbol Secundario" onerror="this.style.opacity='0'" />` : '<div class="match-rune-placeholder"></div>'}
+                  ${keystoneUrl ? `<img src="${keystoneUrl}" class="match-rune-icon primary" data-rune-id="${match.keystoneId}" data-rune-type="keystone" onerror="this.style.opacity='0'" />` : '<div class="match-rune-placeholder"></div>'}
+                  ${subStyleUrl ? `<img src="${subStyleUrl}" class="match-rune-icon secondary" data-rune-id="${match.subStyleId}" data-rune-type="style" onerror="this.style.opacity='0'" />` : '<div class="match-rune-placeholder"></div>'}
                 </div>
               </div>
             `;
