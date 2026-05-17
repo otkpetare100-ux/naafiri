@@ -176,7 +176,7 @@ function hideItemTooltip() {
 // Global mouse event listeners for items tooltips
 document.addEventListener('mouseover', (e) => {
   const slot = e.target.closest('.match-item-slot');
-  if (!slot || slot.classList.contains('empty')) return;
+  if (!slot || slot.classList.contains('empty') || slot.classList.contains('quest-slot')) return;
   
   const itemId = slot.getAttribute('data-item-id');
   if (!itemId || !ITEMS_DB) return;
@@ -196,9 +196,79 @@ document.addEventListener('mousemove', (e) => {
 
 document.addEventListener('mouseout', (e) => {
   const slot = e.target.closest('.match-item-slot');
-  if (!slot) return;
+  if (!slot || slot.classList.contains('quest-slot')) return;
   
   hideItemTooltip();
+});
+
+function showQuestTooltip(e, titleText, isCompleted, lane) {
+  let tooltip = document.getElementById('quest-tooltip');
+  if (!tooltip) {
+    tooltip = document.createElement('div');
+    tooltip.id = 'quest-tooltip';
+    tooltip.className = 'quest-custom-tooltip';
+    document.body.appendChild(tooltip);
+  }
+  
+  const iconSvg = isCompleted
+    ? `<svg class="quest-status-svg completed" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 3C12 7.97 16.03 12 21 12C16.03 12 12 16.03 12 21C12 16.03 7.97 12 3 12C7.97 12 12 7.97 12 3Z" fill="#ff9f0a"/>
+       </svg>`
+    : `<svg class="quest-status-svg incomplete" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="10" stroke="#ef4444" stroke-width="2"/>
+        <line x1="8" y1="12" x2="16" y2="12" stroke="#ef4444" stroke-width="2"/>
+       </svg>`;
+
+  const statusText = isCompleted 
+    ? `<span class="quest-status-badge completed">COMPLETADA</span>`
+    : `<span class="quest-status-badge incomplete">PENDIENTE</span>`;
+
+  tooltip.innerHTML = `
+    <div class="tooltip-header">
+      <span class="tooltip-name">${iconSvg} Misión de ${lane}</span>
+      ${statusText}
+    </div>
+    <div class="tooltip-divider"></div>
+    <div class="tooltip-description">${titleText}</div>
+  `;
+  
+  tooltip.style.display = 'block';
+  positionTooltip(e, tooltip);
+}
+
+function hideQuestTooltip() {
+  const tooltip = document.getElementById('quest-tooltip');
+  if (tooltip) {
+    tooltip.style.display = 'none';
+  }
+}
+
+// Global mouse event listeners for quest tooltips
+document.addEventListener('mouseover', (e) => {
+  const slot = e.target.closest('.quest-slot');
+  if (!slot) return;
+  
+  const questTitle = slot.getAttribute('data-quest-title');
+  if (!questTitle) return;
+  
+  const isCompleted = slot.getAttribute('data-quest-completed') === 'true';
+  const lane = slot.getAttribute('data-quest-lane') || 'Carril';
+  
+  showQuestTooltip(e, questTitle, isCompleted, lane);
+});
+
+document.addEventListener('mousemove', (e) => {
+  const tooltip = document.getElementById('quest-tooltip');
+  if (tooltip && tooltip.style.display !== 'none') {
+    positionTooltip(e, tooltip);
+  }
+});
+
+document.addEventListener('mouseout', (e) => {
+  const slot = e.target.closest('.quest-slot');
+  if (!slot) return;
+  
+  hideQuestTooltip();
 });
 
 function renderQuestSlot(isCompleted, laneKey, match) {
@@ -224,14 +294,14 @@ function renderQuestSlot(isCompleted, laneKey, match) {
     if (hasPinkWard) {
       const itemUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/2055.png`;
       return `
-        <div class="match-item-slot quest-slot completed support-pink-slot filled" title="Misión de Soporte Completada: Ranura Especial para Centinela de Control (Activa)">
+        <div class="match-item-slot quest-slot completed support-pink-slot filled" data-quest-title="Misión de Soporte Completada: Ranura Especial para Centinela de Control (Activa)" data-quest-completed="true" data-quest-lane="Soporte">
           <img src="${itemUrl}" class="match-quest-img-file completed" alt="Control Ward" />
         </div>
       `;
     } else {
       const imgUrl = '/assets/quests/quest-utility-empty.png';
       return `
-        <div class="match-item-slot quest-slot completed support-pink-slot empty-pink" title="Misión de Soporte Completada: Ranura Especial para Centinela de Control (Vacía)">
+        <div class="match-item-slot quest-slot completed support-pink-slot empty-pink" data-quest-title="Misión de Soporte Completada: Ranura Especial para Centinela de Control (Vacía)" data-quest-completed="true" data-quest-lane="Soporte">
           <img src="${imgUrl}" class="match-quest-img-file completed" alt="Ranura Vacía" />
         </div>
       `;
@@ -251,14 +321,14 @@ function renderQuestSlot(isCompleted, laneKey, match) {
     if (equippedBootId) {
       const itemUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/${equippedBootId}.png`;
       return `
-        <div class="match-item-slot quest-slot completed adc-boots-slot filled" title="Misión de Bot (ADC) Completada: 7.º Espacio de Objeto para Botas (Activa)">
+        <div class="match-item-slot quest-slot completed adc-boots-slot filled" data-quest-title="Misión de Bot (ADC) Completada: 7.º Espacio de Objeto para Botas (Activa)" data-quest-completed="true" data-quest-lane="ADC">
           <img src="${itemUrl}" class="match-quest-img-file completed" alt="Boots" />
         </div>
       `;
     } else {
       const imgUrl = '/assets/quests/quest-bottom-empty.png';
       return `
-        <div class="match-item-slot quest-slot completed adc-boots-slot empty-boots" title="Misión de Bot (ADC) Completada: 7.º Espacio de Objeto para Botas (Vacía)">
+        <div class="match-item-slot quest-slot completed adc-boots-slot empty-boots" data-quest-title="Misión de Bot (ADC) Completada: 7.º Espacio de Objeto para Botas (Vacía)" data-quest-completed="true" data-quest-lane="ADC">
           <img src="${imgUrl}" class="match-quest-img-file completed" alt="Ranura Vacía" />
         </div>
       `;
@@ -267,16 +337,25 @@ function renderQuestSlot(isCompleted, laneKey, match) {
   
   const imgUrl = `/assets/quests/quest-${laneFile}.png`;
   
+  const laneDisplayNames = {
+    'TOP': 'Top',
+    'JUNGLE': 'Jungla',
+    'MID': 'Mid',
+    'BOTTOM': 'ADC',
+    'UTILITY': 'Soporte'
+  };
+  const laneName = laneDisplayNames[laneKey] || 'Carril';
+
   if (!isCompleted) {
     return `
-      <div class="match-item-slot quest-slot incomplete" title="${questTooltip}: Incompleta (No se cumplieron los requisitos en partida)">
+      <div class="match-item-slot quest-slot incomplete" data-quest-title="${questTooltip}: Incompleta (No se cumplieron los requisitos en partida)" data-quest-completed="false" data-quest-lane="${laneName}">
         <img src="${imgUrl}" class="match-quest-img-file grayscale" alt="Incompleta" />
       </div>
     `;
   }
   
   return `
-    <div class="match-item-slot quest-slot completed" title="${questTooltip}">
+    <div class="match-item-slot quest-slot completed" data-quest-title="${questTooltip}" data-quest-completed="true" data-quest-lane="${laneName}">
       <img src="${imgUrl}" class="match-quest-img-file completed" alt="Completada" />
     </div>
   `;
