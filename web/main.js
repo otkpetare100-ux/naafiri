@@ -1429,13 +1429,16 @@ function openPlayerDetails(player) {
   }
 
   // Render Historial de Partidas
-  function renderHistory(history, queueType) {
+  function renderHistory(history, queueType, isAppend = false) {
     const historyContainer = document.getElementById('detail-match-history');
-    historyContainer.innerHTML = '';
     
     // Guardar el historial completo en variables globales para scroll infinito
     currentHistory = history || [];
     currentQueueType = queueType;
+    
+    if (!isAppend) {
+      historyContainer.innerHTML = '';
+    }
     
     if (history && history.length > 0) {
       const filteredHistory = history.filter(match => {
@@ -1448,12 +1451,15 @@ function openPlayerDetails(player) {
       });
 
       if (filteredHistory.length === 0) {
-        historyContainer.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-muted); font-size: 0.9rem;">No hay partidas recientes guardadas para esta cola.</div>';
+        if (!isAppend) {
+          historyContainer.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-muted); font-size: 0.9rem;">No hay partidas recientes guardadas para esta cola.</div>';
+        }
         return;
       }
 
       // Rebanar el historial según la paginación activa
-      const slicedHistory = filteredHistory.slice(0, visibleMatchesCount);
+      const startIdx = isAppend ? Math.max(0, visibleMatchesCount - 5) : 0;
+      const slicedHistory = filteredHistory.slice(startIdx, visibleMatchesCount);
 
       // Agrupar partidas por día
       const grouped = [];
@@ -1477,15 +1483,32 @@ function openPlayerDetails(player) {
       });
 
       grouped.forEach(group => {
-        historyContainer.innerHTML += `
-          <div class="date-separator">
-            <span class="ds-date">${group.date}</span>
-            <div class="ds-badges">
-              <span class="ds-badge win">${group.wins} win</span>
-              <span class="ds-badge loss">${group.losses} loss</span>
+        // Buscar si ya existe el separador de fecha para esta fecha
+        let separatorEl = historyContainer.querySelector(`.date-separator[data-date="${group.date}"]`);
+        
+        if (!separatorEl) {
+          const separatorHtml = `
+            <div class="date-separator" data-date="${group.date}" data-wins="${group.wins}" data-losses="${group.losses}">
+              <span class="ds-date">${group.date}</span>
+              <div class="ds-badges">
+                <span class="ds-badge win">${group.wins} win</span>
+                <span class="ds-badge loss">${group.losses} loss</span>
+              </div>
             </div>
-          </div>
-        `;
+          `;
+          historyContainer.insertAdjacentHTML('beforeend', separatorHtml);
+        } else {
+          // Si ya existe, actualizamos los wins y losses acumulados
+          const currentWins = parseInt(separatorEl.getAttribute('data-wins') || 0) + group.wins;
+          const currentLosses = parseInt(separatorEl.getAttribute('data-losses') || 0) + group.losses;
+          separatorEl.setAttribute('data-wins', currentWins);
+          separatorEl.setAttribute('data-losses', currentLosses);
+          
+          const winEl = separatorEl.querySelector('.ds-badge.win');
+          const lossEl = separatorEl.querySelector('.ds-badge.loss');
+          if (winEl) winEl.textContent = `${currentWins} win`;
+          if (lossEl) lossEl.textContent = `${currentLosses} loss`;
+        }
 
         group.matches.forEach(match => {
           const isRemake = match.isRemake;
@@ -1569,7 +1592,7 @@ function openPlayerDetails(player) {
 
           const isQuestCompleted = isLaneQuestCompleted(match);
 
-          historyContainer.innerHTML += `
+          const matchHtml = `
             <div class="match-item ${winClass}">
               <div class="match-champ">
                 <div class="match-champ-avatar-container">
@@ -1603,10 +1626,13 @@ function openPlayerDetails(player) {
               <div class="match-stat"><strong>KP:</strong> ${kpStr}%</div>
             </div>
           `;
+          historyContainer.insertAdjacentHTML('beforeend', matchHtml);
         });
       });
     } else {
-      historyContainer.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-muted); font-size: 0.9rem;">No hay historial guardado. Haz clic en "Actualizar Datos" para cargar tus últimas partidas.</div>';
+      if (!isAppend) {
+        historyContainer.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-muted); font-size: 0.9rem;">No hay historial guardado. Haz clic en "Actualizar Datos" para cargar tus últimas partidas.</div>';
+      }
     }
   }
 
@@ -1686,7 +1712,7 @@ function openPlayerDetails(player) {
           
           // Guardamos la posición actual del scroll para evitar saltos bruscos
           const prevScrollTop = historyContainer.scrollTop;
-          renderHistory(currentHistory, currentQueueType);
+          renderHistory(currentHistory, currentQueueType, true);
           
           // Restauramos la posición
           historyContainer.scrollTop = prevScrollTop;
@@ -1724,11 +1750,14 @@ function openPlayerDetails(player) {
                 loadStats(data.stats[activeQueueKey]);
               }
               
+              // Quitar spinner antes de añadir los nuevos elementos
+              const sp = historyContainer.querySelector('.history-lazy-loader');
+              if (sp) sp.remove();
+
               visibleMatchesCount += 5; // Mostrar 5 más
               const prevScrollTop = historyContainer.scrollTop;
-              renderHistory(currentHistory, currentQueueType);
+              renderHistory(currentHistory, currentQueueType, true);
               
-              // El re-render limpia el contenedor, por lo que no es necesario quitar el spinner a mano
               historyContainer.scrollTop = prevScrollTop;
               showToast('¡Cargadas partidas antiguas adicionales!', 'success');
             } else {
