@@ -2798,7 +2798,8 @@ select option {
   margin-bottom: 25px !important;
 }
 
-.dash-lanes-title {
+.dash-lanes-title,
+.dash-champs-title {
   margin-top: 0;
   color: var(--gold-primary);
   text-transform: uppercase;
@@ -2807,6 +2808,9 @@ select option {
   padding-bottom: 10px;
   margin-bottom: 15px;
   letter-spacing: 1px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
 }
 
 .lanes-distribution-row {

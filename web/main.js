@@ -884,8 +884,20 @@ function openPlayerDetails(player) {
     });
   }
   
+  let isRecent = false;
   if (champsToDisplay.length === 0) {
     champsToDisplay = (player.topChampions || []).slice(0, 3);
+  } else {
+    isRecent = true;
+  }
+
+  const champsTitleElement = document.getElementById('detail-champs-title');
+  if (champsTitleElement) {
+    if (isRecent) {
+      champsTitleElement.textContent = 'Campeones más jugados';
+    } else {
+      champsTitleElement.textContent = 'Campeones con más maestrías';
+    }
   }
 
   const champsContainer = document.getElementById('detail-top-champs');

@@ -123,10 +123,8 @@
         </div>
         <div class="modal-body dashboard-layout">
           
-          <!-- Wrapper de la Columna Izquierda -->
-          <div class="dash-left-col-wrapper">
-            <!-- Panel Izquierdo: Identidad y Rango -->
-            <div class="dash-left-col detail-box">
+          <!-- Panel Izquierdo: Identidad y Rango -->
+          <div class="dash-left-col detail-box">
             <div id="dash-left-bg" class="dash-left-bg"></div>
             <!-- Marco de pantalla de carga dinámico según el rango -->
             <div id="dash-loading-frame" class="dash-loading-frame">
@@ -182,13 +180,6 @@
               </div>
             </div>
           </div>
-
-          <!-- Distribución de Líneas (Mapa de Calor) -->
-          <div class="detail-box dash-lanes-box" style="margin-bottom: 0;">
-            <h4 class="dash-lanes-title">Distribución de Líneas</h4>
-            <div id="detail-lanes-distribution" class="lanes-distribution-row"></div>
-          </div>
-        </div>
 
           <!-- Panel Derecho: Rendimiento -->
           <div class="dash-right-col">
@@ -312,12 +303,21 @@
               </div>
             </div>
 
-            <!-- Mejores Campeones -->
-            <div class="detail-box dash-champs-box">
-              <h4 class="dash-champs-title">Mejores Campeones</h4>
-              <div id="detail-top-champs" class="top-champs-row"></div>
+          </div>
+
+          <!-- Fila de Distribución de Líneas y Campeones más jugados side-by-side -->
+          <div class="dash-bottom-row" style="grid-column: 1 / -1; display: grid; grid-template-columns: 350px 1fr; gap: 20px; margin-top: 10px;">
+            <!-- Distribución de Líneas -->
+            <div class="detail-box dash-lanes-box" style="margin-bottom: 0;">
+              <h4 class="dash-lanes-title">Distribución de Líneas</h4>
+              <div id="detail-lanes-distribution" class="lanes-distribution-row"></div>
             </div>
 
+            <!-- Campeones más jugados -->
+            <div class="detail-box dash-champs-box" style="margin-bottom: 0;">
+              <h4 id="detail-champs-title" class="dash-champs-title">Campeones más jugados</h4>
+              <div id="detail-top-champs" class="top-champs-row"></div>
+            </div>
           </div>
 
           <!-- Historial de Partidas -->
