@@ -59,7 +59,7 @@ const BOOTS_ITEM_IDS = new Set([
   1001, 2422, 3006, 3009, 3047, 3111, 3158, 3020, 3117, 3184, 3181, 3285
 ]);
 
-let visibleMatchesCount = 5;
+let visibleMatchesCount = 10;
 let currentHistory = [];
 let currentQueueType = 'soloq';
 let activePlayerDetails = null;
@@ -738,7 +738,7 @@ async function setRandomSplash(rawChampName) {
 
 
 function openPlayerDetails(player) {
-  visibleMatchesCount = 5; // Resetear la paginación a 5 partidas al abrir cualquier perfil
+  visibleMatchesCount = 10; // Resetear la paginación a 10 partidas al abrir cualquier perfil
   hasReachedHistoryEnd = false; // Resetear bandera de fin de historial
   activePlayerDetails = player; // Guardar referencia al jugador activo
   currentModalPuuid = player.puuid;
