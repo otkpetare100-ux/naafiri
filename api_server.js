@@ -523,13 +523,28 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
 // Cargar Partidas Más Antiguas (Match-V5)
 app.post('/api/summoners/:puuid/matches/load-more', async (req, res) => {
   const { puuid } = req.params;
+  const region = req.query.region || 'la1';
+  const isUntracked = req.query.isUntracked === 'true';
   const RIOT_API_KEY = process.env.RIOT_API_KEY;
 
   try {
-    const account = await db.collection('accounts').findOne({ puuid });
-    if (!account) return res.status(404).json({ message: 'Jugador no encontrado.' });
+    let account = null;
+    let existingMatches = [];
 
-    const existingMatches = account.matchStatsHistory || [];
+    if (isUntracked) {
+      existingMatches = req.body.existingMatches || [];
+      account = {
+        puuid: puuid,
+        region: region,
+        gameName: 'Invocador',
+        matchStatsHistory: existingMatches
+      };
+    } else {
+      account = await db.collection('accounts').findOne({ puuid });
+      if (!account) return res.status(404).json({ message: 'Jugador no encontrado.' });
+      existingMatches = account.matchStatsHistory || [];
+    }
+
     const currentCount = existingMatches.length;
 
     const routingMap = {
@@ -694,11 +709,13 @@ app.post('/api/summoners/:puuid/matches/load-more', async (req, res) => {
       flexq: calculateAverages(440)
     };
 
-    // Actualizar MongoDB
-    await db.collection('accounts').updateOne(
-      { puuid },
-      { $set: { matchStatsHistory: combinedMatches, advancedStats: avgStats } }
-    );
+    // Actualizar MongoDB si el jugador está registrado
+    if (!isUntracked) {
+      await db.collection('accounts').updateOne(
+        { puuid },
+        { $set: { matchStatsHistory: combinedMatches, advancedStats: avgStats } }
+      );
+    }
 
     console.log(`Cargadas ${newMatchStats.length} partidas antiguas adicionales para ${account.gameName}`);
     return res.json({

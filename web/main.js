@@ -2297,7 +2297,6 @@ function openPlayerDetails(player) {
 
   if (historyContainer) {
     historyContainer.onscroll = async () => {
-      if (player.isUntracked) return; // Omitir scroll infinito para jugadores temporales
       if (isFetchingMore) return;
 
       // Detección matemática del final del scroll con tolerancia de 20px
@@ -2334,8 +2333,15 @@ function openPlayerDetails(player) {
           historyContainer.appendChild(spinner);
 
           try {
-            const response = await fetch(`${API_BASE}/summoners/${currentModalPuuid}/matches/load-more`, {
-              method: 'POST'
+            const isUntracked = player.isUntracked || false;
+            const region = player.region || 'la1';
+            
+            const response = await fetch(`${API_BASE}/summoners/${currentModalPuuid}/matches/load-more?region=${region}&isUntracked=${isUntracked}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ existingMatches: currentHistory })
             });
             const data = await response.json();
 
