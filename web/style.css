@@ -3291,16 +3291,31 @@ select option {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.2);
   object-fit: cover;
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s, box-shadow 0.2s;
+}
+
+/* Blue Team (Allies - Top Row) */
+.team-ally .team-player-champ-icon {
+  border: 1.5px solid rgba(59, 130, 246, 0.4);
+}
+.team-ally .team-player:hover .team-player-champ-icon {
+  border-color: rgba(59, 130, 246, 0.85);
+  box-shadow: 0 0 6px rgba(59, 130, 246, 0.45);
+}
+
+/* Red Team (Enemies - Bottom Row) */
+.team-enemy .team-player-champ-icon {
+  border: 1.5px solid rgba(232, 64, 87, 0.4);
+}
+.team-enemy .team-player:hover .team-player-champ-icon {
+  border-color: rgba(232, 64, 87, 0.85);
+  box-shadow: 0 0 6px rgba(232, 64, 87, 0.45);
 }
 
 /* General hover effects */
 .team-player:hover .team-player-champ-icon {
   transform: scale(1.2);
-  border-color: rgba(255, 255, 255, 0.6);
-  box-shadow: 0 0 6px rgba(255, 255, 255, 0.3);
   z-index: 2;
 }
 
