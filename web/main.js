@@ -2054,10 +2054,8 @@ function openPlayerDetails(player) {
                </div>
                <div class="stats-kda-ratio"><strong class="${kdaColorClass}">${kdaRatio}</strong> KDA</div>
                
-               <div class="stats-row-double">
-                 <div class="stats-cs"><strong>${match.cs} CS</strong> <span class="cs-min">(${csPerMin})</span></div>
-                 <div class="stats-vision"><strong>${visionScore}</strong> vision</div>
-               </div>
+               <div class="stats-cs"><strong>${match.cs} CS</strong> <span class="cs-min">(${csPerMin})</span></div>
+               <div class="stats-vision"><strong>${visionScore}</strong> vision</div>
             </div>
           `;
 
