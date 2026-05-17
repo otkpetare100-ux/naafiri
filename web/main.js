@@ -96,11 +96,110 @@ function renderItemSlot(itemId, isTrinket = false) {
   }
   const itemUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/${itemId}.png`;
   return `
-    <div class="match-item-slot ${isTrinket ? 'trinket' : ''}">
-      <img src="${itemUrl}" class="match-item-img" title="Item ID: ${itemId}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'24\' height=\'24\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23555\' stroke-width=\'2\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><path d=\'M9 17L15 7\'/></svg>';" />
+    <div class="match-item-slot ${isTrinket ? 'trinket' : ''}" data-item-id="${itemId}">
+      <img src="${itemUrl}" class="match-item-img" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'24\' height=\'24\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23555\' stroke-width=\'2\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><path d=\'M9 17L15 7\'/></svg>';" />
     </div>
   `;
 }
+
+let ITEMS_DB = null;
+
+async function initItemsDatabase() {
+  try {
+    const res = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/es_MX/item.json`);
+    const data = await res.json();
+    ITEMS_DB = data.data;
+    console.log('Items database initialized.');
+  } catch (e) {
+    console.error('Error loading items database:', e);
+  }
+}
+
+function showItemTooltip(e, item) {
+  let tooltip = document.getElementById('item-tooltip');
+  if (!tooltip) {
+    tooltip = document.createElement('div');
+    tooltip.id = 'item-tooltip';
+    tooltip.className = 'item-custom-tooltip';
+    document.body.appendChild(tooltip);
+  }
+  
+  const descriptionHtml = item.description || '';
+  const goldHtml = item.gold && item.gold.total > 0 
+    ? `<span class="tooltip-gold">🪙 ${item.gold.total} oro</span>` 
+    : '';
+
+  tooltip.innerHTML = `
+    <div class="tooltip-header">
+      <span class="tooltip-name">${item.name}</span>
+      ${goldHtml}
+    </div>
+    ${item.plaintext ? `<div class="tooltip-plaintext">${item.plaintext}</div>` : ''}
+    <div class="tooltip-divider"></div>
+    <div class="tooltip-description">${descriptionHtml}</div>
+  `;
+  
+  tooltip.style.display = 'block';
+  positionTooltip(e, tooltip);
+}
+
+function positionTooltip(e, tooltip) {
+  const offsetX = 15;
+  const offsetY = 15;
+  
+  let x = e.pageX + offsetX;
+  let y = e.pageY + offsetY;
+  
+  const tooltipWidth = tooltip.offsetWidth;
+  const tooltipHeight = tooltip.offsetHeight;
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  
+  if (x + tooltipWidth > window.scrollX + viewportWidth - 20) {
+    x = e.pageX - tooltipWidth - offsetX;
+  }
+  if (y + tooltipHeight > window.scrollY + viewportHeight - 20) {
+    y = e.pageY - tooltipHeight - offsetY;
+  }
+  
+  tooltip.style.left = `${x}px`;
+  tooltip.style.top = `${y}px`;
+}
+
+function hideItemTooltip() {
+  const tooltip = document.getElementById('item-tooltip');
+  if (tooltip) {
+    tooltip.style.display = 'none';
+  }
+}
+
+// Global mouse event listeners for items tooltips
+document.addEventListener('mouseover', (e) => {
+  const slot = e.target.closest('.match-item-slot');
+  if (!slot || slot.classList.contains('empty')) return;
+  
+  const itemId = slot.getAttribute('data-item-id');
+  if (!itemId || !ITEMS_DB) return;
+  
+  const item = ITEMS_DB[itemId];
+  if (!item) return;
+  
+  showItemTooltip(e, item);
+});
+
+document.addEventListener('mousemove', (e) => {
+  const tooltip = document.getElementById('item-tooltip');
+  if (tooltip && tooltip.style.display !== 'none') {
+    positionTooltip(e, tooltip);
+  }
+});
+
+document.addEventListener('mouseout', (e) => {
+  const slot = e.target.closest('.match-item-slot');
+  if (!slot) return;
+  
+  hideItemTooltip();
+});
 
 function renderQuestSlot(isCompleted, laneKey, match) {
   const questTooltip = QUEST_TOOLTIPS[laneKey] || 'Misión de Carril';
@@ -2039,6 +2138,7 @@ function showToast(message, type = 'success') {
 // Carga inicial
 document.addEventListener('DOMContentLoaded', async () => {
   await updateVersion();
+  initItemsDatabase(); // Cargar base de datos de items en segundo plano
   initSkinsDatabase(); // Cargar base de datos de skins
   fetchLadder();
   initModal();
