@@ -63,6 +63,7 @@ let visibleMatchesCount = 5;
 let currentHistory = [];
 let currentQueueType = 'soloq';
 let activePlayerDetails = null;
+let hasReachedHistoryEnd = false;
 
 function isLaneQuestCompleted(match) {
   const lane = (match.lane || 'Unknown').toUpperCase();
@@ -738,6 +739,7 @@ async function setRandomSplash(rawChampName) {
 
 function openPlayerDetails(player) {
   visibleMatchesCount = 5; // Resetear la paginación a 5 partidas al abrir cualquier perfil
+  hasReachedHistoryEnd = false; // Resetear bandera de fin de historial
   activePlayerDetails = player; // Guardar referencia al jugador activo
   currentModalPuuid = player.puuid;
   const modal = document.getElementById('player-details-modal');
@@ -1692,7 +1694,7 @@ function openPlayerDetails(player) {
 
   if (historyContainer) {
     historyContainer.onscroll = async () => {
-      if (isFetchingMore) return;
+      if (isFetchingMore || hasReachedHistoryEnd) return;
 
       // Detección matemática del final del scroll con tolerancia de 20px
       if (historyContainer.scrollTop + historyContainer.clientHeight >= historyContainer.scrollHeight - 20) {
@@ -1765,6 +1767,7 @@ function openPlayerDetails(player) {
               const sp = historyContainer.querySelector('.history-lazy-loader');
               if (sp) sp.remove();
               showToast(data.message || 'No hay más partidas antiguas.', 'info');
+              hasReachedHistoryEnd = true; // Detener futuras búsquedas en esta sesión
             }
           } catch (err) {
             console.error(err);
