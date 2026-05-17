@@ -2725,12 +2725,12 @@ select option {
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  gap: 22px; /* Reducido levemente de 28px para una distribución compacta */
-  padding: 10px 20px; /* Reducido de 14px 24px para compactar la altura */
-  border-radius: 14px; /* Suave redondeado premium */
+  gap: 20px; /* Más compacto horizontalmente */
+  padding: 8px 18px; /* Tarjeta súper compacta y estilizada */
+  border-radius: 12px; /* Redondeado más ceñido a la tarjeta compacta */
   background: rgba(255, 255, 255, 0.03);
-  border-left: 5px solid #666; /* Compactado a 5px */
-  font-size: 0.85rem; /* Ajustado de 0.87rem a 0.85rem */
+  border-left: 5px solid #666;
+  font-size: 0.82rem; /* Fuente base ligeramente menor */
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   animation: matchFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -2760,44 +2760,44 @@ select option {
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  gap: 2px; /* Reducido de 4px para que sea más compacto */
-  min-width: 110px; /* Reducido de 115px */
-  font-size: 0.76rem;
+  gap: 1px; /* Espaciado mínimo */
+  min-width: 110px;
+  font-size: 0.72rem; /* Reducido de 0.76rem */
   font-family: 'Outfit', sans-serif;
+  line-height: 1.3;
 }
 
 .meta-queue {
   font-weight: 800;
-  color: #3b82f6; /* Azul premium para la cola clasificatoria */
+  color: #3b82f6;
   text-transform: capitalize;
-  font-size: 0.82rem; /* Incrementado de 0.78rem */
+  font-size: 0.76rem; /* Ajustado para la línea unificada */
   letter-spacing: 0.3px;
 }
 
 .meta-queue-sub {
-  font-weight: 700;
-  color: #3b82f6;
-  font-size: 0.82rem; /* Incrementado de 0.78rem */
-  margin-top: -2px;
+  font-weight: 500; /* Estilo secundario elegante en la misma línea */
+  color: rgba(59, 130, 246, 0.85);
+  font-size: 0.74rem;
 }
 
 .meta-time {
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.4);
   font-weight: 500;
-  font-size: 0.72rem; /* Incrementado de 0.7rem */
+  font-size: 0.68rem;
 }
 
 .meta-divider {
-  width: 90%; /* Incrementado de 60px a 90% para que cruce elegantemente toda la columna */
+  width: 85%;
   height: 1px;
-  background: rgba(255, 255, 255, 0.1);
-  margin: 3px 0; /* Reducido de 4px a 3px */
+  background: rgba(255, 255, 255, 0.08);
+  margin: 2px 0; /* Espaciado mínimo del separador */
 }
 
 .meta-result {
   font-weight: 800;
   letter-spacing: 0.5px;
-  font-size: 0.82rem; /* Incrementado de 0.78rem */
+  font-size: 0.76rem; /* Reducido de 0.82rem */
 }
 
 .match-win .meta-result {
@@ -2810,6 +2810,12 @@ select option {
 
 .match-remake .meta-result {
   color: #aaaaaa; /* Remake en gris elegante */
+}
+
+.meta-duration {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 500;
 }
 
 .meta-duration-lp {
@@ -3795,12 +3801,12 @@ select option {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  padding: 6px 13px; /* Reducido de 8px 15px para ajustarse al alto de la tarjeta */
-  border-radius: 20px;
-  font-size: 0.8rem; /* Ajustado de 0.84rem a 0.8rem */
+  gap: 6px;
+  padding: 5px 11px; /* Más ceñida al alto de la tarjeta */
+  border-radius: 18px;
+  font-size: 0.76rem; /* Ajustado de 0.8rem a 0.76rem */
   font-weight: 800;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
   white-space: nowrap;
   backdrop-filter: blur(6px);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);

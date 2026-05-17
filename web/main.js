@@ -2065,8 +2065,7 @@ function openPlayerDetails(player) {
             <div class="match-item ${winClass}">
               <!-- 1. BLOQUE DE METADATOS DEL JUEGO (AHORA A LA IZQUIERDA DEL TODO) -->
               <div class="match-meta-info">
-                <div class="meta-queue">${queueName}</div>
-                <div class="meta-queue-sub">${queueSub}</div>
+                <div class="meta-queue">${queueName} • <span class="meta-queue-sub">${queueSub}</span></div>
                 <div class="meta-time">${timeAgoStr}</div>
                 <div class="meta-divider"></div>
                 <div class="meta-result">${resultText}</div>
