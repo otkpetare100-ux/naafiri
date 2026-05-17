@@ -383,6 +383,43 @@ document.addEventListener('mouseout', (e) => {
   }
 });
 
+// Global mouse event listeners for LP unknown tooltips
+document.addEventListener('mouseover', (e) => {
+  const container = e.target.closest('[data-lp-tooltip]');
+  if (!container) return;
+  
+  const text = container.getAttribute('data-lp-tooltip');
+  if (!text) return;
+  
+  let tooltip = document.getElementById('lp-custom-tooltip');
+  if (!tooltip) {
+    tooltip = document.createElement('div');
+    tooltip.id = 'lp-custom-tooltip';
+    tooltip.className = 'lp-custom-tooltip-style';
+    document.body.appendChild(tooltip);
+  }
+  
+  tooltip.innerHTML = `<div class="tooltip-description">${text}</div>`;
+  tooltip.style.display = 'block';
+  positionTooltip(e, tooltip);
+});
+
+document.addEventListener('mousemove', (e) => {
+  const tooltip = document.getElementById('lp-custom-tooltip');
+  if (tooltip && tooltip.style.display !== 'none') {
+    positionTooltip(e, tooltip);
+  }
+});
+
+document.addEventListener('mouseout', (e) => {
+  if (e.target.closest('[data-lp-tooltip]')) {
+    const tooltip = document.getElementById('lp-custom-tooltip');
+    if (tooltip) {
+      tooltip.style.display = 'none';
+    }
+  }
+});
+
 function renderQuestSlot(isCompleted, laneKey, match) {
   const questTooltip = QUEST_TOOLTIPS[laneKey] || 'Misión de Carril';
   
@@ -1848,6 +1885,12 @@ function openPlayerDetails(player) {
             const sign = match.lpChange > 0 ? '+' : '';
             const colorClass = match.lpChange > 0 ? 'lp-gain' : 'lp-loss';
             lpHtml = `<div class="match-lp ${colorClass}">${sign}${match.lpChange} LP</div>`;
+          } else if (!isRemake) {
+            lpHtml = `
+              <div class="match-lp lp-unknown" data-lp-tooltip="Cambio de LP no registrado (partida previa al rastreo o datos no sincronizados)">
+                ? LP <span class="lp-question-mark">?</span>
+              </div>
+            `;
           }
           
           const kdaStr = `${match.kills} / ${match.deaths} / ${match.assists}`;
