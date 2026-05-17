@@ -2725,12 +2725,12 @@ select option {
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  gap: 28px; /* Incrementado para un espaciado más premium */
-  padding: 14px 24px; /* Tarjeta más grande, espaciosa y elegante */
-  border-radius: 16px; /* Bordes más redondeados y modernos */
+  gap: 22px; /* Reducido levemente de 28px para una distribución compacta */
+  padding: 10px 20px; /* Reducido de 14px 24px para compactar la altura */
+  border-radius: 14px; /* Suave redondeado premium */
   background: rgba(255, 255, 255, 0.03);
-  border-left: 6px solid #666; /* Borde de estado un poco más robusto */
-  font-size: 0.87rem; /* Base ligeramente más grande */
+  border-left: 5px solid #666; /* Compactado a 5px */
+  font-size: 0.85rem; /* Ajustado de 0.87rem a 0.85rem */
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   animation: matchFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -2760,8 +2760,8 @@ select option {
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  gap: 4px; /* Incrementado de 2px a 4px para que abarque mejor verticalmente */
-  min-width: 115px; /* Incrementado de 95px a 115px para abarcar mejor horizontalmente */
+  gap: 2px; /* Reducido de 4px para que sea más compacto */
+  min-width: 110px; /* Reducido de 115px */
   font-size: 0.76rem;
   font-family: 'Outfit', sans-serif;
 }
@@ -2791,7 +2791,7 @@ select option {
   width: 90%; /* Incrementado de 60px a 90% para que cruce elegantemente toda la columna */
   height: 1px;
   background: rgba(255, 255, 255, 0.1);
-  margin: 4px 0;
+  margin: 3px 0; /* Reducido de 4px a 3px */
 }
 
 .meta-result {
@@ -3784,7 +3784,7 @@ select option {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 105px; /* Incrementado para darle más aire y presencia en la tarjeta */
+  min-width: 95px; /* Reducido de 105px para ahorrar espacio horizontal */
   font-family: 'Outfit', sans-serif;
   text-align: center;
   user-select: none;
@@ -3795,16 +3795,16 @@ select option {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px; /* Mayor separación entre el texto y el icono */
-  padding: 8px 15px; /* Píldora más rellena, equilibrada y elegante */
-  border-radius: 24px; /* Mayor redondeado proporcional */
-  font-size: 0.84rem; /* ¡Incrementado para máxima legibilidad! */
+  gap: 7px;
+  padding: 6px 13px; /* Reducido de 8px 15px para ajustarse al alto de la tarjeta */
+  border-radius: 20px;
+  font-size: 0.8rem; /* Ajustado de 0.84rem a 0.8rem */
   font-weight: 800;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.5px;
   white-space: nowrap;
   backdrop-filter: blur(6px);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: inset 0 1px 1.5px rgba(255, 255, 255, 0.08), 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
 }
 
 /* Ganancia de LP (Victoria) */
@@ -3856,12 +3856,12 @@ select option {
 }
 
 .lp-question-mark {
-  width: 14px;
-  height: 14px;
+  width: 13px; /* Ajustado de 14px a 13px */
+  height: 13px; /* Ajustado de 14px a 13px */
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.12);
   color: rgba(255, 255, 255, 0.65);
-  font-size: 0.68rem;
+  font-size: 0.64rem; /* Ajustado de 0.68rem */
   font-weight: 800;
   display: flex;
   align-items: center;
