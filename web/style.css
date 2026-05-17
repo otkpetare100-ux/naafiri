@@ -3297,20 +3297,22 @@ select option {
 
 /* Blue Team (Allies - Top Row) */
 .team-ally .team-player-champ-icon {
-  border: 1.5px solid rgba(59, 130, 246, 0.4);
+  border: 2px solid rgba(59, 130, 246, 0.85);
+  box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
 }
 .team-ally .team-player:hover .team-player-champ-icon {
-  border-color: rgba(59, 130, 246, 0.85);
-  box-shadow: 0 0 6px rgba(59, 130, 246, 0.45);
+  border-color: #5383e8;
+  box-shadow: 0 0 10px rgba(83, 131, 232, 0.85);
 }
 
 /* Red Team (Enemies - Bottom Row) */
 .team-enemy .team-player-champ-icon {
-  border: 1.5px solid rgba(232, 64, 87, 0.4);
+  border: 2px solid rgba(232, 64, 87, 0.85);
+  box-shadow: 0 0 5px rgba(232, 64, 87, 0.3);
 }
 .team-enemy .team-player:hover .team-player-champ-icon {
-  border-color: rgba(232, 64, 87, 0.85);
-  box-shadow: 0 0 6px rgba(232, 64, 87, 0.45);
+  border-color: #ff4e50;
+  box-shadow: 0 0 10px rgba(255, 78, 80, 0.85);
 }
 
 /* General hover effects */
@@ -3321,14 +3323,14 @@ select option {
 
 /* Active Summoner Golden Highlighting */
 .team-player.active-summoner .team-player-champ-icon {
-  border: 1.5px solid var(--gold-primary);
-  box-shadow: 0 0 6px rgba(212, 175, 55, 0.6);
+  border: 2.5px solid var(--gold-primary);
+  box-shadow: 0 0 8px rgba(212, 175, 55, 0.85);
   transform: scale(1.1);
 }
 
 .team-player.active-summoner:hover .team-player-champ-icon {
   transform: scale(1.25);
-  box-shadow: 0 0 10px rgba(212, 175, 55, 0.9);
+  box-shadow: 0 0 14px rgba(212, 175, 55, 1);
 }
 
 /* Filas dobles para estadísticas agrupadas en la izquierda */
