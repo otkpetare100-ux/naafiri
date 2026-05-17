@@ -1695,9 +1695,12 @@ function openPlayerDetails(player) {
               <!-- ROSTER DE EQUIPOS PARTICIPANTES -->
               ${teamsHtml}
               
-              <div class="match-stat"><strong>Oro:</strong> ${goldStr}</div>
-              <div class="match-stat"><strong>Daño:</strong> ${dmgStr}</div>
-              <div class="match-stat"><strong>KP:</strong> ${kpStr}%</div>
+              <!-- BLOQUE SIMÉTRICO DE ECONOMÍA Y COMBATE -->
+              <div class="match-econ-block">
+                <div class="econ-stat"><strong class="gold-value">${goldStr}</strong> oro</div>
+                <div class="econ-stat"><strong class="damage-value">${dmgStr}</strong> daño</div>
+                <div class="econ-stat"><strong class="${kpStr >= 50 ? 'kp-high' : ''}">${kpStr}%</strong> KP</div>
+              </div>
             </div>
           `;
           historyContainer.insertAdjacentHTML('beforeend', matchHtml);
