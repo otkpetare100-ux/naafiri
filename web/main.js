@@ -1648,6 +1648,7 @@ function openPlayerDetails(player) {
   const btnUpdateMatches = document.getElementById('btn-update-matches');
   btnUpdateMatches.onclick = async () => {
     try {
+      hasReachedHistoryEnd = false; // Resetear bandera de fin de historial al actualizar manualmente
       startLoadingBar();
       btnUpdateMatches.classList.add('loading');
       btnUpdateMatches.disabled = true;
@@ -1694,7 +1695,7 @@ function openPlayerDetails(player) {
 
   if (historyContainer) {
     historyContainer.onscroll = async () => {
-      if (isFetchingMore || hasReachedHistoryEnd) return;
+      if (isFetchingMore) return;
 
       // Detección matemática del final del scroll con tolerancia de 20px
       if (historyContainer.scrollTop + historyContainer.clientHeight >= historyContainer.scrollHeight - 20) {
@@ -1720,7 +1721,7 @@ function openPlayerDetails(player) {
           historyContainer.scrollTop = prevScrollTop;
         }
         // Caso B: Ya mostramos todas las guardadas, ¡consultemos a Riot API para buscar más antiguas!
-        else if (filtered.length >= 5) {
+        else if (filtered.length >= 5 && !hasReachedHistoryEnd) {
           isFetchingMore = true;
           
           // Crear un spinner de carga Hextech dorado en el DOM
