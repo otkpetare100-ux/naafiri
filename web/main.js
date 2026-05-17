@@ -46,6 +46,135 @@ const RUNE_STYLE_MAP = {
   8400: "perk-images/Styles/7204_Resolve.png"
 };
 
+// Mapas y funciones de ayuda para la Misión de Carril de la Temporada 2026
+const QUEST_TOOLTIPS = {
+  'TOP': 'Misión de Top Completada: +Límite Nivel 20 & Teleport con Escudo de Vida Máxima',
+  'JUNGLE': 'Misión de Jungla Completada: Castigo Divino Mejorado & Velocidad en Río/Jungla',
+  'MID': 'Misión de Mid Completada: Botas de Nivel 3 Exclusivas & Retorno (Recall) Acelerado',
+  'BOTTOM': 'Misión de Bot (ADC) Completada: 7.º Espacio de Objeto para Botas & Escalado de Oro',
+  'UTILITY': 'Misión de Soporte Completada: Ranura Especial para Centinela de Control & Descuentos'
+};
+
+const BOOTS_ITEM_IDS = new Set([
+  1001, 2422, 3006, 3009, 3047, 3111, 3158, 3020, 3117, 3184, 3181, 3285
+]);
+
+function isLaneQuestCompleted(match) {
+  const lane = (match.lane || 'Unknown').toUpperCase();
+  const level = match.champLevel;
+  const cs = match.cs || 0;
+  const gold = match.gold || 0;
+  
+  if (match.isRemake || (match.durationMins && match.durationMins < 15)) return false;
+  
+  if (level !== undefined) {
+    if (lane === 'TOP') return level >= 16;
+    if (lane === 'JUNGLE') return level >= 13 || cs >= 80;
+    if (lane === 'MIDDLE' || lane === 'MID') return level >= 15 || gold >= 8500;
+    if (lane === 'BOTTOM' || lane === 'BOTTOM_CARRY' || lane === 'ADC') return cs >= 140 || gold >= 9500;
+    if (lane === 'UTILITY' || lane === 'BOTTOM_SUPPORT' || lane === 'SUPPORT') return gold >= 6000 || level >= 12;
+  } else {
+    // Fallback inteligente para partidas viejas en la base de datos sin nivel guardado
+    if (lane === 'TOP') return gold >= 9000;
+    if (lane === 'JUNGLE') return cs >= 80 || gold >= 7500;
+    if (lane === 'MIDDLE' || lane === 'MID') return gold >= 8500;
+    if (lane === 'BOTTOM' || lane === 'BOTTOM_CARRY' || lane === 'ADC') return cs >= 140 || gold >= 9500;
+    if (lane === 'UTILITY' || lane === 'BOTTOM_SUPPORT' || lane === 'SUPPORT') return gold >= 5500;
+  }
+  return gold >= 8000;
+}
+
+function renderItemSlot(itemId, isTrinket = false) {
+  if (itemId === undefined || itemId === null || itemId === 0) {
+    return `<div class="match-item-slot empty ${isTrinket ? 'trinket' : ''}"></div>`;
+  }
+  const itemUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/${itemId}.png`;
+  return `
+    <div class="match-item-slot ${isTrinket ? 'trinket' : ''}">
+      <img src="${itemUrl}" class="match-item-img" title="Item ID: ${itemId}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'24\' height=\'24\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23555\' stroke-width=\'2\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><path d=\'M9 17L15 7\'/></svg>';" />
+    </div>
+  `;
+}
+
+function renderQuestSlot(isCompleted, laneKey, match) {
+  const questTooltip = QUEST_TOOLTIPS[laneKey] || 'Misión de Carril';
+  
+  let laneFile = 'jungle';
+  if (laneKey === 'TOP') laneFile = 'top';
+  else if (laneKey === 'JUNGLE') laneFile = 'jungle';
+  else if (laneKey === 'MID' || laneKey === 'MIDDLE') laneFile = 'mid';
+  else if (laneKey === 'BOTTOM' || laneKey === 'BOTTOM_CARRY' || laneKey === 'ADC') laneFile = 'bottom';
+  else if (laneKey === 'UTILITY' || laneKey === 'BOTTOM_SUPPORT' || laneKey === 'SUPPORT') laneFile = 'utility';
+  
+  // Lógica reactiva especial para Soporte (UTILITY)
+  if (laneFile === 'utility' && isCompleted && match) {
+    const itemsList = [
+      match.item0, match.item1, match.item2,
+      match.item3, match.item4, match.item5,
+      match.item6
+    ];
+    const hasPinkWard = itemsList.includes(2055); // 2055 es la Control Ward
+    
+    if (hasPinkWard) {
+      const itemUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/2055.png`;
+      return `
+        <div class="match-item-slot quest-slot completed support-pink-slot filled" title="Misión de Soporte Completada: Ranura Especial para Centinela de Control (Activa)">
+          <img src="${itemUrl}" class="match-quest-img-file completed" alt="Control Ward" />
+        </div>
+      `;
+    } else {
+      const imgUrl = 'assets/quests/quest-utility-empty.png';
+      return `
+        <div class="match-item-slot quest-slot completed support-pink-slot empty-pink" title="Misión de Soporte Completada: Ranura Especial para Centinela de Control (Vacía)">
+          <img src="${imgUrl}" class="match-quest-img-file completed" alt="Ranura Vacía" />
+        </div>
+      `;
+    }
+  }
+
+  // Lógica reactiva especial para ADC (BOTTOM)
+  if (laneFile === 'bottom' && isCompleted && match) {
+    const itemsList = [
+      match.item0, match.item1, match.item2,
+      match.item3, match.item4, match.item5,
+      match.item6
+    ];
+    const equippedBootId = itemsList.find(id => BOOTS_ITEM_IDS.has(id));
+    
+    if (equippedBootId) {
+      const itemUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/${equippedBootId}.png`;
+      return `
+        <div class="match-item-slot quest-slot completed adc-boots-slot filled" title="Misión de Bot (ADC) Completada: 7.º Espacio de Objeto para Botas (Activa)">
+          <img src="${itemUrl}" class="match-quest-img-file completed" alt="Boots" />
+        </div>
+      `;
+    } else {
+      const imgUrl = 'assets/quests/quest-bottom-empty.png';
+      return `
+        <div class="match-item-slot quest-slot completed adc-boots-slot empty-boots" title="Misión de Bot (ADC) Completada: 7.º Espacio de Objeto para Botas (Vacía)">
+          <img src="${imgUrl}" class="match-quest-img-file completed" alt="Ranura Vacía" />
+        </div>
+      `;
+    }
+  }
+  
+  const imgUrl = `assets/quests/quest-${laneFile}.png`;
+  
+  if (!isCompleted) {
+    return `
+      <div class="match-item-slot quest-slot incomplete" title="${questTooltip}: Incompleta (No se cumplieron los requisitos en partida)">
+        <img src="${imgUrl}" class="match-quest-img-file grayscale" alt="Incompleta" />
+      </div>
+    `;
+  }
+  
+  return `
+    <div class="match-item-slot quest-slot completed" title="${questTooltip}">
+      <img src="${imgUrl}" class="match-quest-img-file completed" alt="Completada" />
+    </div>
+  `;
+}
+
 // Controladores de la barra de carga minimalista dorado premium
 let loadingBarTimer = null;
 
@@ -1422,6 +1551,8 @@ function openPlayerDetails(player) {
             `;
           }
 
+          const isQuestCompleted = isLaneQuestCompleted(match);
+
           historyContainer.innerHTML += `
             <div class="match-item ${winClass}">
               <div class="match-champ">
@@ -1435,6 +1566,20 @@ function openPlayerDetails(player) {
                 <div class="match-result">${resultText}</div>
                 ${lpHtml}
               </div>
+              
+              <!-- GRID DE OBJETOS Y MISIÓN DE CARRIL -->
+              <div class="match-items-grid">
+                ${renderItemSlot(match.item0)}
+                ${renderItemSlot(match.item1)}
+                ${renderItemSlot(match.item2)}
+                ${renderItemSlot(match.item6, true)}
+                
+                ${renderItemSlot(match.item3)}
+                ${renderItemSlot(match.item4)}
+                ${renderItemSlot(match.item5)}
+                ${renderQuestSlot(isQuestCompleted, finalLane, match)}
+              </div>
+              
               <div class="match-stat"><strong>KDA:</strong> ${kdaStr} <span style="opacity:0.6;font-size:0.7rem;">(${kdaRatio})</span></div>
               <div class="match-stat"><strong>CS:</strong> ${match.cs}</div>
               <div class="match-stat"><strong>Oro:</strong> ${goldStr}</div>
