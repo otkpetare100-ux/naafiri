@@ -4063,13 +4063,27 @@ async function settleBets(acc) {
               diff: diff 
             };
 
-            // Guardar el cambio de LP histórico para la web
+            // Guardar el cambio de LP histórico para la web (Plan A)
             if (matchIds[0]) {
               await dbInstance.collection('accounts').updateOne(
                 { puuid: acc.puuid },
                 { $set: { [`lpHistory.${matchIds[0]}`]: diff } }
               );
             }
+
+            // Plan B: Guardar un registro cronológico redundante
+            const queueId = match?.info?.queueId || freshAcc?.startQueueId || 420;
+            await dbInstance.collection('accounts').updateOne(
+              { puuid: acc.puuid },
+              { 
+                $push: { 
+                  lastLpChanges: { 
+                    $each: [{ timestamp: Date.now(), diff: diff, queueId: queueId }],
+                    $slice: -10 
+                  } 
+                } 
+              }
+            );
             break;
           }
         } catch (e) {}
@@ -4087,6 +4101,24 @@ async function settleBets(acc) {
       { $unset: { liveGameStartedAt: "", lastLiveGameId: "", startLP: "", startQueueId: "" } }
     );
     await checkChallenges(acc, match);
+
+    // Actualizar automáticamente el historial de partidas en la base de datos (Plan B / Autoupdate)
+    setTimeout(async () => {
+      try {
+        const apiPort = process.env.API_PORT || process.env.PORT || 3010;
+        const updateUrl = `http://localhost:${apiPort}/api/summoners/${acc.puuid}/matches/update`;
+        console.log(`[Bets] 🔄 Disparando actualización automática de historial en la web para ${acc.gameName}...`);
+        const updateRes = await fetch(updateUrl, { method: 'POST' });
+        if (updateRes.ok) {
+          const updateData = await updateRes.json();
+          console.log(`[Bets] ✅ Historial de ${acc.gameName} actualizado automáticamente:`, updateData.message);
+        } else {
+          console.error(`[Bets] ⚠️ Falló la actualización automática de historial: HTTP ${updateRes.status}`);
+        }
+      } catch (err) {
+        console.error(`[Bets] ❌ Error en el disparador de actualización automática:`, err.message);
+      }
+    }, 5000); // Retraso de 5 segundos para que Riot registre la partida
   } catch (e) {
     console.error(`[Bets Error]`, e);
     liveCache.delete(acc.puuid);

@@ -418,9 +418,20 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
       .sort((a, b) => b.timestamp - a.timestamp)
       .slice(0, 40)
       .map(m => {
-        // Adjuntar el cambio de LP si el bot lo registró previamente
+        // Adjuntar el cambio de LP si el bot lo registró previamente (Plan A)
         if (account.lpHistory && account.lpHistory[m.matchId] !== undefined) {
           m.lpChange = account.lpHistory[m.matchId];
+        } else if (account.lastLpChanges && account.lastLpChanges.length > 0) {
+          // Plan B: Fallback cronológico redundante si no coincide el ID de partida
+          const matchTime = m.timestamp;
+          const matchedChange = account.lastLpChanges.find(change => {
+            const timeDiff = Math.abs(change.timestamp - matchTime);
+            // Máximo 3 horas de diferencia y debe coincidir la cola
+            return timeDiff < 3 * 60 * 60 * 1000 && change.queueId === m.queueId;
+          });
+          if (matchedChange) {
+            m.lpChange = matchedChange.diff;
+          }
         }
         return m;
       });
