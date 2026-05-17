@@ -115,7 +115,7 @@ async function initItemsDatabase() {
   }
 }
 
-function showItemTooltip(e, item) {
+function showItemTooltip(e, item, slot) {
   let tooltip = document.getElementById('item-tooltip');
   if (!tooltip) {
     tooltip = document.createElement('div');
@@ -129,11 +129,23 @@ function showItemTooltip(e, item) {
     ? `<span class="tooltip-gold"><svg class="gold-coin-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" fill="#fbbf24" stroke="#d97706" stroke-width="1.8"/><circle cx="12" cy="12" r="5" stroke="#d97706" stroke-width="1.5" stroke-dasharray="2 1"/></svg> ${item.gold.total} oro</span>` 
     : '';
 
+  const isQuest = slot && slot.classList.contains('quest-slot');
+  const questLane = slot && slot.getAttribute('data-quest-lane');
+  let questBadgeHtml = '';
+  if (isQuest && questLane) {
+    questBadgeHtml = `
+      <div class="tooltip-quest-badge">
+        ✨ Misión de ${questLane} Activa (7.ª Ranura)
+      </div>
+    `;
+  }
+
   tooltip.innerHTML = `
     <div class="tooltip-header">
       <span class="tooltip-name">${item.name}</span>
       ${goldHtml}
     </div>
+    ${questBadgeHtml}
     ${item.plaintext ? `<div class="tooltip-plaintext">${item.plaintext}</div>` : ''}
     <div class="tooltip-divider"></div>
     <div class="tooltip-description">${descriptionHtml}</div>
@@ -176,7 +188,7 @@ function hideItemTooltip() {
 // Global mouse event listeners for items tooltips
 document.addEventListener('mouseover', (e) => {
   const slot = e.target.closest('.match-item-slot');
-  if (!slot || slot.classList.contains('empty') || slot.classList.contains('quest-slot')) return;
+  if (!slot || slot.classList.contains('empty')) return;
   
   const itemId = slot.getAttribute('data-item-id');
   if (!itemId || !ITEMS_DB) return;
@@ -184,7 +196,7 @@ document.addEventListener('mouseover', (e) => {
   const item = ITEMS_DB[itemId];
   if (!item) return;
   
-  showItemTooltip(e, item);
+  showItemTooltip(e, item, slot);
 });
 
 document.addEventListener('mousemove', (e) => {
@@ -196,7 +208,7 @@ document.addEventListener('mousemove', (e) => {
 
 document.addEventListener('mouseout', (e) => {
   const slot = e.target.closest('.match-item-slot');
-  if (!slot || slot.classList.contains('quest-slot')) return;
+  if (!slot) return;
   
   hideItemTooltip();
 });
@@ -246,7 +258,7 @@ function hideQuestTooltip() {
 // Global mouse event listeners for quest tooltips
 document.addEventListener('mouseover', (e) => {
   const slot = e.target.closest('.quest-slot');
-  if (!slot) return;
+  if (!slot || slot.getAttribute('data-item-id')) return;
   
   const questTitle = slot.getAttribute('data-quest-title');
   if (!questTitle) return;

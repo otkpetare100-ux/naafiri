@@ -3733,3 +3733,20 @@ select option {
   color: #ef4444;
   background: rgba(239, 68, 68, 0.1);
 }
+
+/* Badge especial de Misión dentro del Tooltip de Objetos */
+.tooltip-quest-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #ff9f0a;
+  background: rgba(255, 159, 10, 0.08);
+  border: 1px dashed rgba(255, 159, 10, 0.35);
+  padding: 4px 8px;
+  border-radius: 6px;
+  margin-top: 6px;
+  margin-bottom: 2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-shadow: 0 0 4px rgba(255, 159, 10, 0.2);
+}
