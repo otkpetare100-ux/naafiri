@@ -1121,6 +1121,12 @@ function openPlayerDetails(player) {
   currentModalPuuid = player.puuid;
   const modal = document.getElementById('player-details-modal');
 
+  // Ocultar el logo de la jauría si es un jugador externo (untracked)
+  const logo = modal.querySelector('.detail-modal-logo');
+  if (logo) {
+    logo.style.display = player.isUntracked ? 'none' : 'block';
+  }
+
   // Determinar campeón objetivo
   let target = getMostPlayedFromHistory(player.matchStatsHistory);
   if (!target && player.topChampions && player.topChampions.length > 0) {
