@@ -62,6 +62,7 @@ const BOOTS_ITEM_IDS = new Set([
 let visibleMatchesCount = 5;
 let currentHistory = [];
 let currentQueueType = 'soloq';
+let activePlayerDetails = null;
 
 function isLaneQuestCompleted(match) {
   const lane = (match.lane || 'Unknown').toUpperCase();
@@ -737,6 +738,7 @@ async function setRandomSplash(rawChampName) {
 
 function openPlayerDetails(player) {
   visibleMatchesCount = 5; // Resetear la paginación a 5 partidas al abrir cualquier perfil
+  activePlayerDetails = player; // Guardar referencia al jugador activo
   currentModalPuuid = player.puuid;
   const modal = document.getElementById('player-details-modal');
 
@@ -1658,10 +1660,14 @@ function openPlayerDetails(player) {
   modal.classList.add('active');
   document.body.style.overflow = 'hidden';
 
-  // Lógica de Scroll Infinito Premium
+  // Lógica de Scroll Infinito Premium (Conexión Directa con Servidor y Riot API)
   const historyContainer = document.getElementById('detail-match-history');
+  let isFetchingMore = false; // Bandera de seguridad para evitar peticiones duplicadas
+
   if (historyContainer) {
-    historyContainer.onscroll = () => {
+    historyContainer.onscroll = async () => {
+      if (isFetchingMore) return;
+
       // Detección matemática del final del scroll con tolerancia de 20px
       if (historyContainer.scrollTop + historyContainer.clientHeight >= historyContainer.scrollHeight - 20) {
         // Filtrar historial según la cola activa
@@ -1674,6 +1680,7 @@ function openPlayerDetails(player) {
           return true;
         });
 
+        // Caso A: Aún nos quedan partidas locales en memoria sin mostrar
         if (visibleMatchesCount < filtered.length) {
           visibleMatchesCount += 5; // Aumentar en 5 partidas
           
@@ -1683,6 +1690,61 @@ function openPlayerDetails(player) {
           
           // Restauramos la posición
           historyContainer.scrollTop = prevScrollTop;
+        }
+        // Caso B: Ya mostramos todas las guardadas, ¡consultemos a Riot API para buscar más antiguas!
+        else if (filtered.length >= 5) {
+          isFetchingMore = true;
+          
+          // Crear un spinner de carga Hextech dorado en el DOM
+          const spinner = document.createElement('div');
+          spinner.className = 'history-lazy-loader';
+          spinner.innerHTML = `<span class="lazy-loader-spin">↻</span> Buscando partidas antiguas en Riot Games...`;
+          historyContainer.appendChild(spinner);
+          
+          // Desplazar suavemente hacia abajo para mostrar el spinner
+          historyContainer.scrollTop = historyContainer.scrollHeight;
+
+          try {
+            const response = await fetch(`${API_BASE}/summoners/${currentModalPuuid}/matches/load-more`, {
+              method: 'POST'
+            });
+            const data = await response.json();
+
+            if (response.ok && data.updated) {
+              // Actualizar datos del jugador localmente
+              currentHistory = data.history;
+              if (activePlayerDetails) {
+                activePlayerDetails.matchStatsHistory = data.history;
+                activePlayerDetails.advancedStats = data.stats;
+              }
+              
+              // Recargar las estadísticas avanzadas en la UI de forma reactiva
+              const activeQueueKey = currentQueueType === 'soloq' ? 'soloq' : 'flexq';
+              if (typeof loadStats === 'function' && data.stats) {
+                loadStats(data.stats[activeQueueKey]);
+              }
+              
+              visibleMatchesCount += 5; // Mostrar 5 más
+              const prevScrollTop = historyContainer.scrollTop;
+              renderHistory(currentHistory, currentQueueType);
+              
+              // El re-render limpia el contenedor, por lo que no es necesario quitar el spinner a mano
+              historyContainer.scrollTop = prevScrollTop;
+              showToast('¡Cargadas partidas antiguas adicionales!', 'success');
+            } else {
+              // Quitar spinner si no hay partidas nuevas
+              const sp = historyContainer.querySelector('.history-lazy-loader');
+              if (sp) sp.remove();
+              showToast(data.message || 'No hay más partidas antiguas.', 'info');
+            }
+          } catch (err) {
+            console.error(err);
+            const sp = historyContainer.querySelector('.history-lazy-loader');
+            if (sp) sp.remove();
+            showToast('Error cargando partidas antiguas.', 'error');
+          } finally {
+            isFetchingMore = false;
+          }
         }
       }
     };

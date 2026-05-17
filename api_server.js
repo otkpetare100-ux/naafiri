@@ -506,6 +506,189 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
   }
 });
 
+// Cargar Partidas Más Antiguas (Match-V5)
+app.post('/api/summoners/:puuid/matches/load-more', async (req, res) => {
+  const { puuid } = req.params;
+  const RIOT_API_KEY = process.env.RIOT_API_KEY;
+
+  try {
+    const account = await db.collection('accounts').findOne({ puuid });
+    if (!account) return res.status(404).json({ message: 'Jugador no encontrado.' });
+
+    const existingMatches = account.matchStatsHistory || [];
+    const currentCount = existingMatches.length;
+
+    const routingMap = {
+      la1: 'americas', la2: 'americas', na1: 'americas', br1: 'americas',
+      euw1: 'europe', eun1: 'europe', tr1: 'europe', ru: 'europe',
+      kr: 'asia', jp1: 'asia',
+      oc1: 'sea', ph2: 'sea', sg2: 'sea', th2: 'sea', tw2: 'sea', vn2: 'sea'
+    };
+    const routing = routingMap[account.region] || 'americas';
+
+    // Para evitar consultas masivas que excedan rate limits, limitamos el acumulado total a 80 partidas
+    if (currentCount >= 80) {
+      return res.json({ message: 'Límite de historial alcanzado (80 partidas).', history: existingMatches, updated: false });
+    }
+
+    // Buscamos 5 partidas más antiguas (start = N, count = 5)
+    const matchIdsSoloUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?queue=420&start=${currentCount}&count=5&api_key=${RIOT_API_KEY}`;
+    const matchIdsFlexUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?queue=440&start=${currentCount}&count=5&api_key=${RIOT_API_KEY}`;
+
+    const [idsSoloResp, idsFlexResp] = await Promise.all([
+      fetch(matchIdsSoloUrl),
+      fetch(matchIdsFlexUrl)
+    ]);
+
+    const fetchedSoloIds = idsSoloResp.ok ? await idsSoloResp.json() : [];
+    const fetchedFlexIds = idsFlexResp.ok ? await idsFlexResp.json() : [];
+    const fetchedMatchIds = [...new Set([...fetchedSoloIds, ...fetchedFlexIds])];
+
+    const existingMatchIds = existingMatches.map(m => m.matchId);
+    const newMatchIds = fetchedMatchIds.filter(id => !existingMatchIds.includes(id));
+
+    if (newMatchIds.length === 0) {
+      return res.json({ message: 'No hay más partidas antiguas en Riot.', history: existingMatches, updated: false });
+    }
+
+    const newMatchStats = [];
+    for (const matchId of newMatchIds) {
+      try {
+        const matchUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/${matchId}?api_key=${RIOT_API_KEY}`;
+        const matchResp = await fetch(matchUrl);
+        if (!matchResp.ok) continue;
+
+        const matchData = await matchResp.json();
+        const participant = matchData.info.participants.find(p => p.puuid === puuid);
+        
+        if (participant) {
+          const durationMins = matchData.info.gameDuration / 60;
+          const teamKills = matchData.info.participants
+            .filter(p => p.teamId === participant.teamId)
+            .reduce((sum, p) => sum + p.kills, 0);
+            
+          const kp = teamKills > 0 ? ((participant.kills + participant.assists) / teamKills) : 0;
+          const isRemake = durationMins < 4.5 || participant.teamEarlySurrendered;
+
+          newMatchStats.push({
+            matchId: matchId,
+            queueId: matchData.info.queueId,
+            championName: championMap[participant.championId?.toString()] || participant.championName || 'Unknown',
+            lane: participant.teamPosition || participant.lane || 'Unknown',
+            kills: participant.kills,
+            deaths: participant.deaths,
+            assists: participant.assists,
+            gold: participant.goldEarned,
+            cs: participant.totalMinionsKilled + participant.neutralMinionsKilled,
+            durationMins: durationMins,
+            kp: kp,
+            damageDealt: participant.totalDamageDealtToChampions,
+            damageTaken: participant.totalDamageTaken,
+            win: participant.win,
+            isRemake: isRemake,
+            timestamp: matchData.info.gameCreation,
+            summoner1Id: participant.summoner1Id,
+            summoner2Id: participant.summoner2Id,
+            keystoneId: participant.perks?.styles?.[0]?.selections?.[0]?.perk,
+            subStyleId: participant.perks?.styles?.[1]?.style,
+            champLevel: participant.champLevel,
+            item0: participant.item0,
+            item1: participant.item1,
+            item2: participant.item2,
+            item3: participant.item3,
+            item4: participant.item4,
+            item5: participant.item5,
+            item6: participant.item6,
+            roleBoundItem: participant.roleBoundItem || 0
+          });
+          console.log(`Descargada partida antigua ${matchId} | Queue: ${matchData.info.queueId}`);
+        }
+        await delay(100);
+      } catch (e) {
+        console.error(`Error procesando match antiguo ${matchId}:`, e);
+      }
+    }
+
+    if (newMatchStats.length === 0) {
+      return res.json({ message: 'No se pudieron descargar más partidas antiguas.', history: existingMatches, updated: false });
+    }
+
+    // Combinar, ordenar y guardar (límite máximo de 80 partidas)
+    const combinedMatches = [...newMatchStats, ...existingMatches]
+      .sort((a, b) => b.timestamp - a.timestamp)
+      .slice(0, 80)
+      .map(m => {
+        if (account.lpHistory && account.lpHistory[m.matchId] !== undefined) {
+          m.lpChange = account.lpHistory[m.matchId];
+        } else if (account.lastLpChanges && account.lastLpChanges.length > 0) {
+          const matchTime = m.timestamp;
+          const matchedChange = account.lastLpChanges.find(change => {
+            const timeDiff = Math.abs(change.timestamp - matchTime);
+            return timeDiff < 3 * 60 * 60 * 1000 && change.queueId === m.queueId;
+          });
+          if (matchedChange) m.lpChange = matchedChange.diff;
+        }
+        return m;
+      });
+
+    // Calcular promedios por cola (Excluyendo Remakes y tomando máx 20 por cola)
+    const calculateAverages = (queueIdFilter) => {
+      let sumKills = 0, sumDeaths = 0, sumAssists = 0, sumGold = 0, sumCs = 0, sumMins = 0, sumKp = 0, sumDmgDealt = 0, sumDmgTaken = 0;
+      
+      const validMatches = combinedMatches
+        .filter(m => !m.isRemake && m.queueId === queueIdFilter)
+        .slice(0, 20);
+
+      validMatches.forEach(m => {
+        sumKills += m.kills;
+        sumDeaths += m.deaths;
+        sumAssists += m.assists;
+        sumGold += m.gold;
+        sumCs += m.cs;
+        sumMins += m.durationMins;
+        sumKp += m.kp;
+        sumDmgDealt += m.damageDealt;
+        sumDmgTaken += m.damageTaken;
+      });
+
+      const count = validMatches.length;
+      
+      return {
+        kda: count > 0 ? (sumDeaths > 0 ? ((sumKills + sumAssists) / sumDeaths).toFixed(2) : ((sumKills + sumAssists).toFixed(2))) : "0.00",
+        avgGold: count > 0 ? Math.round(sumGold / count) : 0,
+        avgDeaths: count > 0 ? (sumDeaths / count).toFixed(1) : "0.0",
+        csPerMin: count > 0 ? (sumMins > 0 ? (sumCs / sumMins).toFixed(1) : 0) : "0.0",
+        avgKp: count > 0 ? Math.round((sumKp / count) * 100) : 0,
+        avgDamageDealt: count > 0 ? Math.round(sumDmgDealt / count) : 0,
+        avgDamageTaken: count > 0 ? Math.round(sumDmgTaken / count) : 0,
+        totalMatchesCalculated: count
+      };
+    };
+
+    const avgStats = {
+      soloq: calculateAverages(420),
+      flexq: calculateAverages(440)
+    };
+
+    // Actualizar MongoDB
+    await db.collection('accounts').updateOne(
+      { puuid },
+      { $set: { matchStatsHistory: combinedMatches, advancedStats: avgStats } }
+    );
+
+    console.log(`Cargadas ${newMatchStats.length} partidas antiguas adicionales para ${account.gameName}`);
+    return res.json({
+      message: `Cargadas ${newMatchStats.length} partidas antiguas.`,
+      history: combinedMatches,
+      stats: avgStats,
+      updated: true
+    });
+  } catch (error) {
+    console.error('Error en load-more matches:', error);
+    return res.status(500).json({ message: 'Error interno del servidor.' });
+  }
+});
+
 // Obtener Invocador Individual
 app.get('/api/summoners/:puuid', async (req, res) => {
   const { puuid } = req.params;

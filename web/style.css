@@ -3252,3 +3252,28 @@ select option {
     box-shadow: 0 0 8px rgba(0, 206, 209, 0.65), inset 0 0 4px rgba(0, 206, 209, 0.35);
   }
 }
+
+/* Lazy loader para el historial de partidas antiguos */
+.history-lazy-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 15px;
+  background: rgba(212, 175, 55, 0.05);
+  border: 1px dashed rgba(212, 175, 55, 0.2);
+  border-radius: 10px;
+  color: var(--gold-primary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 10px;
+  animation: matchFadeIn 0.3s ease;
+}
+
+.lazy-loader-spin {
+  display: inline-block;
+  font-size: 1.1rem;
+  animation: spinIcon 1s linear infinite;
+}
