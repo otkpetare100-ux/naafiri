@@ -2628,8 +2628,8 @@ select option {
 }
 
 .match-champ-icon {
-  width: 44px;
-  height: 44px;
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
   border: 2px solid rgba(212, 175, 55, 0.6);
   object-fit: cover;
@@ -2641,8 +2641,8 @@ select option {
   position: absolute;
   bottom: -2px;
   right: -2px;
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   background: rgba(5, 5, 5, 0.9);
   border: 1px solid rgba(212, 175, 55, 0.7);
   border-radius: 50%;
@@ -2667,8 +2667,8 @@ select option {
 }
 
 .match-spell-icon {
-  width: 20px;
-  height: 20px;
+  width: 25px;
+  height: 25px;
   border-radius: 4px;
   object-fit: cover;
   border: 1px solid rgba(0, 0, 0, 0.8);
@@ -2676,8 +2676,8 @@ select option {
 }
 
 .match-rune-icon {
-  width: 20px;
-  height: 20px;
+  width: 25px;
+  height: 25px;
   object-fit: contain;
 }
 
@@ -2688,15 +2688,15 @@ select option {
 }
 
 .match-rune-icon.secondary {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   align-self: center;
   opacity: 0.85;
 }
 
 .match-rune-placeholder {
-  width: 20px;
-  height: 20px;
+  width: 25px;
+  height: 25px;
 }
 
 @keyframes matchFadeIn {
@@ -3360,16 +3360,16 @@ select option {
 /* 2x4 Items Grid & Lane Quest Styles */
 .match-items-grid {
   display: grid;
-  grid-template-columns: repeat(4, 22px);
-  grid-template-rows: repeat(2, 22px);
-  gap: 3px;
+  grid-template-columns: repeat(4, 28px);
+  grid-template-rows: repeat(2, 28px);
+  gap: 4px;
   flex-shrink: 0;
   margin: 0 15px;
 }
 
 .match-item-slot {
-  width: 22px;
-  height: 22px;
+  width: 28px;
+  height: 28px;
   background: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(212, 175, 55, 0.2);
   border-radius: 4px;
