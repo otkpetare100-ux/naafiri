@@ -1,3 +1,3 @@
 git add .
-git commit -m "Funcionalidad"
+git commit -m "roll back"
 git push
