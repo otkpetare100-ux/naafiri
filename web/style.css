@@ -3159,6 +3159,20 @@ select option {
   font-weight: 700;
 }
 
+.stats-kda-ratio strong.kda-perfect,
+.stats-kda-ratio strong.kda-high {
+  color: #ff9f0a; /* Premium OP.GG gold/orange */
+  text-shadow: 0 0 3px rgba(255, 159, 10, 0.2);
+}
+
+.stats-kda-ratio strong.kda-good {
+  color: #40a9ff; /* Premium blue for KDA >= 4 */
+}
+
+.stats-kda-ratio strong.kda-above-avg {
+  color: #34d399; /* Premium green for KDA >= 3 */
+}
+
 .stats-cs {
   font-size: 0.72rem;
   color: #fff;

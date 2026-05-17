@@ -1633,6 +1633,22 @@ function openPlayerDetails(player) {
           const csPerMin = (match.cs / match.durationMins).toFixed(1);
           const visionScore = match.visionScore !== undefined ? match.visionScore : Math.round(match.durationMins * 0.75);
 
+          let kdaColorClass = '';
+          if (kdaRatio === 'Perfect') {
+            kdaColorClass = 'kda-perfect';
+          } else {
+            const num = parseFloat(kdaRatio);
+            if (!isNaN(num)) {
+              if (num >= 5.0) {
+                kdaColorClass = 'kda-high';
+              } else if (num >= 4.0) {
+                kdaColorClass = 'kda-good';
+              } else if (num >= 3.0) {
+                kdaColorClass = 'kda-above-avg';
+              }
+            }
+          }
+
           const statsBlockHtml = `
             <div class="match-stats-block">
               <div class="stats-kda-raw">
@@ -1640,7 +1656,7 @@ function openPlayerDetails(player) {
                 <span class="d-raw">${match.deaths}</span> / 
                 <span>${match.assists}</span>
               </div>
-              <div class="stats-kda-ratio"><strong>${kdaRatio}</strong> KDA</div>
+              <div class="stats-kda-ratio"><strong class="${kdaColorClass}">${kdaRatio}</strong> KDA</div>
               <div class="stats-cs"><strong>${match.cs} CS</strong> <span class="cs-min">(${csPerMin})</span></div>
               <div class="stats-vision"><strong>${visionScore}</strong> vision</div>
             </div>
