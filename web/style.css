@@ -2975,10 +2975,10 @@ select option {
   z-index: 9999 !important;
 }
 
-/* Retardo de 2 segundos al pasar el ratón (hover) */
+/* Retardo de 0.6 segundos al pasar el ratón (hover) */
 .stat-card[data-tooltip]:hover::before,
 .stat-card[data-tooltip]:hover::after {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
-  transition-delay: 2s; /* ¡Retardo de 2 segundos! */
+  transition-delay: 0.6s; /* ¡Retardo de 0.6 segundos! */
 }
