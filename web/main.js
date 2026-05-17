@@ -1820,6 +1820,7 @@ function openPlayerDetails(player) {
             <div class="date-separator" data-date="${group.date}" data-wins="${group.wins}" data-losses="${group.losses}">
               <span class="ds-date">${group.date}</span>
               <div class="ds-badges">
+                <span class="ds-badge total">${group.wins + group.losses} partidas</span>
                 <span class="ds-badge win">${group.wins} win</span>
                 <span class="ds-badge loss">${group.losses} loss</span>
               </div>
@@ -1833,8 +1834,11 @@ function openPlayerDetails(player) {
           separatorEl.setAttribute('data-wins', currentWins);
           separatorEl.setAttribute('data-losses', currentLosses);
           
+          const totalEl = separatorEl.querySelector('.ds-badge.total');
           const winEl = separatorEl.querySelector('.ds-badge.win');
           const lossEl = separatorEl.querySelector('.ds-badge.loss');
+          
+          if (totalEl) totalEl.textContent = `${currentWins + currentLosses} partidas`;
           if (winEl) winEl.textContent = `${currentWins} win`;
           if (lossEl) lossEl.textContent = `${currentLosses} loss`;
         }
