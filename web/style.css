@@ -2601,8 +2601,8 @@ select option {
 .match-history-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  max-height: 400px;
+  gap: 8px;
+  max-height: 640px;
   overflow-y: auto;
   padding-right: 10px;
 }
@@ -2714,8 +2714,8 @@ select option {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 20px;
-  border-radius: 15px; /* ¡Suavizado! */
+  padding: 8px 16px;
+  border-radius: 12px; /* Sutilmente más compacto y moderno */
   background: rgba(255, 255, 255, 0.03);
   border-left: 5px solid #666;
   font-size: 0.85rem;
@@ -2789,8 +2789,8 @@ select option {
   display: flex;
   align-items: center;
   justify-content: space-between; /* Envía los badges al extremo derecho */
-  padding: 15px 5px 10px 5px;
-  margin-top: 10px;
+  padding: 8px 5px 4px 5px;
+  margin-top: 6px;
 }
 
 .ds-badges {
