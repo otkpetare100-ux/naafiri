@@ -3261,77 +3261,59 @@ select option {
 /* Match Team Roster Styles (Elegant & Compact columns next to inventory) */
 .match-teams-container {
   display: flex;
-  gap: 12px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
   padding: 0 14px;
   border-left: 1.5px solid rgba(212, 175, 55, 0.12); /* Subtle gold vertical divisor */
   border-right: 1.5px solid rgba(212, 175, 55, 0.12);
-  min-width: 215px;
+  min-width: 140px;
+  width: 140px;
   box-sizing: border-box;
 }
 
 .match-team {
   display: flex;
-  flex-direction: column;
-  gap: 3px;
-  width: 100px;
+  flex-direction: row; /* Horizontal! */
+  align-items: center;
+  gap: 4px;
+  width: auto;
 }
 
 .team-player {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 0.68rem;
-  color: rgba(255, 255, 255, 0.65);
-  white-space: nowrap;
-}
-
-.team-player-name {
-  max-width: 75px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  transition: color 0.2s ease;
+  justify-content: center;
+  cursor: pointer;
 }
 
 .team-player-champ-icon {
-  width: 14px;
-  height: 14px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   object-fit: cover;
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s, box-shadow 0.2s;
+}
+
+/* General hover effects */
+.team-player:hover .team-player-champ-icon {
+  transform: scale(1.2);
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.3);
+  z-index: 2;
 }
 
 /* Active Summoner Golden Highlighting */
-.team-player.active-summoner {
-  color: var(--gold-primary);
-  font-weight: 700;
-}
-
-.team-player.active-summoner .team-player-name {
-  color: var(--gold-primary);
-}
-
 .team-player.active-summoner .team-player-champ-icon {
-  border: 1px solid var(--gold-primary);
-  box-shadow: 0 0 4px rgba(212, 175, 55, 0.5);
+  border: 1.5px solid var(--gold-primary);
+  box-shadow: 0 0 6px rgba(212, 175, 55, 0.6);
   transform: scale(1.1);
-}
-
-/* Micro-animations and hover states */
-.team-player:hover {
-  color: #fff;
-}
-
-.team-player:hover .team-player-champ-icon {
-  transform: scale(1.2);
-  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .team-player.active-summoner:hover .team-player-champ-icon {
   transform: scale(1.25);
-  border-color: var(--gold-primary);
-  box-shadow: 0 0 6px var(--gold-primary);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.9);
 }
 
 /* Filas dobles para estadísticas agrupadas en la izquierda */

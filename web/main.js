@@ -1673,10 +1673,10 @@ function openPlayerDetails(player) {
             const renderTeamPlayer = (p) => {
               const isMe = (p.puuid && p.puuid === currentModalPuuid) ? 'active-summoner' : '';
               const iconUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${p.championName}.png`;
+              const champDisplayName = p.championName || 'Unknown';
               return `
-                <div class="team-player ${isMe}" title="${p.summonerName}">
-                  <img src="${iconUrl}" class="team-player-champ-icon" alt="${p.championName}" onerror="this.onerror=null; this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png';" />
-                  <span class="team-player-name">${p.summonerName}</span>
+                <div class="team-player ${isMe}" title="${p.summonerName} (${champDisplayName})">
+                  <img src="${iconUrl}" class="team-player-champ-icon" alt="${champDisplayName}" onerror="this.onerror=null; this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png';" />
                 </div>
               `;
             };
