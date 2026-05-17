@@ -1736,6 +1736,9 @@ function openPlayerDetails(player) {
             const data = await response.json();
 
             if (response.ok && data.updated) {
+              // Guardar la posición del scroll EXACTA antes de cualquier modificación del DOM
+              const prevScrollTop = historyContainer.scrollTop;
+
               // Actualizar datos del jugador localmente
               currentHistory = data.history;
               if (activePlayerDetails) {
@@ -1754,22 +1757,32 @@ function openPlayerDetails(player) {
               if (sp) sp.remove();
 
               visibleMatchesCount += 5; // Mostrar 5 más
-              const prevScrollTop = historyContainer.scrollTop;
               renderHistory(currentHistory, currentQueueType, true);
               
+              // Restaurar la posición exacta original
               historyContainer.scrollTop = prevScrollTop;
               showToast('¡Cargadas partidas antiguas adicionales!', 'success');
             } else {
+              // Guardar posición exacta
+              const prevScrollTop = historyContainer.scrollTop;
+              
               // Quitar spinner si no hay partidas nuevas
               const sp = historyContainer.querySelector('.history-lazy-loader');
               if (sp) sp.remove();
+              
+              // Restaurar posición exacta
+              historyContainer.scrollTop = prevScrollTop;
+              
               showToast(data.message || 'No hay más partidas antiguas.', 'info');
               hasReachedHistoryEnd = true; // Detener futuras búsquedas en esta sesión
             }
           } catch (err) {
             console.error(err);
+            const prevScrollTop = historyContainer.scrollTop;
             const sp = historyContainer.querySelector('.history-lazy-loader');
             if (sp) sp.remove();
+            historyContainer.scrollTop = prevScrollTop;
+            
             showToast('Error cargando partidas antiguas.', 'error');
           } finally {
             isFetchingMore = false;
