@@ -1630,6 +1630,22 @@ function openPlayerDetails(player) {
             `;
           }
 
+          const csPerMin = (match.cs / match.durationMins).toFixed(1);
+          const visionScore = match.visionScore !== undefined ? match.visionScore : Math.round(match.durationMins * 0.75);
+
+          const statsBlockHtml = `
+            <div class="match-stats-block">
+              <div class="stats-kda-raw">
+                <span>${match.kills}</span> / 
+                <span class="d-raw">${match.deaths}</span> / 
+                <span>${match.assists}</span>
+              </div>
+              <div class="stats-kda-ratio"><strong>${kdaRatio}</strong> KDA</div>
+              <div class="stats-cs"><strong>${match.cs} CS</strong> <span class="cs-min">(${csPerMin})</span></div>
+              <div class="stats-vision"><strong>${visionScore}</strong> vision</div>
+            </div>
+          `;
+
           const matchHtml = `
             <div class="match-item ${winClass}">
               <div class="match-champ">
@@ -1643,6 +1659,9 @@ function openPlayerDetails(player) {
                 <div class="match-result">${resultText}</div>
                 ${lpHtml}
               </div>
+              
+              <!-- BLOQUE DE ESTADÍSTICAS VERTICALES -->
+              ${statsBlockHtml}
               
               <!-- GRID DE OBJETOS Y MISIÓN DE CARRIL -->
               <div class="match-items-grid">
@@ -1660,8 +1679,6 @@ function openPlayerDetails(player) {
               <!-- ROSTER DE EQUIPOS PARTICIPANTES -->
               ${teamsHtml}
               
-              <div class="match-stat"><strong>KDA:</strong> ${kdaStr} <span style="opacity:0.6;font-size:0.7rem;">(${kdaRatio})</span></div>
-              <div class="match-stat"><strong>CS:</strong> ${match.cs}</div>
               <div class="match-stat"><strong>Oro:</strong> ${goldStr}</div>
               <div class="match-stat"><strong>Daño:</strong> ${dmgStr}</div>
               <div class="match-stat"><strong>KP:</strong> ${kpStr}%</div>

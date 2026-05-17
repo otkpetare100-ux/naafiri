@@ -421,6 +421,7 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
             item5: participant.item5,
             item6: participant.item6,
             roleBoundItem: participant.roleBoundItem || 0,
+            visionScore: participant.visionScore || 0,
             participants: matchParticipants
           });
           console.log(`Descargada partida ${matchId} | Queue: ${matchData.info.queueId} | isRemake: ${isRemake}`);
@@ -617,6 +618,7 @@ app.post('/api/summoners/:puuid/matches/load-more', async (req, res) => {
             item5: participant.item5,
             item6: participant.item6,
             roleBoundItem: participant.roleBoundItem || 0,
+            visionScore: participant.visionScore || 0,
             participants: matchParticipants
           });
           console.log(`Descargada partida antigua ${matchId} | Queue: ${matchData.info.queueId}`);

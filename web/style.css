@@ -3122,6 +3122,66 @@ select option {
   text-transform: capitalize;
 }
 
+/* Stats Block (Left of Inventory) */
+.match-stats-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 105px;
+  font-size: 0.76rem;
+  color: #fff;
+  text-align: center;
+  border-right: 1.5px solid rgba(212, 175, 55, 0.12); /* Division before inventory */
+  padding-right: 14px;
+  box-sizing: border-box;
+}
+
+.stats-kda-raw {
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #fff;
+}
+
+.stats-kda-raw .d-raw {
+  color: #f87171; /* Highlighted red for deaths */
+}
+
+.stats-kda-ratio {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.stats-kda-ratio strong {
+  color: #fff;
+  font-weight: 700;
+}
+
+.stats-cs {
+  font-size: 0.72rem;
+  color: #fff;
+  font-weight: 600;
+}
+
+.stats-cs .cs-min {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.66rem;
+  font-weight: 400;
+  margin-left: 2px;
+}
+
+.stats-vision {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.stats-vision strong {
+  color: #fff;
+  font-weight: 600;
+}
+
 /* Match Team Roster Styles (Elegant & Compact columns next to inventory) */
 .match-teams-container {
   display: flex;
