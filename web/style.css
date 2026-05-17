@@ -2749,9 +2749,9 @@ select option {
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  gap: 2px;
-  min-width: 95px;
-  font-size: 0.72rem;
+  gap: 4px; /* Incrementado de 2px a 4px para que abarque mejor verticalmente */
+  min-width: 115px; /* Incrementado de 95px a 115px para abarcar mejor horizontalmente */
+  font-size: 0.76rem;
   font-family: 'Outfit', sans-serif;
 }
 
@@ -2759,25 +2759,25 @@ select option {
   font-weight: 800;
   color: #3b82f6; /* Azul premium para la cola clasificatoria */
   text-transform: capitalize;
-  font-size: 0.78rem;
-  letter-spacing: 0.2px;
+  font-size: 0.82rem; /* Incrementado de 0.78rem */
+  letter-spacing: 0.3px;
 }
 
 .meta-queue-sub {
   font-weight: 700;
   color: #3b82f6;
-  font-size: 0.78rem;
+  font-size: 0.82rem; /* Incrementado de 0.78rem */
   margin-top: -2px;
 }
 
 .meta-time {
   color: rgba(255, 255, 255, 0.45);
   font-weight: 500;
-  font-size: 0.7rem;
+  font-size: 0.72rem; /* Incrementado de 0.7rem */
 }
 
 .meta-divider {
-  width: 60px;
+  width: 90%; /* Incrementado de 60px a 90% para que cruce elegantemente toda la columna */
   height: 1px;
   background: rgba(255, 255, 255, 0.1);
   margin: 4px 0;
@@ -2786,7 +2786,7 @@ select option {
 .meta-result {
   font-weight: 800;
   letter-spacing: 0.5px;
-  font-size: 0.78rem;
+  font-size: 0.82rem; /* Incrementado de 0.78rem */
 }
 
 .match-win .meta-result {
@@ -2805,13 +2805,13 @@ select option {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.7rem;
+  font-size: 0.74rem; /* Incrementado de 0.7rem */
   color: rgba(255, 255, 255, 0.5);
   font-weight: 500;
 }
 
 .match-lp {
-  font-size: 0.7rem;
+  font-size: 0.74rem; /* Incrementado de 0.7rem */
   font-weight: 800;
 }
 
