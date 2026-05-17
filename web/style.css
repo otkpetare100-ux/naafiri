@@ -3122,6 +3122,82 @@ select option {
   text-transform: capitalize;
 }
 
+/* Match Team Roster Styles (Elegant & Compact columns next to inventory) */
+.match-teams-container {
+  display: flex;
+  gap: 12px;
+  padding: 0 14px;
+  border-left: 1.5px solid rgba(212, 175, 55, 0.12); /* Subtle gold vertical divisor */
+  border-right: 1.5px solid rgba(212, 175, 55, 0.12);
+  min-width: 215px;
+  box-sizing: border-box;
+}
+
+.match-team {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100px;
+}
+
+.team-player {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.65);
+  white-space: nowrap;
+}
+
+.team-player-name {
+  max-width: 75px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+.team-player-champ-icon {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  object-fit: cover;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s;
+}
+
+/* Active Summoner Golden Highlighting */
+.team-player.active-summoner {
+  color: var(--gold-primary);
+  font-weight: 700;
+}
+
+.team-player.active-summoner .team-player-name {
+  color: var(--gold-primary);
+}
+
+.team-player.active-summoner .team-player-champ-icon {
+  border: 1px solid var(--gold-primary);
+  box-shadow: 0 0 4px rgba(212, 175, 55, 0.5);
+  transform: scale(1.1);
+}
+
+/* Micro-animations and hover states */
+.team-player:hover {
+  color: #fff;
+}
+
+.team-player:hover .team-player-champ-icon {
+  transform: scale(1.2);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.team-player.active-summoner:hover .team-player-champ-icon {
+  transform: scale(1.25);
+  border-color: var(--gold-primary);
+  box-shadow: 0 0 6px var(--gold-primary);
+}
+
 /* 2x4 Items Grid & Lane Quest Styles */
 .match-items-grid {
   display: grid;

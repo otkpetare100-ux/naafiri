@@ -1594,6 +1594,42 @@ function openPlayerDetails(player) {
 
           const isQuestCompleted = isLaneQuestCompleted(match);
 
+          // Generación de rosters de equipos (Team 1 vs Team 2) a la derecha del inventario
+          let teamsHtml = '';
+          if (match.participants && match.participants.length > 0) {
+            const team1Players = match.participants.filter(p => p.teamId === 100);
+            const team2Players = match.participants.filter(p => p.teamId === 200);
+            
+            let team1 = team1Players;
+            let team2 = team2Players;
+            if (team1.length === 0 || team2.length === 0) {
+              team1 = match.participants.slice(0, 5);
+              team2 = match.participants.slice(5, 10);
+            }
+            
+            const renderTeamPlayer = (p) => {
+              const isMe = (p.puuid && p.puuid === currentModalPuuid) ? 'active-summoner' : '';
+              const iconUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${p.championName}.png`;
+              return `
+                <div class="team-player ${isMe}" title="${p.summonerName}">
+                  <img src="${iconUrl}" class="team-player-champ-icon" alt="${p.championName}" onerror="this.onerror=null; this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png';" />
+                  <span class="team-player-name">${p.summonerName}</span>
+                </div>
+              `;
+            };
+            
+            teamsHtml = `
+              <div class="match-teams-container">
+                <div class="match-team team-ally">
+                  ${team1.map(renderTeamPlayer).join('')}
+                </div>
+                <div class="match-team team-enemy">
+                  ${team2.map(renderTeamPlayer).join('')}
+                </div>
+              </div>
+            `;
+          }
+
           const matchHtml = `
             <div class="match-item ${winClass}">
               <div class="match-champ">
@@ -1620,6 +1656,9 @@ function openPlayerDetails(player) {
                 ${renderItemSlot(match.item5)}
                 ${renderQuestSlot(isQuestCompleted, finalLane, match)}
               </div>
+              
+              <!-- ROSTER DE EQUIPOS PARTICIPANTES -->
+              ${teamsHtml}
               
               <div class="match-stat"><strong>KDA:</strong> ${kdaStr} <span style="opacity:0.6;font-size:0.7rem;">(${kdaRatio})</span></div>
               <div class="match-stat"><strong>CS:</strong> ${match.cs}</div>

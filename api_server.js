@@ -383,6 +383,14 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
           const kp = teamKills > 0 ? ((participant.kills + participant.assists) / teamKills) : 0;
           const isRemake = durationMins < 4.5 || participant.teamEarlySurrendered;
 
+          const matchParticipants = matchData.info.participants.map(p => ({
+            summonerName: p.riotIdGameName || p.summonerName || 'Desconocido',
+            championName: championMap[p.championId?.toString()] || p.championName || 'Unknown',
+            puuid: p.puuid,
+            win: p.win,
+            teamId: p.teamId
+          }));
+
           newMatchStats.push({
             matchId: matchId,
             queueId: matchData.info.queueId,
@@ -412,7 +420,8 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
             item4: participant.item4,
             item5: participant.item5,
             item6: participant.item6,
-            roleBoundItem: participant.roleBoundItem || 0
+            roleBoundItem: participant.roleBoundItem || 0,
+            participants: matchParticipants
           });
           console.log(`Descargada partida ${matchId} | Queue: ${matchData.info.queueId} | isRemake: ${isRemake}`);
         }
@@ -570,6 +579,14 @@ app.post('/api/summoners/:puuid/matches/load-more', async (req, res) => {
           const kp = teamKills > 0 ? ((participant.kills + participant.assists) / teamKills) : 0;
           const isRemake = durationMins < 4.5 || participant.teamEarlySurrendered;
 
+          const matchParticipants = matchData.info.participants.map(p => ({
+            summonerName: p.riotIdGameName || p.summonerName || 'Desconocido',
+            championName: championMap[p.championId?.toString()] || p.championName || 'Unknown',
+            puuid: p.puuid,
+            win: p.win,
+            teamId: p.teamId
+          }));
+
           newMatchStats.push({
             matchId: matchId,
             queueId: matchData.info.queueId,
@@ -599,7 +616,8 @@ app.post('/api/summoners/:puuid/matches/load-more', async (req, res) => {
             item4: participant.item4,
             item5: participant.item5,
             item6: participant.item6,
-            roleBoundItem: participant.roleBoundItem || 0
+            roleBoundItem: participant.roleBoundItem || 0,
+            participants: matchParticipants
           });
           console.log(`Descargada partida antigua ${matchId} | Queue: ${matchData.info.queueId}`);
         }
