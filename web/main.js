@@ -306,7 +306,7 @@ function renderQuestSlot(isCompleted, laneKey, match) {
     if (hasPinkWard) {
       const itemUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/2055.png`;
       return `
-        <div class="match-item-slot quest-slot completed support-pink-slot filled" data-quest-title="Misión de Soporte Completada: Ranura Especial para Centinela de Control (Activa)" data-quest-completed="true" data-quest-lane="Soporte">
+        <div class="match-item-slot quest-slot completed support-pink-slot filled" data-item-id="2055" data-quest-title="Misión de Soporte Completada: Ranura Especial para Centinela de Control (Activa)" data-quest-completed="true" data-quest-lane="Soporte">
           <img src="${itemUrl}" class="match-quest-img-file completed" alt="Control Ward" />
         </div>
       `;
@@ -333,7 +333,7 @@ function renderQuestSlot(isCompleted, laneKey, match) {
     if (equippedBootId) {
       const itemUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/${equippedBootId}.png`;
       return `
-        <div class="match-item-slot quest-slot completed adc-boots-slot filled" data-quest-title="Misión de Bot (ADC) Completada: 7.º Espacio de Objeto para Botas (Activa)" data-quest-completed="true" data-quest-lane="ADC">
+        <div class="match-item-slot quest-slot completed adc-boots-slot filled" data-item-id="${equippedBootId}" data-quest-title="Misión de Bot (ADC) Completada: 7.º Espacio de Objeto para Botas (Activa)" data-quest-completed="true" data-quest-lane="ADC">
           <img src="${itemUrl}" class="match-quest-img-file completed" alt="Boots" />
         </div>
       `;
