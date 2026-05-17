@@ -2926,3 +2926,59 @@ select option {
   50% { background-position: 0% 100%; }
   100% { background-position: 0% 0%; }
 }
+
+/* ================== PREMIUM HABLADORES (TOOLTIPS) CON RETARDO DE 2s ================== */
+.stat-card[data-tooltip] {
+  position: relative;
+}
+
+/* El Globo Hablador (Tooltip Container) */
+.stat-card[data-tooltip]::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 115%;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: rgba(10, 10, 12, 0.98) !important;
+  border: 1px solid rgba(212, 175, 55, 0.35) !important;
+  color: #f1f5f9 !important;
+  padding: 10px 14px !important;
+  border-radius: 12px !important;
+  font-size: 0.72rem !important;
+  line-height: 1.45 !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  white-space: normal !important;
+  width: 220px !important;
+  text-align: center !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7), 0 0 20px rgba(212, 175, 55, 0.08) !important;
+  backdrop-filter: blur(12px) !important;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 9999 !important;
+}
+
+/* La flecha indicadora del Globo Hablador */
+.stat-card[data-tooltip]::after {
+  content: '' !important;
+  position: absolute;
+  bottom: 106%;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  border-width: 6px;
+  border-style: solid;
+  border-color: rgba(10, 10, 12, 0.98) transparent transparent transparent !important;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 9999 !important;
+}
+
+/* Retardo de 2 segundos al pasar el ratón (hover) */
+.stat-card[data-tooltip]:hover::before,
+.stat-card[data-tooltip]:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  transition-delay: 2s; /* ¡Retardo de 2 segundos! */
+}
