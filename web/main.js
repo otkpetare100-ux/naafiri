@@ -42,7 +42,7 @@ const RUNE_STYLE_MAP = {
   8000: "perk-images/Styles/7201_Precision.png",
   8100: "perk-images/Styles/7200_Domination.png",
   8200: "perk-images/Styles/7202_Sorcery.png",
-  8300: "perk-images/Styles/7203_Inspiration.png",
+  8300: "perk-images/Styles/7203_Whimsy.png",
   8400: "perk-images/Styles/7204_Resolve.png"
 };
 
