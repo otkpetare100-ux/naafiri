@@ -951,10 +951,7 @@ function openPlayerDetails(player) {
   // Cargar Estadísticas si existen con colores dinámicos y medallas de calificación
   function loadStats(stats) {
     const kdaTitle = document.getElementById('detail-kda-title');
-
-    // Calcular estadísticas adicionales basadas en el historial
-    const history = player.matchStatsHistory || [];
-    const filteredMatches = history.filter(match => {
+    const filteredMatches = (player.matchStatsHistory || []).filter(match => {
       if (currentQueue === 'soloq') {
         return !match.queueId || match.queueId == 420;
       } else if (currentQueue === 'flexq') {
@@ -964,47 +961,50 @@ function openPlayerDetails(player) {
     });
 
     const activeMatches = filteredMatches.filter(m => !m.isRemake);
-    
-    let avgGpm = 0;
-    let avgDpm = 0;
-    let carryRate = 0;
-    let avgKillsVal = 0;
-    let avgAssistsVal = 0;
+    const totalGames = activeMatches.length;
 
-    if (activeMatches.length > 0) {
-      let totalGold = 0;
-      let totalDurationMins = 0;
-      let totalDmg = 0;
-      let totalKills = 0;
-      let totalAssists = 0;
-      let carryGames = 0;
+    if (totalGames > 0) {
+      let sumKills = 0, sumDeaths = 0, sumAssists = 0;
+      let sumGold = 0, sumDuration = 0, sumDamageDealt = 0, sumDamageTaken = 0;
+      let sumKp = 0, carryGames = 0;
 
       activeMatches.forEach(m => {
-        totalGold += m.gold || 0;
-        totalDurationMins += m.durationMins || 20; // fallback a 20 minutos
-        totalDmg += m.damageDealt || 0;
-        totalKills += m.kills || 0;
-        totalAssists += m.assists || 0;
+        sumKills += m.kills || 0;
+        sumDeaths += m.deaths || 0;
+        sumAssists += m.assists || 0;
+        sumGold += m.gold || 0;
+        sumDuration += m.durationMins || 0;
+        sumDamageDealt += m.damageDealt || 0;
+        sumDamageTaken += m.damageTaken || 0;
+        sumKp += m.kp || 0;
 
-        // Carry: Victoria con KDA >= 3.0 o KP >= 55%, o derrota con KDA >= 4.5
-        const deathsVal = m.deaths || 1;
-        const kdaVal = (m.kills + m.assists) / deathsVal;
-        const kpVal = (m.kp || 0) * 100;
-        const isCarry = (m.win && (kdaVal >= 3.0 || kpVal >= 55)) || (!m.win && kdaVal >= 4.5);
-        if (isCarry) {
+        const kda = m.deaths > 0 ? (m.kills + m.assists) / m.deaths : (m.kills + m.assists);
+        if (m.win && (kda >= 3.0 || m.kp >= 0.55)) {
           carryGames++;
         }
       });
 
-      avgGpm = Math.round(totalGold / totalDurationMins);
-      avgDpm = Math.round(totalDmg / totalDurationMins);
-      avgKillsVal = (totalKills / activeMatches.length).toFixed(1);
-      avgAssistsVal = (totalAssists / activeMatches.length).toFixed(1);
-      carryRate = Math.round((carryGames / activeMatches.length) * 100);
-    }
+      const avgKills = (sumKills / totalGames).toFixed(1);
+      const avgDeaths = (sumDeaths / totalGames).toFixed(1);
+      const avgAssists = (sumAssists / totalGames).toFixed(1);
+      const avgGold = Math.round(sumGold / totalGames);
+      const avgDuration = (sumDuration / totalGames).toFixed(1);
+      const gpm = sumDuration > 0 ? Math.round(sumGold / sumDuration) : 0;
+      const dpm = sumDuration > 0 ? Math.round(sumDamageDealt / sumDuration) : 0;
+      const avgDamageDealt = Math.round(sumDamageDealt / totalGames);
+      const avgDamageTaken = Math.round(sumDamageTaken / totalGames);
+      const avgKp = Math.round((sumKp / totalGames) * 100);
+      const carryRate = Math.round((carryGames / totalGames) * 100);
 
-    if (stats && stats.avgGold !== undefined) {
-      const kdaVal = parseFloat(stats.kda) || 0.0;
+      // Calcular CS/Min
+      let totalCs = 0;
+      activeMatches.forEach(m => { totalCs += m.cs || 0; });
+      const csPerMin = sumDuration > 0 ? (totalCs / sumDuration).toFixed(1) : '0.0';
+
+      // Calcular KDA Ratio general del historial
+      const kdaVal = sumDeaths > 0 ? ((sumKills + sumAssists) / sumDeaths) : (sumKills + sumAssists);
+      const kdaStr = kdaVal.toFixed(2);
+
       let kdaColor = '#94a3b8'; // Slate Silver
       let kdaRating = 'Normal';
       if (kdaVal >= 4.0) {
@@ -1020,31 +1020,70 @@ function openPlayerDetails(player) {
         kdaColor = '#ef4444'; // Soft Red Mejorable
         kdaRating = 'Mejorable';
       }
-      
+
+      kdaTitle.innerHTML = `<span class="kda-num" style="color: ${kdaColor}; font-size: 2.0rem; font-weight: 900; text-shadow: 0 0 15px ${kdaColor}33; font-family: 'Outfit', sans-serif;">${kdaStr}</span> <span class="kda-label" style="font-size: 0.8rem; font-weight: 800; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin-left: 4px;">KDA</span> <span class="kda-badge" style="background: ${kdaColor}15; border: 1px solid ${kdaColor}33; color: ${kdaColor}; font-size: 0.65rem; font-weight: 900; padding: 2px 8px; border-radius: 6px; margin-left: 8px; text-transform: uppercase; letter-spacing: 0.5px; vertical-align: middle;">${kdaRating}</span>`;
+
+      // Inyectar en elementos HTML
+      document.getElementById('stat-kills').textContent = avgKills;
+      document.getElementById('stat-deaths').textContent = avgDeaths;
+      document.getElementById('stat-assists').textContent = avgAssists;
+      document.getElementById('stat-cs').textContent = csPerMin;
+      document.getElementById('stat-kp').textContent = `${avgKp}%`;
+      document.getElementById('stat-carry').textContent = `${carryRate}%`;
+      document.getElementById('stat-gold').textContent = avgGold.toLocaleString('es-ES');
+      document.getElementById('stat-gpm').textContent = gpm;
+      document.getElementById('stat-duration').textContent = `${avgDuration}m`;
+      document.getElementById('stat-dmg').textContent = avgDamageDealt.toLocaleString('es-ES');
+      document.getElementById('stat-dmg-taken').textContent = avgDamageTaken.toLocaleString('es-ES');
+      document.getElementById('stat-dpm').textContent = dpm;
+
+    } else if (stats && stats.avgGold !== undefined) {
+      // Fallback si no hay partidas detalladas en historial
+      const kdaVal = parseFloat(stats.kda) || 0.0;
+      let kdaColor = '#94a3b8';
+      let kdaRating = 'Normal';
+      if (kdaVal >= 4.0) {
+        kdaColor = '#ff9f43';
+        kdaRating = '¡LEYENDA!';
+      } else if (kdaVal >= 3.0) {
+        kdaColor = '#a855f7';
+        kdaRating = 'Excelente';
+      } else if (kdaVal >= 2.0) {
+        kdaColor = '#38bdf8';
+        kdaRating = 'Sólido';
+      } else if (kdaVal > 0) {
+        kdaColor = '#ef4444';
+        kdaRating = 'Mejorable';
+      }
+
       kdaTitle.innerHTML = `<span class="kda-num" style="color: ${kdaColor}; font-size: 2.0rem; font-weight: 900; text-shadow: 0 0 15px ${kdaColor}33; font-family: 'Outfit', sans-serif;">${stats.kda}</span> <span class="kda-label" style="font-size: 0.8rem; font-weight: 800; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin-left: 4px;">KDA</span> <span class="kda-badge" style="background: ${kdaColor}15; border: 1px solid ${kdaColor}33; color: ${kdaColor}; font-size: 0.65rem; font-weight: 900; padding: 2px 8px; border-radius: 6px; margin-left: 8px; text-transform: uppercase; letter-spacing: 0.5px; vertical-align: middle;">${kdaRating}</span>`;
-      
-      document.getElementById('stat-gold').textContent = stats.avgGold.toLocaleString('es-ES');
-      document.getElementById('stat-gpm').textContent = activeMatches.length > 0 ? avgGpm : 'N/A';
-      document.getElementById('stat-dmg').textContent = stats.avgDamageDealt.toLocaleString('es-ES');
-      document.getElementById('stat-dpm').textContent = activeMatches.length > 0 ? avgDpm : 'N/A';
-      document.getElementById('stat-carry').textContent = activeMatches.length > 0 ? `${carryRate}%` : 'N/A';
-      document.getElementById('stat-kills').textContent = activeMatches.length > 0 ? avgKillsVal : 'N/A';
-      document.getElementById('stat-deaths').textContent = stats.avgDeaths;
-      document.getElementById('stat-assists').textContent = activeMatches.length > 0 ? avgAssistsVal : 'N/A';
-      document.getElementById('stat-cs').textContent = stats.csPerMin;
-      document.getElementById('stat-kp').textContent = `${stats.avgKp}%`;
+
+      document.getElementById('stat-kills').textContent = stats.avgKills || '--';
+      document.getElementById('stat-deaths').textContent = stats.avgDeaths || '--';
+      document.getElementById('stat-assists').textContent = stats.avgAssists || '--';
+      document.getElementById('stat-cs').textContent = stats.csPerMin || '--';
+      document.getElementById('stat-kp').textContent = `${stats.avgKp || '--'}%`;
+      document.getElementById('stat-carry').textContent = '--';
+      document.getElementById('stat-gold').textContent = stats.avgGold.toLocaleString('es-ES') || '--';
+      document.getElementById('stat-gpm').textContent = '--';
+      document.getElementById('stat-duration').textContent = '--';
+      document.getElementById('stat-dmg').textContent = stats.avgDamageDealt.toLocaleString('es-ES') || '--';
+      document.getElementById('stat-dmg-taken').textContent = stats.avgDamageTaken.toLocaleString('es-ES') || '--';
+      document.getElementById('stat-dpm').textContent = '--';
     } else {
       kdaTitle.innerHTML = `<span class="kda-num" style="color: #94a3b8; font-size: 2.0rem; font-weight: 900; font-family: 'Outfit', sans-serif;">0.00</span> <span class="kda-label" style="font-size: 0.8rem; font-weight: 800; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin-left: 4px;">KDA</span>`;
-      document.getElementById('stat-gold').textContent = 'N/A';
-      document.getElementById('stat-gpm').textContent = 'N/A';
-      document.getElementById('stat-dmg').textContent = 'N/A';
-      document.getElementById('stat-dpm').textContent = 'N/A';
-      document.getElementById('stat-carry').textContent = 'N/A';
       document.getElementById('stat-kills').textContent = 'N/A';
       document.getElementById('stat-deaths').textContent = 'N/A';
       document.getElementById('stat-assists').textContent = 'N/A';
       document.getElementById('stat-cs').textContent = 'N/A';
       document.getElementById('stat-kp').textContent = 'N/A';
+      document.getElementById('stat-carry').textContent = 'N/A';
+      document.getElementById('stat-gold').textContent = 'N/A';
+      document.getElementById('stat-gpm').textContent = 'N/A';
+      document.getElementById('stat-duration').textContent = 'N/A';
+      document.getElementById('stat-dmg').textContent = 'N/A';
+      document.getElementById('stat-dmg-taken').textContent = 'N/A';
+      document.getElementById('stat-dpm').textContent = 'N/A';
     }
   }
 

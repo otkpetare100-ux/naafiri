@@ -2087,11 +2087,11 @@ select option {
   flex-direction: column;
 }
 
-/* Grid de Estadísticas 5x2 */
+/* Grid de Estadísticas 3x2 */
 .advanced-stats-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
 }
 
 .stat-card {
@@ -2099,7 +2099,7 @@ select option {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%) !important;
   border: 1px solid rgba(255, 255, 255, 0.05) !important;
   border-radius: 18px !important;
-  padding: 16px 14px 16px 20px !important; /* Más holgura a la izquierda por la banda acentuada */
+  padding: 16px 18px 16px 24px !important; /* Más holgura a la izquierda por la banda acentuada */
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -2127,17 +2127,18 @@ select option {
   transition: all 0.4s ease;
 }
 
-.stat-accent-strip.stat-gold { background: linear-gradient(to bottom, #f1b90c, #b8860b); }
-.stat-accent-strip.stat-gpm { background: linear-gradient(to bottom, #ffd700, #b8860b); }
+.stat-accent-strip.stat-kills { background: linear-gradient(to bottom, #22c55e, #15803d); }
 .stat-accent-strip.stat-deaths { background: linear-gradient(to bottom, #ef4444, #991b1b); }
-.stat-accent-strip.stat-cs { background: linear-gradient(to bottom, #38bdf8, #0369a1); }
-.stat-accent-strip.stat-kp { background: linear-gradient(to bottom, #c084fc, #6b21a8); }
+.stat-accent-strip.stat-assists { background: linear-gradient(to bottom, #38bdf8, #0284c7); }
+.stat-accent-strip.stat-cs { background: linear-gradient(to bottom, #06b6d4, #0891b2); }
+.stat-accent-strip.stat-kp { background: linear-gradient(to bottom, #f43f5e, #be123c); }
+.stat-accent-strip.stat-carry { background: linear-gradient(to bottom, #a855f7, #7e22ce); }
+.stat-accent-strip.stat-gold { background: linear-gradient(to bottom, #f1b90c, #b8860b); }
+.stat-accent-strip.stat-gpm { background: linear-gradient(to bottom, #f59e0b, #d97706); }
+.stat-accent-strip.stat-duration { background: linear-gradient(to bottom, #14b8a6, #0d9488); }
 .stat-accent-strip.stat-dmg { background: linear-gradient(to bottom, #f97316, #c2410c); }
-.stat-accent-strip.stat-dpm { background: linear-gradient(to bottom, #ff5e3a, #ff2a6d); }
-.stat-accent-strip.stat-carry { background: linear-gradient(to bottom, #00ff87, #60efff); }
-.stat-accent-strip.stat-kills { background: linear-gradient(to bottom, #ff3838, #b91c1c); }
-.stat-accent-strip.stat-assists { background: linear-gradient(to bottom, #00f2fe, #0072ff); }
-.stat-accent-strip.stat-dmg-taken { background: linear-gradient(to bottom, #10b981, #065f46); }
+.stat-accent-strip.stat-dmg-taken { background: linear-gradient(to bottom, #10b981, #059669); }
+.stat-accent-strip.stat-dpm { background: linear-gradient(to bottom, #ec4899, #c026d3); }
 
 .stat-card:hover .stat-accent-strip {
   opacity: 1;
