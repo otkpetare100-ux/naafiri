@@ -3264,11 +3264,11 @@ select option {
   flex-direction: column;
   justify-content: center;
   gap: 6px;
-  padding: 0 14px;
+  padding: 0 12px;
   border-left: 1.5px solid rgba(212, 175, 55, 0.12); /* Subtle gold vertical divisor */
   border-right: 1.5px solid rgba(212, 175, 55, 0.12);
-  min-width: 140px;
-  width: 140px;
+  min-width: 180px;
+  width: 180px;
   box-sizing: border-box;
 }
 
@@ -3288,8 +3288,8 @@ select option {
 }
 
 .team-player-champ-icon {
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.2);
   object-fit: cover;
