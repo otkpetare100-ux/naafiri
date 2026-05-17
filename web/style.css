@@ -2102,7 +2102,7 @@ select option {
   padding: 16px 18px 16px 24px !important; /* Más holgura a la izquierda por la banda acentuada */
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible !important; /* Permitir que los globos habladores sobresalgan */
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
   backdrop-filter: blur(10px);
@@ -2122,7 +2122,7 @@ select option {
   top: 0;
   bottom: 0;
   width: 4px;
-  border-radius: 4px 0 0 4px;
+  border-radius: 18px 0 0 18px; /* Ajustar al radio del contenedor */
   opacity: 0.6;
   transition: all 0.4s ease;
 }
