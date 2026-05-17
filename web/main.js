@@ -1662,13 +1662,6 @@ function openPlayerDetails(player) {
                 <div class="stats-cs"><strong>${match.cs} CS</strong> <span class="cs-min">(${csPerMin})</span></div>
                 <div class="stats-vision"><strong>${visionScore}</strong> vision</div>
               </div>
-              
-              <div class="stats-row-double">
-                <div class="stats-gold"><strong class="gold-value">${goldStr}</strong> oro</div>
-                <div class="stats-damage"><strong class="damage-value">${dmgStr}</strong> daño</div>
-              </div>
-              
-              <div class="stats-kp"><strong class="${kpStr >= 50 ? 'kp-high' : ''}">${kpStr}%</strong> KP</div>
             </div>
           `;
 
