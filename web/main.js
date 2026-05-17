@@ -1517,6 +1517,41 @@ function openPlayerDetails(player) {
           const isWin = match.win;
           const winClass = isRemake ? 'match-remake' : (isWin ? 'match-win' : 'match-loss');
           const resultText = isRemake ? 'REMAKE' : (isWin ? 'VICTORIA' : 'DERROTA');
+
+          // 1. Calcular tiempo transcurrido (Time Ago)
+          const getTimeAgo = (ts) => {
+            const diffMs = Date.now() - ts;
+            const diffSecs = Math.floor(diffMs / 1000);
+            const diffMins = Math.floor(diffSecs / 60);
+            const diffHours = Math.floor(diffMins / 60);
+            const diffDays = Math.floor(diffHours / 24);
+
+            if (diffSecs < 60) return 'hace unos instantes';
+            if (diffMins < 60) return `hace ${diffMins} min`;
+            if (diffHours < 24) return `hace ${diffHours} ${diffHours === 1 ? 'hora' : 'horas'}`;
+            return `hace ${diffDays} ${diffDays === 1 ? 'día' : 'días'}`;
+          };
+          const timeAgoStr = getTimeAgo(match.timestamp);
+
+          // 2. Obtener nombres de cola
+          let queueName = 'Clasificatoria';
+          let queueSub = 'solo/dúo';
+          if (match.queueId === 420) {
+            queueName = 'Clasificatoria';
+            queueSub = 'solo/dúo';
+          } else if (match.queueId === 440) {
+            queueName = 'Clasificatoria';
+            queueSub = 'Flex';
+          } else {
+            queueName = 'Partida';
+            queueSub = 'Personalizada';
+          }
+
+          // 3. Duración formateada (m y s)
+          const totalSeconds = Math.round(match.durationMins * 60);
+          const minutes = Math.floor(totalSeconds / 60);
+          const seconds = totalSeconds % 60;
+          const durationStr = `${minutes}m ${seconds}s`;
           
           let lpHtml = '';
           if (match.lpChange !== undefined && match.lpChange !== null && !isRemake) {
@@ -1674,9 +1709,17 @@ function openPlayerDetails(player) {
                 </div>
                 ${spellsRunesHtml}
               </div>
-              <div class="match-result-box">
-                <div class="match-result">${resultText}</div>
-                ${lpHtml}
+              <!-- NUEVO BLOQUE DE METADATOS DEL RESULTADO -->
+              <div class="match-meta-info">
+                <div class="meta-queue">${queueName}</div>
+                <div class="meta-queue-sub">${queueSub}</div>
+                <div class="meta-time">${timeAgoStr}</div>
+                <div class="meta-divider"></div>
+                <div class="meta-result">${resultText}</div>
+                <div class="meta-duration-lp">
+                  <span class="meta-duration">${durationStr}</span>
+                  ${lpHtml}
+                </div>
               </div>
               
               <!-- BLOQUE DE ESTADÍSTICAS VERTICALES -->

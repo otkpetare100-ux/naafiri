@@ -2743,31 +2743,80 @@ select option {
   background: linear-gradient(90deg, rgba(136, 136, 136, 0.05) 0%, rgba(0,0,0,0) 100%);
 }
 
-.match-result-box {
+/* Nuevo bloque de metadatos del juego a la derecha del campeón */
+.match-meta-info {
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  width: 90px;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 95px;
+  font-size: 0.72rem;
+  font-family: 'Outfit', sans-serif;
 }
 
-.match-result {
-  font-weight: 900;
-  letter-spacing: 1px;
+.meta-queue {
+  font-weight: 800;
+  color: #3b82f6; /* Azul premium para la cola clasificatoria */
+  text-transform: capitalize;
+  font-size: 0.78rem;
+  letter-spacing: 0.2px;
+}
+
+.meta-queue-sub {
+  font-weight: 700;
+  color: #3b82f6;
+  font-size: 0.78rem;
+  margin-top: -2px;
+}
+
+.meta-time {
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 500;
+  font-size: 0.7rem;
+}
+
+.meta-divider {
+  width: 60px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 4px 0;
+}
+
+.meta-result {
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  font-size: 0.78rem;
+}
+
+.match-win .meta-result {
+  color: #4ade80; /* Victoria en verde esmeralda */
+}
+
+.match-loss .meta-result {
+  color: #ef4444; /* Derrota en coral/rojo */
+}
+
+.match-remake .meta-result {
+  color: #aaaaaa; /* Remake en gris elegante */
+}
+
+.meta-duration-lp {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
 }
 
 .match-lp {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 800;
-  margin-top: 4px;
 }
 
 .lp-gain { color: #4ade80; }
 .lp-loss { color: #fca5a5; }
-
-.match-win .match-result { color: #4ade80; }
-.match-loss .match-result { color: #ef4444; }
-.match-remake .match-result { color: #aaaaaa; }
 
 .match-stat {
   color: #fff;
