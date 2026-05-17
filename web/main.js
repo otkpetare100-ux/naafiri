@@ -126,7 +126,7 @@ function showItemTooltip(e, item) {
   
   const descriptionHtml = item.description || '';
   const goldHtml = item.gold && item.gold.total > 0 
-    ? `<span class="tooltip-gold">🪙 ${item.gold.total} oro</span>` 
+    ? `<span class="tooltip-gold"><svg class="gold-coin-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" fill="#fbbf24" stroke="#d97706" stroke-width="1.8"/><circle cx="12" cy="12" r="5" stroke="#d97706" stroke-width="1.5" stroke-dasharray="2 1"/></svg> ${item.gold.total} oro</span>` 
     : '';
 
   tooltip.innerHTML = `
