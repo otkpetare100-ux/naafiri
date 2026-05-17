@@ -710,28 +710,50 @@ function renderLadder(players) {
 
 
     // Top Campeones HTML
-    const topChampsHtml = (player.topChampions || []).map(champ => `
-      <div class="champ-item">
-        <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${champ.name}.png"
-             class="champ-icon" alt="${champ.name}"
-             onerror="this.src='/assets/placeholder_champ.png'" />
+    const topChampsHtml = (player.topChampions || []).map(champ => {
+      const champKey = cleanChampId(champ.name);
+      let champTitle = '';
+      if (CHAMPION_SKINS_DATA) {
+        const foundKey = Object.keys(CHAMPION_SKINS_DATA).find(
+          k => k.toLowerCase() === (champKey ? champKey.toLowerCase() : '')
+        );
+        if (foundKey && CHAMPION_SKINS_DATA[foundKey]) {
+          champTitle = CHAMPION_SKINS_DATA[foundKey].title || '';
+        }
+      }
+      const displayTitle = champTitle ? champTitle.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : '';
+      const formattedPoints = champ.points ? Number(champ.points).toLocaleString() + ' PTS' : '';
 
+      return `
+        <div class="champ-item">
+          <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${champ.name}.png"
+               class="champ-icon" alt="${champ.name}"
+               onerror="this.src='/assets/placeholder_champ.png'" />
 
-        <div class="mastery-card ${cardPositionClass}">
-          <div class="m-card-header">
-            <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${champ.name}.png" class="m-avatar" />
-            <img src="${getMasteryCrest(champ.level)}" class="m-crest-official" />
-          </div>
-          <div class="m-card-body">
-            <div class="m-champ-name">${champ.name}</div>
-            <div class="m-stats">
-              <span class="m-label">Maestría</span>
-              <span class="m-value">${champ.level}</span>
+          <div class="mastery-card ${cardPositionClass}">
+            <div class="m-card-header">
+              <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${champ.name}.png" class="m-avatar" />
+              <img src="${getMasteryCrest(champ.level)}" class="m-crest-official" />
+            </div>
+            <div class="m-card-body">
+              <div class="m-champ-name">${champ.name}</div>
+              ${displayTitle ? `<div class="m-champ-title">${displayTitle}</div>` : ''}
+              <div class="m-stats">
+                <div class="m-stat-row">
+                  <span class="m-label">Nivel</span>
+                  <span class="m-value">${champ.level}</span>
+                </div>
+                ${formattedPoints ? `
+                <div class="m-stat-row">
+                  <span class="m-label">Puntos</span>
+                  <span class="m-value-sub">${formattedPoints}</span>
+                </div>` : ''}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
 
     card.innerHTML = `
       <div class="rank-text">#${rankNum}</div>

@@ -482,21 +482,21 @@ h1::after {
   position: absolute;
   bottom: 110%;
   left: 50%;
-  transform: translateX(-50%) translateY(15px);
-  background: linear-gradient(180deg, #0a0a0c 0%, #121214 100%);
-  backdrop-filter: blur(25px);
-  border: 1.5px solid var(--gold-primary);
-  border-radius: 14px;
-  padding: 18px;
-  width: 150px;
+  transform: translateX(-50%) translateY(12px) scale(0.95);
+  background: linear-gradient(135deg, rgba(10, 10, 12, 0.96) 0%, rgba(18, 18, 20, 0.99) 100%);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(200, 170, 110, 0.4);
+  border-radius: 12px;
+  padding: 16px 14px;
+  width: 170px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   opacity: 0;
   pointer-events: none;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(212, 175, 55, 0.15);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.9), inset 0 0 15px rgba(200, 170, 110, 0.05), 0 0 20px rgba(200, 170, 110, 0.15);
   margin-bottom: 10px;
   z-index: 1000;
 }
@@ -506,16 +506,17 @@ h1::after {
   top: 110%;
   margin-bottom: 0;
   margin-top: 10px;
-  transform: translateX(-50%) translateY(-15px);
+  transform: translateX(-50%) translateY(-12px) scale(0.95);
 }
 
 .champ-item:hover .mastery-card.m-card-bottom {
-  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
 }
 
 .champ-item:hover .mastery-card {
   opacity: 1;
-  transform: translateX(-50%) translateY(0);
+  transform: translateX(-50%) translateY(0) scale(1);
 }
 
 .m-card-header {
@@ -563,37 +564,68 @@ h1::after {
 .m-champ-name {
   color: #fff;
   font-weight: 900;
-  font-size: 1rem;
+  font-size: 0.95rem;
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   margin-top: 8px;
   text-align: center;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  font-family: 'Outfit', sans-serif;
+}
+
+.m-champ-title {
+  color: #c8aa6e; /* Oro oficial suave */
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-style: italic;
+  text-align: center;
+  margin-top: 1px;
+  margin-bottom: 6px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: 0.5px;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .m-stats {
   display: flex;
   flex-direction: column;
+  gap: 6px;
+  border-top: 1px solid rgba(200, 170, 110, 0.2);
+  padding-top: 8px;
+  width: 100%;
+}
+
+.m-stat-row {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 4px;
-  border-top: 1px solid rgba(212, 175, 55, 0.2);
-  padding-top: 10px;
   width: 100%;
 }
 
 .m-label {
-  font-size: 0.65rem;
-  color: #a0a0a0;
+  font-size: 0.62rem;
+  color: rgba(255, 255, 255, 0.45);
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
   font-weight: 700;
 }
 
 .m-value {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--gold-primary);
   font-weight: 800;
-  text-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+  text-shadow: 0 0 6px rgba(212, 175, 55, 0.3);
+}
+
+.m-value-sub {
+  font-size: 0.72rem;
+  color: #e0e0e0;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 
 /* .champ-mastery-lvl styles removed */
