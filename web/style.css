@@ -2712,8 +2712,9 @@ select option {
 
 .match-item {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
+  gap: 24px;
   padding: 8px 16px;
   border-radius: 12px; /* Sutilmente más compacto y moderno */
   background: rgba(255, 255, 255, 0.03);
