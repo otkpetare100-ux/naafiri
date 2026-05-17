@@ -2618,16 +2618,69 @@ select option {
 .match-champ {
   display: flex;
   align-items: center;
+  gap: 10px;
   margin-right: 15px;
 }
 
+.match-champ-avatar-container {
+  position: relative;
+  flex-shrink: 0;
+}
+
 .match-champ-icon {
-  width: 35px;
-  height: 35px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  border: 2px solid rgba(212, 175, 55, 0.4);
+  border: 2px solid rgba(212, 175, 55, 0.6);
   object-fit: cover;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+  display: block;
+}
+
+.match-spells-runes {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.match-spells, .match-runes {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.match-spell-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid rgba(0, 0, 0, 0.8);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.match-rune-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.match-rune-icon.primary {
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+  padding: 1px;
+}
+
+.match-rune-icon.secondary {
+  width: 16px;
+  height: 16px;
+  align-self: center;
+  opacity: 0.85;
+}
+
+.match-rune-placeholder {
+  width: 20px;
+  height: 20px;
 }
 
 .match-item {

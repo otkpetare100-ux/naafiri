@@ -399,7 +399,11 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
             damageTaken: participant.totalDamageTaken,
             win: participant.win,
             isRemake: isRemake,
-            timestamp: matchData.info.gameCreation
+            timestamp: matchData.info.gameCreation,
+            summoner1Id: participant.summoner1Id,
+            summoner2Id: participant.summoner2Id,
+            keystoneId: participant.perks?.styles?.[0]?.selections?.[0]?.perk,
+            subStyleId: participant.perks?.styles?.[1]?.style
           });
           console.log(`Descargada partida ${matchId} | Queue: ${matchData.info.queueId} | isRemake: ${isRemake}`);
         }
