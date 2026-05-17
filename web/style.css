@@ -204,18 +204,65 @@ h1::after {
 }
 
 .player-card.rank-1 {
-  border-color: var(--gold-primary);
-  background: linear-gradient(90deg, rgba(200, 155, 60, 0.15) 0%, var(--bg-card) 40%);
-  box-shadow: 0 0 30px rgba(200, 155, 60, 0.1);
+  border-color: #d4af37 !important;
+  background: linear-gradient(90deg, rgba(212, 175, 55, 0.14) 0%, rgba(212, 175, 55, 0.02) 35%, var(--bg-card) 70%) !important;
   overflow: visible !important;
   z-index: 100;
   margin-top: 1.5rem;
+  animation: champ-gold-pulse 4s ease-in-out infinite;
 }
 
 .player-card.rank-1:hover {
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.15) 0%, rgba(200, 155, 60, 0.2) 20%, var(--bg-card) 60%);
-  border-color: #fff;
-  box-shadow: 0 0 40px hsla(66, 72%, 43%, 0.795);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.12) 0%, rgba(212, 175, 55, 0.22) 20%, var(--bg-card) 60%) !important;
+  border-color: #fff !important;
+  box-shadow: 0 0 40px rgba(212, 175, 55, 0.5), inset 0 0 20px rgba(212, 175, 55, 0.15) !important;
+  animation: none; /* Detener el pulso al hacer hover para enfoque nítido */
+}
+
+.player-card.rank-2 {
+  border-color: rgba(192, 192, 192, 0.45) !important;
+  background: linear-gradient(90deg, rgba(192, 192, 192, 0.1) 0%, rgba(192, 192, 192, 0.01) 35%, var(--bg-card) 70%) !important;
+  z-index: 90;
+  animation: champ-silver-pulse 4s ease-in-out infinite;
+}
+
+.player-card.rank-2:hover {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.12) 0%, rgba(192, 192, 192, 0.18) 20%, var(--bg-card) 60%) !important;
+  border-color: #fff !important;
+  box-shadow: 0 0 35px rgba(192, 192, 192, 0.4), inset 0 0 15px rgba(192, 192, 192, 0.1) !important;
+  animation: none;
+}
+
+.player-card.rank-3 {
+  border-color: rgba(205, 127, 50, 0.45) !important;
+  background: linear-gradient(90deg, rgba(205, 127, 50, 0.1) 0%, rgba(205, 127, 50, 0.01) 35%, var(--bg-card) 70%) !important;
+  z-index: 80;
+  animation: champ-bronze-pulse 4s ease-in-out infinite;
+}
+
+.player-card.rank-3:hover {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.12) 0%, rgba(205, 127, 50, 0.18) 20%, var(--bg-card) 60%) !important;
+  border-color: #fff !important;
+  box-shadow: 0 0 35px rgba(205, 127, 50, 0.4), inset 0 0 15px rgba(205, 127, 50, 0.1) !important;
+  animation: none;
+}
+
+@keyframes champ-gold-pulse {
+  0% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.1), inset 0 0 10px rgba(212, 175, 55, 0.02); border-color: rgba(212, 175, 55, 0.4); }
+  50% { box-shadow: 0 0 35px rgba(212, 175, 55, 0.28), inset 0 0 20px rgba(212, 175, 55, 0.1); border-color: rgba(212, 175, 55, 0.85); }
+  100% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.1), inset 0 0 10px rgba(212, 175, 55, 0.02); border-color: rgba(212, 175, 55, 0.4); }
+}
+
+@keyframes champ-silver-pulse {
+  0% { box-shadow: 0 0 15px rgba(192, 192, 192, 0.06), inset 0 0 8px rgba(192, 192, 192, 0.01); border-color: rgba(192, 192, 192, 0.25); }
+  50% { box-shadow: 0 0 28px rgba(192, 192, 192, 0.2), inset 0 0 15px rgba(192, 192, 192, 0.08); border-color: rgba(192, 192, 192, 0.65); }
+  100% { box-shadow: 0 0 15px rgba(192, 192, 192, 0.06), inset 0 0 8px rgba(192, 192, 192, 0.01); border-color: rgba(192, 192, 192, 0.25); }
+}
+
+@keyframes champ-bronze-pulse {
+  0% { box-shadow: 0 0 15px rgba(205, 127, 50, 0.06), inset 0 0 8px rgba(205, 127, 50, 0.01); border-color: rgba(205, 127, 50, 0.25); }
+  50% { box-shadow: 0 0 28px rgba(205, 127, 50, 0.2), inset 0 0 15px rgba(205, 127, 50, 0.08); border-color: rgba(205, 127, 50, 0.65); }
+  100% { box-shadow: 0 0 15px rgba(205, 127, 50, 0.06), inset 0 0 8px rgba(205, 127, 50, 0.01); border-color: rgba(205, 127, 50, 0.25); }
 }
 
 .rank-text {
