@@ -2197,9 +2197,24 @@ function openPlayerDetails(player) {
               const safeSummonerName = (p.summonerName || 'Desconocido').replace(/'/g, "\\'");
               const safePuuid = (p.puuid || '').replace(/'/g, "\\'");
 
+              // Buscar si es un miembro de la jauría para usar su tagLine real
+              let tagLine = p.tagLine || '';
+              if (!tagLine && GLOBAL_PLAYERS_LIST) {
+                const tracked = GLOBAL_PLAYERS_LIST.find(gp => gp.puuid === p.puuid);
+                if (tracked) {
+                  tagLine = tracked.tagLine || '';
+                }
+              }
+              // Si es un jugador externo en una partida guardada previamente, usar 'LAN' como fallback
+              if (!tagLine) {
+                tagLine = 'LAN';
+              }
+              const safeTagLine = tagLine.replace(/'/g, "\\'");
+
               return `
                 <div class="team-player ${isMe}" 
                      data-summoner-name="${safeSummonerName}" 
+                     data-tag-line="${safeTagLine}"
                      data-champion-name="${champDisplayName}" 
                      data-puuid="${safePuuid}" 
                      data-team-id="${p.teamId || 100}" 
