@@ -1702,14 +1702,7 @@ function openPlayerDetails(player) {
 
           const matchHtml = `
             <div class="match-item ${winClass}">
-              <div class="match-champ">
-                <div class="match-champ-avatar-container">
-                  <img src="${champIconUrl}" class="match-champ-icon" alt="${champName}" onerror="this.onerror=null; this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png';" title="${champName}" />
-                  <img src="${laneIconUrl}" class="match-lane-icon" title="${laneMeta.name}" alt="${laneMeta.name}" />
-                </div>
-                ${spellsRunesHtml}
-              </div>
-              <!-- NUEVO BLOQUE DE METADATOS DEL RESULTADO -->
+              <!-- 1. BLOQUE DE METADATOS DEL JUEGO (AHORA A LA IZQUIERDA DEL TODO) -->
               <div class="match-meta-info">
                 <div class="meta-queue">${queueName}</div>
                 <div class="meta-queue-sub">${queueSub}</div>
@@ -1720,6 +1713,15 @@ function openPlayerDetails(player) {
                   <span class="meta-duration">${durationStr}</span>
                   ${lpHtml}
                 </div>
+              </div>
+
+              <!-- 2. CAMPEÓN, HECHIZOS Y RUNAS -->
+              <div class="match-champ">
+                <div class="match-champ-avatar-container">
+                  <img src="${champIconUrl}" class="match-champ-icon" alt="${champName}" onerror="this.onerror=null; this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png';" title="${champName}" />
+                  <img src="${laneIconUrl}" class="match-lane-icon" title="${laneMeta.name}" alt="${laneMeta.name}" />
+                </div>
+                ${spellsRunesHtml}
               </div>
               
               <!-- BLOQUE DE ESTADÍSTICAS VERTICALES -->
