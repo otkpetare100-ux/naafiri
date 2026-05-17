@@ -3272,47 +3272,39 @@ select option {
   box-shadow: 0 0 6px var(--gold-primary);
 }
 
-/* Bloque de estadísticas de Economía y Combate (Extremo Derecho) */
-.match-econ-block {
+/* Filas dobles para estadísticas agrupadas en la izquierda */
+.stats-row-double {
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  gap: 3px;
-  min-width: 105px;
-  font-size: 0.76rem;
-  color: #fff;
-  text-align: center;
-  border-left: 1.5px solid rgba(212, 175, 55, 0.12); /* Divisor vertical simétrico en la derecha */
-  padding-left: 14px;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
   box-sizing: border-box;
 }
 
-.econ-stat {
+.stats-gold,
+.stats-damage,
+.stats-kp {
   font-size: 0.72rem;
   color: rgba(255, 255, 255, 0.45);
 }
 
-.econ-stat strong {
-  color: #fff;
-  font-weight: 600;
-  font-size: 0.76rem;
-}
-
-/* Resaltado de Oro (Tono amarillo cálido suave) */
-.econ-stat strong.gold-value {
+.stats-gold strong.gold-value {
   color: #fcd34d; /* Amarillo cálido prémium */
 }
 
-/* Resaltado de Daño (Tono coral suave) */
-.econ-stat strong.damage-value {
+.stats-damage strong.damage-value {
   color: #f87171; /* Coral/Rojo de combate */
 }
 
-/* Resaltado de KP Alto (>= 50%) */
-.econ-stat strong.kp-high {
+.stats-kp strong.kp-high {
   color: #ff9f0a; /* Naranja/Oro brillante */
   text-shadow: 0 0 2px rgba(255, 159, 10, 0.2);
+}
+
+.stats-kp strong {
+  color: #fff;
+  font-weight: 600;
 }
 
 /* 2x4 Items Grid & Lane Quest Styles */

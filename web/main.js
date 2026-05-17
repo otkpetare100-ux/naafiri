@@ -1657,8 +1657,18 @@ function openPlayerDetails(player) {
                 <span>${match.assists}</span>
               </div>
               <div class="stats-kda-ratio"><strong class="${kdaColorClass}">${kdaRatio}</strong> KDA</div>
-              <div class="stats-cs"><strong>${match.cs} CS</strong> <span class="cs-min">(${csPerMin})</span></div>
-              <div class="stats-vision"><strong>${visionScore}</strong> vision</div>
+              
+              <div class="stats-row-double">
+                <div class="stats-cs"><strong>${match.cs} CS</strong> <span class="cs-min">(${csPerMin})</span></div>
+                <div class="stats-vision"><strong>${visionScore}</strong> vision</div>
+              </div>
+              
+              <div class="stats-row-double">
+                <div class="stats-gold"><strong class="gold-value">${goldStr}</strong> oro</div>
+                <div class="stats-damage"><strong class="damage-value">${dmgStr}</strong> daño</div>
+              </div>
+              
+              <div class="stats-kp"><strong class="${kpStr >= 50 ? 'kp-high' : ''}">${kpStr}%</strong> KP</div>
             </div>
           `;
 
@@ -1694,13 +1704,6 @@ function openPlayerDetails(player) {
               
               <!-- ROSTER DE EQUIPOS PARTICIPANTES -->
               ${teamsHtml}
-              
-              <!-- BLOQUE SIMÉTRICO DE ECONOMÍA Y COMBATE -->
-              <div class="match-econ-block">
-                <div class="econ-stat"><strong class="gold-value">${goldStr}</strong> oro</div>
-                <div class="econ-stat"><strong class="damage-value">${dmgStr}</strong> daño</div>
-                <div class="econ-stat"><strong class="${kpStr >= 50 ? 'kp-high' : ''}">${kpStr}%</strong> KP</div>
-              </div>
             </div>
           `;
           historyContainer.insertAdjacentHTML('beforeend', matchHtml);
