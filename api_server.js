@@ -411,7 +411,8 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
             item3: participant.item3,
             item4: participant.item4,
             item5: participant.item5,
-            item6: participant.item6
+            item6: participant.item6,
+            roleBoundItem: participant.roleBoundItem || 0
           });
           console.log(`Descargada partida ${matchId} | Queue: ${matchData.info.queueId} | isRemake: ${isRemake}`);
         }

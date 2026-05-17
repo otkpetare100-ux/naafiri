@@ -113,7 +113,8 @@ function renderQuestSlot(isCompleted, laneKey, match) {
       match.item3, match.item4, match.item5,
       match.item6
     ];
-    const hasPinkWard = itemsList.includes(2055); // 2055 es la Control Ward
+    const boundItem = match.roleBoundItem || 0;
+    const hasPinkWard = boundItem === 2055 || itemsList.includes(2055); // 2055 es la Control Ward
     
     if (hasPinkWard) {
       const itemUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/2055.png`;
@@ -139,7 +140,8 @@ function renderQuestSlot(isCompleted, laneKey, match) {
       match.item3, match.item4, match.item5,
       match.item6
     ];
-    const equippedBootId = itemsList.find(id => BOOTS_ITEM_IDS.has(id));
+    const boundItem = match.roleBoundItem || 0;
+    const equippedBootId = BOOTS_ITEM_IDS.has(boundItem) ? boundItem : itemsList.find(id => BOOTS_ITEM_IDS.has(id));
     
     if (equippedBootId) {
       const itemUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/${equippedBootId}.png`;
