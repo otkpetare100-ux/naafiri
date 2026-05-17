@@ -1725,12 +1725,6 @@ function openPlayerDetails(player) {
                  <div class="stats-cs"><strong>${match.cs} CS</strong> <span class="cs-min">(${csPerMin})</span></div>
                  <div class="stats-vision"><strong>${visionScore}</strong> vision</div>
                </div>
-               ${(multikillHtml || badgeHtml) ? `
-                 <div class="stats-badges-row">
-                   ${multikillHtml}
-                   ${badgeHtml}
-                 </div>
-               ` : ''}
             </div>
           `;
 
@@ -1749,13 +1743,21 @@ function openPlayerDetails(player) {
                 </div>
               </div>
 
-              <!-- 2. CAMPEÓN, HECHIZOS Y RUNAS -->
-              <div class="match-champ">
-                <div class="match-champ-avatar-container">
-                  <img src="${champIconUrl}" class="match-champ-icon" alt="${champName}" onerror="this.onerror=null; this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png';" title="${champName}" />
-                  <img src="${laneIconUrl}" class="match-lane-icon" title="${laneMeta.name}" alt="${laneMeta.name}" />
+              <!-- 2. CAMPEÓN, HECHIZOS Y RUNAS CON INSIGNIAS ABAJO -->
+              <div class="match-champ-container">
+                <div class="match-champ">
+                  <div class="match-champ-avatar-container">
+                    <img src="${champIconUrl}" class="match-champ-icon" alt="${champName}" onerror="this.onerror=null; this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png';" title="${champName}" />
+                    <img src="${laneIconUrl}" class="match-lane-icon" title="${laneMeta.name}" alt="${laneMeta.name}" />
+                  </div>
+                  ${spellsRunesHtml}
                 </div>
-                ${spellsRunesHtml}
+                ${(multikillHtml || badgeHtml) ? `
+                  <div class="stats-badges-row">
+                    ${multikillHtml}
+                    ${badgeHtml}
+                  </div>
+                ` : ''}
               </div>
               
               <!-- BLOQUE DE ESTADÍSTICAS VERTICALES -->
