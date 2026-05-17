@@ -602,6 +602,7 @@ app.post('/api/summoners/:puuid/matches/load-more', async (req, res) => {
 
           const matchParticipants = matchData.info.participants.map(p => ({
             summonerName: p.riotIdGameName || p.summonerName || 'Desconocido',
+            tagLine: p.riotIdTagline || '',
             championName: championMap[p.championId?.toString()] || p.championName || 'Unknown',
             puuid: p.puuid,
             win: p.win,
@@ -844,6 +845,7 @@ app.get('/api/summoners/untracked/:puuid', async (req, res) => {
 
           const matchParticipants = matchData.info.participants.map(p => ({
             summonerName: p.riotIdGameName || p.summonerName || 'Desconocido',
+            tagLine: p.riotIdTagline || '',
             championName: championMap[p.championId?.toString()] || p.championName || 'Unknown',
             puuid: p.puuid,
             win: p.win,
