@@ -3190,8 +3190,8 @@ select option {
   align-items: flex-start;
   justify-content: center;
   gap: 3px;
-  min-width: 110px;
-  width: 110px;
+  min-width: 140px;
+  width: 140px;
   font-size: 0.76rem;
   color: #fff;
   text-align: left;
