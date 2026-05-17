@@ -1701,17 +1701,18 @@ function openPlayerDetails(player) {
 
           const statsBlockHtml = `
             <div class="match-stats-block">
-              <div class="stats-kda-raw">
-                <span>${match.kills}</span> / 
-                <span class="d-raw">${match.deaths}</span> / 
-                <span>${match.assists}</span>
-              </div>
-              <div class="stats-kda-ratio"><strong class="${kdaColorClass}">${kdaRatio}</strong> KDA</div>
-              
-              <div class="stats-row-double">
-                <div class="stats-cs"><strong>${match.cs} CS</strong> <span class="cs-min">(${csPerMin})</span></div>
-                <div class="stats-vision"><strong>${visionScore}</strong> vision</div>
-              </div>
+               <div class="stats-kda-raw">
+                 <span>${match.kills}</span> / 
+                 <span class="d-raw">${match.deaths}</span> / 
+                 <span>${match.assists}</span>
+               </div>
+               <div class="stats-kda-ratio"><strong class="${kdaColorClass}">${kdaRatio}</strong> KDA</div>
+               
+               <div class="stats-row-double">
+                 <div class="stats-cs"><strong>${match.cs} CS</strong> <span class="cs-min">(${csPerMin})</span></div>
+                 <div class="stats-vision"><strong>${visionScore}</strong> vision</div>
+               </div>
+               ${badgeHtml}
             </div>
           `;
 
@@ -1728,7 +1729,6 @@ function openPlayerDetails(player) {
                   <span class="meta-duration">${durationStr}</span>
                   ${lpHtml}
                 </div>
-                ${badgeHtml}
               </div>
 
               <!-- 2. CAMPEÓN, HECHIZOS Y RUNAS -->
