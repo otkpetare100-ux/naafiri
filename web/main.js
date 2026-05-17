@@ -942,6 +942,12 @@ async function handleParticipantClick(puuid, summonerName, element) {
     return;
   }
 
+  // Verificar si hay enfriamiento activo antes de consultar a Riot
+  if (riotRequestCooldownActive) {
+    showToast('⏳ Por favor, espera a que termine el enfriamiento de Riot.', 'info');
+    return;
+  }
+
   // 2. Si es externo, abrir el modal en estado de carga
   if (element) element.classList.add('loading-click');
   if (typeof startLoadingBar === 'function') startLoadingBar();
@@ -962,7 +968,7 @@ async function handleParticipantClick(puuid, summonerName, element) {
     openPlayerDetails(untrackedPlayer);
   } catch (error) {
     console.error(error);
-    showToast('⚠️ Error al consultar el perfil de Riot en tiempo real.', 'error');
+    if (typeof activateRiotCooldown === 'function') activateRiotCooldown();
     const modalEl = document.getElementById('player-details-modal');
     const loader = document.getElementById('details-modal-loader');
     if (loader) loader.classList.remove('active');
@@ -983,6 +989,17 @@ window.handleParticipantClick = handleParticipantClick;
 // Variable global para rastrear modal e historial de navegación
 let currentModalPuuid = null;
 let profileNavigationStack = [];
+let riotRequestCooldownActive = false;
+
+function activateRiotCooldown() {
+  if (riotRequestCooldownActive) return;
+  riotRequestCooldownActive = true;
+  showToast('⏳ Enfriamiento de 1 min activo por error de comunicación con Riot.', 'error');
+  setTimeout(() => {
+    riotRequestCooldownActive = false;
+    showToast('✅ El enfriamiento de Riot ha finalizado. Puedes consultar de nuevo.', 'success');
+  }, 60000);
+}
 
 // Modal de Detalles del Jugador
 // Memoria global de campeones y skins para búsqueda instantánea
@@ -2244,6 +2261,10 @@ function openPlayerDetails(player) {
     btnUpdateMatches.style.cursor = '';
     
     btnUpdateMatches.onclick = async () => {
+      if (riotRequestCooldownActive) {
+        showToast('⏳ Por favor, espera a que termine el enfriamiento de Riot.', 'info');
+        return;
+      }
       try {
         hasReachedHistoryEnd = false; // Resetear bandera de fin de historial al actualizar manualmente
         startLoadingBar();
@@ -2269,7 +2290,7 @@ function openPlayerDetails(player) {
         }
       } catch (e) {
         console.error(e);
-        showToast('❌ Error al actualizar partidas.', 'error');
+        if (typeof activateRiotCooldown === 'function') activateRiotCooldown();
       } finally {
         btnUpdateMatches.classList.remove('loading');
         btnUpdateMatches.disabled = false;
@@ -2324,6 +2345,10 @@ function openPlayerDetails(player) {
         }
         // Caso B: Ya mostramos todas las guardadas, ¡consultemos a Riot API para buscar más antiguas!
         else if (filtered.length >= 5 && !hasReachedHistoryEnd) {
+          if (riotRequestCooldownActive) {
+            showToast('⏳ Por favor, espera a que termine el enfriamiento de Riot.', 'info');
+            return;
+          }
           isFetchingMore = true;
           
           // Crear un spinner de carga Hextech dorado en el DOM
@@ -2388,12 +2413,11 @@ function openPlayerDetails(player) {
             }
           } catch (err) {
             console.error(err);
+            if (typeof activateRiotCooldown === 'function') activateRiotCooldown();
             const prevScrollTop = historyContainer.scrollTop;
             const sp = historyContainer.querySelector('.history-lazy-loader');
             if (sp) sp.remove();
             historyContainer.scrollTop = prevScrollTop;
-            
-            showToast('Error cargando partidas antiguas.', 'error');
           } finally {
             isFetchingMore = false;
           }
