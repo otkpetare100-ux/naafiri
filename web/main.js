@@ -221,7 +221,7 @@ function showQuestTooltip(e, titleText, isCompleted, lane) {
 
   const statusText = isCompleted 
     ? `<span class="quest-status-badge completed">COMPLETADA</span>`
-    : `<span class="quest-status-badge incomplete">PENDIENTE</span>`;
+    : `<span class="quest-status-badge incomplete">NO COMPLETADA</span>`;
 
   tooltip.innerHTML = `
     <div class="tooltip-header">
