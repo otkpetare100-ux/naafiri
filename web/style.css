@@ -2127,6 +2127,7 @@ select option {
   transition: all 0.4s ease;
 }
 
+.stat-accent-strip.stat-kda-avg { background: linear-gradient(to bottom, #10b981, #3b82f6); }
 .stat-accent-strip.stat-kills { background: linear-gradient(to bottom, #22c55e, #15803d); }
 .stat-accent-strip.stat-deaths { background: linear-gradient(to bottom, #ef4444, #991b1b); }
 .stat-accent-strip.stat-assists { background: linear-gradient(to bottom, #38bdf8, #0284c7); }

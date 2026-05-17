@@ -987,12 +987,9 @@ function openPlayerDetails(player) {
       const avgKills = (sumKills / totalGames).toFixed(1);
       const avgDeaths = (sumDeaths / totalGames).toFixed(1);
       const avgAssists = (sumAssists / totalGames).toFixed(1);
-      const avgGold = Math.round(sumGold / totalGames);
       const avgDuration = (sumDuration / totalGames).toFixed(1);
       const gpm = sumDuration > 0 ? Math.round(sumGold / sumDuration) : 0;
       const dpm = sumDuration > 0 ? Math.round(sumDamageDealt / sumDuration) : 0;
-      const avgDamageDealt = Math.round(sumDamageDealt / totalGames);
-      const avgDamageTaken = Math.round(sumDamageTaken / totalGames);
       const avgKp = Math.round((sumKp / totalGames) * 100);
       const carryRate = Math.round((carryGames / totalGames) * 100);
 
@@ -1023,19 +1020,13 @@ function openPlayerDetails(player) {
 
       kdaTitle.innerHTML = `<span class="kda-num" style="color: ${kdaColor}; font-size: 2.0rem; font-weight: 900; text-shadow: 0 0 15px ${kdaColor}33; font-family: 'Outfit', sans-serif;">${kdaStr}</span> <span class="kda-label" style="font-size: 0.8rem; font-weight: 800; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin-left: 4px;">KDA</span> <span class="kda-badge" style="background: ${kdaColor}15; border: 1px solid ${kdaColor}33; color: ${kdaColor}; font-size: 0.65rem; font-weight: 900; padding: 2px 8px; border-radius: 6px; margin-left: 8px; text-transform: uppercase; letter-spacing: 0.5px; vertical-align: middle;">${kdaRating}</span>`;
 
-      // Inyectar en elementos HTML
-      document.getElementById('stat-kills').textContent = avgKills;
-      document.getElementById('stat-deaths').textContent = avgDeaths;
-      document.getElementById('stat-assists').textContent = avgAssists;
+      // Inyectar en elementos HTML de las 6 tarjetas avanzadas
+      document.getElementById('stat-kda-avg').innerHTML = `<span style="color: #22c55e;">${avgKills}</span> <span style="color: rgba(255,255,255,0.2);">/</span> <span style="color: #ef4444;">${avgDeaths}</span> <span style="color: rgba(255,255,255,0.2);">/</span> <span style="color: #38bdf8;">${avgAssists}</span>`;
       document.getElementById('stat-cs').textContent = csPerMin;
       document.getElementById('stat-kp').textContent = `${avgKp}%`;
-      document.getElementById('stat-carry').textContent = `${carryRate}%`;
-      document.getElementById('stat-gold').textContent = avgGold.toLocaleString('es-ES');
       document.getElementById('stat-gpm').textContent = gpm;
-      document.getElementById('stat-duration').textContent = `${avgDuration}m`;
-      document.getElementById('stat-dmg').textContent = avgDamageDealt.toLocaleString('es-ES');
-      document.getElementById('stat-dmg-taken').textContent = avgDamageTaken.toLocaleString('es-ES');
       document.getElementById('stat-dpm').textContent = dpm;
+      document.getElementById('stat-carry').textContent = `${carryRate}%`;
 
     } else if (stats && stats.avgGold !== undefined) {
       // Fallback si no hay partidas detalladas en historial
@@ -1058,32 +1049,23 @@ function openPlayerDetails(player) {
 
       kdaTitle.innerHTML = `<span class="kda-num" style="color: ${kdaColor}; font-size: 2.0rem; font-weight: 900; text-shadow: 0 0 15px ${kdaColor}33; font-family: 'Outfit', sans-serif;">${stats.kda}</span> <span class="kda-label" style="font-size: 0.8rem; font-weight: 800; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin-left: 4px;">KDA</span> <span class="kda-badge" style="background: ${kdaColor}15; border: 1px solid ${kdaColor}33; color: ${kdaColor}; font-size: 0.65rem; font-weight: 900; padding: 2px 8px; border-radius: 6px; margin-left: 8px; text-transform: uppercase; letter-spacing: 0.5px; vertical-align: middle;">${kdaRating}</span>`;
 
-      document.getElementById('stat-kills').textContent = stats.avgKills || '--';
-      document.getElementById('stat-deaths').textContent = stats.avgDeaths || '--';
-      document.getElementById('stat-assists').textContent = stats.avgAssists || '--';
+      const fKills = stats.avgKills || '0';
+      const fDeaths = stats.avgDeaths || '0';
+      const fAssists = stats.avgAssists || '0';
+      document.getElementById('stat-kda-avg').innerHTML = `<span style="color: #22c55e;">${fKills}</span> <span style="color: rgba(255,255,255,0.2);">/</span> <span style="color: #ef4444;">${fDeaths}</span> <span style="color: rgba(255,255,255,0.2);">/</span> <span style="color: #38bdf8;">${fAssists}</span>`;
       document.getElementById('stat-cs').textContent = stats.csPerMin || '--';
       document.getElementById('stat-kp').textContent = `${stats.avgKp || '--'}%`;
-      document.getElementById('stat-carry').textContent = '--';
-      document.getElementById('stat-gold').textContent = stats.avgGold.toLocaleString('es-ES') || '--';
       document.getElementById('stat-gpm').textContent = '--';
-      document.getElementById('stat-duration').textContent = '--';
-      document.getElementById('stat-dmg').textContent = stats.avgDamageDealt.toLocaleString('es-ES') || '--';
-      document.getElementById('stat-dmg-taken').textContent = stats.avgDamageTaken.toLocaleString('es-ES') || '--';
       document.getElementById('stat-dpm').textContent = '--';
+      document.getElementById('stat-carry').textContent = '--';
     } else {
       kdaTitle.innerHTML = `<span class="kda-num" style="color: #94a3b8; font-size: 2.0rem; font-weight: 900; font-family: 'Outfit', sans-serif;">0.00</span> <span class="kda-label" style="font-size: 0.8rem; font-weight: 800; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin-left: 4px;">KDA</span>`;
-      document.getElementById('stat-kills').textContent = 'N/A';
-      document.getElementById('stat-deaths').textContent = 'N/A';
-      document.getElementById('stat-assists').textContent = 'N/A';
+      document.getElementById('stat-kda-avg').textContent = 'N/A';
       document.getElementById('stat-cs').textContent = 'N/A';
       document.getElementById('stat-kp').textContent = 'N/A';
-      document.getElementById('stat-carry').textContent = 'N/A';
-      document.getElementById('stat-gold').textContent = 'N/A';
       document.getElementById('stat-gpm').textContent = 'N/A';
-      document.getElementById('stat-duration').textContent = 'N/A';
-      document.getElementById('stat-dmg').textContent = 'N/A';
-      document.getElementById('stat-dmg-taken').textContent = 'N/A';
       document.getElementById('stat-dpm').textContent = 'N/A';
+      document.getElementById('stat-carry').textContent = 'N/A';
     }
   }
 
