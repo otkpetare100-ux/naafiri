@@ -2190,7 +2190,8 @@ function openPlayerDetails(player) {
             }
             
             const renderTeamPlayer = (p) => {
-              const isMe = (p.puuid && p.puuid === currentModalPuuid) ? 'active-summoner' : '';
+              const isMe = (p.puuid && p.puuid === currentModalPuuid);
+              const isMeClass = isMe ? 'active-summoner' : '';
               const iconUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${p.championName}.png`;
               const champDisplayName = p.championName || 'Unknown';
               
@@ -2211,15 +2212,17 @@ function openPlayerDetails(player) {
               }
               const safeTagLine = tagLine.replace(/'/g, "\\'");
 
+              const clickHandler = isMe ? '' : `onclick="handleParticipantClick('${safePuuid}', '${safeSummonerName}', this)"`;
+
               return `
-                <div class="team-player ${isMe}" 
+                <div class="team-player ${isMeClass}" 
                      data-summoner-name="${safeSummonerName}" 
                      data-tag-line="${safeTagLine}"
                      data-champion-name="${champDisplayName}" 
                      data-puuid="${safePuuid}" 
                      data-team-id="${p.teamId || 100}" 
                      data-win="${p.win || false}"
-                     onclick="handleParticipantClick('${safePuuid}', '${safeSummonerName}', this)">
+                     ${clickHandler}>
                   <img src="${iconUrl}" class="team-player-champ-icon" alt="${champDisplayName}" onerror="this.onerror=null; this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png';" />
                 </div>
               `;

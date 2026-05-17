@@ -3411,6 +3411,10 @@ select option {
 }
 
 /* Active Summoner Golden Highlighting */
+.team-player.active-summoner {
+  cursor: default !important;
+}
+
 .team-player.active-summoner .team-player-champ-icon {
   border: 2.5px solid var(--gold-primary);
   box-shadow: 0 0 8px rgba(212, 175, 55, 0.85);
@@ -3418,8 +3422,7 @@ select option {
 }
 
 .team-player.active-summoner:hover .team-player-champ-icon {
-  transform: scale(1.25);
-  box-shadow: 0 0 14px rgba(212, 175, 55, 1);
+  transform: scale(1.1);
 }
 
 /* Loading Highlight Animation on Clic */
