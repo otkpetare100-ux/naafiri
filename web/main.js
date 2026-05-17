@@ -129,23 +129,11 @@ function showItemTooltip(e, item, slot) {
     ? `<span class="tooltip-gold"><svg class="gold-coin-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" fill="#fbbf24" stroke="#d97706" stroke-width="1.8"/><circle cx="12" cy="12" r="5" stroke="#d97706" stroke-width="1.5" stroke-dasharray="2 1"/></svg> ${item.gold.total} oro</span>` 
     : '';
 
-  const isQuest = slot && slot.classList.contains('quest-slot');
-  const questLane = slot && slot.getAttribute('data-quest-lane');
-  let questBadgeHtml = '';
-  if (isQuest && questLane) {
-    questBadgeHtml = `
-      <div class="tooltip-quest-badge">
-        ✨ Misión de ${questLane} Activa (7.ª Ranura)
-      </div>
-    `;
-  }
-
   tooltip.innerHTML = `
     <div class="tooltip-header">
       <span class="tooltip-name">${item.name}</span>
       ${goldHtml}
     </div>
-    ${questBadgeHtml}
     ${item.plaintext ? `<div class="tooltip-plaintext">${item.plaintext}</div>` : ''}
     <div class="tooltip-divider"></div>
     <div class="tooltip-description">${descriptionHtml}</div>
