@@ -1728,9 +1728,6 @@ function openPlayerDetails(player) {
           spinner.className = 'history-lazy-loader';
           spinner.innerHTML = `<span class="lazy-loader-spin">↻</span> Buscando partidas antiguas en Riot Games...`;
           historyContainer.appendChild(spinner);
-          
-          // Desplazar suavemente hacia abajo para mostrar el spinner
-          historyContainer.scrollTop = historyContainer.scrollHeight;
 
           try {
             const response = await fetch(`${API_BASE}/summoners/${currentModalPuuid}/matches/load-more`, {
