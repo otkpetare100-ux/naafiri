@@ -2855,52 +2855,89 @@ select option {
 .date-separator {
   display: flex;
   align-items: center;
-  justify-content: space-between; /* Envía los badges al extremo derecho */
-  padding: 8px 5px 4px 5px;
-  margin-top: 6px;
+  width: 100%;
+  padding: 14px 5px 6px 5px;
+  margin-top: 14px;
+}
+
+.ds-date {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ffffff 30%, #d4af37 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 0.5px;
+  text-transform: capitalize;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+/* Nodo dorado de línea de tiempo con brillo */
+.ds-date::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #d4af37;
+  box-shadow: 0 0 8px #d4af37, 0 0 16px rgba(212, 175, 55, 0.4);
+}
+
+/* Divisor de cristal fluido */
+.ds-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(212, 175, 55, 0.25) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(212, 175, 55, 0.2) 100%);
+  margin: 0 16px;
+  opacity: 0.65;
 }
 
 .ds-badges {
   display: flex;
-  gap: 12px;
+  gap: 8px; /* Espaciado más compacto y balanceado */
+  flex-shrink: 0;
 }
 
-.ds-date {
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: #fff;
-  letter-spacing: 0.5px;
-  text-transform: capitalize;
-}
-
+/* Píldoras rediseñadas con cristal y relieve */
 .ds-badge {
-  padding: 4px 12px;
-  border-radius: 8px;
-  font-size: 0.8rem;
+  padding: 5px 13px;
+  border-radius: 20px; /* Cápsulas perfectamente redondeadas */
+  font-size: 0.78rem;
   font-weight: 800;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
   letter-spacing: 0.5px;
-}
-
-.ds-badge.win {
-  background: rgba(18, 48, 24, 0.9);
-  border: 1px solid rgba(34, 197, 94, 0.25);
-  color: #bbf7d0;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-}
-
-.ds-badge.loss {
-  background: rgba(48, 18, 18, 0.9);
-  border: 1px solid rgba(239, 68, 68, 0.25);
-  color: #fca5a5;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
 }
 
 .ds-badge.total {
-  background: rgba(30, 35, 45, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: rgba(255, 255, 255, 0.85);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.8);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.03), 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.ds-badge.win {
+  background: rgba(34, 197, 94, 0.07);
+  border: 1px solid rgba(34, 197, 94, 0.28);
+  color: #4ade80;
+  text-shadow: 0 0 6px rgba(74, 222, 128, 0.35);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05), 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.ds-badge.loss {
+  background: rgba(239, 68, 68, 0.07);
+  border: 1px solid rgba(239, 68, 68, 0.28);
+  color: #fca5a5;
+  text-shadow: 0 0 6px rgba(252, 165, 165, 0.35);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05), 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 /* ==========================================================

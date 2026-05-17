@@ -1819,6 +1819,7 @@ function openPlayerDetails(player) {
           const separatorHtml = `
             <div class="date-separator" data-date="${group.date}" data-wins="${group.wins}" data-losses="${group.losses}">
               <span class="ds-date">${group.date}</span>
+              <div class="ds-line"></div>
               <div class="ds-badges">
                 <span class="ds-badge total">${group.wins + group.losses} partidas</span>
                 <span class="ds-badge win">${group.wins} win</span>
