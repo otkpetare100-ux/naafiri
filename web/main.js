@@ -968,6 +968,11 @@ function openPlayerDetails(player) {
       let sumGold = 0, sumDuration = 0, sumDamageDealt = 0, sumDamageTaken = 0;
       let sumKp = 0, carryGames = 0;
 
+      let maxDamageDealt = 0, maxDamageDealtChamp = 'N/A';
+      let maxKills = 0, maxKillsChamp = 'N/A';
+      let maxCs = 0, maxCsChamp = 'N/A';
+      let bestSingleKdaVal = -1, bestSingleKdaStr = '0/0/0', bestSingleKdaChamp = 'N/A';
+
       activeMatches.forEach(m => {
         sumKills += m.kills || 0;
         sumDeaths += m.deaths || 0;
@@ -981,6 +986,31 @@ function openPlayerDetails(player) {
         const kda = m.deaths > 0 ? (m.kills + m.assists) / m.deaths : (m.kills + m.assists);
         if (m.win && (kda >= 3.0 || m.kp >= 0.55)) {
           carryGames++;
+        }
+
+        // Calcular récords individuales de esta partida
+        const mDamage = m.damageDealt || 0;
+        if (mDamage > maxDamageDealt) {
+          maxDamageDealt = mDamage;
+          maxDamageDealtChamp = m.championName || 'N/A';
+        }
+
+        const mKills = m.kills || 0;
+        if (mKills > maxKills) {
+          maxKills = mKills;
+          maxKillsChamp = m.championName || 'N/A';
+        }
+
+        const mCs = m.cs || 0;
+        if (mCs > maxCs) {
+          maxCs = mCs;
+          maxCsChamp = m.championName || 'N/A';
+        }
+
+        if (kda > bestSingleKdaVal) {
+          bestSingleKdaVal = kda;
+          bestSingleKdaStr = `${m.kills || 0}/${m.deaths || 0}/${m.assists || 0}`;
+          bestSingleKdaChamp = m.championName || 'N/A';
         }
       });
 
@@ -1028,6 +1058,19 @@ function openPlayerDetails(player) {
       document.getElementById('stat-dpm').textContent = dpm;
       document.getElementById('stat-carry').textContent = `${carryRate}%`;
 
+      // Inyectar en elementos HTML de Récords Recientes
+      document.getElementById('record-dmg').textContent = maxDamageDealt > 0 ? maxDamageDealt.toLocaleString('es-ES') : '--';
+      document.getElementById('record-dmg-champ').textContent = maxDamageDealtChamp !== 'N/A' ? maxDamageDealtChamp : '--';
+
+      document.getElementById('record-kills').textContent = maxKills > 0 ? `${maxKills} Kills` : '--';
+      document.getElementById('record-kills-champ').textContent = maxKillsChamp !== 'N/A' ? maxKillsChamp : '--';
+
+      document.getElementById('record-cs').textContent = maxCs > 0 ? `${maxCs} CS` : '--';
+      document.getElementById('record-cs-champ').textContent = maxCsChamp !== 'N/A' ? maxCsChamp : '--';
+
+      document.getElementById('record-kda').textContent = bestSingleKdaVal >= 0 ? bestSingleKdaStr : '--';
+      document.getElementById('record-kda-champ').textContent = bestSingleKdaChamp !== 'N/A' ? bestSingleKdaChamp : '--';
+
     } else if (stats && stats.avgGold !== undefined) {
       // Fallback si no hay partidas detalladas en historial
       const kdaVal = parseFloat(stats.kda) || 0.0;
@@ -1058,6 +1101,15 @@ function openPlayerDetails(player) {
       document.getElementById('stat-gpm').textContent = '--';
       document.getElementById('stat-dpm').textContent = '--';
       document.getElementById('stat-carry').textContent = '--';
+
+      document.getElementById('record-dmg').textContent = '--';
+      document.getElementById('record-dmg-champ').textContent = '--';
+      document.getElementById('record-kills').textContent = '--';
+      document.getElementById('record-kills-champ').textContent = '--';
+      document.getElementById('record-cs').textContent = '--';
+      document.getElementById('record-cs-champ').textContent = '--';
+      document.getElementById('record-kda').textContent = '--';
+      document.getElementById('record-kda-champ').textContent = '--';
     } else {
       kdaTitle.innerHTML = `<span class="kda-num" style="color: #94a3b8; font-size: 2.0rem; font-weight: 900; font-family: 'Outfit', sans-serif;">0.00</span> <span class="kda-label" style="font-size: 0.8rem; font-weight: 800; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin-left: 4px;">KDA</span>`;
       document.getElementById('stat-kda-avg').textContent = 'N/A';
@@ -1066,6 +1118,15 @@ function openPlayerDetails(player) {
       document.getElementById('stat-gpm').textContent = 'N/A';
       document.getElementById('stat-dpm').textContent = 'N/A';
       document.getElementById('stat-carry').textContent = 'N/A';
+
+      document.getElementById('record-dmg').textContent = 'N/A';
+      document.getElementById('record-dmg-champ').textContent = 'N/A';
+      document.getElementById('record-kills').textContent = 'N/A';
+      document.getElementById('record-kills-champ').textContent = 'N/A';
+      document.getElementById('record-cs').textContent = 'N/A';
+      document.getElementById('record-cs-champ').textContent = 'N/A';
+      document.getElementById('record-kda').textContent = 'N/A';
+      document.getElementById('record-kda-champ').textContent = 'N/A';
     }
   }
 
