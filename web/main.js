@@ -123,7 +123,7 @@ function renderQuestSlot(isCompleted, laneKey, match) {
         </div>
       `;
     } else {
-      const imgUrl = 'assets/quests/quest-utility-empty.png';
+      const imgUrl = '/assets/quests/quest-utility-empty.png';
       return `
         <div class="match-item-slot quest-slot completed support-pink-slot empty-pink" title="Misión de Soporte Completada: Ranura Especial para Centinela de Control (Vacía)">
           <img src="${imgUrl}" class="match-quest-img-file completed" alt="Ranura Vacía" />
@@ -149,7 +149,7 @@ function renderQuestSlot(isCompleted, laneKey, match) {
         </div>
       `;
     } else {
-      const imgUrl = 'assets/quests/quest-bottom-empty.png';
+      const imgUrl = '/assets/quests/quest-bottom-empty.png';
       return `
         <div class="match-item-slot quest-slot completed adc-boots-slot empty-boots" title="Misión de Bot (ADC) Completada: 7.º Espacio de Objeto para Botas (Vacía)">
           <img src="${imgUrl}" class="match-quest-img-file completed" alt="Ranura Vacía" />
@@ -158,7 +158,7 @@ function renderQuestSlot(isCompleted, laneKey, match) {
     }
   }
   
-  const imgUrl = `assets/quests/quest-${laneFile}.png`;
+  const imgUrl = `/assets/quests/quest-${laneFile}.png`;
   
   if (!isCompleted) {
     return `
