@@ -2115,16 +2115,16 @@ select option {
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 0 15px var(--champ-accent-alpha) !important;
 }
 
-/* Banda de color lateral súper sutil */
+/* Banda de color lateral súper sutil (cápsula flotante prémium) */
 .stat-accent-strip {
   position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  border-radius: 18px 0 0 18px; /* Ajustar al radio del contenedor */
-  opacity: 0.6;
-  transition: all 0.4s ease;
+  left: 5px;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+  border-radius: 4px;
+  opacity: 0.7;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .stat-accent-strip.stat-kda-avg { background: linear-gradient(to bottom, #10b981, #3b82f6); }
@@ -2143,7 +2143,7 @@ select option {
 
 .stat-card:hover .stat-accent-strip {
   opacity: 1;
-  width: 6px;
+  width: 5px;
 }
 
 .stat-card-content {
