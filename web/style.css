@@ -3513,7 +3513,15 @@ select option {
   animation: spinIcon 1s linear infinite;
 }
 
-/* Insignias de Honor: MVP y ACE */
+/* Contenedor horizontal para insignias */
+.stats-badges-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+/* Base de Insignias de Honor */
 .match-badge {
   display: inline-flex;
   align-items: center;
@@ -3525,20 +3533,35 @@ select option {
   letter-spacing: 0.5px;
   text-transform: uppercase;
   font-family: 'Outfit', sans-serif;
-  margin-top: 5px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  align-self: flex-start;
+  white-space: nowrap; /* Evita saltos de línea molestos */
 }
 
+/* 1. Racha de Asesinatos (Vibrante y nítido como en tu captura) */
+.match-badge.multikill {
+  background: #e84057; /* Color de multikill de OP.GG y de tu captura */
+  color: #fff;
+  border: 1px solid #ca2d42;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* Estilo Leyenda especial animado para Pentakills */
+.match-badge.multikill.penta {
+  background: linear-gradient(135deg, #e84057 0%, #ff9f0a 100%);
+  border: 1px solid #ff9f0a;
+  box-shadow: 0 0 8px rgba(255, 159, 10, 0.5);
+}
+
+/* 2. MVP y ACE */
 .match-badge.mvp {
-  background: #ff9f0a; /* Naranja/Oro brillante idéntico a tu captura */
+  background: #ff9f0a;
   color: #fff;
   border: 1px solid #d98200;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 .match-badge.ace {
-  background: #bf5af2; /* Púrpura prémium de ACE */
+  background: #bf5af2;
   color: #fff;
   border: 1px solid #9437cd;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);

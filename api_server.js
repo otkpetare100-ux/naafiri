@@ -422,6 +422,10 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
             item6: participant.item6,
             roleBoundItem: participant.roleBoundItem || 0,
             visionScore: participant.visionScore || 0,
+            doubleKills: participant.doubleKills || 0,
+            tripleKills: participant.tripleKills || 0,
+            quadraKills: participant.quadraKills || 0,
+            pentakills: participant.pentakills || 0,
             participants: matchParticipants
           });
           console.log(`Descargada partida ${matchId} | Queue: ${matchData.info.queueId} | isRemake: ${isRemake}`);

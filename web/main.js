@@ -1566,9 +1566,22 @@ function openPlayerDetails(player) {
           const dmgStr = match.damageDealt.toLocaleString('es-ES');
           const kpStr = Math.round(match.kp * 100);
 
-          // 4. Calcular si merece insignia de honor (MVP o ACE)
+          // 4. Calcular si merece insignia de honor (MVP o ACE) e insignias de multikills
           let badgeHtml = '';
+          let multikillHtml = '';
           if (!isRemake) {
+            // Multikill (Penta, Cuádruple, Triple, Doble)
+            if (match.pentakills > 0) {
+              multikillHtml = `<div class="match-badge multikill penta">Pentakill</div>`;
+            } else if (match.quadraKills > 0) {
+              multikillHtml = `<div class="match-badge multikill">Cuádruple asesinato</div>`;
+            } else if (match.tripleKills > 0) {
+              multikillHtml = `<div class="match-badge multikill">Triple asesinato</div>`;
+            } else if (match.doubleKills > 0) {
+              multikillHtml = `<div class="match-badge multikill">Doble asesinato</div>`;
+            }
+
+            // MVP / ACE
             const kdaNum = kdaRatio === 'Perfect' ? 10.0 : parseFloat(kdaRatio);
             if (isWin) {
               if (kdaNum >= 4.0 || match.kills >= 10 || kpStr >= 60) {
@@ -1712,7 +1725,12 @@ function openPlayerDetails(player) {
                  <div class="stats-cs"><strong>${match.cs} CS</strong> <span class="cs-min">(${csPerMin})</span></div>
                  <div class="stats-vision"><strong>${visionScore}</strong> vision</div>
                </div>
-               ${badgeHtml}
+               ${(multikillHtml || badgeHtml) ? `
+                 <div class="stats-badges-row">
+                   ${multikillHtml}
+                   ${badgeHtml}
+                 </div>
+               ` : ''}
             </div>
           `;
 
