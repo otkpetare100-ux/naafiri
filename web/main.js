@@ -555,6 +555,7 @@ function finishLoadingBar() {
 
 // Snapshot de datos anteriores por puuid — usado para detectar cambios en el auto-refresh
 const playerSnapshot = new Map();
+let GLOBAL_PLAYERS_LIST = [];
 
 async function updateVersion() {
   try {
@@ -578,6 +579,7 @@ async function fetchLadder() {
     if (!response.ok) throw new Error('Error al obtener datos');
     
     const players = await response.json();
+    GLOBAL_PLAYERS_LIST = players;
     renderLadder(players);
   } catch (error) {
     console.error('API Error:', error);
@@ -594,6 +596,7 @@ async function smartRefresh() {
     const response = await fetch(`${API_BASE}/ladder`);
     if (!response.ok) return;
     const players = await response.json();
+    GLOBAL_PLAYERS_LIST = players;
 
     let anyChanged = false;
 
@@ -910,8 +913,51 @@ function initDeleteLogic() {
   };
 }
 
+function openUntrackedPlayerLoader() {
+  const modal = document.getElementById('player-details-modal');
+  const loader = document.getElementById('details-modal-loader');
+  if (modal && loader) {
+    loader.classList.add('active');
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+async function handleParticipantClick(puuid, summonerName) {
+  // 1. Si está en nuestra jauría, cargarlo de forma instantánea
+  const trackedPlayer = GLOBAL_PLAYERS_LIST.find(p => p.puuid === puuid);
+  if (trackedPlayer) {
+    const modal = document.getElementById('player-details-modal');
+    if (modal) modal.classList.remove('active');
+    setTimeout(() => openPlayerDetails(trackedPlayer), 150);
+    return;
+  }
+
+  // 2. Si es externo, abrir el modal en estado de carga
+  openUntrackedPlayerLoader();
+
+  try {
+    const response = await fetch(`${API_BASE}/summoners/untracked/${puuid}?region=la1`);
+    if (!response.ok) throw new Error('Error al obtener perfil en tiempo real');
+    
+    const untrackedPlayer = await response.json();
+    openPlayerDetails(untrackedPlayer);
+  } catch (error) {
+    console.error(error);
+    showToast('⚠️ Error al consultar el perfil de Riot en tiempo real.', 'error');
+    const modal = document.getElementById('player-details-modal');
+    const loader = document.getElementById('details-modal-loader');
+    if (loader) loader.classList.remove('active');
+    if (modal) {
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  }
+}
+
 // Hacer funciones disponibles globalmente para los onclick de los strings HTML
 window.openDeleteModal = openDeleteModal;
+window.handleParticipantClick = handleParticipantClick;
 
 // Variable global para rastrear modal
 let currentModalPuuid = null;
@@ -1065,6 +1111,10 @@ async function setRandomSplash(rawChampName) {
 
 
 function openPlayerDetails(player) {
+  // Ocultar loader de carga en tiempo real si está activo
+  const loader = document.getElementById('details-modal-loader');
+  if (loader) loader.classList.remove('active');
+
   visibleMatchesCount = 10; // Resetear la paginación a 10 partidas al abrir cualquier perfil
   hasReachedHistoryEnd = false; // Resetear bandera de fin de historial
   activePlayerDetails = player; // Guardar referencia al jugador activo
@@ -2013,8 +2063,12 @@ function openPlayerDetails(player) {
               const isMe = (p.puuid && p.puuid === currentModalPuuid) ? 'active-summoner' : '';
               const iconUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${p.championName}.png`;
               const champDisplayName = p.championName || 'Unknown';
+              
+              const safeSummonerName = (p.summonerName || 'Desconocido').replace(/'/g, "\\'");
+              const safePuuid = (p.puuid || '').replace(/'/g, "\\'");
+
               return `
-                <div class="team-player ${isMe}" title="${p.summonerName} (${champDisplayName})">
+                <div class="team-player ${isMe}" title="${p.summonerName} (${champDisplayName})" onclick="handleParticipantClick('${safePuuid}', '${safeSummonerName}')">
                   <img src="${iconUrl}" class="team-player-champ-icon" alt="${champDisplayName}" onerror="this.onerror=null; this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png';" />
                 </div>
               `;
@@ -2136,39 +2190,54 @@ function openPlayerDetails(player) {
 
   // Botón para actualizar partidas recientes
   const btnUpdateMatches = document.getElementById('btn-update-matches');
-  btnUpdateMatches.onclick = async () => {
-    try {
-      hasReachedHistoryEnd = false; // Resetear bandera de fin de historial al actualizar manualmente
-      startLoadingBar();
-      btnUpdateMatches.classList.add('loading');
-      btnUpdateMatches.disabled = true;
-      
-      const response = await fetch(`${API_BASE}/summoners/${player.puuid}/matches/update`, {
-        method: 'POST'
-      });
-      const data = await response.json();
-      
-      if (response.ok) {
-        showToast(data.message, data.updated ? 'success' : 'info');
-        if (data.updated && data.stats) {
-          player.advancedStats = data.stats; 
-          player.matchStatsHistory = data.history; // Guardar historial nuevo
-          loadStats(player.advancedStats[currentQueue]);
-          renderHistory(data.history, currentQueue); // Refrescar lista de historial filtrado
-          if (typeof renderLanesDistribution === 'function') renderLanesDistribution(data.history, currentQueue);
+  if (player.isUntracked) {
+    btnUpdateMatches.innerHTML = '<span class="refresh-icon-spin">●</span> HISTORIAL EN TIEMPO REAL';
+    btnUpdateMatches.style.background = 'rgba(255, 255, 255, 0.05)';
+    btnUpdateMatches.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+    btnUpdateMatches.style.color = 'rgba(255, 255, 255, 0.4)';
+    btnUpdateMatches.style.cursor = 'default';
+    btnUpdateMatches.onclick = null;
+  } else {
+    btnUpdateMatches.innerHTML = '<span class="refresh-icon-spin">↻</span> ACTUALIZAR DATOS';
+    btnUpdateMatches.style.background = '';
+    btnUpdateMatches.style.borderColor = '';
+    btnUpdateMatches.style.color = '';
+    btnUpdateMatches.style.cursor = '';
+    
+    btnUpdateMatches.onclick = async () => {
+      try {
+        hasReachedHistoryEnd = false; // Resetear bandera de fin de historial al actualizar manualmente
+        startLoadingBar();
+        btnUpdateMatches.classList.add('loading');
+        btnUpdateMatches.disabled = true;
+        
+        const response = await fetch(`${API_BASE}/summoners/${player.puuid}/matches/update`, {
+          method: 'POST'
+        });
+        const data = await response.json();
+        
+        if (response.ok) {
+          showToast(data.message, data.updated ? 'success' : 'info');
+          if (data.updated && data.stats) {
+            player.advancedStats = data.stats; 
+            player.matchStatsHistory = data.history; // Guardar historial nuevo
+            loadStats(player.advancedStats[currentQueue]);
+            renderHistory(data.history, currentQueue); // Refrescar lista de historial filtrado
+            if (typeof renderLanesDistribution === 'function') renderLanesDistribution(data.history, currentQueue);
+          }
+        } else {
+          showToast(`❌ ${data.message}`, 'error');
         }
-      } else {
-        showToast(`❌ ${data.message}`, 'error');
+      } catch (e) {
+        console.error(e);
+        showToast('❌ Error al actualizar partidas.', 'error');
+      } finally {
+        btnUpdateMatches.classList.remove('loading');
+        btnUpdateMatches.disabled = false;
+        finishLoadingBar();
       }
-    } catch (e) {
-      console.error(e);
-      showToast('❌ Error al actualizar partidas.', 'error');
-    } finally {
-      btnUpdateMatches.classList.remove('loading');
-      btnUpdateMatches.disabled = false;
-      finishLoadingBar();
-    }
-  };
+    };
+  }
 
   // Bind close button
   modal.querySelector('.close-details').onclick = () => {
@@ -2185,6 +2254,7 @@ function openPlayerDetails(player) {
 
   if (historyContainer) {
     historyContainer.onscroll = async () => {
+      if (player.isUntracked) return; // Omitir scroll infinito para jugadores temporales
       if (isFetchingMore) return;
 
       // Detección matemática del final del scroll con tolerancia de 20px

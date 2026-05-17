@@ -721,9 +721,217 @@ app.get('/api/summoners/:puuid', async (req, res) => {
     if (!account) {
       return res.status(404).json({ message: 'Jugador no encontrado.' });
     }
-    res.json(account);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
+// Obtener datos en tiempo real de un jugador no registrado (untracked)
+app.get('/api/summoners/untracked/:puuid', async (req, res) => {
+  const { puuid } = req.params;
+  const region = req.query.region || 'la1';
+  const RIOT_API_KEY = process.env.RIOT_API_KEY;
+
+  try {
+    const routingMap = {
+      la1: 'americas', la2: 'americas', na1: 'americas', br1: 'americas',
+      euw1: 'europe', eun1: 'europe', tr1: 'europe', ru: 'europe',
+      kr: 'asia', jp1: 'asia',
+      oc1: 'sea', ph2: 'sea', sg2: 'sea', th2: 'sea', tw2: 'sea', vn2: 'sea'
+    };
+    const routing = routingMap[region] || 'americas';
+
+    // 1. Obtener cuenta de Riot (riotIdGameName y riotIdTagline) por su PUUID
+    const accountUrl = `https://${routing}.api.riotgames.com/riot/account/v1/accounts/by-puuid/${puuid}?api_key=${RIOT_API_KEY}`;
+    const accountResp = await fetch(accountUrl);
+    
+    let gameName = 'Desconocido';
+    let tagLine = 'LAN';
+    if (accountResp.ok) {
+      const accountData = await accountResp.json();
+      gameName = accountData.gameName || 'Desconocido';
+      tagLine = accountData.tagLine || 'LAN';
+    } else {
+      console.warn(`[WARN] Account-V1 failed for PUUID: ${puuid}. Status: ${accountResp.status}`);
+    }
+
+    // 2. Obtener Summoner-V4 por su PUUID (para profileIconId y nivel)
+    const summonerUrl = `https://${region}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${puuid}?api_key=${RIOT_API_KEY}`;
+    const summonerResp = await fetch(summonerUrl);
+    
+    let summonerLevel = 30;
+    let profileIconId = 29;
+    if (summonerResp.ok) {
+      const summonerData = await summonerResp.json();
+      summonerLevel = summonerData.summonerLevel;
+      profileIconId = summonerData.profileIconId;
+    }
+
+    // 3. Obtener ligas (League-V4)
+    let soloQ = { tier: 'UNRANKED', rank: '', leaguePoints: 0, wins: 0, losses: 0 };
+    let flexQ = { tier: 'UNRANKED', rank: '', leaguePoints: 0, wins: 0, losses: 0 };
+    const leagueUrl = `https://${region}.api.riotgames.com/lol/league/v4/entries/by-puuid/${puuid}?api_key=${RIOT_API_KEY}`;
+    const leagueResp = await fetch(leagueUrl);
+    
+    if (leagueResp.ok) {
+      const leagues = await leagueResp.json();
+      const soloQEntry = leagues.find(e => e.queueType === 'RANKED_SOLO_5x5');
+      if (soloQEntry) {
+        soloQ = {
+          tier: soloQEntry.tier,
+          rank: soloQEntry.rank,
+          leaguePoints: soloQEntry.leaguePoints,
+          wins: soloQEntry.wins,
+          losses: soloQEntry.losses
+        };
+      }
+      const flexQEntry = leagues.find(e => e.queueType === 'RANKED_FLEX_SR');
+      if (flexQEntry) {
+        flexQ = {
+          tier: flexQEntry.tier,
+          rank: flexQEntry.rank,
+          leaguePoints: flexQEntry.leaguePoints,
+          wins: flexQEntry.wins,
+          losses: flexQEntry.losses
+        };
+      }
+    }
+
+    // 4. Obtener mejores campeones
+    const topChampions = await getTopChampions(puuid, region, RIOT_API_KEY);
+
+    // 5. Obtener partidas (últimas 10 de SoloQ/FlexQ combinadas)
+    const matchIdsUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?start=0&count=10&api_key=${RIOT_API_KEY}`;
+    const matchIdsResp = await fetch(matchIdsUrl);
+    const fetchedMatchIds = matchIdsResp.ok ? await matchIdsResp.json() : [];
+
+    const matchPromises = fetchedMatchIds.map(async (matchId) => {
+      try {
+        const matchUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/${matchId}?api_key=${RIOT_API_KEY}`;
+        const matchResp = await fetch(matchUrl);
+        if (!matchResp.ok) return null;
+
+        const matchData = await matchResp.json();
+        const participant = matchData.info.participants.find(p => p.puuid === puuid);
+        
+        if (participant) {
+          const durationMins = matchData.info.gameDuration / 60;
+          const teamKills = matchData.info.participants
+            .filter(p => p.teamId === participant.teamId)
+            .reduce((sum, p) => sum + p.kills, 0);
+            
+          const kp = teamKills > 0 ? ((participant.kills + participant.assists) / teamKills) : 0;
+          const isRemake = durationMins < 4.5 || participant.teamEarlySurrendered;
+
+          const matchParticipants = matchData.info.participants.map(p => ({
+            summonerName: p.riotIdGameName || p.summonerName || 'Desconocido',
+            championName: championMap[p.championId?.toString()] || p.championName || 'Unknown',
+            puuid: p.puuid,
+            win: p.win,
+            teamId: p.teamId
+          }));
+
+          return {
+            matchId: matchId,
+            queueId: matchData.info.queueId,
+            championName: championMap[participant.championId?.toString()] || participant.championName || 'Unknown',
+            lane: participant.teamPosition || participant.lane || 'Unknown',
+            kills: participant.kills,
+            deaths: participant.deaths,
+            assists: participant.assists,
+            gold: participant.goldEarned,
+            cs: participant.totalMinionsKilled + participant.neutralMinionsKilled,
+            durationMins: durationMins,
+            kp: kp,
+            damageDealt: participant.totalDamageDealtToChampions,
+            damageTaken: participant.totalDamageTaken,
+            win: participant.win,
+            isRemake: isRemake,
+            timestamp: matchData.info.gameCreation,
+            summoner1Id: participant.summoner1Id,
+            summoner2Id: participant.summoner2Id,
+            keystoneId: participant.perks?.styles?.[0]?.selections?.[0]?.perk,
+            subStyleId: participant.perks?.styles?.[1]?.style,
+            champLevel: participant.champLevel,
+            item0: participant.item0,
+            item1: participant.item1,
+            item2: participant.item2,
+            item3: participant.item3,
+            item4: participant.item4,
+            item5: participant.item5,
+            item6: participant.item6,
+            roleBoundItem: participant.roleBoundItem || 0,
+            visionScore: participant.visionScore || 0,
+            doubleKills: participant.doubleKills || 0,
+            tripleKills: participant.tripleKills || 0,
+            quadraKills: participant.quadraKills || 0,
+            pentakills: participant.pentakills || 0,
+            participants: matchParticipants
+          };
+        }
+      } catch (e) {
+        console.error(`Error procesando match untracked ${matchId}:`, e);
+      }
+      return null;
+    });
+
+    const parsedMatches = await Promise.all(matchPromises);
+    const validMatches = parsedMatches.filter(m => m !== null).sort((a, b) => b.timestamp - a.timestamp);
+
+    // Calcular estadísticas avanzadas
+    const calculateAverages = (queueIdFilter) => {
+      let sumKills = 0, sumDeaths = 0, sumAssists = 0, sumGold = 0, sumCs = 0, sumMins = 0, sumKp = 0, sumDmgDealt = 0, sumDmgTaken = 0;
+      
+      const filteredMatches = validMatches
+        .filter(m => !m.isRemake && m.queueId === queueIdFilter)
+        .slice(0, 10);
+
+      filteredMatches.forEach(m => {
+        sumKills += m.kills;
+        sumDeaths += m.deaths;
+        sumAssists += m.assists;
+        sumGold += m.gold;
+        sumCs += m.cs;
+        sumMins += m.durationMins;
+        sumKp += m.kp;
+        sumDmgDealt += m.damageDealt;
+        sumDmgTaken += m.damageTaken;
+      });
+
+      const count = filteredMatches.length;
+      
+      return {
+        kda: count > 0 ? (sumDeaths > 0 ? ((sumKills + sumAssists) / sumDeaths).toFixed(2) : ((sumKills + sumAssists).toFixed(2))) : "0.00",
+        avgGold: count > 0 ? Math.round(sumGold / count) : 0,
+        avgDeaths: count > 0 ? (sumDeaths / count).toFixed(1) : "0.0",
+        csPerMin: count > 0 ? (sumMins > 0 ? (sumCs / sumMins).toFixed(1) : 0) : "0.0",
+        avgKp: count > 0 ? Math.round((sumKp / count) * 100) : 0,
+        avgDamageDealt: count > 0 ? Math.round(sumDmgDealt / count) : 0,
+        avgDamageTaken: count > 0 ? Math.round(sumDmgTaken / count) : 0,
+        totalMatchesCalculated: count
+      };
+    };
+
+    const advancedStats = {
+      soloq: calculateAverages(420),
+      flexq: calculateAverages(440)
+    };
+
+    const untrackedAccount = {
+      puuid: puuid,
+      gameName: gameName,
+      tagLine: tagLine,
+      region: region,
+      profileIconId,
+      summonerLevel,
+      soloQ,
+      flexQ,
+      topChampions,
+      matchStatsHistory: validMatches,
+      advancedStats,
+      isUntracked: true
+    };
+
+    res.json(untrackedAccount);
+
+  } catch (error) {
+    console.error('Error in /api/summoners/untracked/:puuid:', error);
+    res.status(500).json({ message: 'Error al consultar el perfil de Riot en tiempo real.' });
   }
 });
 
