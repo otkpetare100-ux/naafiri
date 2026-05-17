@@ -204,7 +204,7 @@
                 </div>
               </div>
 
-              <!-- Cuadrícula 2x3 o 3x2 -->
+              <!-- Cuadrícula 5x2 -->
               <div class="advanced-stats-grid">
                 <!-- Oro Promedio -->
                 <div class="stat-card">
@@ -224,6 +224,91 @@
                   </div>
                 </div>
 
+                <!-- Oro por Minuto (GPM) -->
+                <div class="stat-card">
+                  <div class="stat-accent-strip stat-gpm"></div>
+                  <div class="stat-card-content">
+                    <div class="stat-header-row">
+                      <span class="stat-label">Oro / Min</span>
+                      <span class="stat-icon-wrapper stat-gpm-icon">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                          <line x1="12" y1="1" x2="12" y2="23"></line>
+                          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                      </span>
+                    </div>
+                    <span id="stat-gpm" class="stat-value">--</span>
+                  </div>
+                </div>
+
+                <!-- Daño Promedio -->
+                <div class="stat-card">
+                  <div class="stat-accent-strip stat-dmg"></div>
+                  <div class="stat-card-content">
+                    <div class="stat-header-row">
+                      <span class="stat-label">Daño Prom.</span>
+                      <span class="stat-icon-wrapper stat-dmg-icon">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
+                        </svg>
+                      </span>
+                    </div>
+                    <span id="stat-dmg" class="stat-value">--</span>
+                  </div>
+                </div>
+
+                <!-- Daño por Minuto (DPM) -->
+                <div class="stat-card">
+                  <div class="stat-accent-strip stat-dpm"></div>
+                  <div class="stat-card-content">
+                    <div class="stat-header-row">
+                      <span class="stat-label">Daño / Min</span>
+                      <span class="stat-icon-wrapper stat-dpm-icon">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                      </span>
+                    </div>
+                    <span id="stat-dpm" class="stat-value">--</span>
+                  </div>
+                </div>
+
+                <!-- Tasa de Carry (Carry Rate) -->
+                <div class="stat-card">
+                  <div class="stat-accent-strip stat-carry"></div>
+                  <div class="stat-card-content">
+                    <div class="stat-header-row">
+                      <span class="stat-label">Tasa Carry</span>
+                      <span class="stat-icon-wrapper stat-carry-icon">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zM5 20h14v2H5v-2z"></path>
+                        </svg>
+                      </span>
+                    </div>
+                    <span id="stat-carry" class="stat-value">--</span>
+                  </div>
+                </div>
+
+                <!-- Kills Promedio -->
+                <div class="stat-card">
+                  <div class="stat-accent-strip stat-kills"></div>
+                  <div class="stat-card-content">
+                    <div class="stat-header-row">
+                      <span class="stat-label">Kills Prom.</span>
+                      <span class="stat-icon-wrapper stat-kills-icon">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <line x1="22" y1="12" x2="18" y2="12"></line>
+                          <line x1="6" y1="12" x2="2" y2="12"></line>
+                          <line x1="12" y1="6" x2="12" y2="2"></line>
+                          <line x1="12" y1="22" x2="12" y2="18"></line>
+                        </svg>
+                      </span>
+                    </div>
+                    <span id="stat-kills" class="stat-value">--</span>
+                  </div>
+                </div>
+
                 <!-- Muertes -->
                 <div class="stat-card">
                   <div class="stat-accent-strip stat-deaths"></div>
@@ -239,6 +324,25 @@
                       </span>
                     </div>
                     <span id="stat-deaths" class="stat-value">--</span>
+                  </div>
+                </div>
+
+                <!-- Asistencias Promedio -->
+                <div class="stat-card">
+                  <div class="stat-accent-strip stat-assists"></div>
+                  <div class="stat-card-content">
+                    <div class="stat-header-row">
+                      <span class="stat-label">Asist. Prom</span>
+                      <span class="stat-icon-wrapper stat-assists-icon">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                          <circle cx="9" cy="7" r="4"></circle>
+                          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                      </span>
+                    </div>
+                    <span id="stat-assists" class="stat-value">--</span>
                   </div>
                 </div>
 
@@ -275,38 +379,6 @@
                       </span>
                     </div>
                     <span id="stat-kp" class="stat-value">--</span>
-                  </div>
-                </div>
-
-                <!-- Daño Promedio -->
-                <div class="stat-card">
-                  <div class="stat-accent-strip stat-dmg"></div>
-                  <div class="stat-card-content">
-                    <div class="stat-header-row">
-                      <span class="stat-label">Daño Prom.</span>
-                      <span class="stat-icon-wrapper stat-dmg-icon">
-                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
-                        </svg>
-                      </span>
-                    </div>
-                    <span id="stat-dmg" class="stat-value">--</span>
-                  </div>
-                </div>
-
-                <!-- Daño Recibido -->
-                <div class="stat-card">
-                  <div class="stat-accent-strip stat-dmg-taken"></div>
-                  <div class="stat-card-content">
-                    <div class="stat-header-row">
-                      <span class="stat-label">Daño Rec.</span>
-                      <span class="stat-icon-wrapper stat-dmg-taken-icon">
-                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                        </svg>
-                      </span>
-                    </div>
-                    <span id="stat-dmg-taken" class="stat-value">--</span>
                   </div>
                 </div>
               </div>
