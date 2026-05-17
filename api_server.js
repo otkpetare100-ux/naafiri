@@ -721,6 +721,12 @@ app.get('/api/summoners/:puuid', async (req, res) => {
     if (!account) {
       return res.status(404).json({ message: 'Jugador no encontrado.' });
     }
+    res.json(account);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Obtener datos en tiempo real de un jugador no registrado (untracked)
 app.get('/api/summoners/untracked/:puuid', async (req, res) => {
   const { puuid } = req.params;
