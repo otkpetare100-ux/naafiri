@@ -420,7 +420,7 @@ document.addEventListener('mouseout', (e) => {
   }
 });
 
-function showParticipantTooltip(e, summonerName, championName, puuid, teamId, win) {
+function showParticipantTooltip(e, summonerName, tagLine, championName) {
   let tooltip = document.getElementById('participant-tooltip');
   if (!tooltip) {
     tooltip = document.createElement('div');
@@ -429,44 +429,11 @@ function showParticipantTooltip(e, summonerName, championName, puuid, teamId, wi
     document.body.appendChild(tooltip);
   }
 
-  const isJauria = GLOBAL_PLAYERS_LIST && GLOBAL_PLAYERS_LIST.some(p => p.puuid === puuid);
-  const jauriaBadge = isJauria ? `<span class="p-jauria-badge">🐾 JAURÍA</span>` : '';
-
-  const teamText = teamId === 100 ? 'Equipo Azul' : 'Equipo Rojo';
-  const teamClass = teamId === 100 ? 'blue-team' : 'red-team';
-  const outcomeText = win ? 'Victoria' : 'Derrota';
-  const outcomeClass = win ? 'win' : 'loss';
-
-  const champKey = cleanChampId(championName);
-  let champTitle = '';
-  if (CHAMPION_SKINS_DATA) {
-    const foundKey = Object.keys(CHAMPION_SKINS_DATA).find(
-      k => k.toLowerCase() === (champKey ? champKey.toLowerCase() : '')
-    );
-    if (foundKey && CHAMPION_SKINS_DATA[foundKey]) {
-      champTitle = CHAMPION_SKINS_DATA[foundKey].title || '';
-    }
-  }
-  const displayTitle = champTitle ? champTitle.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : '';
+  const fullSummonerName = tagLine ? `${summonerName}<span class="p-tooltip-tag">#${tagLine}</span>` : summonerName;
 
   tooltip.innerHTML = `
-    <div class="p-tooltip-header">
-      <span class="p-tooltip-summoner">${summonerName}</span>
-      ${jauriaBadge}
-    </div>
-    <div class="p-tooltip-divider"></div>
-    <div class="p-tooltip-champion">
-      <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${championName}.png" class="p-tooltip-avatar" onerror="this.onerror=null; this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png';" />
-      <div class="p-tooltip-champ-info">
-        <span class="p-tooltip-champ-name">${championName}</span>
-        ${displayTitle ? `<span class="p-tooltip-champ-title">${displayTitle}</span>` : ''}
-      </div>
-    </div>
-    <div class="p-tooltip-divider"></div>
-    <div class="p-tooltip-footer">
-      <span class="p-tooltip-team ${teamClass}">${teamText}</span>
-      <span class="p-tooltip-outcome ${outcomeClass}">${outcomeText}</span>
-    </div>
+    <div class="p-tooltip-summoner">${fullSummonerName}</div>
+    <div class="p-tooltip-champ-name">${championName}</div>
   `;
 
   tooltip.style.display = 'block';
@@ -486,12 +453,10 @@ document.addEventListener('mouseover', (e) => {
   if (!playerDiv) return;
 
   const summonerName = playerDiv.getAttribute('data-summoner-name');
+  const tagLine = playerDiv.getAttribute('data-tag-line') || '';
   const championName = playerDiv.getAttribute('data-champion-name');
-  const puuid = playerDiv.getAttribute('data-puuid');
-  const teamId = parseInt(playerDiv.getAttribute('data-team-id'));
-  const win = playerDiv.getAttribute('data-win') === 'true';
 
-  showParticipantTooltip(e, summonerName, championName, puuid, teamId, win);
+  showParticipantTooltip(e, summonerName, tagLine, championName);
 });
 
 document.addEventListener('mousemove', (e) => {
