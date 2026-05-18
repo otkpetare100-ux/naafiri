@@ -706,6 +706,17 @@ function renderLadder(players) {
     return;
   }
 
+  // Precalcular el campeón objetivo para el splash en todos los jugadores del ladder
+  players.forEach(p => {
+    if (!p.splashTargetChamp) {
+      let target = getMostPlayedFromHistory(p.matchStatsHistory);
+      if (!target && p.topChampions && p.topChampions.length > 0) {
+        target = p.topChampions[0].name;
+      }
+      p.splashTargetChamp = target;
+    }
+  });
+
   // Guardar snapshot para el próximo auto-refresh
   players.forEach(p => {
     playerSnapshot.set(p.puuid, {
@@ -1347,18 +1358,13 @@ async function setRandomSplash(rawChampName, playerPuuid) {
 async function preloadLadderSplashArts(players) {
   if (!players || players.length === 0) return;
   
-  // Precargamos los primeros 12 jugadores del ladder progresivamente para optimizar ancho de banda
-  const toPreload = players.slice(0, 12);
-
-  for (const player of toPreload) {
+  // Precargamos todos los jugadores del ladder progresivamente para optimizar ancho de banda
+  for (const player of players) {
     if (PRELOADED_SPLASHES.has(player.puuid)) continue;
 
-    let target = getMostPlayedFromHistory(player.matchStatsHistory);
-    if (!target && player.topChampions && player.topChampions.length > 0) {
-      target = player.topChampions[0].name;
-    }
-
+    const target = player.splashTargetChamp;
     if (!target) continue;
+
     const champId = cleanChampId(target);
     if (!champId) continue;
 
@@ -1440,10 +1446,14 @@ function openPlayerDetails(player) {
     logo.style.display = player.isUntracked ? 'none' : 'block';
   }
 
-  // Determinar campeón objetivo
-  let target = getMostPlayedFromHistory(player.matchStatsHistory);
-  if (!target && player.topChampions && player.topChampions.length > 0) {
-    target = player.topChampions[0].name;
+  // Determinar campeón objetivo (Usa el precalculado o lo calcula en caliente como fallback)
+  let target = player.splashTargetChamp;
+  if (!target) {
+    target = getMostPlayedFromHistory(player.matchStatsHistory);
+    if (!target && player.topChampions && player.topChampions.length > 0) {
+      target = player.topChampions[0].name;
+    }
+    player.splashTargetChamp = target;
   }
   
   setRandomSplash(target, player.puuid);
