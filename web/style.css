@@ -217,7 +217,7 @@ h1::after {
     rgba(255, 255, 255, 0) 100%
   );
   transform: rotate(25deg);
-  transition: all 0.75s cubic-bezier(0.19, 1, 0.22, 1);
+  transition: none;
   pointer-events: none;
   z-index: 10;
   clip-path: inset(0 round 12px);
@@ -225,6 +225,7 @@ h1::after {
 
 .player-card:hover::after {
   left: 140%;
+  transition: left 0.75s cubic-bezier(0.19, 1, 0.22, 1);
 }
 
 .player-card:hover {
@@ -1017,12 +1018,13 @@ h1::after {
     rgba(255, 255, 255, 0) 100%
   );
   transform: rotate(25deg);
-  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+  transition: none;
   pointer-events: none;
 }
 
 .btn-gold-action:hover::after {
   left: 140%;
+  transition: left 0.5s cubic-bezier(0.19, 1, 0.22, 1);
 }
 
 .btn-gold-action:hover {
