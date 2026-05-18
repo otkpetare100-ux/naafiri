@@ -4904,3 +4904,130 @@ select option {
     border-left: 4px solid var(--gold-primary) !important;
   }
 }
+
+/* ==========================================================
+   MODO COMPARACIÓN DIRECTA (CLIC EN TARJETAS)
+   ========================================================== */
+
+/* Banner Flotante del Modo Comparación */
+.compare-helper-bar {
+  position: fixed;
+  bottom: -100px; /* Oculto por defecto */
+  left: 50%;
+  transform: translateX(-50%) translateY(0);
+  background: rgba(10, 10, 12, 0.94);
+  backdrop-filter: blur(15px);
+  border: 1.5px solid var(--gold-primary);
+  border-radius: 50px;
+  padding: 12px 30px;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.8), 0 0 25px rgba(212, 175, 55, 0.15);
+  z-index: 2100000000 !important; /* Por encima de modales, igual a los toasts */
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 0;
+  pointer-events: none;
+  max-width: 90%;
+  width: auto;
+}
+
+.compare-helper-bar.active {
+  bottom: 30px;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.compare-helper-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.compare-helper-icon {
+  font-size: 1.3rem;
+  animation: pulseSword 1.5s ease-in-out infinite;
+}
+
+@keyframes pulseSword {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.2) rotate(15deg); }
+}
+
+.compare-helper-text {
+  font-family: 'Outfit', sans-serif;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.compare-cancel-btn {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1.5px solid #ef4444;
+  color: #ef4444;
+  padding: 6px 16px;
+  border-radius: 30px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.compare-cancel-btn:hover {
+  background: #ef4444;
+  color: #fff;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+}
+
+/* Estilos de Tarjeta en Modo Comparación */
+.comparison-mode-active .player-card {
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.comparison-mode-active .player-card:hover {
+  border-color: #38bdf8 !important; /* Azul selector */
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.25) !important;
+  transform: translateY(-5px) scale(1.01) !important;
+}
+
+/* Tarjeta Seleccionada para Comparar */
+.player-card.compare-selected {
+  border-color: var(--gold-primary) !important;
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.45) !important;
+  transform: translateY(-5px) scale(1.02) !important;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.08) 0%, rgba(10, 10, 12, 0.9) 100%) !important;
+}
+
+/* Checkmark dorado flotando en la tarjeta seleccionada */
+.player-card.compare-selected::before {
+  content: '✓';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: var(--gold-primary);
+  color: #000;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 0.8rem;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+  z-index: 10;
+  animation: popCheck 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes popCheck {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+
+/* Deshabilitar botones de acciones en modo comparación */
+.comparison-mode-active .card-actions {
+  pointer-events: none;
+  opacity: 0.3;
+}

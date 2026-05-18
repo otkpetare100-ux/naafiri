@@ -610,6 +610,8 @@ function finishLoadingBar() {
 // Snapshot de datos anteriores por puuid — usado para detectar cambios en el auto-refresh
 const playerSnapshot = new Map();
 let GLOBAL_PLAYERS_LIST = [];
+let isComparisonMode = false;
+let selectedPuuidsForCompare = [];
 
 async function updateVersion() {
   try {
@@ -731,11 +733,16 @@ function renderLadder(players) {
     const rankNum = index + 1;
     const card = document.createElement('div');
     card.className = `player-card rank-${rankNum}`;
+    card.dataset.puuid = player.puuid;
     card.style.cursor = 'pointer';
 
     card.addEventListener('click', (e) => {
       if (e.target.closest('.card-actions')) return;
-      openPlayerDetails(player);
+      if (isComparisonMode) {
+        handleComparisonCardSelection(player.puuid, card);
+      } else {
+        openPlayerDetails(player);
+      }
     });
     
     // Ruta del emblema
@@ -2864,13 +2871,20 @@ function initCompareLogic() {
   const select1 = document.getElementById('compare-player-1-select');
   const select2 = document.getElementById('compare-player-2-select');
   const resultsContainer = document.getElementById('compare-results-container');
+  const cancelBtn = document.getElementById('compare-cancel-btn');
 
   if (!modal || !btn || !span || !select1 || !select2 || !resultsContainer) return;
 
+  // Alternar modo de comparación
   btn.onclick = () => {
-    populateCompareDropdowns();
-    modal.classList.add('active');
+    toggleComparisonMode();
   };
+
+  if (cancelBtn) {
+    cancelBtn.onclick = () => {
+      toggleComparisonMode(false);
+    };
+  }
 
   span.onclick = () => {
     modal.classList.remove('active');
@@ -2880,6 +2894,97 @@ function initCompareLogic() {
   select1.onchange = updateComparison;
   select2.onchange = updateComparison;
 
+  // Exponer a nivel global para interceptar clics en tarjetas
+  window.handleComparisonCardSelection = handleComparisonCardSelection;
+  window.toggleComparisonMode = toggleComparisonMode;
+
+  function toggleComparisonMode(forceState) {
+    const newState = (forceState !== undefined) ? forceState : !isComparisonMode;
+    
+    if (newState === isComparisonMode) return;
+    
+    isComparisonMode = newState;
+    const ladderContainer = document.getElementById('ladder-container');
+    const helperBar = document.getElementById('compare-helper-bar');
+    
+    if (isComparisonMode) {
+      selectedPuuidsForCompare = [];
+      if (ladderContainer) ladderContainer.classList.add('comparison-mode-active');
+      if (helperBar) helperBar.classList.add('active');
+      updateHelperBarText();
+      
+      btn.innerHTML = '<span class="icon">❌</span> Cancelar';
+      btn.style.background = 'linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(220, 38, 38, 0.35))';
+      btn.style.borderColor = '#ef4444';
+      
+      showToast('⚔️ Modo Comparar activo. Elige 2 tarjetas.');
+    } else {
+      selectedPuuidsForCompare = [];
+      if (ladderContainer) ladderContainer.classList.remove('comparison-mode-active');
+      if (helperBar) helperBar.classList.remove('active');
+      
+      // Limpiar clases de selección de todas las tarjetas
+      document.querySelectorAll('.player-card.compare-selected').forEach(c => {
+        c.classList.remove('compare-selected');
+      });
+      
+      btn.innerHTML = '<span class="icon">⚔️</span> Comparar';
+      btn.style.background = '';
+      btn.style.borderColor = '';
+    }
+  }
+
+  function handleComparisonCardSelection(puuid, card) {
+    const idx = selectedPuuidsForCompare.indexOf(puuid);
+    if (idx !== -1) {
+      selectedPuuidsForCompare.splice(idx, 1);
+      if (card) card.classList.remove('compare-selected');
+      showToast('Deseleccionado');
+    } else {
+      if (selectedPuuidsForCompare.length >= 2) {
+        showToast('⚠️ Solo puedes comparar 2 jugadores.', 'error');
+        return;
+      }
+      
+      selectedPuuidsForCompare.push(puuid);
+      if (card) card.classList.add('compare-selected');
+      
+      if (selectedPuuidsForCompare.length === 2) {
+        const player1 = GLOBAL_PLAYERS_LIST.find(p => p.puuid === selectedPuuidsForCompare[0]);
+        const player2 = GLOBAL_PLAYERS_LIST.find(p => p.puuid === selectedPuuidsForCompare[1]);
+        
+        if (player1 && player2) {
+          // Llenar dropdowns para mantener compatibilidad e interactividad secundaria
+          populateCompareDropdowns();
+          select1.value = player1.puuid;
+          select2.value = player2.puuid;
+          
+          renderComparisonGrid(player1, player2);
+          modal.classList.add('active');
+        }
+        
+        setTimeout(() => {
+          toggleComparisonMode(false);
+        }, 300);
+      }
+    }
+    updateHelperBarText();
+  }
+
+  function updateHelperBarText() {
+    const helperText = document.getElementById('compare-helper-text');
+    if (!helperText) return;
+    
+    const count = selectedPuuidsForCompare.length;
+    if (count === 0) {
+      helperText.textContent = 'Modo Comparación: Selecciona 2 invocadores en la tabla para comparar';
+    } else if (count === 1) {
+      const p1 = GLOBAL_PLAYERS_LIST.find(p => p.puuid === selectedPuuidsForCompare[0]);
+      const name = p1 ? p1.gameName : 'Invocador';
+      helperText.textContent = `Seleccionado: ${name} (1/2). Elige al segundo invocador...`;
+    }
+  }
+
   function populateCompareDropdowns() {
     const val1 = select1.value;
     const val2 = select2.value;
@@ -2887,8 +2992,8 @@ function initCompareLogic() {
     select1.innerHTML = '<option value="">Seleccionar Invocador A...</option>';
     select2.innerHTML = '<option value="">Seleccionar Invocador B...</option>';
 
-    if (window.GLOBAL_PLAYERS_LIST && window.GLOBAL_PLAYERS_LIST.length > 0) {
-      window.GLOBAL_PLAYERS_LIST.forEach(player => {
+    if (GLOBAL_PLAYERS_LIST && GLOBAL_PLAYERS_LIST.length > 0) {
+      GLOBAL_PLAYERS_LIST.forEach(player => {
         const optionText = `${player.gameName}#${player.tagLine} (${player.soloQ?.tier || 'UNRANKED'} ${player.soloQ?.rank || ''})`;
         
         const opt1 = document.createElement('option');
@@ -2932,8 +3037,8 @@ function initCompareLogic() {
       return;
     }
 
-    const player1 = window.GLOBAL_PLAYERS_LIST.find(p => p.puuid === puuid1);
-    const player2 = window.GLOBAL_PLAYERS_LIST.find(p => p.puuid === puuid2);
+    const player1 = GLOBAL_PLAYERS_LIST.find(p => p.puuid === puuid1);
+    const player2 = GLOBAL_PLAYERS_LIST.find(p => p.puuid === puuid2);
 
     if (!player1 || !player2) return;
 
