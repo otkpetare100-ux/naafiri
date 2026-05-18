@@ -2890,11 +2890,11 @@ select option {
 }
 
 .crest-locked-svg {
-  width: 28px;
-  height: 28px;
+  width: 46px;
+  height: 46px;
   fill: none;
   stroke: var(--text-gold);
-  stroke-width: 2.2;
+  stroke-width: 2.0;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -2906,7 +2906,7 @@ select option {
 .crest-locked-padlock {
   fill: none;
   stroke: var(--text-gold);
-  stroke-width: 2.2;
+  stroke-width: 2.0;
 }
 
 .crest-locked-keyhole {
