@@ -1789,7 +1789,13 @@ function openPlayerDetails(player) {
           <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${champ.name}.png" class="champ-detail-icon" onerror="this.src='/assets/placeholder_champ.png'" />
           ${champ.level >= 4 
             ? `<img src="${crestUrl}" class="champ-detail-crest" onerror="this.style.display='none'" />` 
-            : '<div class="champ-detail-crest-spacer"></div>'}
+            : `<div class="champ-detail-crest-locked" title="Maestría menor a nivel 4">
+                <svg viewBox="0 0 64 64" class="crest-locked-svg">
+                  <polygon points="32,8 52,18 52,46 32,56 12,46 12,18" class="crest-locked-shield" />
+                  <path d="M26,30 V24 A6,6 0 0,1 38,24 V30 M24,30 H40 V42 H24 Z" class="crest-locked-padlock" />
+                  <circle cx="32" cy="36" r="1.5" class="crest-locked-keyhole" />
+                </svg>
+               </div>`}
           <div class="champ-detail-info">
             <div class="champ-detail-name">${formatChampionName(champ.name)}</div>
             <div class="champ-detail-pts">${subText}</div>

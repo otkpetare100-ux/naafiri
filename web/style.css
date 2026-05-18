@@ -2877,6 +2877,48 @@ select option {
   transform: scale(1.05); /* Un pulso muy ligero */
 }
 
+.champ-detail-crest-locked {
+  width: 65px;
+  height: 65px;
+  margin-top: -15px; /* Mismo margen negativo exacto */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.18; /* Opacidad atenuada para dar estilo Hextech apagado */
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.4));
+}
+
+.crest-locked-svg {
+  width: 28px;
+  height: 28px;
+  fill: none;
+  stroke: var(--text-gold);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.crest-locked-shield {
+  stroke-dasharray: 4; /* Línea segmentada premium */
+}
+
+.crest-locked-padlock {
+  fill: none;
+  stroke: var(--text-gold);
+  stroke-width: 2.2;
+}
+
+.crest-locked-keyhole {
+  fill: var(--text-gold);
+  stroke: none;
+}
+
+.champ-detail-item:hover .champ-detail-crest-locked {
+  opacity: 0.45;
+  transform: scale(1.05);
+}
+
 /* Match History Styles */
 .dash-history-box {
   margin-top: -10px;
