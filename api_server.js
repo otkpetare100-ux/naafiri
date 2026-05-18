@@ -70,7 +70,7 @@ app.use((req, res, next) => {
 // Helper para obtener top campeones
 async function getTopChampions(puuid, region, apiKey) {
   try {
-    const url = `https://${region}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}/top?count=3&api_key=${apiKey}`;
+    const url = `https://${region}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}?api_key=${apiKey}`;
     const resp = await fetch(url);
     if (!resp.ok) return [];
     const masteries = await resp.json();

@@ -1234,7 +1234,7 @@ function getTopChampsToDisplay(player) {
       
       return {
         name: name,
-        level: mastery ? mastery.level : 1,
+        level: mastery ? mastery.level : 0,
         points: mastery ? mastery.points : 0,
         recentCount: data.count,
         wins: data.wins,
