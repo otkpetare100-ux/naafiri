@@ -59,6 +59,8 @@ const BOOTS_ITEM_IDS = new Set([
   1001, 2422, 3006, 3009, 3047, 3111, 3158, 3020, 3117, 3184, 3181, 3285
 ]);
 
+const PRELOADED_SPLASHES = new Map();
+
 let visibleMatchesCount = 10;
 let currentHistory = [];
 let currentQueueType = 'soloq';
@@ -633,6 +635,7 @@ async function fetchLadder() {
     const players = await response.json();
     GLOBAL_PLAYERS_LIST = players;
     renderLadder(players);
+    if (typeof preloadLadderSplashArts === 'function') preloadLadderSplashArts(players);
   } catch (error) {
     console.error('API Error:', error);
     showToast('⚠️ Error al conectar con la API de Naafiri.', 'error');
@@ -671,6 +674,7 @@ async function smartRefresh() {
 
     if (anyChanged) {
       renderLadder(players);
+      if (typeof preloadLadderSplashArts === 'function') preloadLadderSplashArts(players);
     }
   } catch (e) {
     console.error('[AutoRefresh] Error:', e);
@@ -761,8 +765,71 @@ function renderLadder(players) {
     const cardPositionClass = rankNum <= 2 ? 'm-card-bottom' : '';
 
 
-    // Top Campeones HTML
-    const topChampsHtml = (player.topChampions || []).map(champ => {
+    // Top Campeones HTML (Sincronizado con Detalle del Jugador: Prioriza más jugados en Solo Q + Winrate)
+    const soloQMatchesDetailed = (player.matchStatsHistory || [])
+      .filter(m => (m.queueId === 420 || m.queueType === 'RANKED_SOLO_5x5') && !m.isRemake);
+    
+    let champsToDisplay = [];
+    
+    if (soloQMatchesDetailed.length > 0) {
+      const stats = {};
+      soloQMatchesDetailed.forEach(m => {
+        const name = m.championName;
+        if (name && name !== 'Unknown') {
+          if (!stats[name]) stats[name] = { count: 0, wins: 0, kills: 0, deaths: 0, assists: 0 };
+          stats[name].count++;
+          if (m.win) stats[name].wins++;
+          stats[name].kills += m.kills || 0;
+          stats[name].deaths += m.deaths || 0;
+          stats[name].assists += m.assists || 0;
+        }
+      });
+      
+      const sorted = Object.entries(stats)
+        .sort((a, b) => b[1].count - a[1].count)
+        .slice(0, 3);
+        
+      champsToDisplay = sorted.map(([name, data]) => {
+        const mastery = (player.topChampions || []).find(c => c.name === name);
+        const wr = Math.round((data.wins / data.count) * 100);
+        
+        const avgKills = (data.kills / data.count).toFixed(1);
+        const avgDeaths = (data.deaths / data.count).toFixed(1);
+        const avgAssists = (data.assists / data.count).toFixed(1);
+        
+        const kdaRatioVal = data.deaths > 0 
+          ? ((data.kills + data.assists) / data.deaths)
+          : (data.kills + data.assists);
+        const kdaRatio = kdaRatioVal.toFixed(2);
+        
+        let kdaColor = '#94a3b8';
+        if (kdaRatioVal >= 4.0) kdaColor = '#ff9f43';
+        else if (kdaRatioVal >= 3.0) kdaColor = '#a855f7';
+        else if (kdaRatioVal >= 2.0) kdaColor = '#38bdf8';
+        else if (kdaRatioVal > 0) kdaColor = '#ef4444';
+        
+        return {
+          name: name,
+          level: mastery ? mastery.level : 1,
+          points: mastery ? mastery.points : 0,
+          recentCount: data.count,
+          wins: data.wins,
+          losses: data.count - data.wins,
+          winRate: wr,
+          avgKills,
+          avgDeaths,
+          avgAssists,
+          kdaRatio,
+          kdaColor
+        };
+      });
+    }
+    
+    if (champsToDisplay.length === 0) {
+      champsToDisplay = (player.topChampions || []).slice(0, 3);
+    }
+
+    const topChampsHtml = champsToDisplay.map(champ => {
       const champKey = cleanChampId(champ.name);
       let champTitle = '';
       if (CHAMPION_SKINS_DATA) {
@@ -800,6 +867,20 @@ function renderLadder(players) {
                   <span class="m-label">Puntos</span>
                   <span class="m-value-sub">${formattedPoints}</span>
                 </div>` : ''}
+                ${champ.recentCount !== undefined ? `
+                <div class="m-stat-row" style="margin-top: 4px; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 4px;">
+                  <span class="m-label">Partidas Recientes</span>
+                  <span class="m-value" style="color: #fff;">${champ.recentCount}</span>
+                </div>
+                <div class="m-stat-row">
+                  <span class="m-label">Winrate Reciente</span>
+                  <span class="m-value" style="color: ${champ.winRate >= 50 ? '#22c55e' : '#ef4444'}; font-weight: 800;">${champ.winRate}%</span>
+                </div>
+                <div class="m-stat-row">
+                  <span class="m-label">KDA Promedio</span>
+                  <span class="m-value" style="color: ${champ.kdaColor}; font-weight: 800;">${champ.kdaRatio}</span>
+                </div>
+                ` : ''}
               </div>
             </div>
           </div>
@@ -1166,7 +1247,7 @@ function updateRegionBackground(champName) {
   }
 }
 
-async function setRandomSplash(rawChampName) {
+async function setRandomSplash(rawChampName, playerPuuid) {
   const bgEl = document.getElementById('dash-left-bg');
   if (!bgEl) return;
   
@@ -1183,6 +1264,27 @@ async function setRandomSplash(rawChampName) {
   const LOCAL_LOADING = `/assets/splash-art`;
   const CDN_LOADING = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading`;
 
+  // Comprobar si ya tenemos este splash precargado para este jugador
+  const preloaded = playerPuuid ? PRELOADED_SPLASHES.get(playerPuuid) : null;
+
+  if (preloaded) {
+    // ¡Acierto de caché! La default ya está precargada, por lo que entra al instante
+    bgEl.style.backgroundImage = `url('${preloaded.defaultSrc}')`;
+    bgEl.classList.remove('loading');
+    
+    // Si hay una skin especial precargada, la cargamos directamente con crossfade nativo
+    if (preloaded.specialSrc) {
+      setTimeout(() => {
+        bgEl.style.backgroundImage = `url('${preloaded.specialSrc}')`;
+        console.log(`✅ [Instant Preloaded Splash] Skin especial cargada al instante: ${champId} (Skin ${preloaded.specialNum})`);
+      }, 800); // 800ms de deleite con la default antes de la fusión suave
+    }
+    
+    updateRegionBackground(champId);
+    return;
+  }
+
+  // --- Fallback normal si no estaba precargada ---
   // 2. Cargar el splash por defecto localmente primero (carga ultra rápida)
   const localDefault = `${LOCAL_LOADING}/${champId}_0.jpg`;
   const cdnDefault = `${CDN_LOADING}/${champId}_0.jpg`;
@@ -1222,8 +1324,7 @@ async function setRandomSplash(rawChampName) {
       
       const img = new Image();
       img.onload = () => {
-        // Al estar precargada en memoria, la cambiamos directamente.
-        // La transición CSS 'background-image 0.5s ease-in-out' hará un crossfade nativo impecable y sin fundido a negro.
+        // Al estar precargada en memoria, la cambiamos directamente con crossfade nativo
         bgEl.style.backgroundImage = `url('${localSpecial}')`;
         console.log(`✅ Splash especial local cargado: ${champId} (Skin ${selectedSkin.num})`);
       };
@@ -1239,6 +1340,74 @@ async function setRandomSplash(rawChampName) {
     }
   } catch (error) {
     console.error("Error en Splash:", error);
+  }
+}
+
+// Pre-cargar splash arts en segundo plano de manera inteligente y progresiva (carga a 0ms reales)
+async function preloadLadderSplashArts(players) {
+  if (!players || players.length === 0) return;
+  
+  // Precargamos los primeros 12 jugadores del ladder progresivamente para optimizar ancho de banda
+  const toPreload = players.slice(0, 12);
+
+  for (const player of toPreload) {
+    if (PRELOADED_SPLASHES.has(player.puuid)) continue;
+
+    let target = getMostPlayedFromHistory(player.matchStatsHistory);
+    if (!target && player.topChampions && player.topChampions.length > 0) {
+      target = player.topChampions[0].name;
+    }
+
+    if (!target) continue;
+    const champId = cleanChampId(target);
+    if (!champId) continue;
+
+    const LOCAL_LOADING = `/assets/splash-art`;
+    const localDefault = `${LOCAL_LOADING}/${champId}_0.jpg`;
+
+    // 1. Precargar por defecto en caché del navegador
+    const defaultImg = new Image();
+    defaultImg.src = localDefault;
+
+    // 2. Buscar y precargar la skin especial de manera escalonada (150ms de delay por jugador para no saturar)
+    const index = players.indexOf(player);
+    setTimeout(async () => {
+      try {
+        const resp = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/en_US/champion/${champId}.json`);
+        if (!resp.ok) return;
+        const data = await resp.json();
+        
+        if (data.data[champId]) {
+          const skins = data.data[champId].skins;
+          const specials = skins.filter(s => s.num !== 0 && !s.name.includes('(') && !s.name.toLowerCase().includes('chroma'));
+          
+          if (specials.length > 0) {
+            const selectedSkin = specials[Math.floor(Math.random() * specials.length)];
+            const localSpecial = `${LOCAL_LOADING}/${champId}_${selectedSkin.num}.jpg`;
+
+            // Precargar la skin especial
+            const specialImg = new Image();
+            specialImg.src = localSpecial;
+
+            // Guardar preselección para garantizar 100% de coincidencia al hacer clic
+            PRELOADED_SPLASHES.set(player.puuid, {
+              defaultSrc: localDefault,
+              specialSrc: localSpecial,
+              specialNum: selectedSkin.num
+            });
+            console.log(`📡 [Preload] Listo en segundo plano para ${player.gameName}: ${champId}_0 y skin ${selectedSkin.num}`);
+          } else {
+            PRELOADED_SPLASHES.set(player.puuid, {
+              defaultSrc: localDefault,
+              specialSrc: null,
+              specialNum: null
+            });
+          }
+        }
+      } catch (err) {
+        // Fallback silencioso
+      }
+    }, 150 * index);
   }
 }
 
@@ -1277,7 +1446,7 @@ function openPlayerDetails(player) {
     target = player.topChampions[0].name;
   }
   
-  setRandomSplash(target);
+  setRandomSplash(target, player.puuid);
   
   // Header Info
   document.getElementById('detail-profile-icon').src = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${player.profileIconId || 1}.png`;
