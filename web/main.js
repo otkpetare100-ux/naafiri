@@ -1176,13 +1176,17 @@ async function setRandomSplash(rawChampName) {
     return;
   }
 
-  // Rutas locales (servidas por Express desde /assets/) — carga instantánea
-  const LOCAL_LOADING = `/assets/dragontail-16.10.1/img/champion/loading`;
-  const CDN_LOADING = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading`;
+  // Detectar si estamos en local o producción
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  
+  // Usar activos locales si estamos en local (0ms latencia) y CDN en producción (evita 404 en Railway)
+  const BASE_LOADING = isLocal 
+    ? `/assets/dragontail-16.10.1/img/champion/loading` 
+    : `https://ddragon.leagueoflegends.com/cdn/img/champion/loading`;
 
-  // 1. Mostrar de inmediato el splash default desde archivos locales (0ms latencia)
-  const localDefault = `${LOCAL_LOADING}/${champId}_0.jpg`;
-  bgEl.style.backgroundImage = `url('${localDefault}')`;
+  // 1. Mostrar de inmediato el splash de la skin por defecto (cero demora)
+  const defaultUrl = `${BASE_LOADING}/${champId}_0.jpg`;
+  bgEl.style.backgroundImage = `url('${defaultUrl}')`;
 
   // Actualizar fondo de región del modal completo
   updateRegionBackground(champId);
@@ -1205,28 +1209,29 @@ async function setRandomSplash(rawChampName) {
         return;
       }
 
-      // 3. Intentar cargar la skin especial desde archivos locales primero
-      const localUrl = `${LOCAL_LOADING}/${champId}_${selectedSkin.num}.jpg`;
-      const cdnUrl = `${CDN_LOADING}/${champId}_${selectedSkin.num}.jpg`;
+      // 3. Cargar la skin especial desde la misma base (local o CDN)
+      const specialUrl = `${BASE_LOADING}/${champId}_${selectedSkin.num}.jpg`;
       
       const img = new Image();
       img.onload = () => {
-        bgEl.style.backgroundImage = `url('${localUrl}')`;
-        console.log(`✅ Splash local cargado: ${champId} (Skin ${selectedSkin.num})`);
+        bgEl.style.backgroundImage = `url('${specialUrl}')`;
+        console.log(`✅ Splash especial cargado: ${champId} (Skin ${selectedSkin.num})`);
       };
       img.onerror = () => {
-        // Fallback al CDN si no existe localmente
-        const cdnImg = new Image();
-        cdnImg.onload = () => {
-          bgEl.style.backgroundImage = `url('${cdnUrl}')`;
-          console.log(`✅ Splash CDN fallback: ${champId} (Skin ${selectedSkin.num})`);
-        };
-        cdnImg.onerror = () => {
-          console.log(`⚠️ Skin no disponible ni local ni CDN, manteniendo default: ${champId}`);
-        };
-        cdnImg.src = cdnUrl;
+        // Si falla localmente (p.ej. es una skin más nueva que el parche 16.10), reintentamos con el CDN
+        if (isLocal) {
+          const cdnUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_${selectedSkin.num}.jpg`;
+          const cdnImg = new Image();
+          cdnImg.onload = () => {
+            bgEl.style.backgroundImage = `url('${cdnUrl}')`;
+            console.log(`✅ Splash CDN fallback cargado: ${champId} (Skin ${selectedSkin.num})`);
+          };
+          cdnImg.src = cdnUrl;
+        } else {
+          console.log(`⚠️ Skin especial no disponible, manteniendo default: ${champId}`);
+        }
       };
-      img.src = localUrl;
+      img.src = specialUrl;
     }
   } catch (error) {
     console.error("Error en Splash:", error);
