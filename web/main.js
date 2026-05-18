@@ -1176,21 +1176,24 @@ async function setRandomSplash(rawChampName) {
     return;
   }
 
-  // Carpeta de assets local (ahora subida y disponible en producción en Railway)
+  // Activar estado de carga cinematográfico (desvanecer, encoger y difuminar)
+  bgEl.classList.add('loading');
+
   const LOCAL_LOADING = `/assets/splash-art`;
   const CDN_LOADING = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading`;
 
-  // 1. Intentar cargar de inmediato el splash por defecto localmente (carga instantánea 0ms)
+  // 1. Cargar el splash por defecto localmente
   const localDefault = `${LOCAL_LOADING}/${champId}_0.jpg`;
   const cdnDefault = `${CDN_LOADING}/${champId}_0.jpg`;
 
   const defaultImg = new Image();
   defaultImg.onload = () => {
     bgEl.style.backgroundImage = `url('${localDefault}')`;
+    bgEl.classList.remove('loading'); // Revelar con la hermosa transición
   };
   defaultImg.onerror = () => {
-    // Si falla localmente (p.ej. campeones nuevos que no estén en la carpeta), usamos el CDN de Riot
     bgEl.style.backgroundImage = `url('${cdnDefault}')`;
+    bgEl.classList.remove('loading');
   };
   defaultImg.src = localDefault;
 
@@ -1221,15 +1224,24 @@ async function setRandomSplash(rawChampName) {
       
       const img = new Image();
       img.onload = () => {
-        bgEl.style.backgroundImage = `url('${localSpecial}')`;
-        console.log(`✅ Splash especial local cargado: ${champId} (Skin ${selectedSkin.num})`);
+        // Fundido cinematográfico para cambiar a la skin especial
+        bgEl.classList.add('loading');
+        setTimeout(() => {
+          bgEl.style.backgroundImage = `url('${localSpecial}')`;
+          bgEl.classList.remove('loading');
+          console.log(`✅ Splash especial local cargado: ${champId} (Skin ${selectedSkin.num})`);
+        }, 300); // 300ms para que se desvanezca antes del cambio de imagen
       };
       img.onerror = () => {
         // Fallback al CDN si no existe localmente (p.ej. skin muy nueva)
         const cdnImg = new Image();
         cdnImg.onload = () => {
-          bgEl.style.backgroundImage = `url('${cdnSpecial}')`;
-          console.log(`✅ Splash especial CDN fallback cargado: ${champId} (Skin ${selectedSkin.num})`);
+          bgEl.classList.add('loading');
+          setTimeout(() => {
+            bgEl.style.backgroundImage = `url('${cdnSpecial}')`;
+            bgEl.classList.remove('loading');
+            console.log(`✅ Splash especial CDN fallback cargado: ${champId} (Skin ${selectedSkin.num})`);
+          }, 300);
         };
         cdnImg.src = cdnSpecial;
       };

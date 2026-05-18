@@ -1653,6 +1653,7 @@ select option {
   filter: grayscale(1) brightness(1.6);
 }
 
+/*.dash-left-bg */
 .dash-left-bg {
   position: absolute;
   top: 0;
@@ -1667,11 +1668,19 @@ select option {
   filter: brightness(0.85) contrast(1.05); /* Elegante y equilibrado */
   transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
               filter 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
+              opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
               background-image 0.5s ease-in-out;
 }
 
+/* Estado de carga cinematográfico */
+.dash-left-bg.loading {
+  opacity: 0 !important;
+  transform: scale(0.96) !important;
+  filter: brightness(0.3) blur(8px) !important;
+}
+
 /* Efecto de zoom parallax interactivo en el splash de fondo */
-.dash-left-col:hover .dash-left-bg {
+.dash-left-col:hover .dash-left-bg:not(.loading) {
   transform: scale(1.05);
   filter: brightness(0.95) contrast(1.1); /* Realza los contrastes mágicamente */
 }
