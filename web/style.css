@@ -282,6 +282,88 @@ h1::after {
   color: var(--text-muted);
 }
 
+/* =========================================
+   NÚMEROS DEL PODIO — ESTILO ULTRA PREMIUM
+   ========================================= */
+
+/* --- TOP 1: ORO IMPERIAL --- */
+.rank-1 .rank-text {
+  background: linear-gradient(
+    180deg,
+    #fff8e1 0%,
+    #ffd54f 20%,
+    #f0b90b 45%,
+    #c8860b 70%,
+    #8a5e0a 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-family: var(--font-headers);
+  font-weight: 900;
+  font-size: 2.6rem;
+  letter-spacing: -1px;
+  filter: drop-shadow(0 0 12px rgba(240, 185, 11, 0.5))
+          drop-shadow(0 2px 3px rgba(0, 0, 0, 0.9));
+  animation: rank-gold-glow 3s ease-in-out infinite;
+}
+
+@keyframes rank-gold-glow {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(240, 185, 11, 0.3)) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.9)); }
+  50% { filter: drop-shadow(0 0 18px rgba(240, 185, 11, 0.65)) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.9)); }
+}
+
+/* --- TOP 2: PLATA ARCANA --- */
+.rank-2 .rank-text {
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #e0e8ef 20%,
+    #a8b8c8 45%,
+    #7a8d9c 70%,
+    #4a5c6a 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-family: var(--font-headers);
+  font-weight: 900;
+  font-size: 2.4rem;
+  letter-spacing: -1px;
+  filter: drop-shadow(0 0 10px rgba(168, 184, 200, 0.35))
+          drop-shadow(0 2px 3px rgba(0, 0, 0, 0.9));
+  animation: rank-silver-glow 3.5s ease-in-out infinite;
+}
+
+@keyframes rank-silver-glow {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(168, 184, 200, 0.2)) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.9)); }
+  50% { filter: drop-shadow(0 0 14px rgba(200, 215, 230, 0.5)) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.9)); }
+}
+
+/* --- TOP 3: BRONCE ANCESTRAL --- */
+.rank-3 .rank-text {
+  background: linear-gradient(
+    180deg,
+    #ffe0b2 0%,
+    #e8a050 20%,
+    #cd7f32 45%,
+    #9a5a1a 70%,
+    #5c3310 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-family: var(--font-headers);
+  font-weight: 900;
+  font-size: 2.4rem;
+  letter-spacing: -1px;
+  filter: drop-shadow(0 0 10px rgba(205, 127, 50, 0.35))
+          drop-shadow(0 2px 3px rgba(0, 0, 0, 0.9));
+  animation: rank-bronze-glow 3.5s ease-in-out infinite;
+}
+
+@keyframes rank-bronze-glow {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(205, 127, 50, 0.2)) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.9)); }
+  50% { filter: drop-shadow(0 0 14px rgba(232, 160, 80, 0.5)) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.9)); }
+}
+
 /* Avatar Section */
 .avatar-wrapper {
   position: relative;
