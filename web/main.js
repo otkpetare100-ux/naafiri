@@ -1279,18 +1279,16 @@ async function setRandomSplash(rawChampName, playerPuuid) {
   const preloaded = playerPuuid ? PRELOADED_SPLASHES.get(playerPuuid) : null;
 
   if (preloaded) {
-    // ¡Acierto de caché! La default ya está precargada, por lo que entra al instante
-    bgEl.style.backgroundImage = `url('${preloaded.defaultSrc}')`;
-    bgEl.classList.remove('loading');
-    
-    // Si hay una skin especial precargada, la cargamos directamente con crossfade nativo
+    // Si hay una skin especial precargada, la aplicamos directamente de entrada
     if (preloaded.specialSrc) {
-      setTimeout(() => {
-        bgEl.style.backgroundImage = `url('${preloaded.specialSrc}')`;
-        console.log(`✅ [Instant Preloaded Splash] Skin especial cargada al instante: ${champId} (Skin ${preloaded.specialNum})`);
-      }, 800); // 800ms de deleite con la default antes de la fusión suave
+      bgEl.style.backgroundImage = `url('${preloaded.specialSrc}')`;
+      console.log(`✅ [Instant Preloaded Splash] Skin especial cargada directamente al instante: ${champId} (Skin ${preloaded.specialNum})`);
+    } else {
+      // Si no hay skin especial, aplicamos la predeterminada precargada
+      bgEl.style.backgroundImage = `url('${preloaded.defaultSrc}')`;
+      console.log(`✅ [Instant Preloaded Splash] Skin predeterminada cargada directamente al instante: ${champId}`);
     }
-    
+    bgEl.classList.remove('loading');
     updateRegionBackground(champId);
     return;
   }
