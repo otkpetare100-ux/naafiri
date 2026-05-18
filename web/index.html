@@ -30,7 +30,10 @@
               <span class="trophy-icon">🏆</span>
               <h1>Leaderboard</h1>
             </div>
-            <div class="header-right">
+            <div class="header-right" style="display: flex; gap: 12px;">
+              <button id="compare-players-btn" class="btn-compare-action">
+                <span class="icon">⚔️</span> Comparar
+              </button>
               <button id="add-player-btn" class="btn-gold-action">
                 <span class="icon">+</span> Añadir Jugador
               </button>
@@ -102,6 +105,40 @@
         <div class="modal-footer">
           <button id="cancel-delete" class="btn-secondary">Mantener</button>
           <button id="confirm-delete-btn" class="btn-danger">Quitar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Comparación de Jugadores -->
+    <div id="compare-players-modal" class="modal">
+      <div class="modal-content compare-modal">
+        <div class="modal-header">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <span class="trophy-icon">⚔️</span>
+            <h2>COMPARAR JUGADORES</h2>
+          </div>
+          <span class="close-modal close-compare">&times;</span>
+        </div>
+        <div class="modal-body compare-modal-body">
+          <div class="compare-selectors">
+            <div class="compare-select-col">
+              <label for="compare-player-1-select">Invocador A</label>
+              <select id="compare-player-1-select" class="compare-dropdown">
+                <option value="">Seleccionar Jugador...</option>
+              </select>
+            </div>
+            <div class="compare-vs-badge">VS</div>
+            <div class="compare-select-col">
+              <label for="compare-player-2-select">Invocador B</label>
+              <select id="compare-player-2-select" class="compare-dropdown">
+                <option value="">Seleccionar Jugador...</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="compare-results-container" class="compare-results-container" style="display: none;">
+            <!-- Renderizado dinámico de la tabla simétrica -->
+          </div>
         </div>
       </div>
     </div>
