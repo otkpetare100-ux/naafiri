@@ -203,30 +203,7 @@ h1::after {
   overflow: visible;
 }
 
-.player-card::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -60%;
-  width: 30%;
-  height: 200%;
-  background: linear-gradient(
-    to right,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.08) 50%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  transform: rotate(25deg);
-  transition: none;
-  pointer-events: none;
-  z-index: 10;
-  clip-path: inset(0 round 12px);
-}
 
-.player-card:hover::after {
-  left: 140%;
-  transition: left 0.75s cubic-bezier(0.19, 1, 0.22, 1);
-}
 
 .player-card:hover {
   background: rgba(255, 255, 255, 0.08) !important;
