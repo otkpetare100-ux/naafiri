@@ -2859,52 +2859,22 @@ select option {
   font-style: italic;
   font-weight: 600;
 }
-/* ==========================================================================
-   [RESPALDO: DISEÑO ANTERIOR DE CRESTAS PARA RETROCESO RÁPIDO (SI EL USUARIO LO PIDE)]
-   .champ-detail-crest {
-     width: 65px;
-     height: 65px;
-     object-fit: contain;
-     margin-top: -15px;
-     filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
-     transition: transform 0.3s ease;
-   }
-   .champ-detail-crest-spacer {
-     height: 50px;
-     width: 65px;
-   }
-   .champ-detail-item:hover .champ-detail-crest {
-     transform: scale(1.05);
-   }
-   ========================================================================== */
-
-.champ-detail-icon-wrapper {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 25px; /* Crea el espacio vertical exacto para el crest y la separación del texto */
-}
-
 .champ-detail-crest {
-  position: absolute;
-  bottom: -22px; /* Posicionada exactamente solapando el borde inferior del icono */
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 60px;
+  width: 65px; /* Mismo tamaño que el icono de campeón */
+  height: 65px;
   object-fit: contain;
+  margin-top: -15px; /* ¡Pegado al icono! */
   filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
   transition: transform 0.3s ease;
-  pointer-events: none;
 }
 
 .champ-detail-crest-spacer {
-  display: none;
+  height: 50px; /* Espacio reservado para mantener alineación */
+  width: 65px;
 }
 
 .champ-detail-item:hover .champ-detail-crest {
-  transform: translateX(-50%) scale(1.05); /* Mantiene la centración y hace el ligero zoom */
+  transform: scale(1.05); /* Un pulso muy ligero */
 }
 
 /* Match History Styles */

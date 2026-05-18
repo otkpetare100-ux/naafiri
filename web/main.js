@@ -1786,12 +1786,10 @@ function openPlayerDetails(player) {
       
       champsContainer.innerHTML += `
         <div class="champ-detail-item m-lvl-${champ.level}">
-          <div class="champ-detail-icon-wrapper">
-            <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${champ.name}.png" class="champ-detail-icon" onerror="this.src='/assets/placeholder_champ.png'" />
-            ${champ.level >= 4 
-              ? `<img src="${crestUrl}" class="champ-detail-crest" onerror="this.style.display='none'" />` 
-              : ''}
-          </div>
+          <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${champ.name}.png" class="champ-detail-icon" onerror="this.src='/assets/placeholder_champ.png'" />
+          ${champ.level >= 4 
+            ? `<img src="${crestUrl}" class="champ-detail-crest" onerror="this.style.display='none'" />` 
+            : '<div class="champ-detail-crest-spacer"></div>'}
           <div class="champ-detail-info">
             <div class="champ-detail-name">${formatChampionName(champ.name)}</div>
             <div class="champ-detail-pts">${subText}</div>
