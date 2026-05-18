@@ -1171,14 +1171,21 @@ async function setRandomSplash(rawChampName) {
   const bgEl = document.getElementById('dash-left-bg');
   if (!bgEl) return;
   
-  bgEl.style.backgroundImage = 'none';
   const champId = cleanChampId(rawChampName);
-  if (!champId) return;
+  if (!champId) {
+    bgEl.style.backgroundImage = 'none';
+    return;
+  }
+
+  // 1. Mostrar de inmediato el splash de la skin por defecto (cero demora)
+  const defaultUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_0.jpg`;
+  bgEl.style.backgroundImage = `url('${defaultUrl}')`;
 
   // Actualizar fondo de región del modal completo
   updateRegionBackground(champId);
 
   try {
+    // 2. Consultar asíncronamente en segundo plano las skins especiales
     const resp = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/en_US/champion/${champId}.json`);
     if (!resp.ok) return;
     const data = await resp.json();
@@ -1191,34 +1198,29 @@ async function setRandomSplash(rawChampName) {
       if (specials.length > 0 && Math.random() > 0.01) {
         selectedSkin = specials[Math.floor(Math.random() * specials.length)];
       } else {
-        selectedSkin = skins[0];
+        // Ya se muestra la default, no hay nada más que hacer
+        return;
       }
 
       const bust = Math.random().toString(36).substring(7);
       const url = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_${selectedSkin.num}.jpg?v=${bust}`;
       
+      // 3. Pre-cargar la skin especial en memoria antes de aplicarla
       const img = new Image();
       img.onload = () => {
+        // Crossfade suave controlado por la transición CSS de .dash-left-bg
         bgEl.style.backgroundImage = `url('${url}')`;
-        console.log(`✅ Splash cargado con éxito: ${champId}`);
+        console.log(`✅ Splash especial cargado: ${champId} (Skin ${selectedSkin.num})`);
       };
       img.onerror = () => {
-        const remainingSpecials = specials.filter(s => s.num !== selectedSkin.num);
-        if (remainingSpecials.length > 0) {
-          const nextSkin = remainingSpecials[Math.floor(Math.random() * remainingSpecials.length)];
-          const nextUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_${nextSkin.num}.jpg?v=${bust}`;
-          const nextImg = new Image();
-          nextImg.onload = () => { bgEl.style.backgroundImage = `url('${nextUrl}')`; };
-          nextImg.onerror = () => { bgEl.style.backgroundImage = `url('https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_0.jpg')`; };
-          nextImg.src = nextUrl;
-        } else {
-          bgEl.style.backgroundImage = `url('https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_0.jpg')`;
-        }
+        // Si falla la skin especial, la default ya está visible — no hacer nada
+        console.log(`⚠️ Skin especial no disponible, manteniendo default: ${champId}`);
       };
       img.src = url;
     }
   } catch (error) {
     console.error("Error en Splash:", error);
+    // La default ya está visible, el usuario nunca ve un fondo vacío
   }
 }
 
