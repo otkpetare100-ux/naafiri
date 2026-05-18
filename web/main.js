@@ -1166,7 +1166,6 @@ function updateRegionBackground(champName) {
   }
 }
 
-// Función para cargar un Splash Art vertical aleatorio (TOTALMENTE ASEGURADA)
 async function setRandomSplash(rawChampName) {
   const bgEl = document.getElementById('dash-left-bg');
   if (!bgEl) return;
@@ -1177,15 +1176,19 @@ async function setRandomSplash(rawChampName) {
     return;
   }
 
-  // 1. Mostrar de inmediato el splash de la skin por defecto (cero demora)
-  const defaultUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_0.jpg`;
-  bgEl.style.backgroundImage = `url('${defaultUrl}')`;
+  // Rutas locales (servidas por Express desde /assets/) — carga instantánea
+  const LOCAL_LOADING = `/assets/dragontail-16.10.1/img/champion/loading`;
+  const CDN_LOADING = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading`;
+
+  // 1. Mostrar de inmediato el splash default desde archivos locales (0ms latencia)
+  const localDefault = `${LOCAL_LOADING}/${champId}_0.jpg`;
+  bgEl.style.backgroundImage = `url('${localDefault}')`;
 
   // Actualizar fondo de región del modal completo
   updateRegionBackground(champId);
 
   try {
-    // 2. Consultar asíncronamente en segundo plano las skins especiales
+    // 2. Consultar asíncronamente las skins especiales disponibles
     const resp = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/en_US/champion/${champId}.json`);
     if (!resp.ok) return;
     const data = await resp.json();
@@ -1202,21 +1205,28 @@ async function setRandomSplash(rawChampName) {
         return;
       }
 
-      const bust = Math.random().toString(36).substring(7);
-      const url = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champId}_${selectedSkin.num}.jpg?v=${bust}`;
+      // 3. Intentar cargar la skin especial desde archivos locales primero
+      const localUrl = `${LOCAL_LOADING}/${champId}_${selectedSkin.num}.jpg`;
+      const cdnUrl = `${CDN_LOADING}/${champId}_${selectedSkin.num}.jpg`;
       
-      // 3. Pre-cargar la skin especial en memoria antes de aplicarla
       const img = new Image();
       img.onload = () => {
-        // Crossfade suave controlado por la transición CSS de .dash-left-bg
-        bgEl.style.backgroundImage = `url('${url}')`;
-        console.log(`✅ Splash especial cargado: ${champId} (Skin ${selectedSkin.num})`);
+        bgEl.style.backgroundImage = `url('${localUrl}')`;
+        console.log(`✅ Splash local cargado: ${champId} (Skin ${selectedSkin.num})`);
       };
       img.onerror = () => {
-        // Si falla la skin especial, la default ya está visible — no hacer nada
-        console.log(`⚠️ Skin especial no disponible, manteniendo default: ${champId}`);
+        // Fallback al CDN si no existe localmente
+        const cdnImg = new Image();
+        cdnImg.onload = () => {
+          bgEl.style.backgroundImage = `url('${cdnUrl}')`;
+          console.log(`✅ Splash CDN fallback: ${champId} (Skin ${selectedSkin.num})`);
+        };
+        cdnImg.onerror = () => {
+          console.log(`⚠️ Skin no disponible ni local ni CDN, manteniendo default: ${champId}`);
+        };
+        cdnImg.src = cdnUrl;
       };
-      img.src = url;
+      img.src = localUrl;
     }
   } catch (error) {
     console.error("Error en Splash:", error);
