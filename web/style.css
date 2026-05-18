@@ -1548,6 +1548,20 @@ select option {
 
 .modal.active {
   display: flex;
+  animation: modalOverlayFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes modalOverlayFadeIn {
+  from {
+    background-color: rgba(0, 0, 0, 0);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+  }
+  to {
+    background-color: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
 }
 
 .details-modal {
@@ -1567,13 +1581,84 @@ select option {
   margin: auto; 
   border-radius: 24px;
   overflow: hidden; /* Esto cortará las esquinas cuadradas internas */
-  animation: modalScaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: detailsModalEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   transition: background 0.8s ease, border 0.8s ease;
 }
 
-@keyframes modalScaleIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+@keyframes detailsModalEnter {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.97);
+    box-shadow: 0 0 0px rgba(0, 0, 0, 0), 0 0 0px rgba(212, 175, 55, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    box-shadow: 0 0 80px rgba(0, 0, 0, 0.95), 
+                0 0 35px var(--champ-accent-alpha, rgba(212, 175, 55, 0.35)),
+                inset 0 0 40px var(--champ-accent-alpha, transparent) !important;
+  }
+}
+
+/* Animaciones de Columnas y Elementos Internos */
+.modal.active .dash-left-col-wrapper {
+  animation: detailsLeftColEnter 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes detailsLeftColEnter {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.modal.active .dash-right-col {
+  animation: detailsRightColEnter 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes detailsRightColEnter {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Elevación Escalonada (Staggered Entry) de Tarjetas de Estadísticas */
+.modal.active .advanced-stats-grid .stat-card {
+  opacity: 0;
+  animation: statCardRise 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.modal.active .advanced-stats-grid .stat-card:nth-child(1) { animation-delay: 0.12s; }
+.modal.active .advanced-stats-grid .stat-card:nth-child(2) { animation-delay: 0.17s; }
+.modal.active .advanced-stats-grid .stat-card:nth-child(3) { animation-delay: 0.22s; }
+.modal.active .advanced-stats-grid .stat-card:nth-child(4) { animation-delay: 0.27s; }
+.modal.active .advanced-stats-grid .stat-card:nth-child(5) { animation-delay: 0.32s; }
+.modal.active .advanced-stats-grid .stat-card:nth-child(6) { animation-delay: 0.37s; }
+.modal.active .advanced-stats-grid .stat-card:nth-child(7) { animation-delay: 0.42s; }
+.modal.active .advanced-stats-grid .stat-card:nth-child(8) { animation-delay: 0.47s; }
+.modal.active .advanced-stats-grid .stat-card:nth-child(9) { animation-delay: 0.52s; }
+.modal.active .advanced-stats-grid .stat-card:nth-child(10) { animation-delay: 0.57s; }
+.modal.active .advanced-stats-grid .stat-card:nth-child(11) { animation-delay: 0.62s; }
+.modal.active .advanced-stats-grid .stat-card:nth-child(12) { animation-delay: 0.67s; }
+
+@keyframes statCardRise {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .modal-header {
