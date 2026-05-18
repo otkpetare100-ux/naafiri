@@ -1170,26 +1170,27 @@ async function setRandomSplash(rawChampName) {
   const bgEl = document.getElementById('dash-left-bg');
   if (!bgEl) return;
   
+  // 1. Limpiar de inmediato el fondo anterior para evitar que se muestre brevemente al cambiar de perfil
+  bgEl.style.backgroundImage = 'none';
+  bgEl.classList.add('loading');
+  
   const champId = cleanChampId(rawChampName);
   if (!champId) {
-    bgEl.style.backgroundImage = 'none';
+    bgEl.classList.remove('loading');
     return;
   }
-
-  // Activar estado de carga cinematográfico (desvanecer, encoger y difuminar)
-  bgEl.classList.add('loading');
 
   const LOCAL_LOADING = `/assets/splash-art`;
   const CDN_LOADING = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading`;
 
-  // 1. Cargar el splash por defecto localmente
+  // 2. Cargar el splash por defecto localmente primero (carga ultra rápida)
   const localDefault = `${LOCAL_LOADING}/${champId}_0.jpg`;
   const cdnDefault = `${CDN_LOADING}/${champId}_0.jpg`;
 
   const defaultImg = new Image();
   defaultImg.onload = () => {
     bgEl.style.backgroundImage = `url('${localDefault}')`;
-    bgEl.classList.remove('loading'); // Revelar con la hermosa transición
+    bgEl.classList.remove('loading'); // Revelar suavemente desde negro
   };
   defaultImg.onerror = () => {
     bgEl.style.backgroundImage = `url('${cdnDefault}')`;
@@ -1197,11 +1198,10 @@ async function setRandomSplash(rawChampName) {
   };
   defaultImg.src = localDefault;
 
-  // Actualizar fondo de región del modal completo
   updateRegionBackground(champId);
 
   try {
-    // 2. Consultar asíncronamente las skins especiales disponibles
+    // 3. Consultar asíncronamente las skins especiales disponibles
     const resp = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/en_US/champion/${champId}.json`);
     if (!resp.ok) return;
     const data = await resp.json();
@@ -1214,34 +1214,24 @@ async function setRandomSplash(rawChampName) {
       if (specials.length > 0 && Math.random() > 0.01) {
         selectedSkin = specials[Math.floor(Math.random() * specials.length)];
       } else {
-        // Ya se muestra la default, no hay nada más que hacer
         return;
       }
 
-      // 3. Intentar cargar la skin especial localmente primero
       const localSpecial = `${LOCAL_LOADING}/${champId}_${selectedSkin.num}.jpg`;
       const cdnSpecial = `${CDN_LOADING}/${champId}_${selectedSkin.num}.jpg`;
       
       const img = new Image();
       img.onload = () => {
-        // Fundido cinematográfico para cambiar a la skin especial
-        bgEl.classList.add('loading');
-        setTimeout(() => {
-          bgEl.style.backgroundImage = `url('${localSpecial}')`;
-          bgEl.classList.remove('loading');
-          console.log(`✅ Splash especial local cargado: ${champId} (Skin ${selectedSkin.num})`);
-        }, 300); // 300ms para que se desvanezca antes del cambio de imagen
+        // Al estar precargada en memoria, la cambiamos directamente.
+        // La transición CSS 'background-image 0.5s ease-in-out' hará un crossfade nativo impecable y sin fundido a negro.
+        bgEl.style.backgroundImage = `url('${localSpecial}')`;
+        console.log(`✅ Splash especial local cargado: ${champId} (Skin ${selectedSkin.num})`);
       };
       img.onerror = () => {
-        // Fallback al CDN si no existe localmente (p.ej. skin muy nueva)
         const cdnImg = new Image();
         cdnImg.onload = () => {
-          bgEl.classList.add('loading');
-          setTimeout(() => {
-            bgEl.style.backgroundImage = `url('${cdnSpecial}')`;
-            bgEl.classList.remove('loading');
-            console.log(`✅ Splash especial CDN fallback cargado: ${champId} (Skin ${selectedSkin.num})`);
-          }, 300);
+          bgEl.style.backgroundImage = `url('${cdnSpecial}')`;
+          console.log(`✅ Splash especial CDN fallback cargado: ${champId} (Skin ${selectedSkin.num})`);
         };
         cdnImg.src = cdnSpecial;
       };
@@ -1249,7 +1239,6 @@ async function setRandomSplash(rawChampName) {
     }
   } catch (error) {
     console.error("Error en Splash:", error);
-    // La default ya está visible, el usuario nunca ve un fondo vacío
   }
 }
 
