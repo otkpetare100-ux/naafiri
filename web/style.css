@@ -2818,10 +2818,14 @@ select option {
 }
 
 /* Brillos por Maestría al Hover (Potenciados) */
+.champ-detail-item.m-lvl-1:hover { box-shadow: 0 0 30px rgba(112, 128, 144, 0.4) !important; border-color: #708090 !important; }
+.champ-detail-item.m-lvl-2:hover { box-shadow: 0 0 30px rgba(148, 163, 184, 0.45) !important; border-color: #94a3b8 !important; }
+.champ-detail-item.m-lvl-3:hover { box-shadow: 0 0 30px rgba(203, 213, 225, 0.5) !important; border-color: #cbd5e1 !important; }
 .champ-detail-item.m-lvl-4:hover { box-shadow: 0 0 35px rgba(166, 121, 77, 0.7) !important; border-color: #a6794d !important; }
 .champ-detail-item.m-lvl-5:hover { box-shadow: 0 0 35px rgba(239, 68, 68, 0.7) !important; border-color: #ef4444 !important; }
 .champ-detail-item.m-lvl-6:hover { box-shadow: 0 0 35px rgba(168, 85, 247, 0.7) !important; border-color: #a855f7 !important; }
 .champ-detail-item.m-lvl-7:hover { box-shadow: 0 0 35px rgba(34, 211, 238, 0.7) !important; border-color: #22d3ee !important; }
+.champ-detail-item.m-lvl-high:hover,
 .champ-detail-item.m-lvl-8:hover, 
 .champ-detail-item.m-lvl-9:hover, 
 .champ-detail-item.m-lvl-10:hover { box-shadow: 0 0 45px rgba(250, 204, 21, 0.8) !important; border-color: #facc15 !important; }

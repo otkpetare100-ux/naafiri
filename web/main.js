@@ -1785,7 +1785,7 @@ function openPlayerDetails(player) {
       const crestUrl = getMasteryCrest(champ.level);
       
       champsContainer.innerHTML += `
-        <div class="champ-detail-item m-lvl-${champ.level}">
+        <div class="champ-detail-item m-lvl-${champ.level} ${champ.level >= 8 ? 'm-lvl-high' : ''}">
           <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${champ.name}.png" class="champ-detail-icon" onerror="this.src='/assets/placeholder_champ.png'" />
           ${champ.level >= 1 
             ? `<img src="${crestUrl}" class="champ-detail-crest" onerror="this.style.display='none'" />` 
