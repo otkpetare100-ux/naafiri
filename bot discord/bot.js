@@ -364,7 +364,7 @@ function initBot(db) {
         .addFields(
           { name: 'Región', value: (acc.region || 'LA1').toUpperCase(), inline: true },
           { name: 'Rango SoloQ', value: acc.soloQ ? `${acc.soloQ.tier} ${acc.soloQ.rank} (${acc.soloQ.leaguePoints} LP)` : 'Unranked', inline: true },
-          { name: 'Winrate', value: acc.soloQ ? `${Math.round((acc.soloQ.wins / (acc.soloQ.wins + acc.soloQ.losses)) * 100)}%` : 'N/A', inline: true },
+          { name: 'Winrate', value: acc.soloQ && (acc.soloQ.wins + acc.soloQ.losses) > 0 ? `${Math.round((acc.soloQ.wins / (acc.soloQ.wins + acc.soloQ.losses)) * 100)}%` : (acc.soloQ ? '0%' : 'N/A'), inline: true },
           { name: 'Racha', value: acc.streak > 0 ? `🔥 ${acc.streak} Wins` : acc.streak < 0 ? `❄️ ${Math.abs(acc.streak)} Loss` : '—', inline: true }
         )
         .setFooter({ text: 'LAN Tracker Bot' });
@@ -796,12 +796,18 @@ function initBot(db) {
     if (command === 'shame' || command === 'muro') {
       const accounts = await db.collection('accounts').find({}).toArray();
       const losers = accounts.sort((a,b) => {
-        const wrA = a.soloQ ? a.soloQ.wins / (a.soloQ.wins + a.soloQ.losses) : 0;
-        const wrB = b.soloQ ? b.soloQ.wins / (b.soloQ.wins + b.soloQ.losses) : 0;
+        const totalA = a.soloQ ? (a.soloQ.wins + a.soloQ.losses) : 0;
+        const totalB = b.soloQ ? (b.soloQ.wins + b.soloQ.losses) : 0;
+        const wrA = totalA > 0 ? a.soloQ.wins / totalA : 0;
+        const wrB = totalB > 0 ? b.soloQ.wins / totalB : 0;
         return wrA - wrB;
       }).slice(0, 5);
       
-      const list = losers.map((a, i) => `${i+1}. **${a.gameName}** - WR: ${Math.round((a.soloQ ? a.soloQ.wins / (a.soloQ.wins + a.soloQ.losses) : 0) * 100)}% 🤡`).join('\n');
+      const list = losers.map((a, i) => {
+        const total = a.soloQ ? (a.soloQ.wins + a.soloQ.losses) : 0;
+        const wr = total > 0 ? Math.round((a.soloQ.wins / total) * 100) : 0;
+        return `${i+1}. **${a.gameName}** - WR: ${wr}% 🤡`;
+      }).join('\n');
       
       const embed = new EmbedBuilder()
         .setTitle('🤡 El Muro de la Vergüenza')

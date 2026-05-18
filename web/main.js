@@ -777,68 +777,8 @@ function renderLadder(players) {
 
 
     // Top Campeones HTML (Sincronizado con Detalle del Jugador: Prioriza más jugados en Solo Q + Winrate)
-    const soloQMatchesDetailed = (player.matchStatsHistory || [])
-      .filter(m => (m.queueId === 420 || m.queueType === 'RANKED_SOLO_5x5') && !m.isRemake);
-    
-    let champsToDisplay = [];
-    
-    if (soloQMatchesDetailed.length > 0) {
-      const stats = {};
-      soloQMatchesDetailed.forEach(m => {
-        const name = m.championName;
-        if (name && name !== 'Unknown') {
-          if (!stats[name]) stats[name] = { count: 0, wins: 0, kills: 0, deaths: 0, assists: 0 };
-          stats[name].count++;
-          if (m.win) stats[name].wins++;
-          stats[name].kills += m.kills || 0;
-          stats[name].deaths += m.deaths || 0;
-          stats[name].assists += m.assists || 0;
-        }
-      });
-      
-      const sorted = Object.entries(stats)
-        .sort((a, b) => b[1].count - a[1].count)
-        .slice(0, 3);
-        
-      champsToDisplay = sorted.map(([name, data]) => {
-        const mastery = (player.topChampions || []).find(c => c.name === name);
-        const wr = Math.round((data.wins / data.count) * 100);
-        
-        const avgKills = (data.kills / data.count).toFixed(1);
-        const avgDeaths = (data.deaths / data.count).toFixed(1);
-        const avgAssists = (data.assists / data.count).toFixed(1);
-        
-        const kdaRatioVal = data.deaths > 0 
-          ? ((data.kills + data.assists) / data.deaths)
-          : (data.kills + data.assists);
-        const kdaRatio = kdaRatioVal.toFixed(2);
-        
-        let kdaColor = '#94a3b8';
-        if (kdaRatioVal >= 4.0) kdaColor = '#ff9f43';
-        else if (kdaRatioVal >= 3.0) kdaColor = '#a855f7';
-        else if (kdaRatioVal >= 2.0) kdaColor = '#38bdf8';
-        else if (kdaRatioVal > 0) kdaColor = '#ef4444';
-        
-        return {
-          name: name,
-          level: mastery ? mastery.level : 1,
-          points: mastery ? mastery.points : 0,
-          recentCount: data.count,
-          wins: data.wins,
-          losses: data.count - data.wins,
-          winRate: wr,
-          avgKills,
-          avgDeaths,
-          avgAssists,
-          kdaRatio,
-          kdaColor
-        };
-      });
-    }
-    
-    if (champsToDisplay.length === 0) {
-      champsToDisplay = (player.topChampions || []).slice(0, 3);
-    }
+    const champsToDisplay = getTopChampsToDisplay(player);
+
 
     const topChampsHtml = champsToDisplay.map(champ => {
       const champKey = cleanChampId(champ.name);
@@ -970,7 +910,7 @@ function renderLadder(players) {
         <button class="btn-delete-card" onclick="openDeleteModal('${player.puuid}', '${player.gameName.replace(/'/g, "\\'")}')" title="Eliminar de la jauría">
           ✕
         </button>
-        <button class="btn-refresh-card" onclick="refreshPlayer('${player.gameName}', '${player.tagLine}', '${player.region}')" title="Actualizar datos">
+        <button class="btn-refresh-card" onclick="refreshPlayer('${player.gameName}', '${player.tagLine}', '${player.region}', '${player.puuid}')" title="Actualizar datos">
           <span class="refresh-icon">↻</span>
         </button>
       </div>
@@ -981,13 +921,14 @@ function renderLadder(players) {
 }
 
 // Cooldown de 5 min por jugador para el botón de refresh
-const refreshCooldowns = new Map(); // clave: gameName → timestamp del último refresh
+const refreshCooldowns = new Map(); // clave: puuid o gameName → timestamp del último refresh
 const REFRESH_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutos
 
 // Lógica de Actualización Manual
-async function refreshPlayer(gameName, tagLine, region) {
+async function refreshPlayer(gameName, tagLine, region, puuid) {
   const now = Date.now();
-  const lastRefresh = refreshCooldowns.get(gameName);
+  const cooldownKey = puuid || gameName;
+  const lastRefresh = refreshCooldowns.get(cooldownKey);
   if (lastRefresh && (now - lastRefresh) < REFRESH_COOLDOWN_MS) {
     const remaining = Math.ceil((REFRESH_COOLDOWN_MS - (now - lastRefresh)) / 60000);
     showToast(`⏳ Espera ${remaining} min antes de actualizar a ${gameName} de nuevo.`, 'error');
@@ -996,7 +937,7 @@ async function refreshPlayer(gameName, tagLine, region) {
 
   try {
     startLoadingBar();
-    refreshCooldowns.set(gameName, now);
+    refreshCooldowns.set(cooldownKey, now);
     showToast(`Actualizando a ${gameName}...`);
     
     const response = await fetch(`${API_BASE}/summoners`, {
@@ -1012,11 +953,11 @@ async function refreshPlayer(gameName, tagLine, region) {
       fetchLadder();
     } else {
       // Si falló, liberar el cooldown para que pueda reintentar
-      refreshCooldowns.delete(gameName);
+      refreshCooldowns.delete(cooldownKey);
       showToast(result.message || 'Error al actualizar', 'error');
     }
   } catch (error) {
-    refreshCooldowns.delete(gameName);
+    refreshCooldowns.delete(cooldownKey);
     console.error('Refresh error:', error);
     showToast('Error de conexión.', 'error');
   } finally {
@@ -1215,6 +1156,74 @@ function getMostPlayedFromHistory(history) {
   const entries = Object.entries(counts);
   return entries.length > 0 ? entries.sort((a, b) => b[1] - a[1])[0][0] : null;
 }
+
+// Función para obtener los campeones para mostrar (Sincronizado)
+function getTopChampsToDisplay(player) {
+  const soloQMatchesDetailed = (player.matchStatsHistory || [])
+    .filter(m => (m.queueId === 420 || m.queueType === 'RANKED_SOLO_5x5') && !m.isRemake);
+  
+  let champsToDisplay = [];
+  
+  if (soloQMatchesDetailed.length > 0) {
+    const stats = {};
+    soloQMatchesDetailed.forEach(m => {
+      const name = m.championName;
+      if (name && name !== 'Unknown') {
+        if (!stats[name]) stats[name] = { count: 0, wins: 0, kills: 0, deaths: 0, assists: 0 };
+        stats[name].count++;
+        if (m.win) stats[name].wins++;
+        stats[name].kills += m.kills || 0;
+        stats[name].deaths += m.deaths || 0;
+        stats[name].assists += m.assists || 0;
+      }
+    });
+    
+    const sorted = Object.entries(stats)
+      .sort((a, b) => b[1].count - a[1].count)
+      .slice(0, 3);
+      
+    champsToDisplay = sorted.map(([name, data]) => {
+      const mastery = (player.topChampions || []).find(c => c.name === name);
+      const wr = Math.round((data.wins / data.count) * 100);
+      
+      const avgKills = (data.kills / data.count).toFixed(1);
+      const avgDeaths = (data.deaths / data.count).toFixed(1);
+      const avgAssists = (data.assists / data.count).toFixed(1);
+      
+      const kdaRatioVal = data.deaths > 0 
+        ? ((data.kills + data.assists) / data.deaths)
+        : (data.kills + data.assists);
+      const kdaRatio = kdaRatioVal.toFixed(2);
+      
+      let kdaColor = '#94a3b8';
+      if (kdaRatioVal >= 4.0) kdaColor = '#ff9f43';
+      else if (kdaRatioVal >= 3.0) kdaColor = '#a855f7';
+      else if (kdaRatioVal >= 2.0) kdaColor = '#38bdf8';
+      else if (kdaRatioVal > 0) kdaColor = '#ef4444';
+      
+      return {
+        name: name,
+        level: mastery ? mastery.level : 1,
+        points: mastery ? mastery.points : 0,
+        recentCount: data.count,
+        wins: data.wins,
+        losses: data.count - data.wins,
+        winRate: wr,
+        avgKills,
+        avgDeaths,
+        avgAssists,
+        kdaRatio,
+        kdaColor
+      };
+    });
+  }
+  
+  if (champsToDisplay.length === 0) {
+    champsToDisplay = (player.topChampions || []).slice(0, 3);
+  }
+  return champsToDisplay;
+}
+
 
 // MAPEO DE REGIONES: ATMÓSFERA REGIONAL (Data Dragon - 100% Estable)
 const REGION_WALLPAPERS = {
@@ -1706,76 +1715,9 @@ function openPlayerDetails(player) {
   btnSolo.onclick();
 
   // Lógica de "Mejores Campeones" Inteligente (Prioriza Historial Solo Q + Winrate)
-  const soloQMatchesDetailed = (player.matchStatsHistory || [])
-    .filter(m => (m.queueId === 420 || m.queueType === 'RANKED_SOLO_5x5') && !m.isRemake);
-  
-  let champsToDisplay = [];
-  
-  if (soloQMatchesDetailed.length > 0) {
-    const stats = {};
-    soloQMatchesDetailed.forEach(m => {
-      const name = m.championName;
-      if (name && name !== 'Unknown') {
-        if (!stats[name]) stats[name] = { count: 0, wins: 0, kills: 0, deaths: 0, assists: 0 };
-        stats[name].count++;
-        if (m.win) stats[name].wins++;
-        stats[name].kills += m.kills || 0;
-        stats[name].deaths += m.deaths || 0;
-        stats[name].assists += m.assists || 0;
-      }
-    });
-    
-    const sorted = Object.entries(stats)
-      .sort((a, b) => b[1].count - a[1].count)
-      .slice(0, 3);
-      
-    champsToDisplay = sorted.map(([name, data]) => {
-      const mastery = (player.topChampions || []).find(c => c.name === name);
-      const wr = Math.round((data.wins / data.count) * 100);
-      
-      const avgKills = (data.kills / data.count).toFixed(1);
-      const avgDeaths = (data.deaths / data.count).toFixed(1);
-      const avgAssists = (data.assists / data.count).toFixed(1);
-      
-      const kdaRatioVal = data.deaths > 0 
-        ? ((data.kills + data.assists) / data.deaths)
-        : (data.kills + data.assists);
-      const kdaRatio = kdaRatioVal.toFixed(2);
-      
-      let kdaColor = '#94a3b8'; // Slate Silver
-      if (kdaRatioVal >= 4.0) {
-        kdaColor = '#ff9f43'; // Fuego/Oro Legendario
-      } else if (kdaRatioVal >= 3.0) {
-        kdaColor = '#a855f7'; // Amatista Excelente
-      } else if (kdaRatioVal >= 2.0) {
-        kdaColor = '#38bdf8'; // Sky Blue Sólido
-      } else if (kdaRatioVal > 0) {
-        kdaColor = '#ef4444'; // Soft Red Mejorable
-      }
-      
-      return {
-        name: name,
-        level: mastery ? mastery.level : 1,
-        points: mastery ? mastery.points : 0,
-        recentCount: data.count,
-        wins: data.wins,
-        losses: data.count - data.wins,
-        winRate: wr,
-        avgKills,
-        avgDeaths,
-        avgAssists,
-        kdaRatio,
-        kdaColor
-      };
-    });
-  }
-  
-  let isRecent = false;
-  if (champsToDisplay.length === 0) {
-    champsToDisplay = (player.topChampions || []).slice(0, 3);
-  } else {
-    isRecent = true;
-  }
+  const champsToDisplay = getTopChampsToDisplay(player);
+  let isRecent = (player.matchStatsHistory || []).filter(m => (m.queueId === 420 || m.queueType === 'RANKED_SOLO_5x5') && !m.isRemake).length > 0;
+
 
   const champsTitleElement = document.getElementById('detail-champs-title');
   if (champsTitleElement) {
@@ -2533,11 +2475,8 @@ function openPlayerDetails(player) {
     }
   }
 
-  // El primer renderQueueStats invoca btnSolo.onclick() en la línea 392 aprox,
-  // pero lo llamaremos explícitamente abajo para evitar condiciones de carrera
-  if (typeof loadStats === 'function') loadStats(player.advancedStats ? player.advancedStats[currentQueue] || player.advancedStats : null);
-  if (typeof renderHistory === 'function') renderHistory(player.matchStatsHistory, currentQueue);
-  if (typeof renderLanesDistribution === 'function') renderLanesDistribution(player.matchStatsHistory, currentQueue);
+  // El renderizado inicial queda completamente gestionado de forma limpia por la invocación de btnSolo.onclick() arriba.
+
 
   // Botón para actualizar partidas recientes
   const btnUpdateMatches = document.getElementById('btn-update-matches');
