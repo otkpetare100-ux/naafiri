@@ -337,6 +337,9 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
     };
     const routing = routingMap[account.region] || 'americas';
 
+    // Obtener campeones actualizados (¡Siempre!)
+    const topChampions = await getTopChampions(puuid, account.region, RIOT_API_KEY);
+
     // Obtener IDs de las últimas 20 partidas de Solo y Flex por separado
     const matchIdsSoloUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?queue=420&start=0&count=20&api_key=${RIOT_API_KEY}`;
     const matchIdsFlexUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?queue=440&start=0&count=20&api_key=${RIOT_API_KEY}`;
@@ -360,7 +363,18 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
     const newMatchIds = fetchedMatchIds.filter(id => !existingMatchIds.includes(id));
 
     if (newMatchIds.length === 0) {
-      return res.json({ message: 'No hay partidas nuevas.', updated: false });
+      // Actualizar solo los campeones en la base de datos
+      await db.collection('accounts').updateOne(
+        { puuid },
+        { $set: { topChampions: topChampions } }
+      );
+      return res.json({ 
+        message: '¡Campeones actualizados! No hay partidas nuevas.', 
+        updated: true, 
+        stats: account.advancedStats,
+        history: account.matchStatsHistory,
+        topChampions: topChampions
+      });
     }
 
     const newMatchStats = [];
@@ -505,14 +519,15 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
 
     await db.collection('accounts').updateOne(
       { puuid },
-      { $set: { matchStatsHistory: combinedMatches, advancedStats: avgStats } }
+      { $set: { matchStatsHistory: combinedMatches, advancedStats: avgStats, topChampions: topChampions } }
     );
 
     res.json({ 
-      message: `¡Se actualizaron ${newMatchStats.length} partidas nuevas!`, 
+      message: `¡Se actualizaron campeones y ${newMatchStats.length} partidas nuevas!`, 
       updated: true, 
       stats: avgStats,
-      history: combinedMatches
+      history: combinedMatches,
+      topChampions: topChampions
     });
 
   } catch (error) {

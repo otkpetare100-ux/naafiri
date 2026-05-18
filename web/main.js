@@ -2548,13 +2548,12 @@ function openPlayerDetails(player) {
         const data = await response.json();
         
         if (response.ok) {
-          showToast(data.message, data.updated ? 'success' : 'info');
-          if (data.updated && data.stats) {
-            player.advancedStats = data.stats; 
-            player.matchStatsHistory = data.history; // Guardar historial nuevo
-            loadStats(player.advancedStats[currentQueue]);
-            renderHistory(data.history, currentQueue); // Refrescar lista de historial filtrado
-            if (typeof renderLanesDistribution === 'function') renderLanesDistribution(data.history, currentQueue);
+          showToast(data.message, 'success');
+          if (data.updated) {
+            if (data.stats) player.advancedStats = data.stats; 
+            if (data.history) player.matchStatsHistory = data.history; 
+            if (data.topChampions) player.topChampions = data.topChampions;
+            openPlayerDetails(player);
           }
         } else {
           showToast(`❌ ${data.message}`, 'error');
