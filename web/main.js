@@ -435,7 +435,7 @@ function showParticipantTooltip(e, summonerName, tagLine, championName) {
 
   tooltip.innerHTML = `
     <div class="p-tooltip-summoner">${fullSummonerName}</div>
-    <div class="p-tooltip-champ-name">${championName}</div>
+    <div class="p-tooltip-champ-name">${formatChampionName(championName)}</div>
   `;
 
   tooltip.style.display = 'block';
@@ -1157,6 +1157,37 @@ function getMostPlayedFromHistory(history) {
   return entries.length > 0 ? entries.sort((a, b) => b[1] - a[1])[0][0] : null;
 }
 
+// Formateo estético de nombres de campeones (100% Estable)
+function formatChampionName(name) {
+  if (!name) return '';
+  const specialMap = {
+    'TwistedFate': 'Twisted Fate',
+    'KogMaw': "Kog'Maw",
+    'MissFortune': 'Miss Fortune',
+    'DrMundo': 'Dr. Mundo',
+    'TahmKench': 'Tahm Kench',
+    'AurelionSol': 'Aurelion Sol',
+    'XinZhao': 'Xin Zhao',
+    'LeeSin': 'Lee Sin',
+    'MasterYi': 'Master Yi',
+    'Nunu': 'Nunu & Willump',
+    'RekSai': "Rek'Sai",
+    'VelKoz': "Vel'Koz",
+    'BelVeth': "Bel'Veth",
+    'JarvanIV': 'Jarvan IV',
+    'Renata': 'Renata Glasc',
+    'MonkeyKing': 'Wukong',
+    'Kaisa': "Kai'Sa",
+    'ChoGath': "Cho'Gath",
+    'FiddleSticks': 'Fiddlesticks',
+    'Heimerdinger': 'Heimerdinger'
+  };
+  if (specialMap[name]) return specialMap[name];
+  return name.replace(/([A-Z])/g, ' $1').trim();
+}
+
+window.formatChampionName = formatChampionName;
+
 // Función para obtener los campeones para mostrar (Sincronizado)
 function getTopChampsToDisplay(player) {
   const soloQMatchesDetailed = (player.matchStatsHistory || [])
@@ -1755,12 +1786,14 @@ function openPlayerDetails(player) {
       
       champsContainer.innerHTML += `
         <div class="champ-detail-item m-lvl-${champ.level}">
-          <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${champ.name}.png" class="champ-detail-icon" onerror="this.src='/assets/placeholder_champ.png'" />
-          ${champ.level >= 4 
-            ? `<img src="${crestUrl}" class="champ-detail-crest" onerror="this.style.display='none'" />` 
-            : '<div class="champ-detail-crest-spacer"></div>'}
+          <div class="champ-detail-icon-wrapper">
+            <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${champ.name}.png" class="champ-detail-icon" onerror="this.src='/assets/placeholder_champ.png'" />
+            ${champ.level >= 4 
+              ? `<img src="${crestUrl}" class="champ-detail-crest" onerror="this.style.display='none'" />` 
+              : ''}
+          </div>
           <div class="champ-detail-info">
-            <div class="champ-detail-name">${champ.name}</div>
+            <div class="champ-detail-name">${formatChampionName(champ.name)}</div>
             <div class="champ-detail-pts">${subText}</div>
             ${champ.kdaRatio !== undefined ? `
               <div class="champ-detail-kda" style="font-size: 0.72rem; color: rgba(255,255,255,0.85); font-weight: 700; margin-top: 5px; font-family: 'Outfit', sans-serif; letter-spacing: 0.3px;">
@@ -1888,16 +1921,16 @@ function openPlayerDetails(player) {
 
       // Inyectar en elementos HTML de Récords Recientes
       document.getElementById('record-dmg').textContent = maxDamageDealt > 0 ? maxDamageDealt.toLocaleString('es-ES') : '--';
-      document.getElementById('record-dmg-champ').textContent = maxDamageDealtChamp !== 'N/A' ? maxDamageDealtChamp : '--';
+      document.getElementById('record-dmg-champ').textContent = maxDamageDealtChamp !== 'N/A' ? formatChampionName(maxDamageDealtChamp) : '--';
 
       document.getElementById('record-kills').textContent = maxKills > 0 ? `${maxKills} Kills` : '--';
-      document.getElementById('record-kills-champ').textContent = maxKillsChamp !== 'N/A' ? maxKillsChamp : '--';
+      document.getElementById('record-kills-champ').textContent = maxKillsChamp !== 'N/A' ? formatChampionName(maxKillsChamp) : '--';
 
       document.getElementById('record-cs').textContent = maxCs > 0 ? `${maxCs} CS` : '--';
-      document.getElementById('record-cs-champ').textContent = maxCsChamp !== 'N/A' ? maxCsChamp : '--';
+      document.getElementById('record-cs-champ').textContent = maxCsChamp !== 'N/A' ? formatChampionName(maxCsChamp) : '--';
 
       document.getElementById('record-kda').textContent = bestSingleKdaVal >= 0 ? bestSingleKdaStr : '--';
-      document.getElementById('record-kda-champ').textContent = bestSingleKdaChamp !== 'N/A' ? bestSingleKdaChamp : '--';
+      document.getElementById('record-kda-champ').textContent = bestSingleKdaChamp !== 'N/A' ? formatChampionName(bestSingleKdaChamp) : '--';
 
     } else if (stats && stats.avgGold !== undefined) {
       // Fallback si no hay partidas detalladas en historial
@@ -2332,7 +2365,7 @@ function openPlayerDetails(player) {
               const isMe = (p.puuid && p.puuid === currentModalPuuid);
               const isMeClass = isMe ? 'active-summoner' : '';
               const iconUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${p.championName}.png`;
-              const champDisplayName = p.championName || 'Unknown';
+              const champDisplayName = p.championName ? formatChampionName(p.championName) : 'Unknown';
               
               const safeSummonerName = (p.summonerName || 'Desconocido').replace(/'/g, "\\'");
               const safePuuid = (p.puuid || '').replace(/'/g, "\\'");
