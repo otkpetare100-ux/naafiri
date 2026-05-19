@@ -3337,8 +3337,8 @@ function initCompareLogic() {
 
       <div class="compare-stats-table">
         ${mkRow('Rango SoloQ',
-          `<img src="/assets/emblemas/Emblem_${p1.soloQ?.tier||'UNRANKED'}.png" class="compare-rank-emblem" onerror="this.src='/assets/emblemas/Emblem_UNRANKED.png'"/><div class="compare-rank-info"><span class="rank-name">${p1.soloQ?.tier||'UNRANKED'} ${p1.soloQ?.rank||''}</span><span class="rank-lp">${p1.soloQ?.leaguePoints||0} LP</span></div>`,
-          `<div class="compare-rank-info"><span class="rank-name">${p2.soloQ?.tier||'UNRANKED'} ${p2.soloQ?.rank||''}</span><span class="rank-lp">${p2.soloQ?.leaguePoints||0} LP</span></div><img src="/assets/emblemas/Emblem_${p2.soloQ?.tier||'UNRANKED'}.png" class="compare-rank-emblem" onerror="this.src='/assets/emblemas/Emblem_UNRANKED.png'"/>`,
+          `<img src="/assets/ranks/${(p1.soloQ?.tier||'unranked').toLowerCase()}.png" class="compare-rank-emblem" onerror="this.src='/assets/ranks/unranked.png'"/><div class="compare-rank-info"><span class="rank-name">${p1.soloQ?.tier||'UNRANKED'} ${p1.soloQ?.rank||''}</span><span class="rank-lp">${p1.soloQ?.leaguePoints||0} LP</span></div>`,
+          `<div class="compare-rank-info"><span class="rank-name">${p2.soloQ?.tier||'UNRANKED'} ${p2.soloQ?.rank||''}</span><span class="rank-lp">${p2.soloQ?.leaguePoints||0} LP</span></div><img src="/assets/ranks/${(p2.soloQ?.tier||'unranked').toLowerCase()}.png" class="compare-rank-emblem" onerror="this.src='/assets/ranks/unranked.png'"/>`,
           rankClasses[0], rankClasses[1])}
 
         ${mkRow('Win Rate SoloQ',
