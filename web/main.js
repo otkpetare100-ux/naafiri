@@ -1560,10 +1560,11 @@ function openPlayerDetails(player) {
         }
 
         if ((maxCount / soloQ20.length) >= 0.8) {
+          const safeTopChamp = escapeHtml(topChamp);
           otpContainer.innerHTML = `
-            <div class="badge-otp" title="¡Este jugador es un especialista con ${topChamp}!">
-              <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${topChamp}.png" class="otp-mini-icon" alt="${topChamp}" />
-              <span>OTP ${topChamp}</span>
+            <div class="badge-otp" title="¡Este jugador es un especialista con ${safeTopChamp}!">
+              <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${encodeURIComponent(topChamp)}.png" class="otp-mini-icon" alt="${safeTopChamp}" />
+              <span>OTP ${safeTopChamp}</span>
             </div>`;
         }
       }
@@ -1900,7 +1901,9 @@ function openPlayerDetails(player) {
       const avgDuration = (sumDuration / totalGames).toFixed(1);
       const gpm = sumDuration > 0 ? Math.round(sumGold / sumDuration) : 0;
       const dpm = sumDuration > 0 ? Math.round(sumDamageDealt / sumDuration) : 0;
-      const avgKp = Math.round((sumKp / totalGames) * 100);
+      // Si kp ya viene como ratio (0-1) lo multiplicamos, si viene como % (>1) lo dejamos
+      const rawAvgKp = sumKp / totalGames;
+      const avgKp = rawAvgKp > 1 ? Math.round(rawAvgKp) : Math.round(rawAvgKp * 100);
       const carryRate = Math.round((carryGames / totalGames) * 100);
 
       // Calcular CS/Min
@@ -2270,11 +2273,12 @@ function openPlayerDetails(player) {
             `;
           }
           
-          const kdaStr = `${match.kills} / ${match.deaths} / ${match.assists}`;
-          const kdaRatio = match.deaths > 0 ? ((match.kills + match.assists) / match.deaths).toFixed(2) : 'Perfect';
-          const goldStr = match.gold.toLocaleString('es-ES');
-          const dmgStr = match.damageDealt.toLocaleString('es-ES');
-          const kpStr = Math.round(match.kp * 100);
+          const kdaStr = `${match.kills || 0} / ${match.deaths || 0} / ${match.assists || 0}`;
+          const kdaRatio = (match.deaths || 0) > 0 ? (((match.kills || 0) + (match.assists || 0)) / match.deaths).toFixed(2) : 'Perfect';
+          const goldStr = (match.gold || 0).toLocaleString('es-ES');
+          const dmgStr = (match.damageDealt || 0).toLocaleString('es-ES');
+          const rawKp = match.kp || 0;
+          const kpStr = rawKp > 1 ? Math.round(rawKp) : Math.round(rawKp * 100);
 
           // 4. Calcular si merece insignia de honor (MVP o ACE) e insignias de multikills
           let badgeHtml = '';
@@ -2386,8 +2390,8 @@ function openPlayerDetails(player) {
               const iconUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${p.championName}.png`;
               const champDisplayName = p.championName ? formatChampionName(p.championName) : 'Unknown';
               
-              const safeSummonerName = (p.summonerName || 'Desconocido').replace(/'/g, "\\'");
-              const safePuuid = (p.puuid || '').replace(/'/g, "\\'");
+              const safeSummonerName = escapeHtml((p.summonerName || 'Desconocido')).replace(/'/g, '&#39;');
+              const safePuuid = (p.puuid || '').replace(/[^a-zA-Z0-9_-]/g, '');
 
               // Buscar si es un miembro de la jauría para usar su tagLine real
               let tagLine = p.tagLine || '';
@@ -2431,8 +2435,8 @@ function openPlayerDetails(player) {
             `;
           }
 
-          const csPerMin = (match.cs / match.durationMins).toFixed(1);
-          const visionScore = match.visionScore !== undefined ? match.visionScore : Math.round(match.durationMins * 0.75);
+          const csPerMin = (match.durationMins > 0) ? (match.cs / match.durationMins).toFixed(1) : '0.0';
+          const visionScore = (match.visionScore !== undefined && match.visionScore !== null) ? match.visionScore : '--';
 
           let kdaColorClass = '';
           if (kdaRatio === 'Perfect') {
@@ -2599,9 +2603,11 @@ function openPlayerDetails(player) {
   document.body.style.overflow = 'hidden';
 
   // Lógica de Scroll Infinito Premium (Conexión Directa con Servidor y Riot API)
-  let isFetchingMore = false; // Bandera de seguridad para evitar peticiones duplicadas
+  let isFetchingMore = false;
 
   if (historyContainer) {
+    // Limpiar handler anterior para evitar memory leaks al navegar entre perfiles
+    historyContainer.onscroll = null;
     historyContainer.onscroll = async () => {
       if (isFetchingMore) return;
 
