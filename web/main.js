@@ -2910,6 +2910,10 @@ function initCompareLogic() {
     resetCompare();
   };
 
+  // Poblar dropdowns al abrir modal para evitar selects vacíos
+  const origModalOpen = () => { populateCompareDropdowns(); };
+  select1.onfocus = origModalOpen;
+  select2.onfocus = origModalOpen;
   select1.onchange = updateComparison;
   select2.onchange = updateComparison;
 
@@ -3139,9 +3143,15 @@ function initCompareLogic() {
       const m2Match = m2.find(m => m.matchId === match.matchId);
       if (!m2Match || match.isRemake) return;
       together++;
-      const sameTeam = match.participants && m2Match.participants
-        ? match.participants.find(p => p.puuid === p2.puuid)?.teamId === match.participants.find(p => p.puuid === p1.puuid)?.teamId
-        : match.win === m2Match.win;
+      // Null-safe: verificar que ambos participantes existen antes de comparar teamId
+      let sameTeam;
+      if (match.participants && m2Match.participants) {
+        const p1Part = match.participants.find(p => p.puuid === p1.puuid);
+        const p2Part = match.participants.find(p => p.puuid === p2.puuid);
+        sameTeam = (p1Part && p2Part) ? p1Part.teamId === p2Part.teamId : match.win === m2Match.win;
+      } else {
+        sameTeam = match.win === m2Match.win;
+      }
       if (sameTeam) { allies++; }
       else { enemies++; if (match.win) p1WinsVs++; else p2WinsVs++; }
     });
@@ -3150,9 +3160,9 @@ function initCompareLogic() {
 
   // Render barra comparativa central
   function renderVersusBar(val1, val2, color1 = '#38bdf8', color2 = '#c084fc') {
-    const total = val1 + val2;
+    const total = Math.abs(val1) + Math.abs(val2); // Protección contra valores negativos
     if (total === 0) return '<div class="versus-bar"><div class="vb-fill vb-left" style="width:50%;background:rgba(148,163,184,0.2)"></div><div class="vb-fill vb-right" style="width:50%;background:rgba(148,163,184,0.2)"></div></div>';
-    const pct1 = Math.round((val1 / total) * 100);
+    const pct1 = Math.max(0, Math.min(100, Math.round((Math.abs(val1) / total) * 100)));
     const pct2 = 100 - pct1;
     return `<div class="versus-bar"><div class="vb-fill vb-left" style="width:${pct1}%;background:linear-gradient(90deg,${color1}33,${color1}66)"></div><div class="vb-fill vb-right" style="width:${pct2}%;background:linear-gradient(90deg,${color2}66,${color2}33)"></div><span class="vb-pct vb-pct-l">${pct1}%</span><span class="vb-pct vb-pct-r">${pct2}%</span></div>`;
   }
@@ -3275,7 +3285,7 @@ function initCompareLogic() {
       let detail = '';
       if (h2h.allies > 0) detail += `<span class="h2h-tag ally">🤝 ${h2h.allies} como aliados</span>`;
       if (h2h.enemies > 0) detail += `<span class="h2h-tag enemy">⚔️ ${h2h.enemies} como rivales</span>`;
-      if (h2h.enemies > 0) detail += `<span class="h2h-score">${p1.gameName} ${h2h.p1WinsVs}W - ${h2h.p2WinsVs}W ${p2.gameName}</span>`;
+      if (h2h.enemies > 0) detail += `<span class="h2h-score">${escapeHtml(p1.gameName)} ${h2h.p1WinsVs}W - ${h2h.p2WinsVs}W ${escapeHtml(p2.gameName)}</span>`;
       return `<div class="h2h-section"><div class="h2h-title">📜 Historial en Común — ${h2h.together} partidas</div><div class="h2h-details">${detail}</div></div>`;
     };
 
@@ -3379,5 +3389,8 @@ function initCompareLogic() {
     `;
 
     resultsContainer.style.display = 'block';
+    // Scroll to top del modal al abrir comparación
+    const modalBody = resultsContainer.closest('.compare-modal-body');
+    if (modalBody) modalBody.scrollTop = 0;
   }
 }
