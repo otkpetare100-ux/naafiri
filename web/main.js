@@ -2,7 +2,7 @@ import './style.css'
 
 const API_BASE = `${window.location.origin}/api`;
 const ASSETS_BASE = '/assets';
-let DDRAGON_VERSION = '14.9.1';
+let DDRAGON_VERSION = '16.9.1'; // BUG-17 fix: mantener actualizado con el servidor
 
 // Mapeos estáticos globales de Hechizos e Iconos de Runas para el Historial
 const SUMMONER_SPELL_MAP = {
@@ -60,6 +60,18 @@ const BOOTS_ITEM_IDS = new Set([
 ]);
 
 const PRELOADED_SPLASHES = new Map();
+let preloadTimers = []; // BUG-15 fix: referencia para cancelar preloads anteriores
+
+// BUG-02 fix: Sanitizar datos externos antes de inyectar en innerHTML
+function escapeHtml(str) {
+  if (typeof str !== 'string') return str;
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 
 let visibleMatchesCount = 10;
 let currentHistory = [];
@@ -1403,6 +1415,10 @@ async function setRandomSplash(rawChampName, playerPuuid) {
 async function preloadLadderSplashArts(players) {
   if (!players || players.length === 0) return;
   
+  // BUG-15 fix: Cancelar preloads anteriores antes de iniciar nuevos
+  preloadTimers.forEach(id => clearTimeout(id));
+  preloadTimers = [];
+  
   // Precargamos todos los jugadores del ladder progresivamente para optimizar ancho de banda
   for (const player of players) {
     if (PRELOADED_SPLASHES.has(player.puuid)) continue;
@@ -1422,7 +1438,7 @@ async function preloadLadderSplashArts(players) {
 
     // 2. Buscar y precargar la skin especial de manera escalonada (150ms de delay por jugador para no saturar)
     const index = players.indexOf(player);
-    setTimeout(async () => {
+    const timerId = setTimeout(async () => {
       try {
         const resp = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/en_US/champion/${champId}.json`);
         if (!resp.ok) return;
@@ -1459,6 +1475,7 @@ async function preloadLadderSplashArts(players) {
         // Fallback silencioso
       }
     }, 150 * index);
+    preloadTimers.push(timerId); // BUG-15 fix: guardar referencia
   }
 }
 
@@ -1552,16 +1569,7 @@ function openPlayerDetails(player) {
       }
 
 
-  // W/L Calculation
-  const historyArr = player.history || [];
-  const wins = historyArr.filter(r => r === 'W').length;
-  const losses = historyArr.filter(r => r === 'L').length;
-  const total = wins + losses;
-  
-  const totalWins = player.wins !== undefined ? player.wins : wins;
-  const totalLosses = player.losses !== undefined ? player.losses : losses;
-  const totalGames = totalWins + totalLosses;
-  const wr = totalGames > 0 ? Math.round((totalWins / totalGames) * 100) : 0;
+  // BUG-11 fix: Removed dead code — W/L is calculated per queue inside renderQueueStats
 
   // Big Winrate Top Right
   const wrEl = document.getElementById('detail-wr-big');
@@ -1825,7 +1833,7 @@ function openPlayerDetails(player) {
     const kdaTitle = document.getElementById('detail-kda-title');
     const filteredMatches = (player.matchStatsHistory || []).filter(match => {
       if (currentQueue === 'soloq') {
-        return !match.queueId || match.queueId == 420;
+        return match.queueId == 420; // BUG-07 fix: solo incluir si explícitamente es SoloQ
       } else if (currentQueue === 'flexq') {
         return match.queueId == 440;
       }
@@ -2047,7 +2055,7 @@ function openPlayerDetails(player) {
     if (history && history.length > 0) {
       const filteredHistory = history.filter(match => {
         if (queueType === 'soloq') {
-          return !match.queueId || match.queueId == 420;
+          return match.queueId == 420;
         } else if (queueType === 'flexq') {
           return match.queueId == 440;
         }
@@ -2135,7 +2143,7 @@ function openPlayerDetails(player) {
     if (history && history.length > 0) {
       const filteredHistory = history.filter(match => {
         if (queueType === 'soloq') {
-          return !match.queueId || match.queueId == 420; // old matches default to soloq
+          return match.queueId == 420;
         } else if (queueType === 'flexq') {
           return match.queueId == 440;
         }
@@ -2602,7 +2610,7 @@ function openPlayerDetails(player) {
         // Filtrar historial según la cola activa
         const filtered = currentHistory.filter(match => {
           if (currentQueueType === 'soloq') {
-            return !match.queueId || match.queueId == 420;
+            return match.queueId == 420;
           } else if (currentQueueType === 'flexq') {
             return match.queueId == 440;
           }
@@ -2716,8 +2724,8 @@ function initModal() {
   btn.onclick = () => modal.classList.add('active');
   span.onclick = () => modal.classList.remove('active');
   
-  // Cerrar al hacer clic fuera del modal (Aplica para todos los modales)
-  window.onclick = (event) => {
+  // BUG-16 fix: Usar addEventListener en vez de window.onclick para no sobreescribir otros handlers
+  window.addEventListener('click', (event) => {
     const confirmDeleteModal = document.getElementById('confirm-delete-modal');
     const detailsModal = document.getElementById('player-details-modal');
     const compareModal = document.getElementById('compare-players-modal');
@@ -2741,7 +2749,7 @@ function initModal() {
       document.body.style.overflow = '';
       currentModalPuuid = null;
     }
-  };
+  });
 
   form.onsubmit = async (e) => {
     e.preventDefault();
@@ -2860,8 +2868,19 @@ async function pollLiveStatus() {
   }
 }
 
-// Iniciar polling
-setInterval(pollLiveStatus, 30000);
+// BUG-13 fix: Pausar polling cuando la pestaña no es visible
+let pollIntervalId = setInterval(pollLiveStatus, 30000);
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    clearInterval(pollIntervalId);
+    pollIntervalId = null;
+  } else {
+    if (!pollIntervalId) {
+      pollLiveStatus();
+      pollIntervalId = setInterval(pollLiveStatus, 30000);
+    }
+  }
+});
 
 // Lógica para Comparar Cuentas de Invocador (Cara a Cara)
 function initCompareLogic() {
@@ -3045,12 +3064,14 @@ function initCompareLogic() {
     renderComparisonGrid(player1, player2);
   }
 
-  function getPlayerStreak(history) {
-    if (!history || history.length === 0) return { type: 'W', count: 0 };
-    const firstResult = history[0].win;
+  // BUG-09/22 fix: Usar matchStatsHistory en vez de player.history (que contiene strings 'W'/'L')
+  function getPlayerStreak(matchHistory) {
+    if (!matchHistory || matchHistory.length === 0) return { type: 'W', count: 0 };
+    const nonRemake = matchHistory.filter(m => !m.isRemake);
+    if (nonRemake.length === 0) return { type: 'W', count: 0 };
+    const firstResult = nonRemake[0].win;
     let count = 0;
-    for (const match of history) {
-      if (match.isRemake) continue;
+    for (const match of nonRemake) {
       if (match.win === firstResult) {
         count++;
       } else {
@@ -3060,21 +3081,26 @@ function initCompareLogic() {
     return { type: firstResult ? 'W' : 'L', count };
   }
 
+  // BUG-22 fix: Usar matchStatsHistory para campeones recientes en vez de player.history
   function getPlayerRecentChamps(player) {
-    if (player.history && player.history.length > 0) {
+    const matches = player.matchStatsHistory || [];
+    if (matches.length > 0) {
       const counts = {};
-      player.history.forEach(m => {
+      matches.forEach(m => {
         if (m.isRemake) return;
         const name = m.championName;
+        if (!name) return;
         if (!counts[name]) counts[name] = { count: 0, wins: 0 };
         counts[name].count++;
         if (m.win) counts[name].wins++;
       });
       const sorted = Object.entries(counts).sort((a, b) => b[1].count - a[1].count).slice(0, 3);
-      return sorted.map(([name, data]) => {
-        const wr = Math.round((data.wins / data.count) * 100);
-        return { name, count: data.count, winRate: wr };
-      });
+      if (sorted.length > 0) {
+        return sorted.map(([name, data]) => {
+          const wr = Math.round((data.wins / data.count) * 100);
+          return { name, count: data.count, winRate: wr };
+        });
+      }
     }
     return (player.topChampions || []).slice(0, 3).map(c => ({
       name: c.name,
@@ -3154,11 +3180,13 @@ function initCompareLogic() {
     // Daño Recibido
     const taken1 = stats1.avgDamageTaken || 0;
     const taken2 = stats2.avgDamageTaken || 0;
-    const takenClasses = getWinnerClasses(taken1, taken2);
+    const takenClasses = getWinnerClasses(taken1, taken2, false); // BUG-20 fix: menos daño recibido es mejor
 
-    // Active Streaks
-    const streakData1 = getPlayerStreak(p1.history || []);
-    const streakData2 = getPlayerStreak(p2.history || []);
+    // Active Streaks — BUG-09 fix: usar matchStatsHistory filtrado
+    const soloMatches1 = (p1.matchStatsHistory || []).filter(m => m.queueId == 420);
+    const soloMatches2 = (p2.matchStatsHistory || []).filter(m => m.queueId == 420);
+    const streakData1 = getPlayerStreak(soloMatches1);
+    const streakData2 = getPlayerStreak(soloMatches2);
     const streakScore1 = streakData1.type === 'W' ? streakData1.count : -streakData1.count;
     const streakScore2 = streakData2.type === 'W' ? streakData2.count : -streakData2.count;
     const streakClasses = getWinnerClasses(streakScore1, streakScore2);

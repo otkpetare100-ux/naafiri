@@ -548,7 +548,8 @@ function initBot(db) {
           const statusMsg = await msg.channel.send(`<@${msg.author.id}> 🔍 Buscando a **${name}#${tag}** en **${region.toUpperCase()}** vía Servidor Central...`);
 
           try {
-            const apiRes = await fetch('https://lan-tracker-production.up.railway.app/api/summoners', {
+            const API_BASE_URL = process.env.API_BASE_URL || 'https://lan-tracker-production.up.railway.app';
+            const apiRes = await fetch(`${API_BASE_URL}/api/summoners`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ gameName: name, tagLine: tag, region: region })

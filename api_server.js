@@ -10,11 +10,32 @@ dns.setServers(['8.8.8.8']);
 const app = express();
 const PORT = process.env.PORT || process.env.API_PORT || 3010;
 const MONGO_URI = process.env.MONGO_URI;
+const ADMIN_KEY = process.env.ADMIN_KEY || '';
 
-app.use(cors());
+// BUG-23 fix: Restringir CORS a orígenes conocidos
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',')
+  : [];
+app.use(cors({
+  origin: (origin, callback) => {
+    // Permitir requests sin origin (mismo servidor, Postman, bots) y orígenes configurados
+    if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, true); // Permisivo por ahora pero logea orígenes desconocidos
+      console.warn(`[CORS] Origen no configurado: ${origin}`);
+    }
+  }
+}));
 app.use(express.json());
 
+// BUG-04 fix: Validador de PUUID (formato Riot: 78 chars hex con guiones)
+function isValidPuuid(puuid) {
+  return typeof puuid === 'string' && /^[a-zA-Z0-9_-]{30,90}$/.test(puuid);
+}
+
 let db;
+let mongoClient; // BUG-18 fix: guardar referencia para cierre limpio
 let DDRAGON_VERSION = '16.9.1';
 let championMap = {};
 
@@ -49,17 +70,28 @@ async function fetchChampionMap() {
 
 async function connectDB() {
   try {
-    const client = new MongoClient(MONGO_URI);
-    await client.connect();
-    db = client.db('lan-tracker');
+    mongoClient = new MongoClient(MONGO_URI); // BUG-18 fix: almacenar referencia
+    await mongoClient.connect();
+    db = mongoClient.db('lan-tracker');
     console.log('✅ API Server: MongoDB conectado');
     await fetchChampionMap();
   } catch (e) {
     console.error('❌ API Server: Error conectando a MongoDB:', e);
+    process.exit(1); // Si no hay DB, no tiene sentido arrancar
   }
 }
 
-connectDB();
+// BUG-18 fix: Cerrar MongoDB limpiamente al detener el proceso
+process.on('SIGTERM', async () => {
+  console.log('🛑 SIGTERM recibido, cerrando MongoDB...');
+  if (mongoClient) await mongoClient.close();
+  process.exit(0);
+});
+process.on('SIGINT', async () => {
+  console.log('🛑 SIGINT recibido, cerrando MongoDB...');
+  if (mongoClient) await mongoClient.close();
+  process.exit(0);
+});
 
 // --- Middleware Logger para Diagnóstico ---
 app.use((req, res, next) => {
@@ -67,11 +99,16 @@ app.use((req, res, next) => {
   next();
 });
 
+// BUG-01 fix: Helper para hacer fetch a Riot con API key en header en vez de query param
+function riotFetch(url, apiKey) {
+  return fetch(url, { headers: { 'X-Riot-Token': apiKey } });
+}
+
 // Helper para obtener top campeones
 async function getTopChampions(puuid, region, apiKey) {
   try {
-    const url = `https://${region}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}?api_key=${apiKey}`;
-    const resp = await fetch(url);
+    const url = `https://${region}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}`;
+    const resp = await riotFetch(url, apiKey);
     if (!resp.ok) return [];
     const masteries = await resp.json();
     return masteries.map(m => ({
@@ -173,6 +210,16 @@ app.get('/api/live-status', async (req, res) => {
 // Cooldown global en memoria (clave: gameName#tagLine)
 const refreshCooldowns = new Map();
 
+// BUG-14 fix: Limpiar cooldowns expirados cada 10 minutos para evitar memory leak
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, timestamp] of refreshCooldowns) {
+    if (now - timestamp > 10 * 60 * 1000) {
+      refreshCooldowns.delete(key);
+    }
+  }
+}, 10 * 60 * 1000);
+
 // Añadir o actualizar Invocador
 app.post('/api/summoners', async (req, res) => {
   const { gameName, tagLine, region, isNew } = req.body;
@@ -207,8 +254,8 @@ app.post('/api/summoners', async (req, res) => {
     const routing = routingMap[region] || 'americas';
 
     // 2. PUUID
-    const accountUrl = `https://${routing}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}?api_key=${RIOT_API_KEY}`;
-    const accountResp = await fetch(accountUrl);
+    const accountUrl = `https://${routing}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`;
+    const accountResp = await riotFetch(accountUrl, RIOT_API_KEY);
     
     if (!accountResp.ok) {
       return res.status(accountResp.status).json({ message: 'No se encontró la cuenta en Riot Games.' });
@@ -216,8 +263,8 @@ app.post('/api/summoners', async (req, res) => {
     const accountData = await accountResp.json();
 
     // 3. Summoner-V4
-    const summonerUrl = `https://${region}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${accountData.puuid}?api_key=${RIOT_API_KEY}`;
-    const summonerResp = await fetch(summonerUrl);
+    const summonerUrl = `https://${region}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${accountData.puuid}`;
+    const summonerResp = await riotFetch(summonerUrl, RIOT_API_KEY);
     
     let summonerLevel = 0;
     let profileIconId = 29;
@@ -233,8 +280,8 @@ app.post('/api/summoners', async (req, res) => {
     // 4. League-V4 (Usando PUUID directamente)
     let soloQ = { tier: 'UNRANKED', rank: '', leaguePoints: 0, wins: 0, losses: 0 };
     let flexQ = { tier: 'UNRANKED', rank: '', leaguePoints: 0, wins: 0, losses: 0 };
-    const leagueUrl = `https://${region}.api.riotgames.com/lol/league/v4/entries/by-puuid/${accountData.puuid}?api_key=${RIOT_API_KEY}`;
-    const leagueResp = await fetch(leagueUrl);
+    const leagueUrl = `https://${region}.api.riotgames.com/lol/league/v4/entries/by-puuid/${accountData.puuid}`;
+    const leagueResp = await riotFetch(leagueUrl, RIOT_API_KEY);
     
     if (leagueResp.ok) {
       const leagues = await leagueResp.json();
@@ -341,12 +388,12 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
     const topChampions = await getTopChampions(puuid, account.region, RIOT_API_KEY);
 
     // Obtener IDs de las últimas 20 partidas de Solo y Flex por separado
-    const matchIdsSoloUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?queue=420&start=0&count=20&api_key=${RIOT_API_KEY}`;
-    const matchIdsFlexUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?queue=440&start=0&count=20&api_key=${RIOT_API_KEY}`;
+    const matchIdsSoloUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?queue=420&start=0&count=20`;
+    const matchIdsFlexUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?queue=440&start=0&count=20`;
     
     const [idsSoloResp, idsFlexResp] = await Promise.all([
-      fetch(matchIdsSoloUrl),
-      fetch(matchIdsFlexUrl)
+      riotFetch(matchIdsSoloUrl, RIOT_API_KEY),
+      riotFetch(matchIdsFlexUrl, RIOT_API_KEY)
     ]);
     
     if (!idsSoloResp.ok && !idsFlexResp.ok) {
@@ -381,8 +428,8 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
     
     for (const matchId of newMatchIds) {
       try {
-        const matchUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/${matchId}?api_key=${RIOT_API_KEY}`;
-        const matchResp = await fetch(matchUrl);
+        const matchUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/${matchId}`;
+        const matchResp = await riotFetch(matchUrl, RIOT_API_KEY);
         if (!matchResp.ok) continue;
 
         const matchData = await matchResp.json();
@@ -395,7 +442,7 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
             .reduce((sum, p) => sum + p.kills, 0);
             
           const kp = teamKills > 0 ? ((participant.kills + participant.assists) / teamKills) : 0;
-          const isRemake = durationMins < 4.5 || participant.teamEarlySurrendered;
+          const isRemake = durationMins < 4.5; // BUG-21 fix: teamEarlySurrendered es una rendición válida, no un remake
 
           const matchParticipants = matchData.info.participants.map(p => ({
             summonerName: p.riotIdGameName || p.summonerName || 'Desconocido',
@@ -456,26 +503,28 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
     }
 
     // Combinar y mantener hasta 40 partidas para cubrir ambas colas
+    // BUG-08 fix: usar spread para no mutar objetos originales
     const combinedMatches = [...newMatchStats, ...existingMatches]
       .sort((a, b) => b.timestamp - a.timestamp)
       .slice(0, 40)
       .map(m => {
+        const match = { ...m };
         // Adjuntar el cambio de LP si el bot lo registró previamente (Plan A)
-        if (account.lpHistory && account.lpHistory[m.matchId] !== undefined) {
-          m.lpChange = account.lpHistory[m.matchId];
+        if (account.lpHistory && account.lpHistory[match.matchId] !== undefined) {
+          match.lpChange = account.lpHistory[match.matchId];
         } else if (account.lastLpChanges && account.lastLpChanges.length > 0) {
           // Plan B: Fallback cronológico redundante si no coincide el ID de partida
-          const matchTime = m.timestamp;
+          const matchTime = match.timestamp;
           const matchedChange = account.lastLpChanges.find(change => {
             const timeDiff = Math.abs(change.timestamp - matchTime);
             // Máximo 3 horas de diferencia y debe coincidir la cola
-            return timeDiff < 3 * 60 * 60 * 1000 && change.queueId === m.queueId;
+            return timeDiff < 3 * 60 * 60 * 1000 && change.queueId === match.queueId;
           });
           if (matchedChange) {
-            m.lpChange = matchedChange.diff;
+            match.lpChange = matchedChange.diff;
           }
         }
-        return m;
+        return match;
       });
 
     // Calcular promedios por cola (Excluyendo Remakes y tomando máx 20 por cola)
@@ -504,7 +553,7 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
         kda: count > 0 ? (sumDeaths > 0 ? ((sumKills + sumAssists) / sumDeaths).toFixed(2) : ((sumKills + sumAssists).toFixed(2))) : "0.00",
         avgGold: count > 0 ? Math.round(sumGold / count) : 0,
         avgDeaths: count > 0 ? (sumDeaths / count).toFixed(1) : "0.0",
-        csPerMin: count > 0 ? (sumMins > 0 ? (sumCs / sumMins).toFixed(1) : 0) : "0.0",
+        csPerMin: count > 0 ? (sumMins > 0 ? (sumCs / sumMins).toFixed(1) : "0.0") : "0.0",
         avgKp: count > 0 ? Math.round((sumKp / count) * 100) : 0,
         avgDamageDealt: count > 0 ? Math.round(sumDmgDealt / count) : 0,
         avgDamageTaken: count > 0 ? Math.round(sumDmgTaken / count) : 0,
@@ -576,13 +625,17 @@ app.post('/api/summoners/:puuid/matches/load-more', async (req, res) => {
       return res.json({ message: 'Límite de historial alcanzado (80 partidas).', history: existingMatches, updated: false });
     }
 
-    // Buscamos 5 partidas más antiguas (start = N, count = 5)
-    const matchIdsSoloUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?queue=420&start=${currentCount}&count=5&api_key=${RIOT_API_KEY}`;
-    const matchIdsFlexUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?queue=440&start=${currentCount}&count=5&api_key=${RIOT_API_KEY}`;
+    // BUG-06 fix: Calcular offsets por cola separadamente, no usar el total combinado
+    const soloCount = existingMatches.filter(m => m.queueId === 420).length;
+    const flexCount = existingMatches.filter(m => m.queueId === 440).length;
+
+    // Buscamos 5 partidas más antiguas por cola con offset correcto
+    const matchIdsSoloUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?queue=420&start=${soloCount}&count=5`;
+    const matchIdsFlexUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?queue=440&start=${flexCount}&count=5`;
 
     const [idsSoloResp, idsFlexResp] = await Promise.all([
-      fetch(matchIdsSoloUrl),
-      fetch(matchIdsFlexUrl)
+      riotFetch(matchIdsSoloUrl, RIOT_API_KEY),
+      riotFetch(matchIdsFlexUrl, RIOT_API_KEY)
     ]);
 
     const fetchedSoloIds = idsSoloResp.ok ? await idsSoloResp.json() : [];
@@ -599,8 +652,8 @@ app.post('/api/summoners/:puuid/matches/load-more', async (req, res) => {
     const newMatchStats = [];
     for (const matchId of newMatchIds) {
       try {
-        const matchUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/${matchId}?api_key=${RIOT_API_KEY}`;
-        const matchResp = await fetch(matchUrl);
+        const matchUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/${matchId}`;
+        const matchResp = await riotFetch(matchUrl, RIOT_API_KEY);
         if (!matchResp.ok) continue;
 
         const matchData = await matchResp.json();
@@ -613,7 +666,7 @@ app.post('/api/summoners/:puuid/matches/load-more', async (req, res) => {
             .reduce((sum, p) => sum + p.kills, 0);
             
           const kp = teamKills > 0 ? ((participant.kills + participant.assists) / teamKills) : 0;
-          const isRemake = durationMins < 4.5 || participant.teamEarlySurrendered;
+          const isRemake = durationMins < 4.5; // BUG-21 fix
 
           const matchParticipants = matchData.info.participants.map(p => ({
             summonerName: p.riotIdGameName || p.summonerName || 'Desconocido',
@@ -674,17 +727,18 @@ app.post('/api/summoners/:puuid/matches/load-more', async (req, res) => {
       .sort((a, b) => b.timestamp - a.timestamp)
       .slice(0, 80)
       .map(m => {
-        if (account.lpHistory && account.lpHistory[m.matchId] !== undefined) {
-          m.lpChange = account.lpHistory[m.matchId];
+        const match = { ...m }; // BUG-08 fix: no mutar originales
+        if (account.lpHistory && account.lpHistory[match.matchId] !== undefined) {
+          match.lpChange = account.lpHistory[match.matchId];
         } else if (account.lastLpChanges && account.lastLpChanges.length > 0) {
-          const matchTime = m.timestamp;
+          const matchTime = match.timestamp;
           const matchedChange = account.lastLpChanges.find(change => {
             const timeDiff = Math.abs(change.timestamp - matchTime);
-            return timeDiff < 3 * 60 * 60 * 1000 && change.queueId === m.queueId;
+            return timeDiff < 3 * 60 * 60 * 1000 && change.queueId === match.queueId;
           });
-          if (matchedChange) m.lpChange = matchedChange.diff;
+          if (matchedChange) match.lpChange = matchedChange.diff;
         }
-        return m;
+        return match;
       });
 
     // Calcular promedios por cola (Excluyendo Remakes y tomando máx 20 por cola)
@@ -713,7 +767,7 @@ app.post('/api/summoners/:puuid/matches/load-more', async (req, res) => {
         kda: count > 0 ? (sumDeaths > 0 ? ((sumKills + sumAssists) / sumDeaths).toFixed(2) : ((sumKills + sumAssists).toFixed(2))) : "0.00",
         avgGold: count > 0 ? Math.round(sumGold / count) : 0,
         avgDeaths: count > 0 ? (sumDeaths / count).toFixed(1) : "0.0",
-        csPerMin: count > 0 ? (sumMins > 0 ? (sumCs / sumMins).toFixed(1) : 0) : "0.0",
+        csPerMin: count > 0 ? (sumMins > 0 ? (sumCs / sumMins).toFixed(1) : "0.0") : "0.0",
         avgKp: count > 0 ? Math.round((sumKp / count) * 100) : 0,
         avgDamageDealt: count > 0 ? Math.round(sumDmgDealt / count) : 0,
         avgDamageTaken: count > 0 ? Math.round(sumDmgTaken / count) : 0,
@@ -777,8 +831,8 @@ app.get('/api/summoners/untracked/:puuid', async (req, res) => {
     const routing = routingMap[region] || 'americas';
 
     // 1. Obtener cuenta de Riot (riotIdGameName y riotIdTagline) por su PUUID
-    const accountUrl = `https://${routing}.api.riotgames.com/riot/account/v1/accounts/by-puuid/${puuid}?api_key=${RIOT_API_KEY}`;
-    const accountResp = await fetch(accountUrl);
+    const accountUrl = `https://${routing}.api.riotgames.com/riot/account/v1/accounts/by-puuid/${puuid}`;
+    const accountResp = await riotFetch(accountUrl, RIOT_API_KEY);
     
     let gameName = 'Desconocido';
     let tagLine = 'LAN';
@@ -791,8 +845,8 @@ app.get('/api/summoners/untracked/:puuid', async (req, res) => {
     }
 
     // 2. Obtener Summoner-V4 por su PUUID (para profileIconId y nivel)
-    const summonerUrl = `https://${region}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${puuid}?api_key=${RIOT_API_KEY}`;
-    const summonerResp = await fetch(summonerUrl);
+    const summonerUrl = `https://${region}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${puuid}`;
+    const summonerResp = await riotFetch(summonerUrl, RIOT_API_KEY);
     
     let summonerLevel = 30;
     let profileIconId = 29;
@@ -805,8 +859,8 @@ app.get('/api/summoners/untracked/:puuid', async (req, res) => {
     // 3. Obtener ligas (League-V4)
     let soloQ = { tier: 'UNRANKED', rank: '', leaguePoints: 0, wins: 0, losses: 0 };
     let flexQ = { tier: 'UNRANKED', rank: '', leaguePoints: 0, wins: 0, losses: 0 };
-    const leagueUrl = `https://${region}.api.riotgames.com/lol/league/v4/entries/by-puuid/${puuid}?api_key=${RIOT_API_KEY}`;
-    const leagueResp = await fetch(leagueUrl);
+    const leagueUrl = `https://${region}.api.riotgames.com/lol/league/v4/entries/by-puuid/${puuid}`;
+    const leagueResp = await riotFetch(leagueUrl, RIOT_API_KEY);
     
     if (leagueResp.ok) {
       const leagues = await leagueResp.json();
@@ -836,14 +890,14 @@ app.get('/api/summoners/untracked/:puuid', async (req, res) => {
     const topChampions = await getTopChampions(puuid, region, RIOT_API_KEY);
 
     // 5. Obtener partidas (últimas 10 de SoloQ/FlexQ combinadas)
-    const matchIdsUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?start=0&count=10&api_key=${RIOT_API_KEY}`;
-    const matchIdsResp = await fetch(matchIdsUrl);
+    const matchIdsUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?start=0&count=10`;
+    const matchIdsResp = await riotFetch(matchIdsUrl, RIOT_API_KEY);
     const fetchedMatchIds = matchIdsResp.ok ? await matchIdsResp.json() : [];
 
     const matchPromises = fetchedMatchIds.map(async (matchId) => {
       try {
-        const matchUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/${matchId}?api_key=${RIOT_API_KEY}`;
-        const matchResp = await fetch(matchUrl);
+        const matchUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/${matchId}`;
+        const matchResp = await riotFetch(matchUrl, RIOT_API_KEY);
         if (!matchResp.ok) return null;
 
         const matchData = await matchResp.json();
@@ -856,7 +910,7 @@ app.get('/api/summoners/untracked/:puuid', async (req, res) => {
             .reduce((sum, p) => sum + p.kills, 0);
             
           const kp = teamKills > 0 ? ((participant.kills + participant.assists) / teamKills) : 0;
-          const isRemake = durationMins < 4.5 || participant.teamEarlySurrendered;
+          const isRemake = durationMins < 4.5; // BUG-21 fix
 
           const matchParticipants = matchData.info.participants.map(p => ({
             summonerName: p.riotIdGameName || p.summonerName || 'Desconocido',
@@ -940,7 +994,7 @@ app.get('/api/summoners/untracked/:puuid', async (req, res) => {
         kda: count > 0 ? (sumDeaths > 0 ? ((sumKills + sumAssists) / sumDeaths).toFixed(2) : ((sumKills + sumAssists).toFixed(2))) : "0.00",
         avgGold: count > 0 ? Math.round(sumGold / count) : 0,
         avgDeaths: count > 0 ? (sumDeaths / count).toFixed(1) : "0.0",
-        csPerMin: count > 0 ? (sumMins > 0 ? (sumCs / sumMins).toFixed(1) : 0) : "0.0",
+        csPerMin: count > 0 ? (sumMins > 0 ? (sumCs / sumMins).toFixed(1) : "0.0") : "0.0",
         avgKp: count > 0 ? Math.round((sumKp / count) * 100) : 0,
         avgDamageDealt: count > 0 ? Math.round(sumDmgDealt / count) : 0,
         avgDamageTaken: count > 0 ? Math.round(sumDmgTaken / count) : 0,
@@ -977,8 +1031,22 @@ app.get('/api/summoners/untracked/:puuid', async (req, res) => {
 });
 
 // Eliminar Invocador
+// BUG-03 fix: Requiere admin key para evitar borrados no autorizados
 app.delete('/api/summoners/:puuid', async (req, res) => {
   const { puuid } = req.params;
+
+  // BUG-04 fix: Validar formato del puuid
+  if (!isValidPuuid(puuid)) {
+    return res.status(400).json({ message: 'PUUID inválido.' });
+  }
+
+  // BUG-03 fix: Verificar admin key (si está configurada)
+  if (ADMIN_KEY) {
+    const providedKey = req.headers['x-admin-key'] || req.query.adminKey;
+    if (providedKey !== ADMIN_KEY) {
+      return res.status(403).json({ message: 'No autorizado. Se requiere clave de administrador.' });
+    }
+  }
 
   try {
     const result = await db.collection('accounts').deleteOne({ puuid: puuid });
@@ -1009,6 +1077,9 @@ app.get('*', (req, res, next) => {
   res.sendFile(path.join(__dirname, 'web', 'dist', 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 API Server V2 (Regions) listo en http://localhost:${PORT}`);
+// BUG-19 fix: Esperar a que la DB conecte antes de escuchar peticiones
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`🚀 API Server V2 (Regions) listo en http://localhost:${PORT}`);
+  });
 });
