@@ -3109,6 +3109,54 @@ function initCompareLogic() {
     }));
   }
 
+  // Playstyle Badges basados en estadísticas
+  function getPlaystyleBadges(stats, matches) {
+    const badges = [];
+    const cs = parseFloat(stats.csPerMin) || 0;
+    const kda = parseFloat(stats.kda) || 0;
+    const deaths = parseFloat(stats.avgDeaths) || 10;
+    const kp = stats.avgKp || 0;
+    const dmgDealt = stats.avgDamageDealt || 0;
+    const dmgTaken = stats.avgDamageTaken || 0;
+    if (cs >= 8.0) badges.push({ icon: '🌾', label: 'Farm God', color: '#4ade80' });
+    if (deaths <= 3.0 && kda >= 3.0) badges.push({ icon: '🛡️', label: 'KDA Guardian', color: '#38bdf8' });
+    if (kp >= 65) badges.push({ icon: '🎯', label: 'Team Fighter', color: '#c084fc' });
+    if (dmgDealt > 20000) badges.push({ icon: '💥', label: 'Carry', color: '#ff9f43' });
+    if (dmgTaken > 25000 && dmgDealt > 15000) badges.push({ icon: '⚔️', label: 'Gladiator', color: '#ef4444' });
+    if (kda >= 5.0) badges.push({ icon: '👑', label: 'Perfect', color: '#d4af37' });
+    if (badges.length === 0) badges.push({ icon: '🎮', label: 'Casual', color: '#94a3b8' });
+    return badges.slice(0, 3);
+  }
+
+  // Historial Frente a Frente (partidas en común)
+  function getHeadToHead(p1, p2) {
+    const m1 = p1.matchStatsHistory || [];
+    const m2 = p2.matchStatsHistory || [];
+    const m2Ids = new Set(m2.map(m => m.matchId));
+    let together = 0, allies = 0, enemies = 0, p1WinsVs = 0, p2WinsVs = 0;
+    m1.forEach(match => {
+      if (!m2Ids.has(match.matchId)) return;
+      const m2Match = m2.find(m => m.matchId === match.matchId);
+      if (!m2Match || match.isRemake) return;
+      together++;
+      const sameTeam = match.participants && m2Match.participants
+        ? match.participants.find(p => p.puuid === p2.puuid)?.teamId === match.participants.find(p => p.puuid === p1.puuid)?.teamId
+        : match.win === m2Match.win;
+      if (sameTeam) { allies++; }
+      else { enemies++; if (match.win) p1WinsVs++; else p2WinsVs++; }
+    });
+    return { together, allies, enemies, p1WinsVs, p2WinsVs };
+  }
+
+  // Render barra comparativa central
+  function renderVersusBar(val1, val2, color1 = '#38bdf8', color2 = '#c084fc') {
+    const total = val1 + val2;
+    if (total === 0) return '<div class="versus-bar"><div class="vb-fill vb-left" style="width:50%;background:rgba(148,163,184,0.2)"></div><div class="vb-fill vb-right" style="width:50%;background:rgba(148,163,184,0.2)"></div></div>';
+    const pct1 = Math.round((val1 / total) * 100);
+    const pct2 = 100 - pct1;
+    return `<div class="versus-bar"><div class="vb-fill vb-left" style="width:${pct1}%;background:linear-gradient(90deg,${color1}33,${color1}66)"></div><div class="vb-fill vb-right" style="width:${pct2}%;background:linear-gradient(90deg,${color2}66,${color2}33)"></div><span class="vb-pct vb-pct-l">${pct1}%</span><span class="vb-pct vb-pct-r">${pct2}%</span></div>`;
+  }
+
   function renderComparisonGrid(p1, p2) {
     const getWinnerClasses = (val1, val2, highIsBetter = true) => {
       if (val1 === val2) return ['', ''];
@@ -3209,194 +3257,123 @@ function initCompareLogic() {
 
     const champs1 = getPlayerRecentChamps(p1);
     const champs2 = getPlayerRecentChamps(p2);
+    const badges1 = getPlaystyleBadges(stats1, soloMatches1);
+    const badges2 = getPlaystyleBadges(stats2, soloMatches2);
+    const h2h = getHeadToHead(p1, p2);
+
+    // Count metric wins for global winner glow
+    const metrics = [[rankScore1,rankScore2,true],[wr1,wr2,true],[kda1,kda2,true],[deaths1,deaths2,false],[cs1,cs2,true],[gold1,gold2,true],[kp1,kp2,true],[dmg1,dmg2,true],[taken1,taken2,false]];
+    let p1Wins = 0, p2Wins = 0;
+    metrics.forEach(([v1,v2,hib]) => { const w = hib ? v1>v2 : v1<v2; const l = hib ? v1<v2 : v1>v2; if(w) p1Wins++; if(l) p2Wins++; });
+    const p1IsWinner = p1Wins > p2Wins;
+    const p2IsWinner = p2Wins > p1Wins;
+
+    const renderBadges = (badges) => badges.map(b => `<span class="ps-badge" style="border-color:${b.color}44;color:${b.color};background:${b.color}11">${b.icon} ${b.label}</span>`).join('');
+
+    const renderH2H = () => {
+      if (h2h.together === 0) return '';
+      let detail = '';
+      if (h2h.allies > 0) detail += `<span class="h2h-tag ally">🤝 ${h2h.allies} como aliados</span>`;
+      if (h2h.enemies > 0) detail += `<span class="h2h-tag enemy">⚔️ ${h2h.enemies} como rivales</span>`;
+      if (h2h.enemies > 0) detail += `<span class="h2h-score">${p1.gameName} ${h2h.p1WinsVs}W - ${h2h.p2WinsVs}W ${p2.gameName}</span>`;
+      return `<div class="h2h-section"><div class="h2h-title">📜 Historial en Común — ${h2h.together} partidas</div><div class="h2h-details">${detail}</div></div>`;
+    };
+
+    const mkRow = (label, v1Html, v2Html, cls1, cls2, bar = '') => `
+      <div class="compare-row">
+        <div class="compare-val-col col-1 ${cls1}">${v1Html}${cls1 ? '<span class="compare-crown-icon">🏆</span>' : ''}</div>
+        <div class="compare-label-col"><span>${label}</span>${bar}</div>
+        <div class="compare-val-col col-2 ${cls2}">${v2Html}${cls2 ? '<span class="compare-crown-icon">🏆</span>' : ''}</div>
+      </div>`;
+
+    const tierGlow1 = (p1.soloQ?.tier||'unranked').toLowerCase();
+    const tierGlow2 = (p2.soloQ?.tier||'unranked').toLowerCase();
 
     resultsContainer.innerHTML = `
       <div class="compare-vs-header">
-        <div class="compare-player-card">
+        <div class="compare-player-card ${p1IsWinner ? 'global-winner' : ''}">
           <div class="compare-profile-icon-container">
-            <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${p1.profileIconId}.png" class="compare-profile-icon" onerror="this.src='/assets/placeholder_icon.png'" />
+            <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${p1.profileIconId}.png" class="compare-profile-icon tier-glow-${tierGlow1}" onerror="this.src='/assets/placeholder_icon.png'" />
             <span class="compare-level-badge">${p1.summonerLevel}</span>
           </div>
-          <span class="compare-player-name">${p1.gameName}</span>
-          <span class="compare-player-tag">#${p1.tagLine}</span>
+          <span class="compare-player-name">${escapeHtml(p1.gameName)}</span>
+          <span class="compare-player-tag">#${escapeHtml(p1.tagLine)}</span>
+          <div class="ps-badges-row">${renderBadges(badges1)}</div>
+          ${p1IsWinner ? '<div class="global-winner-label">⭐ GANADOR ⭐</div>' : ''}
         </div>
         <div class="compare-vs-divider">
           <div class="vs-shield">VS</div>
+          <div class="compare-score-pill">${p1Wins} — ${p2Wins}</div>
         </div>
-        <div class="compare-player-card">
+        <div class="compare-player-card ${p2IsWinner ? 'global-winner' : ''}">
           <div class="compare-profile-icon-container">
-            <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${p2.profileIconId}.png" class="compare-profile-icon" onerror="this.src='/assets/placeholder_icon.png'" />
+            <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${p2.profileIconId}.png" class="compare-profile-icon tier-glow-${tierGlow2}" onerror="this.src='/assets/placeholder_icon.png'" />
             <span class="compare-level-badge">${p2.summonerLevel}</span>
           </div>
-          <span class="compare-player-name">${p2.gameName}</span>
-          <span class="compare-player-tag">#${p2.tagLine}</span>
+          <span class="compare-player-name">${escapeHtml(p2.gameName)}</span>
+          <span class="compare-player-tag">#${escapeHtml(p2.tagLine)}</span>
+          <div class="ps-badges-row">${renderBadges(badges2)}</div>
+          ${p2IsWinner ? '<div class="global-winner-label">⭐ GANADOR ⭐</div>' : ''}
         </div>
       </div>
 
+      ${renderH2H()}
+
       <div class="compare-stats-table">
-        <!-- METRIC ROW 1: RANGO SOLOQ -->
-        <div class="compare-row">
-          <div class="compare-val-col col-1 ${rankClasses[0]}">
-            <img src="/assets/emblemas/Emblem_${p1.soloQ?.tier || 'UNRANKED'}.png" class="compare-rank-emblem" onerror="this.src='/assets/emblemas/Emblem_UNRANKED.png'" />
-            <div class="compare-rank-info">
-              <span class="rank-name">${p1.soloQ?.tier || 'UNRANKED'} ${p1.soloQ?.rank || ''}</span>
-              <span class="rank-lp">${p1.soloQ?.leaguePoints || 0} LP</span>
-            </div>
-            ${rankClasses[0] ? '<span class="compare-crown-icon">🏆</span>' : ''}
-          </div>
-          <div class="compare-label-col">Rango SoloQ</div>
-          <div class="compare-val-col col-2 ${rankClasses[1]}">
-            <img src="/assets/emblemas/Emblem_${p2.soloQ?.tier || 'UNRANKED'}.png" class="compare-rank-emblem" onerror="this.src='/assets/emblemas/Emblem_UNRANKED.png'" />
-            <div class="compare-rank-info">
-              <span class="rank-name">${p2.soloQ?.tier || 'UNRANKED'} ${p2.soloQ?.rank || ''}</span>
-              <span class="rank-lp">${p2.soloQ?.leaguePoints || 0} LP</span>
-            </div>
-            ${rankClasses[1] ? '<span class="compare-crown-icon">🏆</span>' : ''}
-          </div>
-        </div>
+        ${mkRow('Rango SoloQ',
+          `<img src="/assets/emblemas/Emblem_${p1.soloQ?.tier||'UNRANKED'}.png" class="compare-rank-emblem" onerror="this.src='/assets/emblemas/Emblem_UNRANKED.png'"/><div class="compare-rank-info"><span class="rank-name">${p1.soloQ?.tier||'UNRANKED'} ${p1.soloQ?.rank||''}</span><span class="rank-lp">${p1.soloQ?.leaguePoints||0} LP</span></div>`,
+          `<div class="compare-rank-info"><span class="rank-name">${p2.soloQ?.tier||'UNRANKED'} ${p2.soloQ?.rank||''}</span><span class="rank-lp">${p2.soloQ?.leaguePoints||0} LP</span></div><img src="/assets/emblemas/Emblem_${p2.soloQ?.tier||'UNRANKED'}.png" class="compare-rank-emblem" onerror="this.src='/assets/emblemas/Emblem_UNRANKED.png'"/>`,
+          rankClasses[0], rankClasses[1])}
 
-        <!-- METRIC ROW 2: TASA DE VICTORIA (SoloQ) -->
-        <div class="compare-row">
-          <div class="compare-val-col col-1 ${wrClasses[0]}">
-            <span class="compare-stat-val">${wr1}%</span>
-            <span class="compare-stat-sub">${wins1}W / ${losses1}L</span>
-            ${wrClasses[0] ? '<span class="compare-crown-icon">🏆</span>' : ''}
-          </div>
-          <div class="compare-label-col">Win Rate SoloQ</div>
-          <div class="compare-val-col col-2 ${wrClasses[1]}">
-            <span class="compare-stat-val">${wr2}%</span>
-            <span class="compare-stat-sub">${wins2}W / ${losses2}L</span>
-            ${wrClasses[1] ? '<span class="compare-crown-icon">🏆</span>' : ''}
-          </div>
-        </div>
+        ${mkRow('Win Rate SoloQ',
+          `<span class="compare-stat-val">${wr1}%</span><span class="compare-stat-sub">${wins1}W / ${losses1}L</span>`,
+          `<span class="compare-stat-sub">${wins2}W / ${losses2}L</span><span class="compare-stat-val">${wr2}%</span>`,
+          wrClasses[0], wrClasses[1], renderVersusBar(wr1, wr2, '#4ade80', '#f87171'))}
 
-        <!-- METRIC ROW 3: KDA PROMEDIO -->
-        <div class="compare-row">
-          <div class="compare-val-col col-1 ${kdaClasses[0]}">
-            <span class="compare-stat-val" style="color: ${kda1 >= 3 ? '#ff9f43' : (kda1 >= 2 ? '#38bdf8' : '#ef4444')}">${kda1.toFixed(2)}:1</span>
-            <span class="compare-stat-sub">${stats1.avgKills || '0'}/${stats1.avgDeaths || '0'}/${stats1.avgAssists || '0'}</span>
-            ${kdaClasses[0] ? '<span class="compare-crown-icon">🏆</span>' : ''}
-          </div>
-          <div class="compare-label-col">KDA Promedio</div>
-          <div class="compare-val-col col-2 ${kdaClasses[1]}">
-            <span class="compare-stat-val" style="color: ${kda2 >= 3 ? '#ff9f43' : (kda2 >= 2 ? '#38bdf8' : '#ef4444')}">${kda2.toFixed(2)}:1</span>
-            <span class="compare-stat-sub">${stats2.avgKills || '0'}/${stats2.avgDeaths || '0'}/${stats2.avgAssists || '0'}</span>
-            ${kdaClasses[1] ? '<span class="compare-crown-icon">🏆</span>' : ''}
-          </div>
-        </div>
+        ${mkRow('KDA Promedio',
+          `<span class="compare-stat-val" style="color:${kda1>=3?'#ff9f43':kda1>=2?'#38bdf8':'#ef4444'}">${kda1.toFixed(2)}:1</span>`,
+          `<span class="compare-stat-val" style="color:${kda2>=3?'#ff9f43':kda2>=2?'#38bdf8':'#ef4444'}">${kda2.toFixed(2)}:1</span>`,
+          kdaClasses[0], kdaClasses[1], renderVersusBar(kda1, kda2))}
 
-        <!-- METRIC ROW 3B: PROMEDIO DE MUERTES -->
-        <div class="compare-row">
-          <div class="compare-val-col col-1 ${deathsClasses[0]}">
-            <span class="compare-stat-val">${deaths1.toFixed(1)}</span>
-            <span class="compare-stat-sub">Muertes / Partida</span>
-            ${deathsClasses[0] ? '<span class="compare-crown-icon">🏆</span>' : ''}
-          </div>
-          <div class="compare-label-col">Menos Muertes</div>
-          <div class="compare-val-col col-2 ${deathsClasses[1]}">
-            <span class="compare-stat-val">${deaths2.toFixed(1)}</span>
-            <span class="compare-stat-sub">Muertes / Partida</span>
-            ${deathsClasses[1] ? '<span class="compare-crown-icon">🏆</span>' : ''}
-          </div>
-        </div>
+        ${mkRow('Menos Muertes',
+          `<span class="compare-stat-val">${deaths1.toFixed(1)}</span><span class="compare-stat-sub">muertes/partida</span>`,
+          `<span class="compare-stat-sub">muertes/partida</span><span class="compare-stat-val">${deaths2.toFixed(1)}</span>`,
+          deathsClasses[0], deathsClasses[1])}
 
-        <!-- METRIC ROW 4: CS/MIN -->
-        <div class="compare-row">
-          <div class="compare-val-col col-1 ${csClasses[0]}">
-            <span class="compare-stat-val">${cs1.toFixed(1)} CS/min</span>
-            ${csClasses[0] ? '<span class="compare-crown-icon">🏆</span>' : ''}
-          </div>
-          <div class="compare-label-col">Farm por Minuto</div>
-          <div class="compare-val-col col-2 ${csClasses[1]}">
-            <span class="compare-stat-val">${cs2.toFixed(1)} CS/min</span>
-            ${csClasses[1] ? '<span class="compare-crown-icon">🏆</span>' : ''}
-          </div>
-        </div>
+        ${mkRow('Farm por Minuto',
+          `<span class="compare-stat-val">${cs1.toFixed(1)} CS/min</span>`,
+          `<span class="compare-stat-val">${cs2.toFixed(1)} CS/min</span>`,
+          csClasses[0], csClasses[1], renderVersusBar(cs1, cs2, '#4ade80', '#c084fc'))}
 
-        <!-- METRIC ROW 5: ORO PROMEDIO -->
-        <div class="compare-row">
-          <div class="compare-val-col col-1 ${goldClasses[0]}">
-            <span class="compare-stat-val">${gold1.toLocaleString('es-ES')}</span>
-            <span class="compare-stat-sub">Oro / Partida</span>
-            ${goldClasses[0] ? '<span class="compare-crown-icon">🏆</span>' : ''}
-          </div>
-          <div class="compare-label-col">Oro Promedio</div>
-          <div class="compare-val-col col-2 ${goldClasses[1]}">
-            <span class="compare-stat-val">${gold2.toLocaleString('es-ES')}</span>
-            <span class="compare-stat-sub">Oro / Partida</span>
-            ${goldClasses[1] ? '<span class="compare-crown-icon">🏆</span>' : ''}
-          </div>
-        </div>
+        ${mkRow('Oro Promedio',
+          `<span class="compare-stat-val">${gold1.toLocaleString('es-ES')}</span><span class="compare-stat-sub">oro/partida</span>`,
+          `<span class="compare-stat-sub">oro/partida</span><span class="compare-stat-val">${gold2.toLocaleString('es-ES')}</span>`,
+          goldClasses[0], goldClasses[1], renderVersusBar(gold1, gold2, '#d4af37', '#d4af37'))}
 
-        <!-- METRIC ROW 6: KP% PROMEDIO -->
-        <div class="compare-row">
-          <div class="compare-val-col col-1 ${kpClasses[0]}">
-            <span class="compare-stat-val">${kp1}%</span>
-            <span class="compare-stat-sub">Kill Participation</span>
-            ${kpClasses[0] ? '<span class="compare-crown-icon">🏆</span>' : ''}
-          </div>
-          <div class="compare-label-col">Participación Kills</div>
-          <div class="compare-val-col col-2 ${kpClasses[1]}">
-            <span class="compare-stat-val">${kp2}%</span>
-            <span class="compare-stat-sub">Kill Participation</span>
-            ${kpClasses[1] ? '<span class="compare-crown-icon">🏆</span>' : ''}
-          </div>
-        </div>
+        ${mkRow('Participación Kills',
+          `<span class="compare-stat-val">${kp1}%</span>`,
+          `<span class="compare-stat-val">${kp2}%</span>`,
+          kpClasses[0], kpClasses[1], renderVersusBar(kp1, kp2))}
 
-        <!-- METRIC ROW 7: DAÑO INFLIGIDO -->
-        <div class="compare-row">
-          <div class="compare-val-col col-1 ${dmgClasses[0]}">
-            <span class="compare-stat-val" style="color: #ff9f43">${dmg1.toLocaleString('es-ES')}</span>
-            <span class="compare-stat-sub">Dmg a Campeones</span>
-            ${dmgClasses[0] ? '<span class="compare-crown-icon">🏆</span>' : ''}
-          </div>
-          <div class="compare-label-col">Daño Infligido</div>
-          <div class="compare-val-col col-2 ${dmgClasses[1]}">
-            <span class="compare-stat-val" style="color: #ff9f43">${dmg2.toLocaleString('es-ES')}</span>
-            <span class="compare-stat-sub">Dmg a Campeones</span>
-            ${dmgClasses[1] ? '<span class="compare-crown-icon">🏆</span>' : ''}
-          </div>
-        </div>
+        ${mkRow('Daño Infligido',
+          `<span class="compare-stat-val" style="color:#ff9f43">${dmg1.toLocaleString('es-ES')}</span>`,
+          `<span class="compare-stat-val" style="color:#ff9f43">${dmg2.toLocaleString('es-ES')}</span>`,
+          dmgClasses[0], dmgClasses[1], renderVersusBar(dmg1, dmg2, '#ff9f43', '#ff9f43'))}
 
-        <!-- METRIC ROW 8: DAÑO RECIBIDO -->
-        <div class="compare-row">
-          <div class="compare-val-col col-1 ${takenClasses[0]}">
-            <span class="compare-stat-val" style="color: #ef4444">${taken1.toLocaleString('es-ES')}</span>
-            <span class="compare-stat-sub">Dmg Recibido</span>
-            ${takenClasses[0] ? '<span class="compare-crown-icon">🏆</span>' : ''}
-          </div>
-          <div class="compare-label-col">Daño Recibido</div>
-          <div class="compare-val-col col-2 ${takenClasses[1]}">
-            <span class="compare-stat-val" style="color: #ef4444">${taken2.toLocaleString('es-ES')}</span>
-            <span class="compare-stat-sub">Dmg Recibido</span>
-            ${takenClasses[1] ? '<span class="compare-crown-icon">🏆</span>' : ''}
-          </div>
-        </div>
+        ${mkRow('Daño Recibido',
+          `<span class="compare-stat-val" style="color:#ef4444">${taken1.toLocaleString('es-ES')}</span>`,
+          `<span class="compare-stat-val" style="color:#ef4444">${taken2.toLocaleString('es-ES')}</span>`,
+          takenClasses[0], takenClasses[1])}
 
-        <!-- METRIC ROW 9: RACHA ACTUAL -->
-        <div class="compare-row">
-          <div class="compare-val-col col-1 ${streakClasses[0]}">
-            <span class="compare-stat-val" style="color: ${streakData1.type === 'W' ? '#4ade80' : '#f87171'}">${streakData1.count}${streakData1.type}</span>
-            <span class="compare-stat-sub">${streakData1.type === 'W' ? 'Victorias seguidas' : 'Derrotas seguidas'}</span>
-            ${streakClasses[0] ? '<span class="compare-crown-icon">🏆</span>' : ''}
-          </div>
-          <div class="compare-label-col">Racha Actual</div>
-          <div class="compare-val-col col-2 ${streakClasses[1]}">
-            <span class="compare-stat-val" style="color: ${streakData2.type === 'W' ? '#4ade80' : '#f87171'}">${streakData2.count}${streakData2.type}</span>
-            <span class="compare-stat-sub">${streakData2.type === 'W' ? 'Victorias seguidas' : 'Derrotas seguidas'}</span>
-            ${streakClasses[1] ? '<span class="compare-crown-icon">🏆</span>' : ''}
-          </div>
-        </div>
+        ${mkRow('Racha Actual',
+          `<span class="compare-stat-val" style="color:${streakData1.type==='W'?'#4ade80':'#f87171'}">${streakData1.count}${streakData1.type}</span><span class="compare-stat-sub">${streakData1.type==='W'?'Victorias':'Derrotas'} seguidas</span>`,
+          `<span class="compare-stat-sub">${streakData2.type==='W'?'Victorias':'Derrotas'} seguidas</span><span class="compare-stat-val" style="color:${streakData2.type==='W'?'#4ade80':'#f87171'}">${streakData2.count}${streakData2.type}</span>`,
+          streakClasses[0], streakClasses[1])}
 
-        <!-- METRIC ROW 10: MEJORES CAMPEONES RECIENTES -->
-        <div class="compare-row champs-compare-row" style="height: auto; align-items: flex-start; padding: 20px 0;">
-          <div class="compare-val-col col-1" style="flex-direction: column; align-items: flex-start; justify-content: flex-start; height: auto;">
-            ${renderChampsCompare(champs1)}
-          </div>
-          <div class="compare-label-col" style="align-self: center;">Top Campeones</div>
-          <div class="compare-val-col col-2" style="flex-direction: column; align-items: flex-start; justify-content: flex-start; height: auto;">
-            ${renderChampsCompare(champs2)}
-          </div>
+        <div class="compare-row champs-compare-row" style="height:auto;align-items:flex-start;padding:20px 0;">
+          <div class="compare-val-col col-1" style="flex-direction:column;align-items:flex-start;justify-content:flex-start;height:auto;">${renderChampsCompare(champs1)}</div>
+          <div class="compare-label-col" style="align-self:center;">Top Campeones</div>
+          <div class="compare-val-col col-2" style="flex-direction:column;align-items:flex-start;justify-content:flex-start;height:auto;">${renderChampsCompare(champs2)}</div>
         </div>
       </div>
     `;
@@ -3404,4 +3381,3 @@ function initCompareLogic() {
     resultsContainer.style.display = 'block';
   }
 }
-

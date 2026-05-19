@@ -5031,3 +5031,51 @@ select option {
   pointer-events: none;
   opacity: 0.3;
 }
+
+/* ==========================================================
+   COMPARISON ENHANCEMENTS V2
+   ========================================================== */
+
+/* Versus Bar (barra comparativa central) */
+.versus-bar { display:flex; height:6px; border-radius:3px; overflow:hidden; margin-top:6px; position:relative; background:rgba(255,255,255,0.04); }
+.vb-fill { height:100%; transition:width 0.6s cubic-bezier(0.16,1,0.3,1); }
+.vb-pct { position:absolute; top:-14px; font-size:0.6rem; font-weight:800; color:rgba(255,255,255,0.5); font-family:'Outfit',sans-serif; }
+.vb-pct-l { left:2px; }
+.vb-pct-r { right:2px; }
+
+/* Playstyle Badges */
+.ps-badges-row { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; justify-content:center; }
+.ps-badge { font-family:'Outfit',sans-serif; font-size:0.65rem; font-weight:700; padding:3px 8px; border-radius:12px; border:1px solid; white-space:nowrap; letter-spacing:0.3px; }
+
+/* Head-to-Head Section */
+.h2h-section { background:linear-gradient(135deg,rgba(212,175,55,0.06),rgba(212,175,55,0.02)); border:1px solid rgba(212,175,55,0.15); border-radius:16px; padding:16px 20px; text-align:center; animation:fadeInCompare 0.6s ease both; }
+.h2h-title { font-family:'Outfit',sans-serif; font-size:0.95rem; font-weight:800; color:#d4af37; margin-bottom:8px; letter-spacing:0.5px; }
+.h2h-details { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; align-items:center; }
+.h2h-tag { font-family:'Outfit',sans-serif; font-size:0.78rem; font-weight:700; padding:4px 12px; border-radius:20px; }
+.h2h-tag.ally { background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.3); color:#4ade80; }
+.h2h-tag.enemy { background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.3); color:#f87171; }
+.h2h-score { font-family:'Outfit',sans-serif; font-size:0.8rem; font-weight:800; color:#fff; background:rgba(255,255,255,0.06); padding:4px 14px; border-radius:20px; border:1px solid rgba(255,255,255,0.1); }
+
+/* Global Winner Glow */
+.compare-player-card.global-winner { position:relative; }
+.compare-player-card.global-winner .compare-profile-icon { box-shadow:0 0 25px rgba(212,175,55,0.5),0 0 50px rgba(212,175,55,0.2); border-color:#d4af37; }
+.global-winner-label { font-family:'Outfit',sans-serif; font-size:0.72rem; font-weight:900; color:#d4af37; letter-spacing:2px; margin-top:6px; text-shadow:0 0 10px rgba(212,175,55,0.4); animation:pulseWinner 2s ease-in-out infinite; }
+@keyframes pulseWinner { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.8;transform:scale(1.05)} }
+
+/* Score Pill (between VS shield) */
+.compare-score-pill { font-family:'Outfit',sans-serif; font-size:0.82rem; font-weight:800; color:rgba(255,255,255,0.6); background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:4px 14px; border-radius:20px; margin-top:8px; letter-spacing:1px; }
+
+/* Tier-based Profile Icon Glows */
+.compare-profile-icon.tier-glow-challenger { box-shadow:0 8px 25px rgba(0,0,0,0.6),0 0 20px rgba(210,140,25,0.4) !important; border-color:rgb(210,140,25) !important; }
+.compare-profile-icon.tier-glow-grandmaster { box-shadow:0 8px 25px rgba(0,0,0,0.6),0 0 20px rgba(165,45,45,0.4) !important; border-color:rgb(165,45,45) !important; }
+.compare-profile-icon.tier-glow-master { box-shadow:0 8px 25px rgba(0,0,0,0.6),0 0 20px rgba(125,60,180,0.4) !important; border-color:rgb(125,60,180) !important; }
+.compare-profile-icon.tier-glow-diamond { box-shadow:0 8px 25px rgba(0,0,0,0.6),0 0 20px rgba(50,135,175,0.4) !important; border-color:rgb(50,135,175) !important; }
+.compare-profile-icon.tier-glow-emerald { box-shadow:0 8px 25px rgba(0,0,0,0.6),0 0 20px rgba(20,115,75,0.4) !important; border-color:rgb(20,115,75) !important; }
+.compare-profile-icon.tier-glow-platinum { box-shadow:0 8px 25px rgba(0,0,0,0.6),0 0 20px rgba(25,125,115,0.4) !important; border-color:rgb(25,125,115) !important; }
+.compare-profile-icon.tier-glow-gold { box-shadow:0 8px 25px rgba(0,0,0,0.6),0 0 20px rgba(165,130,70,0.4) !important; border-color:rgb(165,130,70) !important; }
+.compare-profile-icon.tier-glow-silver { box-shadow:0 8px 25px rgba(0,0,0,0.6),0 0 15px rgba(160,170,180,0.3) !important; border-color:rgb(160,170,180) !important; }
+.compare-profile-icon.tier-glow-bronze { box-shadow:0 8px 25px rgba(0,0,0,0.6),0 0 15px rgba(140,100,60,0.3) !important; border-color:rgb(140,100,60) !important; }
+.compare-profile-icon.tier-glow-iron { box-shadow:0 8px 25px rgba(0,0,0,0.6),0 0 15px rgba(100,100,100,0.3) !important; border-color:rgb(100,100,100) !important; }
+
+/* compare-label-col flex for versus bar */
+.compare-label-col { display:flex; flex-direction:column; align-items:center; gap:2px; }
