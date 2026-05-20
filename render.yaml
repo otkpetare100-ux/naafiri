@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: lan-tracker
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: node master.js
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: RIOT_API_KEY
+        sync: false
+      - key: MONGO_URI
+        sync: false
+      - key: DISCORD_TOKEN
+        sync: false
+      - key: DISCORD_CHANNEL_ID
+        sync: false
+      - key: ADMIN_DISCORD_ID
+        sync: false
+      - key: ADMIN_WEB_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
