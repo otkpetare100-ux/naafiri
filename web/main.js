@@ -2740,6 +2740,7 @@ function initModal() {
     if (event.target === confirmDeleteModal) confirmDeleteModal.classList.remove('active');
     if (event.target === compareModal) {
       compareModal.classList.remove('active');
+      document.body.style.overflow = '';
       const select1 = document.getElementById('compare-player-1-select');
       const select2 = document.getElementById('compare-player-2-select');
       const resultsContainer = document.getElementById('compare-results-container');
@@ -2913,6 +2914,7 @@ function initCompareLogic() {
 
   span.onclick = () => {
     modal.classList.remove('active');
+    document.body.style.overflow = '';
     resetCompare();
   };
 
@@ -2990,6 +2992,7 @@ function initCompareLogic() {
           
           renderComparisonGrid(player1, player2);
           modal.classList.add('active');
+          document.body.style.overflow = 'hidden';
         }
         
         setTimeout(() => {

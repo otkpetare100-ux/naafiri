@@ -4471,7 +4471,7 @@ select option {
 .compare-modal {
   max-width: 900px !important;
   width: 90% !important;
-  background: rgba(10, 10, 12, 0.96) !important;
+  background: linear-gradient(to bottom, rgba(10, 10, 12, 0.8), rgba(10, 10, 12, 0.98)), url('/assets/bg.jpg') center/cover no-repeat !important;
   border: 1.5px solid rgba(212, 175, 55, 0.35) !important;
   border-radius: 24px !important;
   box-shadow: 0 25px 80px rgba(0, 0, 0, 0.95), 0 0 40px rgba(212, 175, 55, 0.05) !important;
