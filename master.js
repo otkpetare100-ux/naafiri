@@ -6,7 +6,7 @@ console.log('🚀 Iniciando Sistema Multiproceso de Naafiri Tracker (API + Bot).
 // Función para lanzar procesos y mantenerlos vivos
 function startProcess(name, command, args) {
   console.log(`[${name}] Lanzando...`);
-  const child = spawn(command, args, { stdio: 'inherit', shell: true });
+  const child = spawn(command, args, { stdio: 'inherit' });
 
   child.on('close', (code) => {
     console.log(`[${name}] El proceso se cerró con código ${code}. Reiniciando en 5s...`);
@@ -22,4 +22,5 @@ function startProcess(name, command, args) {
 
 // Iniciar ambos
 startProcess('API', 'node', ['api_server.js']);
-startProcess('BOT', 'node', ['"bot discord/bot.js"']);
+startProcess('BOT', 'node', [path.join('bot discord', 'bot.js')]);
+
