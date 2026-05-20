@@ -22,4 +22,4 @@ function startProcess(name, command, args) {
 
 // Iniciar ambos
 startProcess('API', 'node', ['api_server.js']);
-startProcess('BOT', 'node', ['bot discord/bot.js']);
+startProcess('BOT', 'node', ['"bot discord/bot.js"']);
