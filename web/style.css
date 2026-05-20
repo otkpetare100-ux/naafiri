@@ -5124,3 +5124,56 @@ select option {
   0% { transform: translateY(0) scale(1); }
   100% { transform: translateY(-2px) scale(1.05); }
 }
+
+/* MVP Custom Tooltip (Premium y Rápido) */
+.mvp-badge[data-mvp-tooltip] {
+  cursor: help;
+}
+
+.mvp-badge[data-mvp-tooltip]::before {
+  content: attr(data-mvp-tooltip);
+  position: absolute;
+  bottom: 140%;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: rgba(10, 10, 14, 0.98);
+  color: #f1f1f1;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-family: var(--font-main);
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  border: 1px solid rgba(212, 175, 55, 0.6);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.9);
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 100;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.mvp-badge[data-mvp-tooltip]::after {
+  content: '';
+  position: absolute;
+  bottom: 105%;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  border-width: 6px;
+  border-style: solid;
+  border-color: rgba(212, 175, 55, 0.6) transparent transparent transparent;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 100;
+}
+
+.mvp-badge[data-mvp-tooltip]:hover::before,
+.mvp-badge[data-mvp-tooltip]:hover::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
