@@ -894,10 +894,10 @@ function renderLadder(players) {
     }).join('');
 
     let mvpBadges = '';
-    if (player.puuid === mvpKdaId && maxKda > 0) mvpBadges += `<div class="mvp-badge kda" data-mvp-tooltip="Mejor KDA de La Jauría (${maxKda.toFixed(2)})"><img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/3031.png" style="width:14px; height:14px; border-radius:2px;" onerror="this.src='/assets/placeholder_champ.png'"> El Verdugo</div>`;
-    else if (player.puuid === mvpFarmId && maxFarm > 0) mvpBadges += `<div class="mvp-badge farm" data-mvp-tooltip="Mejor Farmeador (${maxFarm.toFixed(1)} CS/min)"><img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/1083.png" style="width:14px; height:14px; border-radius:2px;" onerror="this.src='/assets/placeholder_champ.png'"> Señor del Farmeo</div>`;
-    else if (player.puuid === mvpDmgId && maxDmg > 0) mvpBadges += `<div class="mvp-badge dmg" data-mvp-tooltip="Mayor Daño Infligido Promedio (${maxDmg.toLocaleString()})"><img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/3089.png" style="width:14px; height:14px; border-radius:2px;" onerror="this.src='/assets/placeholder_champ.png'"> Arma de Destrucción</div>`;
-    else if (player.puuid === mvpWrId && maxWr > 0) mvpBadges += `<div class="mvp-badge wr" data-mvp-tooltip="Mejor Win Rate sostenido (${maxWr}%)"><img src="/assets/estetica/corona.png" style="width:14px; height:14px;"> El Invicto</div>`;
+    if (player.puuid === mvpKdaId && maxKda > 0) mvpBadges += `<div class="mvp-badge kda" data-mvp-tooltip="Mejor KDA de La Jauría (${maxKda.toFixed(2)})"><img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/3031.png" class="mvp-item-icon" onerror="this.src='/assets/placeholder_champ.png'"> El Verdugo</div>`;
+    else if (player.puuid === mvpFarmId && maxFarm > 0) mvpBadges += `<div class="mvp-badge farm" data-mvp-tooltip="Mejor Farmeador (${maxFarm.toFixed(1)} CS/min)"><img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/1083.png" class="mvp-item-icon" onerror="this.src='/assets/placeholder_champ.png'"> Señor del Farmeo</div>`;
+    else if (player.puuid === mvpDmgId && maxDmg > 0) mvpBadges += `<div class="mvp-badge dmg" data-mvp-tooltip="Mayor Daño Infligido Promedio (${maxDmg.toLocaleString()})"><img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/3089.png" class="mvp-item-icon" onerror="this.src='/assets/placeholder_champ.png'"> Arma de Destrucción</div>`;
+    else if (player.puuid === mvpWrId && maxWr > 0) mvpBadges += `<div class="mvp-badge wr" data-mvp-tooltip="Mejor Win Rate sostenido (${maxWr}%)"><img src="/assets/estetica/corona.png" class="mvp-item-icon"> El Invicto</div>`;
 
     card.innerHTML = `
       ${mvpBadges}

@@ -5151,7 +5151,9 @@ select option {
 .option-icon {
   width: 20px;
   height: 20px;
-  object-fit: contain;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid rgba(212, 175, 55, 0.4);
 }
 
 .mvp-badge {
@@ -5161,16 +5163,28 @@ select option {
   background: linear-gradient(135deg, #d4af37, #b8860b);
   color: #000;
   font-family: var(--font-headers);
-  font-weight: 900;
+  font-weight: 800;
   font-size: 0.75rem;
   padding: 4px 10px;
-  border-radius: 12px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
   z-index: 10;
   display: flex;
   align-items: center;
   gap: 5px;
   animation: mvpGlow 2s infinite alternate;
+}
+
+.mvp-item-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 4px rgba(0,0,0,0.6);
+  object-fit: cover;
+  transform: scale(1.1);
 }
 
 .mvp-badge.kda { background: linear-gradient(135deg, #ef4444, #991b1b); color: #fff; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); }
