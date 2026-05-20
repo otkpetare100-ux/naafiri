@@ -5063,20 +5063,6 @@ select option {
 .compare-label-col { display:flex; flex-direction:column; align-items:center; gap:2px; }
 
 /* Leaderboard Sorting & MVP Styles */
-.sort-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(15, 15, 20, 0.85);
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  border-radius: 8px;
-  padding: 6px 12px;
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-}
-
-.sort-icon {
-  font-size: 1.1rem;
-}
 
 .ladder-sort-select {
   background: transparent;
