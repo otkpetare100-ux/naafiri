@@ -5072,6 +5072,11 @@ select option {
 .custom-dropdown-container {
   cursor: pointer;
   z-index: 1000; /* so dropdown appears above other stuff */
+  overflow: visible !important;
+}
+
+.custom-dropdown-container::after {
+  display: none !important; /* Evitar que el brillo del botón se salga por el overflow visible */
 }
 
 .custom-select-trigger {
