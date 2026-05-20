@@ -894,10 +894,10 @@ function renderLadder(players) {
     }).join('');
 
     let mvpBadges = '';
-    if (player.puuid === mvpKdaId && maxKda > 0) mvpBadges += `<div class="mvp-badge kda" data-mvp-tooltip="Mejor KDA de La Jauría (${maxKda.toFixed(2)})">🔪 El Verdugo</div>`;
-    else if (player.puuid === mvpFarmId && maxFarm > 0) mvpBadges += `<div class="mvp-badge farm" data-mvp-tooltip="Mejor Farmeador (${maxFarm.toFixed(1)} CS/min)">🌾 Señor del Farmeo</div>`;
-    else if (player.puuid === mvpDmgId && maxDmg > 0) mvpBadges += `<div class="mvp-badge dmg" data-mvp-tooltip="Mayor Daño Infligido Promedio (${maxDmg.toLocaleString()})">💥 Arma de Destrucción</div>`;
-    else if (player.puuid === mvpWrId && maxWr > 0) mvpBadges += `<div class="mvp-badge wr" data-mvp-tooltip="Mejor Win Rate sostenido (${maxWr}%)">👑 El Invicto</div>`;
+    if (player.puuid === mvpKdaId && maxKda > 0) mvpBadges += `<div class="mvp-badge kda" data-mvp-tooltip="Mejor KDA de La Jauría (${maxKda.toFixed(2)})"><img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/3031.png" style="width:14px; height:14px; border-radius:2px;" onerror="this.src='/assets/placeholder_champ.png'"> El Verdugo</div>`;
+    else if (player.puuid === mvpFarmId && maxFarm > 0) mvpBadges += `<div class="mvp-badge farm" data-mvp-tooltip="Mejor Farmeador (${maxFarm.toFixed(1)} CS/min)"><img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/1083.png" style="width:14px; height:14px; border-radius:2px;" onerror="this.src='/assets/placeholder_champ.png'"> Señor del Farmeo</div>`;
+    else if (player.puuid === mvpDmgId && maxDmg > 0) mvpBadges += `<div class="mvp-badge dmg" data-mvp-tooltip="Mayor Daño Infligido Promedio (${maxDmg.toLocaleString()})"><img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/3089.png" style="width:14px; height:14px; border-radius:2px;" onerror="this.src='/assets/placeholder_champ.png'"> Arma de Destrucción</div>`;
+    else if (player.puuid === mvpWrId && maxWr > 0) mvpBadges += `<div class="mvp-badge wr" data-mvp-tooltip="Mejor Win Rate sostenido (${maxWr}%)"><img src="/assets/estetica/corona.png" style="width:14px; height:14px;"> El Invicto</div>`;
 
     card.innerHTML = `
       ${mvpBadges}
@@ -2884,12 +2884,34 @@ document.addEventListener('DOMContentLoaded', async () => {
   initDeleteLogic();
   initCompareLogic();
 
-  // Event listener para el sort dropdown
-  const sortSelect = document.getElementById('ladder-sort');
-  if (sortSelect) {
-    sortSelect.addEventListener('change', (e) => {
-      currentSortMode = e.target.value;
-      renderLadder(GLOBAL_PLAYERS_LIST);
+  // Lógica del custom dropdown de ordenamiento
+  const sortContainer = document.querySelector('.custom-dropdown-container');
+  const sortTrigger = document.getElementById('sort-trigger');
+  const sortTriggerText = document.getElementById('sort-trigger-text');
+  const sortOptions = document.querySelectorAll('.custom-option');
+
+  if (sortContainer && sortTrigger && sortOptions.length > 0) {
+    sortTrigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      sortContainer.classList.toggle('open');
+    });
+
+    sortOptions.forEach(option => {
+      option.addEventListener('click', (e) => {
+        e.stopPropagation();
+        sortOptions.forEach(opt => opt.classList.remove('selected'));
+        option.classList.add('selected');
+        sortTriggerText.innerHTML = option.innerHTML;
+        sortContainer.classList.remove('open');
+        currentSortMode = option.dataset.value;
+        renderLadder(GLOBAL_PLAYERS_LIST);
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!sortContainer.contains(e.target)) {
+        sortContainer.classList.remove('open');
+      }
     });
   }
 

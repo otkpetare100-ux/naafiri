@@ -31,15 +31,31 @@
               <h1>Leaderboard</h1>
             </div>
             <div class="header-right" style="display: flex; gap: 12px; align-items: center;">
-              <div class="sort-container btn-compare-action" style="padding: 0 0.5rem; gap: 0;">
+              <div class="sort-container btn-compare-action custom-dropdown-container" style="padding: 0 0.5rem; gap: 0; position: relative;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--gold-primary); margin-left: 0.5rem;"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-                <select id="ladder-sort" class="ladder-sort-select" style="padding: 0.6rem 1rem 0.6rem 0.5rem;">
-                  <option value="lp">🏆 Rango / LP</option>
-                  <option value="wr">📈 Win Rate</option>
-                  <option value="kda">🔪 KDA (Asesino)</option>
-                  <option value="cs">🌾 Farm (CS/min)</option>
-                  <option value="dmg">💥 Daño Infligido</option>
-                </select>
+                
+                <div class="custom-select-trigger" id="sort-trigger">
+                  <span id="sort-trigger-text">🏆 Rango / LP</span>
+                  <span class="arrow">▼</span>
+                </div>
+                
+                <div class="custom-select-options" id="sort-options">
+                  <div class="custom-option selected" data-value="lp">
+                    <img src="/assets/estetica/corona.png" alt="LP" class="option-icon"> Rango / LP
+                  </div>
+                  <div class="custom-option" data-value="wr">
+                    <img src="https://ddragon.leagueoflegends.com/cdn/14.8.1/img/item/3041.png" alt="WR" class="option-icon" onerror="this.src='/assets/placeholder_champ.png'"> Win Rate
+                  </div>
+                  <div class="custom-option" data-value="kda">
+                    <img src="https://ddragon.leagueoflegends.com/cdn/14.8.1/img/item/3031.png" alt="KDA" class="option-icon" onerror="this.src='/assets/placeholder_champ.png'"> KDA (Asesino)
+                  </div>
+                  <div class="custom-option" data-value="cs">
+                    <img src="https://ddragon.leagueoflegends.com/cdn/14.8.1/img/item/1083.png" alt="Farm" class="option-icon" onerror="this.src='/assets/placeholder_champ.png'"> Farm (CS/min)
+                  </div>
+                  <div class="custom-option" data-value="dmg">
+                    <img src="https://ddragon.leagueoflegends.com/cdn/14.8.1/img/item/3089.png" alt="Dmg" class="option-icon" onerror="this.src='/assets/placeholder_champ.png'"> Daño Infligido
+                  </div>
+                </div>
               </div>
               <button id="compare-players-btn" class="btn-compare-action">
                 <span class="icon">⚔️</span> Comparar
