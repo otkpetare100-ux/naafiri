@@ -622,6 +622,7 @@ function finishLoadingBar() {
 // Snapshot de datos anteriores por puuid — usado para detectar cambios en el auto-refresh
 const playerSnapshot = new Map();
 let GLOBAL_PLAYERS_LIST = [];
+let currentSortMode = 'lp';
 let isComparisonMode = false;
 let selectedPuuidsForCompare = [];
 
@@ -741,7 +742,41 @@ function renderLadder(players) {
     });
   });
 
-  players.forEach((player, index) => {
+  // Cálculo de MVPs Globales
+  let mvpKdaId = null, mvpFarmId = null, mvpDmgId = null, mvpWrId = null;
+  let maxKda = 0, maxFarm = 0, maxDmg = 0, maxWr = 0;
+  
+  players.forEach(p => {
+    const s = p.advancedStats?.soloq;
+    if (s && s.totalMatchesCalculated >= 5) {
+      const kda = parseFloat(s.kda) || 0;
+      const farm = parseFloat(s.csPerMin) || 0;
+      const dmg = parseInt(s.avgDamageDealt) || 0;
+      
+      if (kda > maxKda) { maxKda = kda; mvpKdaId = p.puuid; }
+      if (farm > maxFarm) { maxFarm = farm; mvpFarmId = p.puuid; }
+      if (dmg > maxDmg) { maxDmg = dmg; mvpDmgId = p.puuid; }
+    }
+    const wr = parseInt(p.winRate) || 0;
+    const totalGames = (parseInt(p.soloQ?.wins) || 0) + (parseInt(p.soloQ?.losses) || 0);
+    if (totalGames >= 20 && wr > maxWr) { maxWr = wr; mvpWrId = p.puuid; }
+  });
+
+  // Ordenamiento
+  let sortedPlayers = [...players];
+  if (currentSortMode !== 'lp') {
+    sortedPlayers.sort((a, b) => {
+      const sa = a.advancedStats?.soloq || {};
+      const sb = b.advancedStats?.soloq || {};
+      if (currentSortMode === 'wr') return (parseInt(b.winRate)||0) - (parseInt(a.winRate)||0);
+      if (currentSortMode === 'kda') return (parseFloat(sb.kda)||0) - (parseFloat(sa.kda)||0);
+      if (currentSortMode === 'cs') return (parseFloat(sb.csPerMin)||0) - (parseFloat(sa.csPerMin)||0);
+      if (currentSortMode === 'dmg') return (parseInt(sb.avgDamageDealt)||0) - (parseInt(sa.avgDamageDealt)||0);
+      return 0;
+    });
+  }
+
+  sortedPlayers.forEach((player, index) => {
     const rankNum = index + 1;
     const card = document.createElement('div');
     card.className = `player-card rank-${rankNum}`;
@@ -858,7 +893,14 @@ function renderLadder(players) {
       `;
     }).join('');
 
+    let mvpBadges = '';
+    if (player.puuid === mvpKdaId && maxKda > 0) mvpBadges += `<div class="mvp-badge kda">🔪 El Verdugo</div>`;
+    else if (player.puuid === mvpFarmId && maxFarm > 0) mvpBadges += `<div class="mvp-badge farm">🌾 Señor del Farmeo</div>`;
+    else if (player.puuid === mvpDmgId && maxDmg > 0) mvpBadges += `<div class="mvp-badge dmg">💥 Arma de Destrucción</div>`;
+    else if (player.puuid === mvpWrId && maxWr > 0) mvpBadges += `<div class="mvp-badge wr">👑 El Invicto</div>`;
+
     card.innerHTML = `
+      ${mvpBadges}
       <div class="rank-text">#${rankNum}</div>
       
       <div class="avatar-wrapper">
@@ -2841,6 +2883,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   initModal();
   initDeleteLogic();
   initCompareLogic();
+
+  // Event listener para el sort dropdown
+  const sortSelect = document.getElementById('ladder-sort');
+  if (sortSelect) {
+    sortSelect.addEventListener('change', (e) => {
+      currentSortMode = e.target.value;
+      renderLadder(GLOBAL_PLAYERS_LIST);
+    });
+  }
 
   // Auto-refresh cada 5 minutos: solo re-renderiza si hay cambios en historial o LP
   setInterval(smartRefresh, 5 * 60 * 1000);

@@ -30,7 +30,17 @@
               <span class="trophy-icon">🏆</span>
               <h1>Leaderboard</h1>
             </div>
-            <div class="header-right" style="display: flex; gap: 12px;">
+            <div class="header-right" style="display: flex; gap: 12px; align-items: center;">
+              <div class="sort-container">
+                <span class="sort-icon">📶</span>
+                <select id="ladder-sort" class="ladder-sort-select">
+                  <option value="lp">🏆 Rango / LP</option>
+                  <option value="wr">📈 Win Rate</option>
+                  <option value="kda">🔪 KDA (Asesino)</option>
+                  <option value="cs">🌾 Farm (CS/min)</option>
+                  <option value="dmg">💥 Daño Infligido</option>
+                </select>
+              </div>
               <button id="compare-players-btn" class="btn-compare-action">
                 <span class="icon">⚔️</span> Comparar
               </button>
