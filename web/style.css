@@ -4640,10 +4640,12 @@ select option {
 
 .compare-vs-divider {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   margin: 0 30px;
+  gap: 12px;
 }
 
 .vs-shield {
