@@ -894,10 +894,10 @@ function renderLadder(players) {
     }).join('');
 
     let mvpBadges = '';
-    if (player.puuid === mvpKdaId && maxKda > 0) mvpBadges += `<div class="mvp-badge kda">🔪 El Verdugo</div>`;
-    else if (player.puuid === mvpFarmId && maxFarm > 0) mvpBadges += `<div class="mvp-badge farm">🌾 Señor del Farmeo</div>`;
-    else if (player.puuid === mvpDmgId && maxDmg > 0) mvpBadges += `<div class="mvp-badge dmg">💥 Arma de Destrucción</div>`;
-    else if (player.puuid === mvpWrId && maxWr > 0) mvpBadges += `<div class="mvp-badge wr">👑 El Invicto</div>`;
+    if (player.puuid === mvpKdaId && maxKda > 0) mvpBadges += `<div class="mvp-badge kda" title="Mejor KDA de La Jauría (${maxKda.toFixed(2)})">🔪 El Verdugo</div>`;
+    else if (player.puuid === mvpFarmId && maxFarm > 0) mvpBadges += `<div class="mvp-badge farm" title="Mejor Farmeador (${maxFarm.toFixed(1)} CS/min)">🌾 Señor del Farmeo</div>`;
+    else if (player.puuid === mvpDmgId && maxDmg > 0) mvpBadges += `<div class="mvp-badge dmg" title="Mayor Daño Infligido Promedio (${maxDmg.toLocaleString()})">💥 Arma de Destrucción</div>`;
+    else if (player.puuid === mvpWrId && maxWr > 0) mvpBadges += `<div class="mvp-badge wr" title="Mejor Win Rate sostenido (${maxWr}%)">👑 El Invicto</div>`;
 
     card.innerHTML = `
       ${mvpBadges}
