@@ -2891,7 +2891,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const sortOptions = document.querySelectorAll('.custom-option');
 
   if (sortContainer && sortTrigger && sortOptions.length > 0) {
-    sortTrigger.addEventListener('click', (e) => {
+    sortContainer.addEventListener('click', (e) => {
       e.stopPropagation();
       sortContainer.classList.toggle('open');
     });
