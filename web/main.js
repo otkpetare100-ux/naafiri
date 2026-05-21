@@ -1413,7 +1413,14 @@ async function setRandomSplash(rawChampName, playerPuuid) {
     if (data.data[champId]) {
       const skins    = data.data[champId].skins;
       const specials = skins.filter(s => s.num !== 0 && !s.name.includes('(') && !s.name.toLowerCase().includes('chroma'));
-      if (specials.length === 0 || Math.random() <= 0.01) return;
+
+      if (specials.length === 0 || Math.random() <= 0.01) {
+        // Sin skin especial → guardar el default para reutilizar siempre el mismo
+        if (playerPuuid) {
+          PRELOADED_SPLASHES.set(playerPuuid, { defaultSrc: localDefault, specialSrc: null, specialNum: null });
+        }
+        return;
+      }
 
       const selectedSkin = specials[Math.floor(Math.random() * specials.length)];
       const localSpecial = `${LOCAL_LOADING}/${champId}_${selectedSkin.num}.jpg`;
@@ -1422,10 +1429,19 @@ async function setRandomSplash(rawChampName, playerPuuid) {
       const specialImg = new Image();
       specialImg.onload = () => {
         bgEl.style.backgroundImage = `url('${localSpecial}')`;
+        // Guardar la skin elegida → siempre se mostrará la misma al reabrir
+        if (playerPuuid) {
+          PRELOADED_SPLASHES.set(playerPuuid, { defaultSrc: localDefault, specialSrc: localSpecial, specialNum: selectedSkin.num });
+        }
       };
       specialImg.onerror = () => {
         const cdnImg = new Image();
-        cdnImg.onload = () => { bgEl.style.backgroundImage = `url('${cdnSpecial}')`; };
+        cdnImg.onload = () => {
+          bgEl.style.backgroundImage = `url('${cdnSpecial}')`;
+          if (playerPuuid) {
+            PRELOADED_SPLASHES.set(playerPuuid, { defaultSrc: localDefault, specialSrc: cdnSpecial, specialNum: selectedSkin.num });
+          }
+        };
         cdnImg.src = cdnSpecial;
       };
       specialImg.src = localSpecial;
