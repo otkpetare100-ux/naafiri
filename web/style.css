@@ -5164,78 +5164,63 @@ select option {
   font-family: var(--font-headers);
   font-weight: 900;
   font-size: 0.72rem;
-  padding: 5px 13px 5px 9px;
+  padding: 3px 10px;
   border-radius: 30px;
   text-transform: uppercase;
-  letter-spacing: 1.2px;
+  letter-spacing: 0.8px;
   z-index: 10;
   display: flex;
   align-items: center;
-  gap: 7px;
-  overflow: hidden;
+  gap: 5px;
   backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  border: 1px solid rgba(255,255,255,0.18);
-  text-shadow: 0 1px 4px rgba(0,0,0,0.55);
-  animation: mvpPopIn 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) both, mvpFloat 3s ease-in-out infinite 0.5s;
+  border: 1px solid rgba(255,255,255,0.1);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  animation: mvpPopIn 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) both, mvpFloat 4s ease-in-out infinite 0.5s;
   cursor: help;
-  background-size: 250% 100%;
-  background-position: 0% 0;
 }
 
 .mvp-item-icon {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
-  border: 1.5px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 0 0 8px rgba(0,0,0,0.5), 0 0 6px currentColor;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   object-fit: cover;
   flex-shrink: 0;
-  filter: drop-shadow(0 0 4px rgba(255,255,255,0.3));
 }
 
 /* KDA — Rojo sangre premium */
 .mvp-badge.kda {
-  background: linear-gradient(105deg, #7b0205 0%, #c0050a 30%, #ff6060 50%, #c0050a 70%, #7b0205 100%);
-  box-shadow: 0 4px 22px rgba(220, 20, 20, 0.6), 0 1px 0 rgba(255,100,100,0.3) inset, 0 -1px 0 rgba(0,0,0,0.4) inset;
-  animation: mvpPopIn 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) both, mvpFloat 3s ease-in-out infinite 0.5s, mvpShimmer 3s linear infinite;
+  background: linear-gradient(135deg, #7b0205, #c0050a);
+  box-shadow: 0 2px 10px rgba(220, 20, 20, 0.3);
 }
 
-/* Farm — Verde esmeralda */
+/* Farm — Verde */
 .mvp-badge.farm {
-  background: linear-gradient(105deg, #065a2a 0%, #0d9a4a 30%, #5dffaa 50%, #0d9a4a 70%, #065a2a 100%);
-  box-shadow: 0 4px 22px rgba(20, 180, 90, 0.6), 0 1px 0 rgba(100,255,150,0.3) inset, 0 -1px 0 rgba(0,0,0,0.4) inset;
-  animation: mvpPopIn 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) both, mvpFloat 3s ease-in-out infinite 0.5s, mvpShimmer 3s linear infinite;
+  background: linear-gradient(135deg, #0d9a4a, #065a2a);
+  box-shadow: 0 2px 10px rgba(15, 140, 65, 0.3);
 }
 
-/* DMG — Naranja fuego */
+/* DMG — Naranja */
 .mvp-badge.dmg {
-  background: linear-gradient(105deg, #8b1a00 0%, #e03d00 30%, #ffb347 50%, #e03d00 70%, #8b1a00 100%);
-  box-shadow: 0 4px 22px rgba(230, 80, 0, 0.6), 0 1px 0 rgba(255,160,80,0.3) inset, 0 -1px 0 rgba(0,0,0,0.4) inset;
-  animation: mvpPopIn 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) both, mvpFloat 3s ease-in-out infinite 0.5s, mvpShimmer 3s linear infinite;
+  background: linear-gradient(135deg, #d45000, #7a1e00);
+  box-shadow: 0 2px 10px rgba(200, 70, 0, 0.3);
 }
 
-/* WR — Azul real */
+/* WR — Azul */
 .mvp-badge.wr {
-  background: linear-gradient(105deg, #0d2e7a 0%, #1b5fc0 30%, #7ec8ff 50%, #1b5fc0 70%, #0d2e7a 100%);
-  box-shadow: 0 4px 22px rgba(40, 100, 220, 0.6), 0 1px 0 rgba(130,190,255,0.3) inset, 0 -1px 0 rgba(0,0,0,0.4) inset;
-  animation: mvpPopIn 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) both, mvpFloat 3s ease-in-out infinite 0.5s, mvpShimmer 3s linear infinite;
+  background: linear-gradient(135deg, #1a5ab8, #0d2e7a);
+  box-shadow: 0 2px 10px rgba(30, 80, 190, 0.3);
 }
 
 @keyframes mvpPopIn {
-  0%   { opacity: 0; transform: translateY(6px) scale(0.7); }
-  70%  { transform: translateY(-3px) scale(1.08); }
+  0%   { opacity: 0; transform: translateY(4px) scale(0.82); }
+  70%  { transform: translateY(-1px) scale(1.03); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes mvpFloat {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50%       { transform: translateY(-3px) scale(1.03); }
-}
-
-@keyframes mvpShimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-2px); }
 }
 
 /* MVP Custom Tooltip (Premium y Rápido) */
