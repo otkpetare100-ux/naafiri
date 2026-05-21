@@ -504,6 +504,7 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
 
     // Combinar y mantener hasta 40 partidas para cubrir ambas colas
     // BUG-08 fix: usar spread para no mutar objetos originales
+    const usedChangeIndices = new Set();
     const combinedMatches = [...newMatchStats, ...existingMatches]
       .sort((a, b) => b.timestamp - a.timestamp)
       .slice(0, 40)
@@ -515,13 +516,22 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
         } else if (account.lastLpChanges && account.lastLpChanges.length > 0) {
           // Plan B: Fallback cronológico redundante si no coincide el ID de partida
           const matchTime = match.timestamp;
-          const matchedChange = account.lastLpChanges.find(change => {
+          const matchedChangeIndex = account.lastLpChanges.findIndex((change, idx) => {
+            if (usedChangeIndices.has(idx)) return false;
             const timeDiff = Math.abs(change.timestamp - matchTime);
             // Máximo 3 horas de diferencia y debe coincidir la cola
-            return timeDiff < 3 * 60 * 60 * 1000 && change.queueId === match.queueId;
+            const timeAndQueueMatch = timeDiff < 3 * 60 * 60 * 1000 && change.queueId === match.queueId;
+            if (!timeAndQueueMatch) return false;
+            
+            // Validar que el sentido del cambio coincida con la victoria/derrota
+            if (match.win && change.diff < 0) return false;
+            if (!match.win && change.diff > 0) return false;
+            
+            return true;
           });
-          if (matchedChange) {
-            match.lpChange = matchedChange.diff;
+          if (matchedChangeIndex !== -1) {
+            usedChangeIndices.add(matchedChangeIndex);
+            match.lpChange = account.lastLpChanges[matchedChangeIndex].diff;
           }
         }
         return match;
@@ -723,6 +733,7 @@ app.post('/api/summoners/:puuid/matches/load-more', async (req, res) => {
     }
 
     // Combinar, ordenar y guardar (límite máximo de 80 partidas)
+    const usedChangeIndices = new Set();
     const combinedMatches = [...newMatchStats, ...existingMatches]
       .sort((a, b) => b.timestamp - a.timestamp)
       .slice(0, 80)
@@ -732,11 +743,22 @@ app.post('/api/summoners/:puuid/matches/load-more', async (req, res) => {
           match.lpChange = account.lpHistory[match.matchId];
         } else if (account.lastLpChanges && account.lastLpChanges.length > 0) {
           const matchTime = match.timestamp;
-          const matchedChange = account.lastLpChanges.find(change => {
+          const matchedChangeIndex = account.lastLpChanges.findIndex((change, idx) => {
+            if (usedChangeIndices.has(idx)) return false;
             const timeDiff = Math.abs(change.timestamp - matchTime);
-            return timeDiff < 3 * 60 * 60 * 1000 && change.queueId === match.queueId;
+            const timeAndQueueMatch = timeDiff < 3 * 60 * 60 * 1000 && change.queueId === match.queueId;
+            if (!timeAndQueueMatch) return false;
+            
+            // Validar que el sentido del cambio coincida con la victoria/derrota
+            if (match.win && change.diff < 0) return false;
+            if (!match.win && change.diff > 0) return false;
+            
+            return true;
           });
-          if (matchedChange) match.lpChange = matchedChange.diff;
+          if (matchedChangeIndex !== -1) {
+            usedChangeIndices.add(matchedChangeIndex);
+            match.lpChange = account.lastLpChanges[matchedChangeIndex].diff;
+          }
         }
         return match;
       });
