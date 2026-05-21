@@ -1362,88 +1362,66 @@ function updateRegionBackground(champName) {
 async function setRandomSplash(rawChampName, playerPuuid) {
   const bgEl = document.getElementById('dash-left-bg');
   if (!bgEl) return;
-  
-  // 1. Limpiar de inmediato el fondo anterior para evitar que se muestre brevemente al cambiar de perfil
-  bgEl.style.backgroundImage = 'none';
-  bgEl.classList.add('loading');
-  
+
   const champId = cleanChampId(rawChampName);
-  if (!champId) {
-    bgEl.classList.remove('loading');
-    return;
-  }
+  if (!champId) return;
 
   const LOCAL_LOADING = `/assets/splash-art`;
-  const CDN_LOADING = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading`;
+  const CDN_LOADING   = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading`;
 
-  // Comprobar si ya tenemos este splash precargado para este jugador
+  // 1. Si está precargado → aplicar directamente sin negro ni parpadeo
   const preloaded = playerPuuid ? PRELOADED_SPLASHES.get(playerPuuid) : null;
-
   if (preloaded) {
-    // Si hay una skin especial precargada, la aplicamos directamente de entrada
-    if (preloaded.specialSrc) {
-      bgEl.style.backgroundImage = `url('${preloaded.specialSrc}')`;
-      console.log(`✅ [Instant Preloaded Splash] Skin especial cargada directamente al instante: ${champId} (Skin ${preloaded.specialNum})`);
-    } else {
-      // Si no hay skin especial, aplicamos la predeterminada precargada
-      bgEl.style.backgroundImage = `url('${preloaded.defaultSrc}')`;
-      console.log(`✅ [Instant Preloaded Splash] Skin predeterminada cargada directamente al instante: ${champId}`);
-    }
+    const src = preloaded.specialSrc || preloaded.defaultSrc;
+    bgEl.style.backgroundImage = `url('${src}')`;
     bgEl.classList.remove('loading');
     updateRegionBackground(champId);
     return;
   }
 
-  // --- Fallback normal si no estaba precargada ---
-  // 2. Cargar el splash por defecto localmente primero (carga ultra rápida)
+  // 2. Sin precarga: sólo oscurecer si no hay imagen previa visible
   const localDefault = `${LOCAL_LOADING}/${champId}_0.jpg`;
-  const cdnDefault = `${CDN_LOADING}/${champId}_0.jpg`;
+  const cdnDefault   = `${CDN_LOADING}/${champId}_0.jpg`;
 
-  const defaultImg = new Image();
-  defaultImg.onload = () => {
+  const hasPrevious = bgEl.style.backgroundImage && bgEl.style.backgroundImage !== 'none';
+  if (!hasPrevious) bgEl.classList.add('loading');
+
+  // Mostrar default inmediatamente (crossfade desde splash anterior)
+  const defaultTmp = new Image();
+  defaultTmp.onload = () => {
     bgEl.style.backgroundImage = `url('${localDefault}')`;
-    bgEl.classList.remove('loading'); // Revelar suavemente desde negro
+    bgEl.classList.remove('loading');
   };
-  defaultImg.onerror = () => {
+  defaultTmp.onerror = () => {
     bgEl.style.backgroundImage = `url('${cdnDefault}')`;
     bgEl.classList.remove('loading');
   };
-  defaultImg.src = localDefault;
+  defaultTmp.src = localDefault;
 
   updateRegionBackground(champId);
 
+  // 3. En paralelo: buscar skin especial y hacer crossfade cuando cargue
   try {
-    // 3. Consultar asíncronamente las skins especiales disponibles
     const resp = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/en_US/champion/${champId}.json`);
     if (!resp.ok) return;
     const data = await resp.json();
-    
-    if (data.data[champId]) {
-      const skins = data.data[champId].skins;
-      const specials = skins.filter(s => s.num !== 0 && !s.name.includes('(') && !s.name.toLowerCase().includes('chroma'));
-      
-      let selectedSkin;
-      if (specials.length > 0 && Math.random() > 0.01) {
-        selectedSkin = specials[Math.floor(Math.random() * specials.length)];
-      } else {
-        return;
-      }
 
+    if (data.data[champId]) {
+      const skins    = data.data[champId].skins;
+      const specials = skins.filter(s => s.num !== 0 && !s.name.includes('(') && !s.name.toLowerCase().includes('chroma'));
+      if (specials.length === 0 || Math.random() <= 0.01) return;
+
+      const selectedSkin = specials[Math.floor(Math.random() * specials.length)];
       const localSpecial = `${LOCAL_LOADING}/${champId}_${selectedSkin.num}.jpg`;
-      const cdnSpecial = `${CDN_LOADING}/${champId}_${selectedSkin.num}.jpg`;
-      
+      const cdnSpecial   = `${CDN_LOADING}/${champId}_${selectedSkin.num}.jpg`;
+
       const img = new Image();
       img.onload = () => {
-        // Al estar precargada en memoria, la cambiamos directamente con crossfade nativo
         bgEl.style.backgroundImage = `url('${localSpecial}')`;
-        console.log(`✅ Splash especial local cargado: ${champId} (Skin ${selectedSkin.num})`);
       };
       img.onerror = () => {
         const cdnImg = new Image();
-        cdnImg.onload = () => {
-          bgEl.style.backgroundImage = `url('${cdnSpecial}')`;
-          console.log(`✅ Splash especial CDN fallback cargado: ${champId} (Skin ${selectedSkin.num})`);
-        };
+        cdnImg.onload = () => { bgEl.style.backgroundImage = `url('${cdnSpecial}')`; };
         cdnImg.src = cdnSpecial;
       };
       img.src = localSpecial;
