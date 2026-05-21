@@ -2863,7 +2863,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         e.stopPropagation();
         sortOptions.forEach(opt => opt.classList.remove('selected'));
         option.classList.add('selected');
-        sortTriggerText.innerHTML = option.innerHTML;
+        const optIcon = option.querySelector('.option-icon');
+        sortTriggerText.innerHTML = optIcon ? optIcon.outerHTML : '';
         sortContainer.classList.remove('open');
         currentSortMode = option.dataset.value;
         renderLadder(GLOBAL_PLAYERS_LIST);
