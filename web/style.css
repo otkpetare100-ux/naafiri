@@ -59,6 +59,7 @@ body {
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
+  padding-top: 26px; /* Ajuste para el banner de beta */
 }
 
 h1, h2, h3, h4, .summoner-name, #detail-name {
@@ -3285,7 +3286,7 @@ select option {
    ========================================================== */
 .top-loading-bar {
   position: fixed;
-  top: 0;
+  top: 26px; /* Desplazado abajo del banner de beta */
   left: 0;
   height: 3.5px;
   width: 0%;
@@ -5279,4 +5280,61 @@ select option {
   opacity: 1;
   visibility: visible;
   transform: translateX(-50%) translateY(0);
+}
+
+/* ==========================================================
+   BANNER DE BETA CON TEXTO DESPLAZABLE (TICKER)
+   ========================================================== */
+.beta-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 26px;
+  background: rgba(8, 8, 10, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1.5px solid rgba(212, 175, 55, 0.3);
+  z-index: 100000000; /* Asegurar que se superpone a todo excepto barra de carga */
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
+  pointer-events: none; /* No intercepta clics */
+}
+
+.beta-banner-track {
+  display: flex;
+  width: max-content;
+  animation: beta-scroll 35s linear infinite;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+.beta-banner-content {
+  display: inline-flex;
+  align-items: center;
+  padding-right: 120px; /* Separación generosa entre bloques de texto */
+  font-family: var(--font-headers);
+  font-weight: 600;
+  font-size: 0.68rem;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.beta-banner-content span {
+  color: var(--gold-primary);
+  font-weight: 900;
+  margin-right: 8px;
+  text-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+}
+
+@keyframes beta-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
