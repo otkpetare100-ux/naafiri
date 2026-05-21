@@ -1423,28 +1423,17 @@ async function setRandomSplash(rawChampName, playerPuuid) {
       }
 
       const selectedSkin = specials[Math.floor(Math.random() * specials.length)];
-      const localSpecial = `${LOCAL_LOADING}/${champId}_${selectedSkin.num}.jpg`;
       const cdnSpecial   = `${CDN_LOADING}/${champId}_${selectedSkin.num}.jpg`;
 
       const specialImg = new Image();
       specialImg.onload = () => {
-        bgEl.style.backgroundImage = `url('${localSpecial}')`;
+        bgEl.style.backgroundImage = `url('${cdnSpecial}')`;
         // Guardar la skin elegida → siempre se mostrará la misma al reabrir
         if (playerPuuid) {
-          PRELOADED_SPLASHES.set(playerPuuid, { defaultSrc: localDefault, specialSrc: localSpecial, specialNum: selectedSkin.num });
+          PRELOADED_SPLASHES.set(playerPuuid, { defaultSrc: localDefault, specialSrc: cdnSpecial, specialNum: selectedSkin.num });
         }
       };
-      specialImg.onerror = () => {
-        const cdnImg = new Image();
-        cdnImg.onload = () => {
-          bgEl.style.backgroundImage = `url('${cdnSpecial}')`;
-          if (playerPuuid) {
-            PRELOADED_SPLASHES.set(playerPuuid, { defaultSrc: localDefault, specialSrc: cdnSpecial, specialNum: selectedSkin.num });
-          }
-        };
-        cdnImg.src = cdnSpecial;
-      };
-      specialImg.src = localSpecial;
+      specialImg.src = cdnSpecial;
     }
   } catch (error) {
     console.error('Error en Splash:', error);
@@ -1512,29 +1501,17 @@ async function preloadSinglePlayerSplash(player) {
       }
 
       if (selectedSkin) {
-        const localSpecial = `${LOCAL_LOADING}/${champId}_${selectedSkin.num}.jpg`;
+        const cdnSpecial = `${CDN_LOADING}/${champId}_${selectedSkin.num}.jpg`;
         const specialImg = new Image();
         // Guardar la nueva precarga en memoria
         specialImg.onload = () => {
           PRELOADED_SPLASHES.set(player.puuid, {
             defaultSrc: localDefault,
-            specialSrc: localSpecial,
+            specialSrc: cdnSpecial,
             specialNum: selectedSkin.num
           });
         };
-        specialImg.onerror = () => {
-          const cdnSpecial = `${CDN_LOADING}/${champId}_${selectedSkin.num}.jpg`;
-          const cdnImg = new Image();
-          cdnImg.onload = () => {
-            PRELOADED_SPLASHES.set(player.puuid, {
-              defaultSrc: localDefault,
-              specialSrc: cdnSpecial,
-              specialNum: selectedSkin.num
-            });
-          };
-          cdnImg.src = cdnSpecial;
-        };
-        specialImg.src = localSpecial;
+        specialImg.src = cdnSpecial;
       } else {
         PRELOADED_SPLASHES.set(player.puuid, {
           defaultSrc: localDefault,
@@ -1587,19 +1564,20 @@ async function preloadLadderSplashArts(players) {
           
           if (specials.length > 0) {
             const selectedSkin = specials[Math.floor(Math.random() * specials.length)];
-            const localSpecial = `${LOCAL_LOADING}/${champId}_${selectedSkin.num}.jpg`;
+            const cdnSpecial   = `${CDN_LOADING}/${champId}_${selectedSkin.num}.jpg`;
 
             // Precargar la skin especial
             const specialImg = new Image();
-            specialImg.src = localSpecial;
-
-            // Guardar preselección para garantizar 100% de coincidencia al hacer clic
-            PRELOADED_SPLASHES.set(player.puuid, {
-              defaultSrc: localDefault,
-              specialSrc: localSpecial,
-              specialNum: selectedSkin.num
-            });
-            console.log(`📡 [Preload] Listo en segundo plano para ${player.gameName}: ${champId}_0 y skin ${selectedSkin.num}`);
+            specialImg.onload = () => {
+              // Guardar preselección para garantizar 100% de coincidencia al hacer clic
+              PRELOADED_SPLASHES.set(player.puuid, {
+                defaultSrc: localDefault,
+                specialSrc: cdnSpecial,
+                specialNum: selectedSkin.num
+              });
+              console.log(`📡 [Preload] Listo en segundo plano para ${player.gameName}: ${champId}_0 y skin ${selectedSkin.num}`);
+            };
+            specialImg.src = cdnSpecial;
           } else {
             PRELOADED_SPLASHES.set(player.puuid, {
               defaultSrc: localDefault,
