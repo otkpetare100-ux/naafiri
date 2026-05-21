@@ -59,6 +59,8 @@ const BOOTS_ITEM_IDS = new Set([
   1001, 2422, 3006, 3009, 3047, 3111, 3158, 3020, 3117, 3184, 3181, 3285
 ]);
 
+const PRELOADED_SPLASHES = new Map();
+
 
 // BUG-02 fix: Sanitizar datos externos antes de inyectar en innerHTML
 function escapeHtml(str) {
@@ -648,7 +650,7 @@ async function fetchLadder() {
     const players = await response.json();
     GLOBAL_PLAYERS_LIST = players;
     renderLadder(players);
-
+    preloadAllLadderSplashes(players);
   } catch (error) {
     console.error('API Error:', error);
     showToast('⚠️ Error al conectar con la API de Naafiri.', 'error');
@@ -687,7 +689,7 @@ async function smartRefresh() {
 
     if (anyChanged) {
       renderLadder(players);
-
+      preloadAllLadderSplashes(players);
     }
   } catch (e) {
     console.error('[AutoRefresh] Error:', e);
@@ -1359,6 +1361,128 @@ function updateRegionBackground(champName) {
 
 
 
+// Opciones de carga del splash art (CDN oficial y DDragon)
+const CDN_LOADING = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading`;
+
+// Helper para obtener URL de skin aleatoria
+async function getChampionSkinUrl(champName, lastSkinNum = null) {
+  const champId = cleanChampId(champName);
+  const defaultUrl = `${CDN_LOADING}/${champId}_0.jpg`;
+
+  try {
+    const resp = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/en_US/champion/${champId}.json`);
+    if (!resp.ok) return { url: defaultUrl, num: 0 };
+    
+    const data = await resp.json();
+    const championData = data.data[champId];
+    if (!championData) return { url: defaultUrl, num: 0 };
+
+    const skins = championData.skins;
+    const validSkins = skins.filter(s => !s.name.includes('(') && !s.name.toLowerCase().includes('chroma'));
+    
+    if (validSkins.length === 0) return { url: defaultUrl, num: 0 };
+
+    // Intentar elegir una skin distinta a la anterior
+    const otherSkins = validSkins.filter(s => s.num !== lastSkinNum);
+    const pool = otherSkins.length > 0 ? otherSkins : validSkins;
+    const selected = pool[Math.floor(Math.random() * pool.length)];
+
+    return {
+      url: `${CDN_LOADING}/${champId}_${selected.num}.jpg`,
+      num: selected.num
+    };
+  } catch (err) {
+    return { url: defaultUrl, num: 0 };
+  }
+}
+
+// Precargar splash art de un jugador específico en memoria
+async function preloadSplashForPlayer(player, forceNew = false) {
+  let target = player.splashTargetChamp;
+  if (!target) {
+    target = getMostPlayedFromHistory(player.matchStatsHistory);
+    if (!target && player.topChampions && player.topChampions.length > 0) {
+      target = player.topChampions[0].name;
+    }
+    player.splashTargetChamp = target;
+  }
+  if (!target) return;
+
+  const current = PRELOADED_SPLASHES.get(player.puuid);
+  const lastNum = forceNew && current ? current.num : null;
+
+  const skinInfo = await getChampionSkinUrl(target, lastNum);
+
+  // Precargar en caché del navegador
+  const img = new Image();
+  img.onload = () => {
+    PRELOADED_SPLASHES.set(player.puuid, skinInfo);
+  };
+  img.src = skinInfo.url;
+}
+
+// Precarga progresiva de todos los splash arts de los jugadores del ladder
+function preloadAllLadderSplashes(players) {
+  if (!players || players.length === 0) return;
+  
+  players.forEach((player, index) => {
+    setTimeout(() => {
+      preloadSplashForPlayer(player, false);
+    }, 50 * index);
+  });
+}
+
+// Aplicar el splash art al contenedor cuando se abre el modal de detalles
+async function applyPlayerSplash(player) {
+  const bgEl = document.getElementById('dash-left-bg');
+  if (!bgEl) return;
+
+  let target = player.splashTargetChamp;
+  if (!target) {
+    target = getMostPlayedFromHistory(player.matchStatsHistory);
+    if (!target && player.topChampions && player.topChampions.length > 0) {
+      target = player.topChampions[0].name;
+    }
+    player.splashTargetChamp = target;
+  }
+  if (!target) return;
+
+  const champId = cleanChampId(target);
+  if (!champId) return;
+
+  // Si ya está precargado en memoria, usarlo directamente
+  const preloaded = PRELOADED_SPLASHES.get(player.puuid);
+  if (preloaded) {
+    bgEl.style.backgroundImage = `url('${preloaded.url}')`;
+    bgEl.classList.remove('loading');
+    updateRegionBackground(champId);
+    return;
+  }
+
+  // Carga al vuelo (si el usuario hizo clic muy rápido)
+  bgEl.classList.add('loading');
+  const skinInfo = await getChampionSkinUrl(target);
+  
+  bgEl.style.backgroundImage = `url('${skinInfo.url}')`;
+  bgEl.classList.remove('loading');
+  updateRegionBackground(champId);
+
+  // Guardar en la caché global en memoria
+  PRELOADED_SPLASHES.set(player.puuid, skinInfo);
+}
+
+// Limpiar splash art del DOM al cerrar y precargar uno nuevo en memoria
+function closePlayerDetailsSplash(player) {
+  const bgEl = document.getElementById('dash-left-bg');
+  if (bgEl) {
+    bgEl.style.backgroundImage = 'none';
+    bgEl.classList.add('loading');
+  }
+  if (player) {
+    preloadSplashForPlayer(player, true);
+  }
+}
+
 function openPlayerDetails(player) {
   // Ocultar loader de carga en tiempo real si está activo
   const loader = document.getElementById('details-modal-loader');
@@ -1396,9 +1520,8 @@ function openPlayerDetails(player) {
     }
     player.splashTargetChamp = target;
   }
-  
+  applyPlayerSplash(player);
 
-  
   // Header Info
   document.getElementById('detail-profile-icon').src = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${player.profileIconId || 1}.png`;
   document.getElementById('detail-level').textContent = player.summonerLevel || 0;
@@ -2473,6 +2596,7 @@ function openPlayerDetails(player) {
       const prevPlayer = profileNavigationStack.pop();
       openPlayerDetails(prevPlayer);
     } else {
+      closePlayerDetailsSplash(activePlayerDetails);
       modal.classList.remove('active');
       document.body.style.overflow = '';
       currentModalPuuid = null;
@@ -2631,6 +2755,7 @@ function initModal() {
       }
     }
     if (event.target === detailsModal) {
+      closePlayerDetailsSplash(activePlayerDetails);
       detailsModal.classList.remove('active');
       document.body.style.overflow = '';
       currentModalPuuid = null;
