@@ -59,8 +59,6 @@ const BOOTS_ITEM_IDS = new Set([
   1001, 2422, 3006, 3009, 3047, 3111, 3158, 3020, 3117, 3184, 3181, 3285
 ]);
 
-const PRELOADED_SPLASHES = new Map();
-let preloadTimers = []; // BUG-15 fix: referencia para cancelar preloads anteriores
 
 // BUG-02 fix: Sanitizar datos externos antes de inyectar en innerHTML
 function escapeHtml(str) {
@@ -650,7 +648,7 @@ async function fetchLadder() {
     const players = await response.json();
     GLOBAL_PLAYERS_LIST = players;
     renderLadder(players);
-    if (typeof preloadLadderSplashArts === 'function') preloadLadderSplashArts(players);
+
   } catch (error) {
     console.error('API Error:', error);
     showToast('⚠️ Error al conectar con la API de Naafiri.', 'error');
@@ -689,7 +687,7 @@ async function smartRefresh() {
 
     if (anyChanged) {
       renderLadder(players);
-      if (typeof preloadLadderSplashArts === 'function') preloadLadderSplashArts(players);
+
     }
   } catch (e) {
     console.error('[AutoRefresh] Error:', e);
@@ -1359,240 +1357,6 @@ function updateRegionBackground(champName) {
   }
 }
 
-async function setRandomSplash(rawChampName, playerPuuid) {
-  const bgEl = document.getElementById('dash-left-bg');
-  if (!bgEl) return;
-
-  const champId = cleanChampId(rawChampName);
-  if (!champId) return;
-
-  const LOCAL_LOADING = `/assets/splash-art`;
-  const CDN_LOADING   = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading`;
-
-  // 1. Si está precargado → crossfade directo, sin negro en ningún momento
-  const preloaded = playerPuuid ? PRELOADED_SPLASHES.get(playerPuuid) : null;
-  if (preloaded) {
-    const src = preloaded.specialSrc || preloaded.defaultSrc;
-    // Breve fade-to-black solo cuando había un splash diferente visible
-    const hadSplash = bgEl.style.backgroundImage && bgEl.style.backgroundImage !== 'none';
-    if (hadSplash) {
-      bgEl.classList.add('loading');
-      await new Promise(r => setTimeout(r, 120));
-    }
-    bgEl.style.backgroundImage = `url('${src}')`;
-    bgEl.classList.remove('loading');
-    updateRegionBackground(champId);
-    return;
-  }
-
-  // 2. Sin precarga: fade-to-black y mostrar el default local de inmediato
-  bgEl.classList.add('loading');
-
-  const localDefault = `${LOCAL_LOADING}/${champId}_0.jpg`;
-  const cdnDefault   = `${CDN_LOADING}/${champId}_0.jpg`;
-
-  const defaultTmp = new Image();
-  defaultTmp.onload = () => {
-    bgEl.style.backgroundImage = `url('${localDefault}')`;
-    bgEl.classList.remove('loading');
-  };
-  defaultTmp.onerror = () => {
-    bgEl.style.backgroundImage = `url('${cdnDefault}')`;
-    bgEl.classList.remove('loading');
-  };
-  defaultTmp.src = localDefault;
-
-  updateRegionBackground(champId);
-
-  // 3. En paralelo: buscar skin especial y hacer crossfade suave cuando cargue
-  try {
-    const resp = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/en_US/champion/${champId}.json`);
-    if (!resp.ok) return;
-    const data = await resp.json();
-
-    if (data.data[champId]) {
-      const skins    = data.data[champId].skins;
-      const specials = skins.filter(s => s.num !== 0 && !s.name.includes('(') && !s.name.toLowerCase().includes('chroma'));
-
-      if (specials.length === 0 || Math.random() <= 0.01) {
-        // Sin skin especial → guardar el default para reutilizar siempre el mismo
-        if (playerPuuid) {
-          PRELOADED_SPLASHES.set(playerPuuid, { defaultSrc: localDefault, specialSrc: null, specialNum: null });
-        }
-        return;
-      }
-
-      const selectedSkin = specials[Math.floor(Math.random() * specials.length)];
-      const cdnSpecial   = `${CDN_LOADING}/${champId}_${selectedSkin.num}.jpg`;
-
-      const specialImg = new Image();
-      specialImg.onload = () => {
-        bgEl.style.backgroundImage = `url('${cdnSpecial}')`;
-        // Guardar la skin elegida → siempre se mostrará la misma al reabrir
-        if (playerPuuid) {
-          PRELOADED_SPLASHES.set(playerPuuid, { defaultSrc: localDefault, specialSrc: cdnSpecial, specialNum: selectedSkin.num });
-        }
-      };
-      specialImg.src = cdnSpecial;
-    }
-  } catch (error) {
-    console.error('Error en Splash:', error);
-  }
-}
-
-// Limpiar el splash art del elemento DOM con fade-out suave
-// Y precargar una nueva skin diferente para el mismo jugador en segundo plano (memoria)
-function clearSplash(player) {
-  const bgEl = document.getElementById('dash-left-bg');
-  if (!bgEl) return;
-  
-  // 1. Ocultar el splash actual con fade-out suave
-  bgEl.classList.add('loading');
-  
-  setTimeout(() => {
-    // 2. Limpiar por completo el backgroundImage del elemento DOM
-    // Esto garantiza que al abrir a otro jugador no se muestre el splash viejo
-    bgEl.style.backgroundImage = 'none';
-    bgEl.classList.remove('loading');
-    
-    // 3. Precargar una skin NUEVA/diferente en memoria para el jugador que se acaba de cerrar
-    if (player && player.splashTargetChamp) {
-      preloadSinglePlayerSplash(player);
-    }
-  }, 500);
-}
-
-// Precargar una skin diferente en memoria para un jugador específico
-async function preloadSinglePlayerSplash(player) {
-  const target = player.splashTargetChamp;
-  if (!target) return;
-
-  const champId = cleanChampId(target);
-  if (!champId) return;
-
-  const LOCAL_LOADING = `/assets/splash-art`;
-  const CDN_LOADING   = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading`;
-
-  const localDefault = `${LOCAL_LOADING}/${champId}_0.jpg`;
-
-  // Precargar por defecto en caché del navegador
-  const defaultImg = new Image();
-  defaultImg.src = localDefault;
-
-  try {
-    const resp = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/en_US/champion/${champId}.json`);
-    if (!resp.ok) return;
-    const data = await resp.json();
-    
-    if (data.data[champId]) {
-      const skins = data.data[champId].skins;
-      const specials = skins.filter(s => s.num !== 0 && !s.name.includes('(') && !s.name.toLowerCase().includes('chroma'));
-      
-      // Obtener la skin que acabamos de mostrar para intentar no repetir si es posible
-      const currentPreloaded = PRELOADED_SPLASHES.get(player.puuid);
-      const lastNum = currentPreloaded ? currentPreloaded.specialNum : null;
-      
-      let selectedSkin = null;
-      if (specials.length > 0) {
-        // Filtrar la última mostrada para que sea diferente
-        const otherSpecials = specials.filter(s => s.num !== lastNum);
-        const pool = otherSpecials.length > 0 ? otherSpecials : specials;
-        selectedSkin = pool[Math.floor(Math.random() * pool.length)];
-      }
-
-      if (selectedSkin) {
-        const cdnSpecial = `${CDN_LOADING}/${champId}_${selectedSkin.num}.jpg`;
-        const specialImg = new Image();
-        // Guardar la nueva precarga en memoria
-        specialImg.onload = () => {
-          PRELOADED_SPLASHES.set(player.puuid, {
-            defaultSrc: localDefault,
-            specialSrc: cdnSpecial,
-            specialNum: selectedSkin.num
-          });
-        };
-        specialImg.src = cdnSpecial;
-      } else {
-        PRELOADED_SPLASHES.set(player.puuid, {
-          defaultSrc: localDefault,
-          specialSrc: null,
-          specialNum: null
-        });
-      }
-    }
-  } catch (err) {
-    // Fallback silencioso
-  }
-}
-
-// Pre-cargar splash arts en segundo plano de manera inteligente y progresiva (carga a 0ms reales)
-async function preloadLadderSplashArts(players) {
-  if (!players || players.length === 0) return;
-  
-  // BUG-15 fix: Cancelar preloads anteriores antes de iniciar nuevos
-  preloadTimers.forEach(id => clearTimeout(id));
-  preloadTimers = [];
-  
-  // Precargamos todos los jugadores del ladder progresivamente para optimizar ancho de banda
-  for (const player of players) {
-    if (PRELOADED_SPLASHES.has(player.puuid)) continue;
-
-    const target = player.splashTargetChamp;
-    if (!target) continue;
-
-    const champId = cleanChampId(target);
-    if (!champId) continue;
-
-    const LOCAL_LOADING = `/assets/splash-art`;
-    const localDefault = `${LOCAL_LOADING}/${champId}_0.jpg`;
-
-    // 1. Precargar por defecto en caché del navegador
-    const defaultImg = new Image();
-    defaultImg.src = localDefault;
-
-    // 2. Buscar y precargar la skin especial de manera escalonada (150ms de delay por jugador para no saturar)
-    const index = players.indexOf(player);
-    const timerId = setTimeout(async () => {
-      try {
-        const resp = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/en_US/champion/${champId}.json`);
-        if (!resp.ok) return;
-        const data = await resp.json();
-        
-        if (data.data[champId]) {
-          const skins = data.data[champId].skins;
-          const specials = skins.filter(s => s.num !== 0 && !s.name.includes('(') && !s.name.toLowerCase().includes('chroma'));
-          
-          if (specials.length > 0) {
-            const selectedSkin = specials[Math.floor(Math.random() * specials.length)];
-            const cdnSpecial   = `${CDN_LOADING}/${champId}_${selectedSkin.num}.jpg`;
-
-            // Precargar la skin especial
-            const specialImg = new Image();
-            specialImg.onload = () => {
-              // Guardar preselección para garantizar 100% de coincidencia al hacer clic
-              PRELOADED_SPLASHES.set(player.puuid, {
-                defaultSrc: localDefault,
-                specialSrc: cdnSpecial,
-                specialNum: selectedSkin.num
-              });
-              console.log(`📡 [Preload] Listo en segundo plano para ${player.gameName}: ${champId}_0 y skin ${selectedSkin.num}`);
-            };
-            specialImg.src = cdnSpecial;
-          } else {
-            PRELOADED_SPLASHES.set(player.puuid, {
-              defaultSrc: localDefault,
-              specialSrc: null,
-              specialNum: null
-            });
-          }
-        }
-      } catch (err) {
-        // Fallback silencioso
-      }
-    }, 50 * index);
-    preloadTimers.push(timerId); // BUG-15 fix: guardar referencia
-  }
-}
 
 
 function openPlayerDetails(player) {
@@ -1633,7 +1397,7 @@ function openPlayerDetails(player) {
     player.splashTargetChamp = target;
   }
   
-  setRandomSplash(target, player.puuid);
+
   
   // Header Info
   document.getElementById('detail-profile-icon').src = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${player.profileIconId || 1}.png`;
@@ -2709,7 +2473,6 @@ function openPlayerDetails(player) {
       const prevPlayer = profileNavigationStack.pop();
       openPlayerDetails(prevPlayer);
     } else {
-      clearSplash(activePlayerDetails);
       modal.classList.remove('active');
       document.body.style.overflow = '';
       currentModalPuuid = null;
@@ -2868,7 +2631,6 @@ function initModal() {
       }
     }
     if (event.target === detailsModal) {
-      clearSplash(activePlayerDetails);
       detailsModal.classList.remove('active');
       document.body.style.overflow = '';
       currentModalPuuid = null;
