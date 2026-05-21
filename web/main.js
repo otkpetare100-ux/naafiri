@@ -2133,6 +2133,147 @@ function openPlayerDetails(player) {
     });
   }
 
+  // =============================================
+  // DETALLES EXPANDIDOS DE PARTIDA (10 JUGADORES)
+  // =============================================
+  function renderExpandedMatch(matchEl, match) {
+    // Toggle: si ya está expandido, colapsar
+    const existing = matchEl.nextElementSibling;
+    if (existing && existing.classList.contains('match-expanded')) {
+      existing.classList.remove('open');
+      matchEl.classList.remove('expanded');
+      setTimeout(() => existing.remove(), 300);
+      return;
+    }
+
+    // Cerrar cualquier otra expansión abierta
+    document.querySelectorAll('.match-expanded.open').forEach(el => {
+      el.previousElementSibling?.classList.remove('expanded');
+      el.classList.remove('open');
+      setTimeout(() => el.remove(), 300);
+    });
+
+    const participants = match.participants || [];
+    if (participants.length === 0) {
+      return; // Sin datos de participantes
+    }
+
+    // Separar equipos
+    const team1 = participants.filter(p => p.teamId === 100);
+    const team2 = participants.filter(p => p.teamId === 200);
+    const allTeam1 = team1.length > 0 ? team1 : participants.slice(0, 5);
+    const allTeam2 = team2.length > 0 ? team2 : participants.slice(5, 10);
+
+    // Calcular MVP: mejor score ponderado entre los 10 jugadores
+    const hasDetailedData = participants.some(p => p.kills !== undefined);
+    let mvpPuuid = null;
+    if (hasDetailedData) {
+      let bestScore = -1;
+      participants.forEach(p => {
+        const k = p.kills || 0;
+        const d = p.deaths || 0;
+        const a = p.assists || 0;
+        const dmg = p.damageDealt || 0;
+        const score = ((k * 3) + (a * 1.5)) / Math.max(d, 1) + (dmg / 5000);
+        if (score > bestScore) {
+          bestScore = score;
+          mvpPuuid = p.puuid;
+        }
+      });
+    }
+
+    // Máximo daño para la barra de proporción
+    const maxDmg = hasDetailedData ? Math.max(...participants.map(p => p.damageDealt || 0), 1) : 1;
+
+    const renderExpandedRow = (p) => {
+      const isMe = p.puuid === currentModalPuuid;
+      const isMvp = p.puuid === mvpPuuid;
+      const champIcon = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${p.championName}.png`;
+      const k = p.kills ?? '—';
+      const d = p.deaths ?? '—';
+      const a = p.assists ?? '—';
+      const dmg = p.damageDealt;
+      const dmgStr = dmg !== undefined ? (dmg).toLocaleString('es-ES') : '—';
+      const dmgPct = dmg !== undefined ? Math.round((dmg / maxDmg) * 100) : 0;
+      const goldStr = p.gold !== undefined ? (p.gold).toLocaleString('es-ES') : '—';
+      const csStr = p.cs !== undefined ? p.cs : '—';
+      const vsStr = p.visionScore !== undefined ? p.visionScore : '—';
+      const lvl = p.champLevel ?? '';
+      const name = p.summonerName || 'Desconocido';
+
+      // Items mini
+      const items = [p.item0, p.item1, p.item2, p.item3, p.item4, p.item5, p.item6];
+      const itemsHtml = items.map(id => {
+        if (!id || id === 0) return `<div class="exp-item-slot empty"></div>`;
+        return `<img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/${id}.png" class="exp-item-img" onerror="this.style.opacity='0'" />`;
+      }).join('');
+
+      return `
+        <tr class="exp-row ${isMe ? 'exp-row-me' : ''} ${isMvp ? 'exp-row-mvp' : ''}">
+          <td class="exp-champ-cell">
+            <div class="exp-champ-wrapper">
+              <img src="${champIcon}" class="exp-champ-icon" onerror="this.onerror=null; this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png';" />
+              <span class="exp-champ-level">${lvl}</span>
+            </div>
+          </td>
+          <td class="exp-name-cell">
+            <span class="exp-name ${isMe ? 'exp-name-me' : ''}">${escapeHtml(name)}</span>
+            ${isMvp ? '<span class="exp-mvp-badge">★ MVP</span>' : ''}
+          </td>
+          <td class="exp-kda-cell"><span class="exp-k">${k}</span> / <span class="exp-d">${d}</span> / <span class="exp-a">${a}</span></td>
+          <td class="exp-dmg-cell">
+            <div class="exp-dmg-bar-container">
+              <div class="exp-dmg-bar" style="width: ${dmgPct}%"></div>
+              <span class="exp-dmg-text">${dmgStr}</span>
+            </div>
+          </td>
+          <td class="exp-gold-cell">${goldStr}</td>
+          <td class="exp-cs-cell">${csStr}</td>
+          <td class="exp-items-cell"><div class="exp-items-row">${itemsHtml}</div></td>
+          <td class="exp-vision-cell">${vsStr}</td>
+        </tr>
+      `;
+    };
+
+    const team1Won = allTeam1.length > 0 && allTeam1[0].win;
+    const team2Won = allTeam2.length > 0 && allTeam2[0].win;
+
+    const expandedHtml = `
+      <div class="match-expanded">
+        <table class="exp-table">
+          <thead>
+            <tr class="exp-header">
+              <th></th><th>Jugador</th><th>KDA</th><th>Daño</th><th>Oro</th><th>CS</th><th>Ítems</th><th>Visión</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="exp-team-divider">
+              <td colspan="8">
+                <span class="exp-team-label ${team1Won ? 'team-win' : 'team-loss'}">${team1Won ? 'VICTORIA' : 'DERROTA'} — Equipo Azul</span>
+              </td>
+            </tr>
+            ${allTeam1.map(renderExpandedRow).join('')}
+            <tr class="exp-team-divider">
+              <td colspan="8">
+                <span class="exp-team-label ${team2Won ? 'team-win' : 'team-loss'}">${team2Won ? 'VICTORIA' : 'DERROTA'} — Equipo Rojo</span>
+              </td>
+            </tr>
+            ${allTeam2.map(renderExpandedRow).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    matchEl.insertAdjacentHTML('afterend', expandedHtml);
+    matchEl.classList.add('expanded');
+
+    // Trigger animation
+    requestAnimationFrame(() => {
+      const panel = matchEl.nextElementSibling;
+      if (panel) panel.classList.add('open');
+    });
+  }
+
   // Render Historial de Partidas
   function renderHistory(history, queueType, isAppend = false) {
     const historyContainer = document.getElementById('detail-match-history');
@@ -2524,6 +2665,17 @@ function openPlayerDetails(player) {
             </div>
           `;
           historyContainer.insertAdjacentHTML('beforeend', matchHtml);
+
+          // Attach click handler for expanded details
+          const insertedMatch = historyContainer.lastElementChild;
+          if (insertedMatch && match.participants && match.participants.length > 0) {
+            insertedMatch.style.cursor = 'pointer';
+            insertedMatch.addEventListener('click', (e) => {
+              // No expandir si se hizo clic en un jugador del roster o en un enlace
+              if (e.target.closest('.team-player') || e.target.closest('a')) return;
+              renderExpandedMatch(insertedMatch, match);
+            });
+          }
         });
       });
     } else {

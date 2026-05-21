@@ -450,7 +450,17 @@ app.post('/api/summoners/:puuid/matches/update', async (req, res) => {
             championName: championMap[p.championId?.toString()] || p.championName || 'Unknown',
             puuid: p.puuid,
             win: p.win,
-            teamId: p.teamId
+            teamId: p.teamId,
+            kills: p.kills,
+            deaths: p.deaths,
+            assists: p.assists,
+            gold: p.goldEarned,
+            cs: (p.totalMinionsKilled || 0) + (p.neutralMinionsKilled || 0),
+            damageDealt: p.totalDamageDealtToChampions,
+            item0: p.item0, item1: p.item1, item2: p.item2,
+            item3: p.item3, item4: p.item4, item5: p.item5, item6: p.item6,
+            champLevel: p.champLevel,
+            visionScore: p.visionScore || 0
           }));
 
           newMatchStats.push({
@@ -684,7 +694,17 @@ app.post('/api/summoners/:puuid/matches/load-more', async (req, res) => {
             championName: championMap[p.championId?.toString()] || p.championName || 'Unknown',
             puuid: p.puuid,
             win: p.win,
-            teamId: p.teamId
+            teamId: p.teamId,
+            kills: p.kills,
+            deaths: p.deaths,
+            assists: p.assists,
+            gold: p.goldEarned,
+            cs: (p.totalMinionsKilled || 0) + (p.neutralMinionsKilled || 0),
+            damageDealt: p.totalDamageDealtToChampions,
+            item0: p.item0, item1: p.item1, item2: p.item2,
+            item3: p.item3, item4: p.item4, item5: p.item5, item6: p.item6,
+            champLevel: p.champLevel,
+            visionScore: p.visionScore || 0
           }));
 
           newMatchStats.push({
@@ -940,7 +960,17 @@ app.get('/api/summoners/untracked/:puuid', async (req, res) => {
             championName: championMap[p.championId?.toString()] || p.championName || 'Unknown',
             puuid: p.puuid,
             win: p.win,
-            teamId: p.teamId
+            teamId: p.teamId,
+            kills: p.kills,
+            deaths: p.deaths,
+            assists: p.assists,
+            gold: p.goldEarned,
+            cs: (p.totalMinionsKilled || 0) + (p.neutralMinionsKilled || 0),
+            damageDealt: p.totalDamageDealtToChampions,
+            item0: p.item0, item1: p.item1, item2: p.item2,
+            item3: p.item3, item4: p.item4, item5: p.item5, item6: p.item6,
+            champLevel: p.champLevel,
+            visionScore: p.visionScore || 0
           }));
 
           return {
