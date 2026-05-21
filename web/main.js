@@ -1369,24 +1369,28 @@ async function setRandomSplash(rawChampName, playerPuuid) {
   const LOCAL_LOADING = `/assets/splash-art`;
   const CDN_LOADING   = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading`;
 
-  // 1. Si está precargado → aplicar directamente sin negro ni parpadeo
+  // 1. Si está precargado → crossfade directo, sin negro en ningún momento
   const preloaded = playerPuuid ? PRELOADED_SPLASHES.get(playerPuuid) : null;
   if (preloaded) {
     const src = preloaded.specialSrc || preloaded.defaultSrc;
+    // Breve fade-to-black solo cuando había un splash diferente visible
+    const hadSplash = bgEl.style.backgroundImage && bgEl.style.backgroundImage !== 'none';
+    if (hadSplash) {
+      bgEl.classList.add('loading');
+      await new Promise(r => setTimeout(r, 120));
+    }
     bgEl.style.backgroundImage = `url('${src}')`;
     bgEl.classList.remove('loading');
     updateRegionBackground(champId);
     return;
   }
 
-  // 2. Sin precarga: sólo oscurecer si no hay imagen previa visible
+  // 2. Sin precarga: fade-to-black y mostrar el default local de inmediato
+  bgEl.classList.add('loading');
+
   const localDefault = `${LOCAL_LOADING}/${champId}_0.jpg`;
   const cdnDefault   = `${CDN_LOADING}/${champId}_0.jpg`;
 
-  const hasPrevious = bgEl.style.backgroundImage && bgEl.style.backgroundImage !== 'none';
-  if (!hasPrevious) bgEl.classList.add('loading');
-
-  // Mostrar default inmediatamente (crossfade desde splash anterior)
   const defaultTmp = new Image();
   defaultTmp.onload = () => {
     bgEl.style.backgroundImage = `url('${localDefault}')`;
@@ -1400,7 +1404,7 @@ async function setRandomSplash(rawChampName, playerPuuid) {
 
   updateRegionBackground(champId);
 
-  // 3. En paralelo: buscar skin especial y hacer crossfade cuando cargue
+  // 3. En paralelo: buscar skin especial y hacer crossfade suave cuando cargue
   try {
     const resp = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/en_US/champion/${champId}.json`);
     if (!resp.ok) return;
@@ -1415,20 +1419,31 @@ async function setRandomSplash(rawChampName, playerPuuid) {
       const localSpecial = `${LOCAL_LOADING}/${champId}_${selectedSkin.num}.jpg`;
       const cdnSpecial   = `${CDN_LOADING}/${champId}_${selectedSkin.num}.jpg`;
 
-      const img = new Image();
-      img.onload = () => {
+      const specialImg = new Image();
+      specialImg.onload = () => {
         bgEl.style.backgroundImage = `url('${localSpecial}')`;
       };
-      img.onerror = () => {
+      specialImg.onerror = () => {
         const cdnImg = new Image();
         cdnImg.onload = () => { bgEl.style.backgroundImage = `url('${cdnSpecial}')`; };
         cdnImg.src = cdnSpecial;
       };
-      img.src = localSpecial;
+      specialImg.src = localSpecial;
     }
   } catch (error) {
-    console.error("Error en Splash:", error);
+    console.error('Error en Splash:', error);
   }
+}
+
+// Limpiar el splash art con fade-out suave (llamar al cerrar el modal)
+function clearSplash() {
+  const bgEl = document.getElementById('dash-left-bg');
+  if (!bgEl) return;
+  bgEl.classList.add('loading');
+  setTimeout(() => {
+    bgEl.style.backgroundImage = 'none';
+    bgEl.classList.remove('loading');
+  }, 500);
 }
 
 // Pre-cargar splash arts en segundo plano de manera inteligente y progresiva (carga a 0ms reales)
@@ -1494,7 +1509,7 @@ async function preloadLadderSplashArts(players) {
       } catch (err) {
         // Fallback silencioso
       }
-    }, 150 * index);
+    }, 50 * index);
     preloadTimers.push(timerId); // BUG-15 fix: guardar referencia
   }
 }
@@ -2614,8 +2629,9 @@ function openPlayerDetails(player) {
       const prevPlayer = profileNavigationStack.pop();
       openPlayerDetails(prevPlayer);
     } else {
+      clearSplash();
       modal.classList.remove('active');
-      document.body.style.overflow = ''; // Restaurar scroll del body
+      document.body.style.overflow = '';
       currentModalPuuid = null;
     }
   };
@@ -2772,6 +2788,7 @@ function initModal() {
       }
     }
     if (event.target === detailsModal) {
+      clearSplash();
       detailsModal.classList.remove('active');
       document.body.style.overflow = '';
       currentModalPuuid = null;
