@@ -1435,14 +1435,28 @@ async function setRandomSplash(rawChampName, playerPuuid) {
   }
 }
 
-// Limpiar el splash art con fade-out suave (llamar al cerrar el modal)
-function clearSplash() {
+// Limpiar el splash art con fade-out suave y recargar el del mismo jugador en silencio
+function clearSplash(player) {
   const bgEl = document.getElementById('dash-left-bg');
   if (!bgEl) return;
   bgEl.classList.add('loading');
   setTimeout(() => {
     bgEl.style.backgroundImage = 'none';
     bgEl.classList.remove('loading');
+    // Recargar en silencio el splash del mismo jugador (modal cerrado = invisible)
+    // → listo instantáneamente la próxima vez que se abra su tarjeta
+    if (player) {
+      const preloaded = player.puuid ? PRELOADED_SPLASHES.get(player.puuid) : null;
+      if (preloaded) {
+        const src = preloaded.specialSrc || preloaded.defaultSrc;
+        const tmp = new Image();
+        tmp.onload = () => { bgEl.style.backgroundImage = `url('${src}')`; };
+        tmp.src = src;
+      } else if (player.splashTargetChamp) {
+        // Si no estaba precargado, precargar ahora silenciosamente
+        setRandomSplash(player.splashTargetChamp, player.puuid);
+      }
+    }
   }, 500);
 }
 
@@ -2629,7 +2643,7 @@ function openPlayerDetails(player) {
       const prevPlayer = profileNavigationStack.pop();
       openPlayerDetails(prevPlayer);
     } else {
-      clearSplash();
+      clearSplash(activePlayerDetails);
       modal.classList.remove('active');
       document.body.style.overflow = '';
       currentModalPuuid = null;
@@ -2788,7 +2802,7 @@ function initModal() {
       }
     }
     if (event.target === detailsModal) {
-      clearSplash();
+      clearSplash(activePlayerDetails);
       detailsModal.classList.remove('active');
       document.body.style.overflow = '';
       currentModalPuuid = null;
