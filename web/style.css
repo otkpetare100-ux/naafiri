@@ -5158,43 +5158,84 @@ select option {
 
 .mvp-badge {
   position: absolute;
-  top: -10px;
-  right: 15px;
-  background: linear-gradient(135deg, #d4af37, #b8860b);
-  color: #000;
+  top: -13px;
+  right: 12px;
+  color: #fff;
   font-family: var(--font-headers);
-  font-weight: 800;
-  font-size: 0.75rem;
-  padding: 4px 10px;
-  border-radius: 20px;
+  font-weight: 900;
+  font-size: 0.72rem;
+  padding: 5px 13px 5px 9px;
+  border-radius: 30px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+  letter-spacing: 1.2px;
   z-index: 10;
   display: flex;
   align-items: center;
-  gap: 5px;
-  animation: mvpGlow 2s infinite alternate;
+  gap: 7px;
+  overflow: hidden;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.18);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.55);
+  animation: mvpPopIn 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) both, mvpFloat 3s ease-in-out infinite 0.5s;
+  cursor: help;
+  background-size: 250% 100%;
+  background-position: 0% 0;
 }
 
 .mvp-item-icon {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 0 4px rgba(0,0,0,0.6);
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 8px rgba(0,0,0,0.5), 0 0 6px currentColor;
   object-fit: cover;
-  transform: scale(1.1);
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 4px rgba(255,255,255,0.3));
 }
 
-.mvp-badge.kda { background: linear-gradient(135deg, #ef4444, #991b1b); color: #fff; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); }
-.mvp-badge.farm { background: linear-gradient(135deg, #4ade80, #166534); color: #fff; box-shadow: 0 4px 15px rgba(74, 222, 128, 0.4); }
-.mvp-badge.dmg { background: linear-gradient(135deg, #f97316, #9a3412); color: #fff; box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4); }
-.mvp-badge.wr { background: linear-gradient(135deg, #3b82f6, #1e3a8a); color: #fff; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
+/* KDA — Rojo sangre premium */
+.mvp-badge.kda {
+  background: linear-gradient(105deg, #7b0205 0%, #c0050a 30%, #ff6060 50%, #c0050a 70%, #7b0205 100%);
+  box-shadow: 0 4px 22px rgba(220, 20, 20, 0.6), 0 1px 0 rgba(255,100,100,0.3) inset, 0 -1px 0 rgba(0,0,0,0.4) inset;
+  animation: mvpPopIn 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) both, mvpFloat 3s ease-in-out infinite 0.5s, mvpShimmer 3s linear infinite;
+}
 
-@keyframes mvpGlow {
-  0% { transform: translateY(0) scale(1); }
-  100% { transform: translateY(-2px) scale(1.05); }
+/* Farm — Verde esmeralda */
+.mvp-badge.farm {
+  background: linear-gradient(105deg, #065a2a 0%, #0d9a4a 30%, #5dffaa 50%, #0d9a4a 70%, #065a2a 100%);
+  box-shadow: 0 4px 22px rgba(20, 180, 90, 0.6), 0 1px 0 rgba(100,255,150,0.3) inset, 0 -1px 0 rgba(0,0,0,0.4) inset;
+  animation: mvpPopIn 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) both, mvpFloat 3s ease-in-out infinite 0.5s, mvpShimmer 3s linear infinite;
+}
+
+/* DMG — Naranja fuego */
+.mvp-badge.dmg {
+  background: linear-gradient(105deg, #8b1a00 0%, #e03d00 30%, #ffb347 50%, #e03d00 70%, #8b1a00 100%);
+  box-shadow: 0 4px 22px rgba(230, 80, 0, 0.6), 0 1px 0 rgba(255,160,80,0.3) inset, 0 -1px 0 rgba(0,0,0,0.4) inset;
+  animation: mvpPopIn 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) both, mvpFloat 3s ease-in-out infinite 0.5s, mvpShimmer 3s linear infinite;
+}
+
+/* WR — Azul real */
+.mvp-badge.wr {
+  background: linear-gradient(105deg, #0d2e7a 0%, #1b5fc0 30%, #7ec8ff 50%, #1b5fc0 70%, #0d2e7a 100%);
+  box-shadow: 0 4px 22px rgba(40, 100, 220, 0.6), 0 1px 0 rgba(130,190,255,0.3) inset, 0 -1px 0 rgba(0,0,0,0.4) inset;
+  animation: mvpPopIn 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) both, mvpFloat 3s ease-in-out infinite 0.5s, mvpShimmer 3s linear infinite;
+}
+
+@keyframes mvpPopIn {
+  0%   { opacity: 0; transform: translateY(6px) scale(0.7); }
+  70%  { transform: translateY(-3px) scale(1.08); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes mvpFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%       { transform: translateY(-3px) scale(1.03); }
+}
+
+@keyframes mvpShimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 /* MVP Custom Tooltip (Premium y Rápido) */

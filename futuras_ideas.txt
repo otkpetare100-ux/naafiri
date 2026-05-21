@@ -1,0 +1,14 @@
+Ideas futuras para implementar en el Naafiri Tracker:
+
+1. Tracker de Partidas en Vivo (Live Match)
+   - Indicador parpadeante de "EN PARTIDA".
+   - Al hacer clic, abre un modal mostrando a los 10 jugadores de esa partida actual, con sus rangos y sus porcentajes de victoria con los campeones que están usando.
+
+2. Detalles Expandidos de la Partida
+   - Hacer que al hacer clic en una partida del historial, se expanda hacia abajo para mostrar la tabla completa de los 10 jugadores (ítems comprados, daño infligido de todos, y quién fue el MVP de la partida).
+
+4. Micro-interacciones de Sonido (Efectos Hextech)
+   - Agregar pequeños efectos de sonido (muy sutiles y elegantes) al pasar el ratón por encima de las tarjetas de los jugadores, cuando se abre un modal, o cuando haces clic en el botón "Comparar", para simular el cliente real de League of Legends.
+
+5. Maestría de Campeones Extendida
+   - Añadir una pestaña dentro del perfil de cada jugador que muestre sus Top Maestría, con los puntos totales que tienen, nivel de maestría (el nuevo sistema de niveles), y cofres disponibles.
