@@ -1563,8 +1563,10 @@ select option {
               0 0 20px rgba(212, 175, 55, 0.2),
               inset 0 0 40px var(--champ-accent-alpha, transparent) !important;
   padding: 2.5rem !important; 
-  margin: auto; 
+  margin: 0 auto auto auto; 
   border-radius: 24px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
   overflow: hidden; /* Esto cortará las esquinas cuadradas internas */
   transform: translateY(40px) scale(0.97);
   transition: background 0.8s ease, border 0.8s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -2138,7 +2140,7 @@ select option {
 #player-details-modal {
   align-items: flex-start; /* Evita que se corte la parte superior si es muy largo */
   overflow-y: auto;
-  padding: 4vh 0; /* Espaciado arriba y abajo */
+  padding: 26px 0 4vh 0; /* Sin espaciado arriba (solo el ajuste del banner de beta) y 4vh abajo */
 }
 
 /* Scrollbar del modal — heredado del estilo global dorado */
