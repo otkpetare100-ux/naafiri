@@ -2664,22 +2664,39 @@ function openPlayerDetails(player) {
               ${teamsHtml}
               
               <!-- BOTÓN DE EXPANDIR PREMIUM -->
+              ${(match.participants && match.participants.length > 0) ? `
               <div class="match-expand-action">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
               </div>
+              ` : `
+              <div class="match-expand-action" style="opacity: 0.3;" title="Detalles no disponibles para partidas antiguas">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+                </svg>
+              </div>
+              `}
             </div>
           `;
           historyContainer.insertAdjacentHTML('beforeend', matchHtml);
 
           // Attach click handler for expanded details
           const insertedMatch = historyContainer.lastElementChild;
-          if (insertedMatch && match.participants && match.participants.length > 0) {
+          if (insertedMatch) {
             insertedMatch.style.cursor = 'pointer';
             insertedMatch.addEventListener('click', (e) => {
               // No expandir si se hizo clic en un jugador del roster o en un enlace
               if (e.target.closest('.team-player') || e.target.closest('a')) return;
+              
+              if (!match.participants || match.participants.length === 0) {
+                if (typeof showToast === 'function') {
+                  showToast('Los detalles expandidos no están disponibles para partidas antiguas guardadas antes de la actualización.', 'info');
+                }
+                return;
+              }
+              
               renderExpandedMatch(insertedMatch, match);
             });
           }
