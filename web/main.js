@@ -2139,20 +2139,22 @@ function openPlayerDetails(player) {
   function renderExpandedMatch(matchEl, match) {
     try {
       console.log('[EXP] renderExpandedMatch called', { matchId: match.matchId, participants: match.participants?.length });
-    // Toggle: si ya está expandido, colapsar
+    // Toggle: si ya está expandido, colapsar con animación suave de altura
     const existing = matchEl.nextElementSibling;
     if (existing && existing.classList.contains('match-expanded')) {
+      existing.style.maxHeight = '0px';
       existing.classList.remove('open');
       matchEl.classList.remove('expanded');
-      setTimeout(() => existing.remove(), 300);
+      setTimeout(() => existing.remove(), 400);
       return;
     }
 
-    // Cerrar cualquier otra expansión abierta
-    document.querySelectorAll('.match-expanded.open').forEach(el => {
+    // Cerrar cualquier otra expansión abierta con animación suave de altura
+    document.querySelectorAll('.match-expanded').forEach(el => {
+      el.style.maxHeight = '0px';
       el.previousElementSibling?.classList.remove('expanded');
       el.classList.remove('open');
-      setTimeout(() => el.remove(), 300);
+      setTimeout(() => el.remove(), 400);
     });
 
     const participants = match.participants || [];
@@ -2269,11 +2271,16 @@ function openPlayerDetails(player) {
     matchEl.insertAdjacentHTML('afterend', expandedHtml);
     matchEl.classList.add('expanded');
 
-    // Trigger animation
-    requestAnimationFrame(() => {
-      const panel = matchEl.nextElementSibling;
-      if (panel) panel.classList.add('open');
-    });
+    // Trigger animation dynamically to ensure smooth transitions
+    const panel = matchEl.nextElementSibling;
+    if (panel) {
+      // Force layout/reflow
+      panel.offsetHeight;
+      
+      panel.classList.add('open');
+      // Set max-height to the actual height of the content for a perfect, premium animation
+      panel.style.maxHeight = panel.scrollHeight + 'px';
+    }
     } catch (err) {
       console.error('[EXP] Error in renderExpandedMatch:', err);
       if (typeof showToast === 'function') {
