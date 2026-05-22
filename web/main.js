@@ -2139,154 +2139,145 @@ function openPlayerDetails(player) {
   function renderExpandedMatch(matchEl, match) {
     try {
       console.log('[EXP] renderExpandedMatch called', { matchId: match.matchId, participants: match.participants?.length });
-    // Toggle: si ya está expandido, colapsar con animación suave de altura
-    const existing = matchEl.nextElementSibling;
-    if (existing && existing.classList.contains('match-expanded')) {
-      existing.style.maxHeight = '0px';
-      existing.classList.remove('open');
-      matchEl.classList.remove('expanded');
-      setTimeout(() => existing.remove(), 400);
-      return;
-    }
+      
+      // Toggle: si ya está expandido, colapsar con animación suave
+      const existing = matchEl.nextElementSibling;
+      if (existing && existing.classList.contains('match-expanded')) {
+        existing.classList.remove('open');
+        matchEl.classList.remove('expanded');
+        setTimeout(() => existing.remove(), 400);
+        return;
+      }
 
-    // Cerrar cualquier otra expansión abierta con animación suave de altura
-    document.querySelectorAll('.match-expanded').forEach(el => {
-      el.style.maxHeight = '0px';
-      el.previousElementSibling?.classList.remove('expanded');
-      el.classList.remove('open');
-      setTimeout(() => el.remove(), 400);
-    });
-
-    const participants = match.participants || [];
-    if (participants.length === 0) {
-      return; // Sin datos de participantes
-    }
-
-    // Separar equipos
-    const team1 = participants.filter(p => p.teamId === 100);
-    const team2 = participants.filter(p => p.teamId === 200);
-    const allTeam1 = team1.length > 0 ? team1 : participants.slice(0, 5);
-    const allTeam2 = team2.length > 0 ? team2 : participants.slice(5, 10);
-
-    // Calcular MVP: mejor score ponderado entre los 10 jugadores
-    const hasDetailedData = participants.some(p => p.kills !== undefined);
-    let mvpPuuid = null;
-    if (hasDetailedData) {
-      let bestScore = -1;
-      participants.forEach(p => {
-        const k = p.kills || 0;
-        const d = p.deaths || 0;
-        const a = p.assists || 0;
-        const dmg = p.damageDealt || 0;
-        const score = ((k * 3) + (a * 1.5)) / Math.max(d, 1) + (dmg / 5000);
-        if (score > bestScore) {
-          bestScore = score;
-          mvpPuuid = p.puuid;
-        }
+      // Cerrar cualquier otra expansión abierta con animación suave
+      document.querySelectorAll('.match-expanded').forEach(el => {
+        el.classList.remove('open');
+        el.previousElementSibling?.classList.remove('expanded');
+        setTimeout(() => el.remove(), 400);
       });
-    }
 
-    // Máximo daño para la barra de proporción
-    const maxDmg = hasDetailedData ? Math.max(...participants.map(p => p.damageDealt || 0), 1) : 1;
+      const participants = match.participants || [];
+      if (participants.length === 0) {
+        return; // Sin datos de participantes
+      }
 
-    const renderExpandedRow = (p) => {
-      const isMe = p.puuid === currentModalPuuid;
-      const isMvp = p.puuid === mvpPuuid;
-      const champIcon = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${p.championName}.png`;
-      const k = p.kills ?? '—';
-      const d = p.deaths ?? '—';
-      const a = p.assists ?? '—';
-      const dmg = p.damageDealt;
-      const dmgStr = dmg !== undefined ? (dmg).toLocaleString('es-ES') : '—';
-      const dmgPct = dmg !== undefined ? Math.round((dmg / maxDmg) * 100) : 0;
-      const goldStr = p.gold !== undefined ? (p.gold).toLocaleString('es-ES') : '—';
-      const csStr = p.cs !== undefined ? p.cs : '—';
-      const vsStr = p.visionScore !== undefined ? p.visionScore : '—';
-      const lvl = p.champLevel ?? '';
-      const name = p.summonerName || 'Desconocido';
+      // Separar equipos
+      const team1 = participants.filter(p => p.teamId === 100);
+      const team2 = participants.filter(p => p.teamId === 200);
+      const allTeam1 = team1.length > 0 ? team1 : participants.slice(0, 5);
+      const allTeam2 = team2.length > 0 ? team2 : participants.slice(5, 10);
 
-      // Items mini
-      const items = [p.item0, p.item1, p.item2, p.item3, p.item4, p.item5, p.item6];
-      const itemsHtml = items.map(id => {
-        if (!id || id === 0) return `<div class="exp-item-slot empty"></div>`;
-        return `<img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/${id}.png" class="exp-item-img" onerror="this.style.opacity='0'" />`;
-      }).join('');
+      // Calcular MVP: mejor score ponderado entre los 10 jugadores
+      const hasDetailedData = participants.some(p => p.kills !== undefined);
+      let mvpPuuid = null;
+      if (hasDetailedData) {
+        let bestScore = -1;
+        participants.forEach(p => {
+          const k = p.kills || 0;
+          const d = p.deaths || 0;
+          const a = p.assists || 0;
+          const dmg = p.damageDealt || 0;
+          const score = ((k * 3) + (a * 1.5)) / Math.max(d, 1) + (dmg / 5000);
+          if (score > bestScore) {
+            bestScore = score;
+            mvpPuuid = p.puuid;
+          }
+        });
+      }
 
-      return `
-        <tr class="exp-row ${isMe ? 'exp-row-me' : ''} ${isMvp ? 'exp-row-mvp' : ''}">
-          <td class="exp-champ-cell">
-            <div class="exp-champ-wrapper">
-              <img src="${champIcon}" class="exp-champ-icon" onerror="this.onerror=null; this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png';" />
-              <span class="exp-champ-level">${lvl}</span>
-            </div>
-          </td>
-          <td class="exp-name-cell">
-            <span class="exp-name ${isMe ? 'exp-name-me' : ''}">${escapeHtml(name)}</span>
-            ${isMvp ? '<span class="exp-mvp-badge">★ MVP</span>' : ''}
-          </td>
-          <td class="exp-kda-cell"><span class="exp-k">${k}</span> / <span class="exp-d">${d}</span> / <span class="exp-a">${a}</span></td>
-          <td class="exp-dmg-cell">
-            <div class="exp-dmg-bar-container">
-              <div class="exp-dmg-bar" style="width: ${dmgPct}%"></div>
-              <span class="exp-dmg-text">${dmgStr}</span>
-            </div>
-          </td>
-          <td class="exp-gold-cell">${goldStr}</td>
-          <td class="exp-cs-cell">${csStr}</td>
-          <td class="exp-items-cell"><div class="exp-items-row">${itemsHtml}</div></td>
-          <td class="exp-vision-cell">${vsStr}</td>
-        </tr>
+      // Máximo daño para la barra de proporción
+      const maxDmg = hasDetailedData ? Math.max(...participants.map(p => p.damageDealt || 0), 1) : 1;
+
+      const renderExpandedRow = (p) => {
+        const isMe = p.puuid === currentModalPuuid;
+        const isMvp = p.puuid === mvpPuuid;
+        const champIcon = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${p.championName}.png`;
+        const k = p.kills ?? '—';
+        const d = p.deaths ?? '—';
+        const a = p.assists ?? '—';
+        const dmg = p.damageDealt;
+        const dmgStr = dmg !== undefined ? (dmg).toLocaleString('es-ES') : '—';
+        const dmgPct = dmg !== undefined ? Math.round((dmg / maxDmg) * 100) : 0;
+        const goldStr = p.gold !== undefined ? (p.gold).toLocaleString('es-ES') : '—';
+        const csStr = p.cs !== undefined ? p.cs : '—';
+        const vsStr = p.visionScore !== undefined ? p.visionScore : '—';
+        const lvl = p.champLevel ?? '';
+        const name = p.summonerName || 'Desconocido';
+
+        // Items mini
+        const items = [p.item0, p.item1, p.item2, p.item3, p.item4, p.item5, p.item6];
+        const itemsHtml = items.map(id => {
+          if (!id || id === 0) return `<div class="exp-item-slot empty"></div>`;
+          return `<img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/${id}.png" class="exp-item-img" onerror="this.style.opacity='0'" />`;
+        }).join('');
+
+        return `
+          <tr class="exp-row ${isMe ? 'exp-row-me' : ''} ${isMvp ? 'exp-row-mvp' : ''}">
+            <td class="exp-champ-cell">
+              <div class="exp-champ-wrapper">
+                <img src="${champIcon}" class="exp-champ-icon" onerror="this.onerror=null; this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png';" />
+                <span class="exp-champ-level">${lvl}</span>
+              </div>
+            </td>
+            <td class="exp-name-cell">
+              <span class="exp-name ${isMe ? 'exp-name-me' : ''}">${escapeHtml(name)}</span>
+              ${isMvp ? '<span class="exp-mvp-badge">★ MVP</span>' : ''}
+            </td>
+            <td class="exp-kda-cell"><span class="exp-k">${k}</span> / <span class="exp-d">${d}</span> / <span class="exp-a">${a}</span></td>
+            <td class="exp-dmg-cell">
+              <div class="exp-dmg-bar-container">
+                <div class="exp-dmg-bar" style="width: ${dmgPct}%"></div>
+                <span class="exp-dmg-text">${dmgStr}</span>
+              </div>
+            </td>
+            <td class="exp-gold-cell">${goldStr}</td>
+            <td class="exp-cs-cell">${csStr}</td>
+            <td class="exp-items-cell"><div class="exp-items-row">${itemsHtml}</div></td>
+            <td class="exp-vision-cell">${vsStr}</td>
+          </tr>
+        `;
+      };
+
+      const team1Won = allTeam1.length > 0 && allTeam1[0].win;
+      const team2Won = allTeam2.length > 0 && allTeam2[0].win;
+
+      const expandedHtml = `
+        <div class="match-expanded">
+          <table class="exp-table">
+            <thead>
+              <tr class="exp-header">
+                <th></th><th>Jugador</th><th>KDA</th><th>Daño</th><th>Oro</th><th>CS</th><th>Ítems</th><th>Visión</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="exp-team-divider">
+                <td colspan="8">
+                  <span class="exp-team-label ${team1Won ? 'team-win' : 'team-loss'}">${team1Won ? 'VICTORIA' : 'DERROTA'} — Equipo Azul</span>
+                </td>
+              </tr>
+              ${allTeam1.map(renderExpandedRow).join('')}
+              <tr class="exp-team-divider">
+                <td colspan="8">
+                  <span class="exp-team-label ${team2Won ? 'team-win' : 'team-loss'}">${team2Won ? 'VICTORIA' : 'DERROTA'} — Equipo Rojo</span>
+                </td>
+              </tr>
+              ${allTeam2.map(renderExpandedRow).join('')}
+            </tbody>
+          </table>
+        </div>
       `;
-    };
 
-    const team1Won = allTeam1.length > 0 && allTeam1[0].win;
-    const team2Won = allTeam2.length > 0 && allTeam2[0].win;
+      matchEl.insertAdjacentHTML('afterend', expandedHtml);
+      matchEl.classList.add('expanded');
 
-    const expandedHtml = `
-      <div class="match-expanded">
-        <table class="exp-table">
-          <thead>
-            <tr class="exp-header">
-              <th></th><th>Jugador</th><th>KDA</th><th>Daño</th><th>Oro</th><th>CS</th><th>Ítems</th><th>Visión</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="exp-team-divider">
-              <td colspan="8">
-                <span class="exp-team-label ${team1Won ? 'team-win' : 'team-loss'}">${team1Won ? 'VICTORIA' : 'DERROTA'} — Equipo Azul</span>
-              </td>
-            </tr>
-            ${allTeam1.map(renderExpandedRow).join('')}
-            <tr class="exp-team-divider">
-              <td colspan="8">
-                <span class="exp-team-label ${team2Won ? 'team-win' : 'team-loss'}">${team2Won ? 'VICTORIA' : 'DERROTA'} — Equipo Rojo</span>
-              </td>
-            </tr>
-            ${allTeam2.map(renderExpandedRow).join('')}
-          </tbody>
-        </table>
-      </div>
-    `;
-
-    matchEl.insertAdjacentHTML('afterend', expandedHtml);
-    matchEl.classList.add('expanded');
-
-    // Trigger animation dynamically to ensure smooth transitions
-    const panel = matchEl.nextElementSibling;
-    if (panel) {
-      // Force layout/reflow
-      panel.offsetHeight;
-      
-      panel.classList.add('open');
-      
-      // Use a short timeout to ensure the DOM has completed layout so scrollHeight is accurate.
-      // If scrollHeight still returns 0, use a fallback height of 1000px to ensure the panel opens.
-      setTimeout(() => {
-        const height = panel.scrollHeight;
-        console.log('[EXP] Panel expanded height computed:', height);
-        panel.style.maxHeight = (height > 50 ? height : 1000) + 'px';
-      }, 50);
-    }
+      // Trigger CSS transition dynamically
+      const panel = matchEl.nextElementSibling;
+      if (panel) {
+        // Force reflow so the browser registers the initial closed state before adding class 'open'
+        panel.offsetHeight;
+        panel.classList.add('open');
+        console.log('[EXP] Panel expanded successfully');
+      }
     } catch (err) {
       console.error('[EXP] Error in renderExpandedMatch:', err);
       if (typeof showToast === 'function') {
