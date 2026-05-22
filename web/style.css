@@ -5363,7 +5363,7 @@ select option {
   background: rgba(8, 8, 10, 0.92);
   backdrop-filter: blur(12px);
   border-bottom: 1.5px solid rgba(212, 175, 55, 0.3);
-  z-index: 100000000; /* Asegurar que se superpone a todo excepto barra de carga */
+  z-index: 9999999999; /* Siempre visible por encima del modal y todo lo demás */
   display: flex;
   align-items: center;
   overflow: hidden;
