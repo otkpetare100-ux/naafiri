@@ -843,6 +843,87 @@ app.post('/api/summoners/:puuid/matches/load-more', async (req, res) => {
   }
 });
 
+// Obtener Detalles de una Partida Individual (Riot API + Cache de DB)
+app.get('/api/matches/:matchId', async (req, res) => {
+  const { matchId } = req.params;
+  const region = req.query.region || 'la1';
+  const RIOT_API_KEY = process.env.RIOT_API_KEY;
+
+  try {
+    // 1. Intentar buscar la partida en la caché local de MongoDB (en el historial de cualquier cuenta)
+    const accountWithMatch = await db.collection('accounts').findOne({
+      "matchStatsHistory.matchId": matchId
+    });
+
+    if (accountWithMatch) {
+      const match = accountWithMatch.matchStatsHistory.find(m => m.matchId === matchId);
+      if (match && match.participants && match.participants.length > 0) {
+        console.log(`[API] Partida ${matchId} encontrada en la caché de la base de datos.`);
+        return res.json(match);
+      }
+    }
+
+    // 2. Si no está en la base de datos, consultamos a Riot API
+    console.log(`[API] Partida ${matchId} no encontrada en DB. Consultando a Riot API...`);
+    const routingMap = {
+      la1: 'americas', la2: 'americas', na1: 'americas', br1: 'americas',
+      euw1: 'europe', eun1: 'europe', tr1: 'europe', ru: 'europe',
+      kr: 'asia', jp1: 'asia',
+      oc1: 'sea', ph2: 'sea', sg2: 'sea', th2: 'sea', tw2: 'sea', vn2: 'sea'
+    };
+    const routing = routingMap[region] || 'americas';
+
+    const matchUrl = `https://${routing}.api.riotgames.com/lol/match/v5/matches/${matchId}`;
+    const matchResp = await riotFetch(matchUrl, RIOT_API_KEY);
+    if (!matchResp.ok) {
+      return res.status(matchResp.status).json({ 
+        message: `La API de Riot respondió con estado ${matchResp.status} al consultar la partida ${matchId}.` 
+      });
+    }
+
+    const matchData = await matchResp.json();
+    if (!matchData || !matchData.info || !matchData.info.participants) {
+      return res.status(404).json({ message: 'No se encontraron participantes en la partida de Riot.' });
+    }
+
+    const matchParticipants = matchData.info.participants.map(p => ({
+      summonerName: p.riotIdGameName || p.summonerName || 'Desconocido',
+      tagLine: p.riotIdTagline || '',
+      championName: championMap[p.championId?.toString()] || p.championName || 'Unknown',
+      puuid: p.puuid,
+      win: p.win,
+      teamId: p.teamId,
+      kills: p.kills,
+      deaths: p.deaths,
+      assists: p.assists,
+      gold: p.goldEarned,
+      cs: (p.totalMinionsKilled || 0) + (p.neutralMinionsKilled || 0),
+      damageDealt: p.totalDamageDealtToChampions,
+      item0: p.item0, item1: p.item1, item2: p.item2,
+      item3: p.item3, item4: p.item4, item5: p.item5, item6: p.item6,
+      champLevel: p.champLevel,
+      visionScore: p.visionScore || 0
+    }));
+
+    const durationMins = matchData.info.gameDuration / 60;
+    const isRemake = durationMins < 4.5;
+
+    const result = {
+      matchId: matchId,
+      queueId: matchData.info.queueId,
+      durationMins: durationMins,
+      isRemake: isRemake,
+      timestamp: matchData.info.gameCreation,
+      participants: matchParticipants
+    };
+
+    res.json(result);
+  } catch (error) {
+    console.error(`[API] Error en GET /api/matches/${matchId}:`, error);
+    res.status(500).json({ message: 'Error interno del servidor al obtener la partida.', error: error.message });
+  }
+});
+
 // Obtener Invocador Individual
 app.get('/api/summoners/:puuid', async (req, res) => {
   const { puuid } = req.params;

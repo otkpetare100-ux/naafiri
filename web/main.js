@@ -2286,6 +2286,221 @@ function openPlayerDetails(player) {
     }
   }
 
+  // Lógica para detectar la vista standalone de detalles de partida
+  async function checkStandaloneMatchView() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const view = urlParams.get('view');
+    const matchId = urlParams.get('matchId');
+    const puuid = urlParams.get('puuid');
+    const region = urlParams.get('region') || 'la1';
+
+    if (view === 'match' && matchId) {
+      console.log('[STANDALONE] Vista standalone detectada para la partida:', matchId);
+      
+      // Ocultar la app principal y banners
+      const appEl = document.getElementById('app');
+      if (appEl) appEl.style.display = 'none';
+      const betaBanner = document.querySelector('.beta-banner');
+      if (betaBanner) betaBanner.style.display = 'none';
+      
+      // Mostrar contenedor standalone
+      const container = document.getElementById('standalone-match-view');
+      const loader = document.getElementById('standalone-match-loader');
+      const content = document.getElementById('standalone-match-content');
+      
+      if (container) container.style.display = 'block';
+      if (loader) loader.classList.add('active');
+      if (content) {
+        content.classList.remove('loaded');
+        content.innerHTML = '';
+      }
+
+      try {
+        // Consultar detalles de la partida al servidor
+        const response = await fetch(`${API_BASE}/matches/${matchId}?region=${region}`);
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.message || `Error del servidor (${response.status})`);
+        }
+
+        const match = await response.json();
+        
+        if (!match || !match.participants || match.participants.length === 0) {
+          throw new Error('La partida no contiene datos de participantes o es demasiado antigua.');
+        }
+
+        // Aplicar fondo temático regional premium si está disponible
+        const targetChamp = match.participants.find(p => p.puuid === puuid)?.championName || match.participants[0]?.championName;
+        if (targetChamp && typeof CHAMP_REGIONS_LOWER !== 'undefined' && typeof REGION_WALLPAPERS !== 'undefined') {
+          const champRegion = CHAMP_REGIONS_LOWER[targetChamp.toLowerCase()] || 'runeterra';
+          const wallpaperUrl = REGION_WALLPAPERS[champRegion];
+          if (wallpaperUrl && container) {
+            container.style.backgroundImage = `linear-gradient(rgba(10, 15, 20, 0.88), rgba(10, 15, 20, 0.95)), url('${wallpaperUrl}')`;
+            container.style.backgroundSize = 'cover';
+            container.style.backgroundPosition = 'center';
+            container.style.backgroundAttachment = 'fixed';
+          }
+        }
+
+        // Renderizar los detalles
+        renderStandaloneMatch(match, puuid);
+        
+        if (loader) loader.classList.remove('active');
+        if (content) content.classList.add('loaded');
+      } catch (err) {
+        console.error('[STANDALONE] Error al cargar la partida:', err);
+        if (loader) loader.classList.remove('active');
+        if (content) {
+          content.innerHTML = `
+            <div class="standalone-error-container">
+              <span class="standalone-error-icon">⚠️</span>
+              <h3 class="standalone-error-title">Error al cargar la partida</h3>
+              <p class="standalone-error-message">${escapeHtml(err.message)}</p>
+              <button class="btn-close-standalone" style="margin-top: 15px;" onclick="window.location.reload()">
+                Reintentar
+              </button>
+            </div>
+          `;
+          content.classList.add('loaded');
+        }
+      }
+    }
+  }
+
+  function renderStandaloneMatch(match, targetPuuid) {
+    const content = document.getElementById('standalone-match-content');
+    if (!content) return;
+
+    const participants = match.participants || [];
+    const team1 = participants.filter(p => p.teamId === 100);
+    const team2 = participants.filter(p => p.teamId === 200);
+    const allTeam1 = team1.length > 0 ? team1 : participants.slice(0, 5);
+    const allTeam2 = team2.length > 0 ? team2 : participants.slice(5, 10);
+
+    // Calcular MVP: mejor score ponderado
+    const hasDetailedData = participants.some(p => p.kills !== undefined);
+    let mvpPuuid = null;
+    if (hasDetailedData) {
+      let bestScore = -1;
+      participants.forEach(p => {
+        const k = p.kills || 0;
+        const d = p.deaths || 0;
+        const a = p.assists || 0;
+        const dmg = p.damageDealt || 0;
+        const score = ((k * 3) + (a * 1.5)) / Math.max(d, 1) + (dmg / 5000);
+        if (score > bestScore) {
+          bestScore = score;
+          mvpPuuid = p.puuid;
+        }
+      });
+    }
+
+    const maxDmg = hasDetailedData ? Math.max(...participants.map(p => p.damageDealt || 0), 1) : 1;
+
+    const renderRow = (p) => {
+      const isMe = p.puuid === targetPuuid;
+      const isMvp = p.puuid === mvpPuuid;
+      const champIcon = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${p.championName}.png`;
+      const k = p.kills ?? '—';
+      const d = p.deaths ?? '—';
+      const a = p.assists ?? '—';
+      const dmg = p.damageDealt;
+      const dmgStr = dmg !== undefined ? (dmg).toLocaleString('es-ES') : '—';
+      const dmgPct = dmg !== undefined ? Math.round((dmg / maxDmg) * 100) : 0;
+      const goldStr = p.gold !== undefined ? (p.gold).toLocaleString('es-ES') : '—';
+      const csStr = p.cs !== undefined ? p.cs : '—';
+      const vsStr = p.visionScore !== undefined ? p.visionScore : '—';
+      const lvl = p.champLevel ?? '';
+      const name = p.summonerName || 'Desconocido';
+
+      const items = [p.item0, p.item1, p.item2, p.item3, p.item4, p.item5, p.item6];
+      const itemsHtml = items.map(id => {
+        if (!id || id === 0) return `<div class="exp-item-slot empty"></div>`;
+        return `<img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/${id}.png" class="exp-item-img" onerror="this.style.opacity='0'" />`;
+      }).join('');
+
+      return `
+        <tr class="exp-row ${isMe ? 'exp-row-me' : ''} ${isMvp ? 'exp-row-mvp' : ''}">
+          <td class="exp-champ-cell">
+            <div class="exp-champ-wrapper">
+              <img src="${champIcon}" class="exp-champ-icon" onerror="this.onerror=null; this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png';" />
+              <span class="exp-champ-level">${lvl}</span>
+            </div>
+          </td>
+          <td class="exp-name-cell">
+            <span class="exp-name ${isMe ? 'exp-name-me' : ''}">${escapeHtml(name)}</span>
+            ${isMvp ? '<span class="exp-mvp-badge">★ MVP</span>' : ''}
+          </td>
+          <td class="exp-kda-cell"><span class="exp-k">${k}</span> / <span class="exp-d">${d}</span> / <span class="exp-a">${a}</span></td>
+          <td class="exp-dmg-cell">
+            <div class="exp-dmg-bar-container">
+              <div class="exp-dmg-bar" style="width: ${dmgPct}%"></div>
+              <span class="exp-dmg-text">${dmgStr}</span>
+            </div>
+          </td>
+          <td class="exp-gold-cell">${goldStr}</td>
+          <td class="exp-cs-cell">${csStr}</td>
+          <td class="exp-items-cell"><div class="exp-items-row">${itemsHtml}</div></td>
+          <td class="exp-vision-cell">${vsStr}</td>
+        </tr>
+      `;
+    };
+
+    const team1Won = allTeam1.length > 0 && allTeam1[0].win;
+    const team2Won = allTeam2.length > 0 && allTeam2[0].win;
+
+    const totalSeconds = Math.round(match.durationMins * 60);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    const durationStr = `${minutes}m ${seconds}s`;
+
+    let queueName = 'Partida';
+    if (match.queueId === 420) queueName = 'Clasificatoria Solo/Dúo';
+    else if (match.queueId === 440) queueName = 'Clasificatoria Flex';
+
+    const dateStr = new Date(match.timestamp).toLocaleString('es-ES', { 
+      day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' 
+    });
+
+    content.innerHTML = `
+      <div class="standalone-meta-summary" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; background:rgba(255,255,255,0.02); padding:15px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);">
+        <div>
+          <div style="font-weight:700; font-size:1.1rem; color:var(--gold-primary);">${queueName}</div>
+          <div style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">ID: ${match.matchId} • ${dateStr}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-weight:700; font-size:1.1rem;">${durationStr}</div>
+          <div style="font-size:0.85rem; color:${match.isRemake ? 'var(--text-muted)' : 'inherit'}; margin-top:4px;">
+            ${match.isRemake ? 'REMAKE' : ''}
+          </div>
+        </div>
+      </div>
+      <div class="match-expanded open" style="max-height:none; opacity:1; margin-bottom:0;">
+        <table class="exp-table">
+          <thead>
+            <tr class="exp-header">
+              <th></th><th>Jugador</th><th>KDA</th><th>Daño</th><th>Oro</th><th>CS</th><th>Ítems</th><th>Visión</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="exp-team-divider">
+              <td colspan="8">
+                <span class="exp-team-label ${team1Won ? 'team-win' : 'team-loss'}">${team1Won ? 'VICTORIA' : 'DERROTA'} — Equipo Azul</span>
+              </td>
+            </tr>
+            ${allTeam1.map(renderRow).join('')}
+            <tr class="exp-team-divider">
+              <td colspan="8">
+                <span class="exp-team-label ${team2Won ? 'team-win' : 'team-loss'}">${team2Won ? 'VICTORIA' : 'DERROTA'} — Equipo Rojo</span>
+              </td>
+            </tr>
+            ${allTeam2.map(renderRow).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
   // Render Historial de Partidas
   function renderHistory(history, queueType, isAppend = false) {
     const historyContainer = document.getElementById('detail-match-history');
@@ -2703,6 +2918,16 @@ function openPlayerDetails(player) {
               console.log('[EXP] Click detected on match card', { target: e.target.className, closestTeamPlayer: !!e.target.closest('.team-player'), closestA: !!e.target.closest('a') });
               // No expandir si se hizo clic en un jugador del roster o en un enlace
               if (e.target.closest('.team-player') || e.target.closest('a')) return;
+
+              // Si se hizo clic específicamente en la flecha de expandir (o el icono desactivado)
+              if (e.target.closest('.match-expand-action')) {
+                e.stopPropagation();
+                const region = (activePlayerDetails && activePlayerDetails.region) || 'la1';
+                const puuid = currentModalPuuid || '';
+                const url = `/?view=match&matchId=${match.matchId}&puuid=${puuid}&region=${region}`;
+                window.open(url, '_blank');
+                return;
+              }
               
               if (!match.participants || match.participants.length === 0) {
                 if (typeof showToast === 'function') {
@@ -3030,6 +3255,10 @@ function showToast(message, type = 'success') {
 // Carga inicial
 document.addEventListener('DOMContentLoaded', async () => {
   await updateVersion();
+  
+  // Detectar e inicializar la vista standalone de detalles de partida si aplica
+  checkStandaloneMatchView();
+
   initItemsDatabase(); // Cargar base de datos de items en segundo plano
   initSkinsDatabase(); // Cargar base de datos de skins
   fetchLadder();

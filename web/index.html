@@ -469,6 +469,28 @@
       </div>
     </div>
 
+    <!-- Contenedor Standalone para Detalles de Partida -->
+    <div id="standalone-match-view" class="standalone-match-container" style="display: none;">
+      <div class="standalone-match-card">
+        <div class="standalone-match-header">
+          <div class="header-brand">
+            <img src="/assets/estetica/logo.png" class="standalone-logo" alt="Logo" />
+            <span class="standalone-title">Detalles de la Partida</span>
+          </div>
+          <button class="btn-close-standalone" onclick="window.close()">
+            Cerrar Ventana
+          </button>
+        </div>
+        <div id="standalone-match-loader" class="standalone-loader active">
+          <div class="spinner"></div>
+          <span class="loader-text">Consultando detalles con Riot Games...</span>
+        </div>
+        <div id="standalone-match-content" class="standalone-content">
+          <!-- Renderizado dinámico de los detalles de la partida -->
+        </div>
+      </div>
+    </div>
+
     <div id="toast-container" class="toast-container"></div>
 
     <script type="module" src="/main.js"></script>
