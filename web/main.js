@@ -2137,6 +2137,8 @@ function openPlayerDetails(player) {
   // DETALLES EXPANDIDOS DE PARTIDA (10 JUGADORES)
   // =============================================
   function renderExpandedMatch(matchEl, match) {
+    try {
+      console.log('[EXP] renderExpandedMatch called', { matchId: match.matchId, participants: match.participants?.length });
     // Toggle: si ya está expandido, colapsar
     const existing = matchEl.nextElementSibling;
     if (existing && existing.classList.contains('match-expanded')) {
@@ -2272,6 +2274,12 @@ function openPlayerDetails(player) {
       const panel = matchEl.nextElementSibling;
       if (panel) panel.classList.add('open');
     });
+    } catch (err) {
+      console.error('[EXP] Error in renderExpandedMatch:', err);
+      if (typeof showToast === 'function') {
+        showToast('Error al expandir detalles de la partida. Revisa la consola.', 'error');
+      }
+    }
   }
 
   // Render Historial de Partidas
@@ -2684,9 +2692,11 @@ function openPlayerDetails(player) {
 
           // Attach click handler for expanded details
           const insertedMatch = historyContainer.lastElementChild;
+          console.log('[EXP] Attaching click handler', { insertedMatch: insertedMatch?.className, hasParticipants: !!match.participants, participantsLen: match.participants?.length });
           if (insertedMatch) {
             insertedMatch.style.cursor = 'pointer';
             insertedMatch.addEventListener('click', (e) => {
+              console.log('[EXP] Click detected on match card', { target: e.target.className, closestTeamPlayer: !!e.target.closest('.team-player'), closestA: !!e.target.closest('a') });
               // No expandir si se hizo clic en un jugador del roster o en un enlace
               if (e.target.closest('.team-player') || e.target.closest('a')) return;
               
@@ -2697,6 +2707,7 @@ function openPlayerDetails(player) {
                 return;
               }
               
+              console.log('[EXP] Calling renderExpandedMatch...');
               renderExpandedMatch(insertedMatch, match);
             });
           }
