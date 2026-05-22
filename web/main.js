@@ -2278,8 +2278,14 @@ function openPlayerDetails(player) {
       panel.offsetHeight;
       
       panel.classList.add('open');
-      // Set max-height to the actual height of the content for a perfect, premium animation
-      panel.style.maxHeight = panel.scrollHeight + 'px';
+      
+      // Use a short timeout to ensure the DOM has completed layout so scrollHeight is accurate.
+      // If scrollHeight still returns 0, use a fallback height of 1000px to ensure the panel opens.
+      setTimeout(() => {
+        const height = panel.scrollHeight;
+        console.log('[EXP] Panel expanded height computed:', height);
+        panel.style.maxHeight = (height > 50 ? height : 1000) + 'px';
+      }, 50);
     }
     } catch (err) {
       console.error('[EXP] Error in renderExpandedMatch:', err);
