@@ -2273,10 +2273,13 @@ function openPlayerDetails(player) {
       // Trigger CSS transition dynamically
       const panel = matchEl.nextElementSibling;
       if (panel) {
-        // Force reflow so the browser registers the initial closed state before adding class 'open'
-        panel.offsetHeight;
-        panel.classList.add('open');
-        console.log('[EXP] Panel expanded successfully');
+        // Garantizar que el navegador procese el estado inicial cerrado
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            panel.classList.add('open');
+            console.log('[EXP] Panel expanded successfully');
+          }, 10);
+        });
       }
     } catch (err) {
       console.error('[EXP] Error in renderExpandedMatch:', err);
