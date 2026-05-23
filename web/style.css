@@ -5422,10 +5422,9 @@ select option {
 }
 
 .match-expanded {
-  max-height: 0;
-  overflow: hidden;
+  display: none;
   opacity: 0;
-  transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, margin-bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.3s ease, margin-bottom 0.3s ease;
   background: rgba(18, 18, 20, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-top: none;
@@ -5437,9 +5436,15 @@ select option {
 }
 
 .match-expanded.open {
-  max-height: 800px;
+  display: block;
   opacity: 1;
   margin-bottom: 15px;
+  animation: fadeInPanel 0.3s ease forwards;
+}
+
+@keyframes fadeInPanel {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .exp-table {
