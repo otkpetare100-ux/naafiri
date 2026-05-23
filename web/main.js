@@ -2208,7 +2208,7 @@ function openPlayerDetails(player) {
         const items = [p.item0, p.item1, p.item2, p.item3, p.item4, p.item5, p.item6];
         const itemsHtml = items.map(id => {
           if (!id || id === 0) return `<div class="exp-item-slot empty"></div>`;
-          return `<img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/${id}.png" class="exp-item-img" onerror="this.style.opacity='0'" />`;
+          return `<div class="exp-item-slot"><img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/${id}.png" class="exp-item-img" onerror="this.style.opacity='0'" /></div>`;
         }).join('');
 
         return `
