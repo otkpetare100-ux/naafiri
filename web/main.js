@@ -2704,16 +2704,7 @@ function openPlayerDetails(player) {
               // No expandir si se hizo clic en un jugador del roster o en un enlace
               if (e.target.closest('.team-player') || e.target.closest('a')) return;
 
-              // Si se hizo clic específicamente en la flecha de expandir (o el icono desactivado)
-              if (e.target.closest('.match-expand-action')) {
-                e.stopPropagation();
-                const region = (activePlayerDetails && activePlayerDetails.region) || 'la1';
-                const puuid = currentModalPuuid || '';
-                const url = `/?view=match&matchId=${match.matchId}&puuid=${puuid}&region=${region}`;
-                window.open(url, '_blank');
-                return;
-              }
-              
+
               if (!match.participants || match.participants.length === 0) {
                 if (typeof showToast === 'function') {
                   showToast('Los detalles expandidos no están disponibles para partidas antiguas guardadas antes de la actualización.', 'info');
