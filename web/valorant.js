@@ -93,31 +93,47 @@ function renderLeaderboard() {
   // (Otras opciones de sort se pueden añadir después si traemos matches en el leaderboard)
 
   sorted.forEach((p, idx) => {
+    const rankNum = idx + 1;
     const rankColor = getRankColor(p.rank);
     const card = document.createElement('div');
-    card.className = 'player-card';
+    card.className = `player-card rank-${rankNum}`;
+    card.style.cursor = 'pointer';
     card.onclick = () => openPlayerDetails(p);
+    
+    const [gName, tLine] = p.name.split('#');
 
     card.innerHTML = `
-      <div class="card-rank-badge">#${idx + 1}</div>
-      <div class="card-avatar-wrapper">
-        <img src="${p.iconUrl || '/assets/placeholder_champ.png'}" class="card-avatar" alt="Avatar">
+      <div class="rank-text" style="color: ${rankColor}; text-shadow: 0 0 10px ${rankColor}40;">#${rankNum}</div>
+      
+      <div class="avatar-wrapper">
+        <img src="${p.iconUrl || '/assets/placeholder_champ.png'}" class="player-avatar" alt="Avatar">
       </div>
       
-      <div class="card-info">
-        <div class="player-name">${p.name}</div>
-        <div class="tier-label" style="color: ${rankColor}">${p.rank || 'Unranked'}</div>
-      </div>
-      
-      <div class="card-stats">
-        <div class="stat-block">
-          <span class="stat-value" style="color: var(--gold-primary);">${p.rr !== null ? p.rr : '-'}</span>
-          <span class="stat-label">RR</span>
+      <div class="player-main-info">
+        <div class="player-name-row">
+          <span class="name">${gName}</span>
+        </div>
+        <div class="player-meta">
+          <span class="tag">#${tLine}</span>
+          <span class="region-badge" style="background: rgba(255, 70, 85, 0.2); color: #ff4655; border: 1px solid rgba(255, 70, 85, 0.4);">VALORANT</span>
         </div>
       </div>
       
-      <div class="card-emblem-wrapper">
-        <img src="${p.rankIconUrl || ''}" class="card-emblem" style="opacity: 0.6;" alt="">
+      <div class="rank-data" style="display: flex; align-items: center; justify-content: flex-end; gap: 15px;">
+        <div class="rank-info-text" style="text-align: right;">
+          <div class="tier-text" style="color: ${rankColor};">${p.rank || 'Unranked'}</div>
+          <div class="rank-stats">
+            <span class="lp">${p.rr !== null ? p.rr : '-'} RR</span>
+          </div>
+        </div>
+        <div class="rank-emblem-container" style="position: static; margin: 0; filter: drop-shadow(0 0 8px ${rankColor}80);">
+          <img src="${p.rankIconUrl || ''}" class="rank-emblem" alt="" style="width: 50px; height: 50px; opacity: 1;">
+        </div>
+      </div>
+      
+      <!-- Botones de Acción (Ocultos por defecto, igual que LoL) -->
+      <div class="card-actions">
+        <!-- Sin botón de eliminar temporalmente -->
       </div>
     `;
     container.appendChild(card);
