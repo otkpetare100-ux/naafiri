@@ -206,7 +206,7 @@ async function openPlayerDetails(player) {
     const agentsCount = {};
     
     matches.forEach(m => {
-      const isDeathmatch = m.meta.mode.toLowerCase() === 'deathmatch';
+      const isDeathmatch = m.meta?.mode?.toLowerCase() === 'deathmatch';
       // Encontrar al jugador en los equipos
       let myPlayer = null;
       if (m.players && m.players.all_players) {
@@ -232,11 +232,21 @@ async function openPlayerDetails(player) {
          
          const dmgData = myPlayer.damage_made || 0;
          totalDamage += dmgData;
-         totalRounds += m.meta.cluster ? m.meta.cluster.length || (m.teams.red.rounds_won + m.teams.red.rounds_lost) : 20; // Aproximación
+         
+         // Safe check for rounds
+         let gameRounds = 20;
+         if (m.meta?.cluster && m.meta.cluster.length) {
+            gameRounds = m.meta.cluster.length;
+         } else if (m.teams && m.teams.red) {
+            gameRounds = (m.teams.red.rounds_won || 0) + (m.teams.red.rounds_lost || 0);
+         }
+         if (gameRounds === 0) gameRounds = 20;
+         totalRounds += gameRounds;
          
          // Agentes
-         const agentName = myPlayer.character;
-         if (!agentsCount[agentName]) agentsCount[agentName] = { count: 0, wins: 0, icon: myPlayer.assets.agent.small };
+         const agentName = myPlayer.character || 'Desconocido';
+         const agentIcon = myPlayer.assets?.agent?.small || '/assets/placeholder_champ.png';
+         if (!agentsCount[agentName]) agentsCount[agentName] = { count: 0, wins: 0, icon: agentIcon };
          agentsCount[agentName].count++;
       }
       
@@ -245,14 +255,14 @@ async function openPlayerDetails(player) {
       let resultColor = '#888';
       let borderLeft = '4px solid #888';
       
-      if (!isDeathmatch && m.teams) {
+      if (!isDeathmatch && m.teams && myPlayer.team) {
         const myTeam = m.teams[myPlayer.team.toLowerCase()];
         if (myTeam && myTeam.has_won) {
           result = 'Victoria';
           resultColor = '#5bb482';
           borderLeft = '4px solid #5bb482';
           wins++;
-          if (agentsCount[myPlayer.character]) agentsCount[myPlayer.character].wins++;
+          if (myPlayer.character && agentsCount[myPlayer.character]) agentsCount[myPlayer.character].wins++;
         } else if (myTeam && !myTeam.has_won && myTeam.rounds_won < myTeam.rounds_lost) {
           result = 'Derrota';
           resultColor = '#ff4655';
@@ -265,23 +275,26 @@ async function openPlayerDetails(player) {
       
       // Elemento Historial
       const stats = myPlayer.stats || {};
-      const kdaStr = `${stats.kills}/${stats.deaths}/${stats.assists}`;
+      const kdaStr = `${stats.kills || 0}/${stats.deaths || 0}/${stats.assists || 0}`;
       const score = stats.score || 0;
+      const mapName = m.meta?.map?.name || 'Mapa Desconocido';
+      const modeName = m.meta?.mode || 'Modo Desconocido';
+      const agentIconUrl = myPlayer.assets?.agent?.small || '/assets/placeholder_champ.png';
       
       const el = document.createElement('div');
       el.style.cssText = `background: rgba(20,20,20,0.8); margin-bottom: 8px; padding: 12px; border-radius: 6px; border-left: ${borderLeft}; display: flex; align-items: center; justify-content: space-between;`;
       
       el.innerHTML = `
         <div style="display: flex; align-items: center; gap: 12px;">
-          <img src="${myPlayer.assets.agent.small}" style="width: 48px; height: 48px; border-radius: 50%; background: #333; border: 1px solid rgba(255,255,255,0.1);" alt="Agent">
+          <img src="${agentIconUrl}" style="width: 48px; height: 48px; border-radius: 50%; background: #333; border: 1px solid rgba(255,255,255,0.1);" alt="Agent">
           <div>
-            <div style="font-weight: bold; color: ${resultColor}; font-size: 1.1rem;">${result} <span style="font-size: 0.8rem; color: #888;">${m.meta.mode} - ${m.meta.map.name}</span></div>
+            <div style="font-weight: bold; color: ${resultColor}; font-size: 1.1rem;">${result} <span style="font-size: 0.8rem; color: #888;">${modeName} - ${mapName}</span></div>
             <div style="font-size: 0.85rem; color: #aaa;">KDA: <span style="color: white; font-weight: bold;">${kdaStr}</span></div>
           </div>
         </div>
         <div style="text-align: right; font-size: 0.85rem; color: #aaa;">
            <div>Combat Score: <span style="color: white; font-weight: bold;">${score}</span></div>
-           <div>Agente: <span style="color: var(--gold-primary); font-weight: 600;">${myPlayer.character}</span></div>
+           <div>Agente: <span style="color: var(--gold-primary); font-weight: 600;">${myPlayer.character || '?'}</span></div>
         </div>
       `;
       historyContainer.appendChild(el);

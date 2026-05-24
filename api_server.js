@@ -269,41 +269,51 @@ app.get('/api/valorant/leaderboard', async (req, res) => {
     const accounts = await db.collection('accounts').find({}).toArray();
     if (!accounts.length) return res.json({ leaderboard: [] });
 
-    // Fetch Valorant MMR para cada cuenta (usamos Promise.all porque el Rate Limit de HenrikDev permiteráfagas pequeñas)
-    const results = await Promise.all(accounts.map(async (acc) => {
-      try {
-        const url = `https://api.henrikdev.xyz/valorant/v2/mmr/latam/${encodeURIComponent(acc.gameName)}/${encodeURIComponent(acc.tagLine)}`;
-        const response = await fetch(url, {
-          headers: { 'Authorization': henrikKey }
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          const mmr = data.data.current_data || {};
-          return {
-            puuid: acc.puuid,
-            name: `${acc.gameName}#${acc.tagLine}`,
-            iconUrl: `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${acc.profileIconId || 1}.png`,
-            rank: mmr.currenttierpatched || 'Unranked',
-            rr: mmr.ranking_in_tier || 0,
-            elo: mmr.elo || 0,
-            rankIconUrl: mmr.images ? mmr.images.small : null
-          };
-        } else {
-          return {
-            puuid: acc.puuid,
-            name: `${acc.gameName}#${acc.tagLine}`,
-            iconUrl: `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${acc.profileIconId || 1}.png`,
-            rank: 'Unranked',
-            rr: null,
-            elo: 0,
-            rankIconUrl: null
-          };
+    // Agrupar peticiones en chunks para evitar error 429 Too Many Requests en HenrikDev API
+    const chunkArray = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
+    const chunks = chunkArray(accounts, 5); // 5 peticiones por lote
+    
+    const results = [];
+    for (const chunk of chunks) {
+      const chunkResults = await Promise.all(chunk.map(async (acc) => {
+        try {
+          const url = `https://api.henrikdev.xyz/valorant/v2/mmr/latam/${encodeURIComponent(acc.gameName)}/${encodeURIComponent(acc.tagLine)}`;
+          const response = await fetch(url, {
+            headers: { 'Authorization': henrikKey }
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            const mmr = data.data.current_data || {};
+            return {
+              puuid: acc.puuid,
+              name: `${acc.gameName}#${acc.tagLine}`,
+              iconUrl: `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${acc.profileIconId || 1}.png`,
+              rank: mmr.currenttierpatched || 'Unranked',
+              rr: mmr.ranking_in_tier || 0,
+              elo: mmr.elo || 0,
+              rankIconUrl: mmr.images ? mmr.images.small : null
+            };
+          } else {
+            return {
+              puuid: acc.puuid,
+              name: `${acc.gameName}#${acc.tagLine}`,
+              iconUrl: `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${acc.profileIconId || 1}.png`,
+              rank: 'Unranked',
+              rr: null,
+              elo: 0,
+              rankIconUrl: null
+            };
+          }
+        } catch (e) {
+          return null; // Omitir si hay error de red
         }
-      } catch (e) {
-        return null; // Omitir si hay error de red
-      }
-    }));
+      }));
+      
+      results.push(...chunkResults);
+      // Pequeña pausa entre lotes para respetar Rate Limits
+      await new Promise(resolve => setTimeout(resolve, 350));
+    }
 
     const validResults = results.filter(r => r !== null);
     
