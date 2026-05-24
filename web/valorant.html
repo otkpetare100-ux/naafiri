@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LAN Tracker | Valorant Leaderboard</title>
+    <!-- Tipografía Premium -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Oswald:wght@500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+    <!-- Barra de carga minimalista rojo premium -->
+    <div id="top-loading-bar" class="top-loading-bar" style="background: linear-gradient(90deg, #ff4655, #d42c38);"></div>
+    <div id="app">
+      <header class="main-header">
+        <div class="header-content">
+          <div class="brand">
+            <img src="/assets/estetica/logo.png" class="nav-logo" alt="Logo" />
+            <img src="/assets/estetica/texto.png" class="nav-text" alt="Las Perras de Naafiri" />
+            <a href="/" class="nav-valorant-btn" style="background: linear-gradient(135deg, #1f2326, #111); border-color: rgba(255,255,255,0.1); color: #fff;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              VOLVER A LOL
+            </a>
+          </div>
+        </div>
+      </header>
+
+      <main class="content">
+        <section class="ladder-section">
+          <div class="section-header">
+            <div class="header-left">
+              <span class="trophy-icon" style="color: #ff4655;">🎯</span>
+              <h1 style="color: #ff4655; text-shadow: 0 0 15px rgba(255,70,85,0.4);">Valorant Leaderboard</h1>
+            </div>
+            <div class="header-right">
+              <button id="refresh-val-btn" class="icon-btn" title="Actualizar Datos de Valorant">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff4655" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              </button>
+            </div>
+          </div>
+          <div id="valorant-leaderboard-container">
+             <!-- Spinner de carga -->
+             <div id="val-loading" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                Generando Leaderboard...
+             </div>
+             <!-- Tabla donde se insertará el leaderboard -->
+             <div id="val-table-wrapper" style="display: none;">
+                 <!-- JS inyectará las filas aquí -->
+             </div>
+          </div>
+        </section>
+      </main>
+    </div>
+    
+    <div id="toast-container" class="toast-container"></div>
+    <script type="module" src="/valorant.js"></script>
+  </body>
+</html>

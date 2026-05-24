@@ -2993,6 +2993,37 @@ select option {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
+.nav-text {
+  height: 28px;
+  object-fit: contain;
+}
+
+.nav-valorant-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 20px;
+  padding: 6px 14px;
+  background: linear-gradient(135deg, #ff4655 0%, #d42c38 100%);
+  color: #fff;
+  font-family: 'Oswald', 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(255, 70, 85, 0.4);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.nav-valorant-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(255, 70, 85, 0.6);
+  background: linear-gradient(135deg, #ff5c6a 0%, #e83643 100%);
+}
+
 .match-rune-icon {
   width: 25px;
   height: 25px;

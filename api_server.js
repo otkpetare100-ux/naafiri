@@ -235,6 +235,64 @@ app.get('/api/summoners/:puuid/live', async (req, res) => {
   }
 });
 
+// Endpoint para obtener el leaderboard de Valorant usando HenrikDev API
+app.get('/api/valorant/leaderboard', async (req, res) => {
+  try {
+    const henrikKey = process.env.HENRIK_API_KEY;
+    if (!henrikKey) {
+      return res.status(500).json({ error: 'HENRIK_API_KEY no configurada en el servidor' });
+    }
+
+    const accounts = await db.collection('accounts').find({}).toArray();
+    if (!accounts.length) return res.json({ leaderboard: [] });
+
+    // Fetch Valorant MMR para cada cuenta (usamos Promise.all porque el Rate Limit de HenrikDev permiteráfagas pequeñas)
+    const results = await Promise.all(accounts.map(async (acc) => {
+      try {
+        const url = `https://api.henrikdev.xyz/valorant/v2/mmr/latam/${encodeURIComponent(acc.gameName)}/${encodeURIComponent(acc.tagLine)}`;
+        const response = await fetch(url, {
+          headers: { 'Authorization': henrikKey }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          const mmr = data.data.current_data || {};
+          return {
+            puuid: acc.puuid,
+            name: `${acc.gameName}#${acc.tagLine}`,
+            iconUrl: `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${acc.profileIconId || 1}.png`,
+            rank: mmr.currenttierpatched || 'Unranked',
+            rr: mmr.ranking_in_tier || 0,
+            elo: mmr.elo || 0,
+            rankIconUrl: mmr.images ? mmr.images.small : null
+          };
+        } else {
+          return {
+            puuid: acc.puuid,
+            name: `${acc.gameName}#${acc.tagLine}`,
+            iconUrl: `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${acc.profileIconId || 1}.png`,
+            rank: 'Unranked',
+            rr: null,
+            elo: 0,
+            rankIconUrl: null
+          };
+        }
+      } catch (e) {
+        return null; // Omitir si hay error de red
+      }
+    }));
+
+    const validResults = results.filter(r => r !== null);
+    
+    // Ordenar por elo descendente
+    validResults.sort((a, b) => b.elo - a.elo);
+
+    res.json({ leaderboard: validResults });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Cooldown global en memoria (clave: gameName#tagLine)
 const refreshCooldowns = new Map();
 
