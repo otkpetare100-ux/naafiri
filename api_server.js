@@ -207,6 +207,34 @@ app.get('/api/live-status', async (req, res) => {
   }
 });
 
+// Endpoint para forzar chequeo de estado en vivo de un jugador específico (Directo a Riot API)
+app.get('/api/summoners/:puuid/live', async (req, res) => {
+  try {
+    const puuid = req.params.puuid;
+    const account = await db.collection('accounts').findOne({ puuid });
+    if (!account) return res.status(404).json({ error: 'Player not found' });
+    
+    const region = account.region || 'la1';
+    const spectUrl = `https://${region}.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${puuid}`;
+    const spectRes = await riotFetch(spectUrl, process.env.RIOT_API_KEY);
+    
+    let isLive = false;
+    let updateOp = {};
+    if (spectRes.ok) {
+      const game = await spectRes.json();
+      isLive = true;
+      updateOp = { $set: { liveGameStartedAt: new Date(), lastLiveGameId: game.gameId } };
+    } else {
+      updateOp = { $unset: { liveGameStartedAt: "", lastLiveGameId: "" } };
+    }
+    
+    await db.collection('accounts').updateOne({ puuid }, updateOp);
+    res.json({ isLive });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Cooldown global en memoria (clave: gameName#tagLine)
 const refreshCooldowns = new Map();
 

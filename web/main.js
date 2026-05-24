@@ -1537,6 +1537,23 @@ function openPlayerDetails(player) {
     statusEl.className = 'status-badge offline';
   }
 
+  // Disparar chequeo asíncrono del estado en vivo real al abrir el modal
+  fetch(`${API_BASE}/summoners/${player.puuid}/live`)
+    .then(res => res.json())
+    .then(data => {
+      if (currentModalPuuid === player.puuid && statusEl) {
+        statusEl.textContent = data.isLive ? 'CONECTADO' : 'DESCONECTADO';
+        statusEl.className = data.isLive ? 'status-badge' : 'status-badge offline';
+        
+        const dot = document.getElementById(`live-dot-${player.puuid}`);
+        if (dot) {
+          if (data.isLive) dot.classList.add('online');
+          else dot.classList.remove('online');
+        }
+      }
+    })
+    .catch(err => console.error('Error auto-checking live status:', err));
+
       // LÓGICA DE TAG OTP PREMIUM (Sincronizada a 20 SoloQ)
       const otpContainer = document.getElementById('otp-badge-container');
       otpContainer.innerHTML = '';
