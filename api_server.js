@@ -235,6 +235,29 @@ app.get('/api/summoners/:puuid/live', async (req, res) => {
   }
 });
 
+// Endpoint para obtener el historial de partidas de Valorant (Proxies HenrikDev API)
+app.get('/api/valorant/matches/:gameName/:tagLine', async (req, res) => {
+  try {
+    const { gameName, tagLine } = req.params;
+    const henrikKey = process.env.HENRIK_API_KEY;
+    if (!henrikKey) {
+      return res.status(500).json({ error: 'HENRIK_API_KEY no configurada' });
+    }
+
+    const url = `https://api.henrikdev.xyz/valorant/v3/matches/latam/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`;
+    const response = await fetch(url, { headers: { 'Authorization': henrikKey } });
+    
+    if (!response.ok) {
+      return res.status(response.status).json({ error: 'No se encontraron partidas' });
+    }
+    
+    const data = await response.json();
+    res.json(data.data); // Array of match objects
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Endpoint para obtener el leaderboard de Valorant usando HenrikDev API
 app.get('/api/valorant/leaderboard', async (req, res) => {
   try {

@@ -35,24 +35,114 @@
               <span class="trophy-icon" style="color: #ff4655;">🎯</span>
               <h1 style="color: #ff4655; text-shadow: 0 0 15px rgba(255,70,85,0.4);">Valorant Leaderboard</h1>
             </div>
-            <div class="header-right">
-              <button id="refresh-val-btn" class="icon-btn" title="Actualizar Datos de Valorant">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff4655" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            <div class="header-right" style="display: flex; gap: 12px; align-items: center;">
+              <div class="sort-container btn-compare-action custom-dropdown-container" style="padding: 0; position: relative;">
+                <div class="custom-select-trigger" id="sort-trigger" style="color: #ff4655; border-color: rgba(255,70,85,0.3);">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #ff4655;"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                </div>
+                
+                <div class="custom-select-options" id="sort-options">
+                  <div class="custom-option selected" data-value="elo">
+                     Rango / RR
+                  </div>
+                  <div class="custom-option" data-value="wr">
+                     Win Rate
+                  </div>
+                  <div class="custom-option" data-value="kda">
+                     KDA
+                  </div>
+                  <div class="custom-option" data-value="hs">
+                     Headshot %
+                  </div>
+                </div>
+              </div>
+              <button id="add-player-btn" class="btn-gold-action" style="background: linear-gradient(135deg, #ff4655 0%, #d42c38 100%); box-shadow: 0 0 10px rgba(255, 70, 85, 0.3);">
+                <span class="icon">+</span> Añadir Jugador
               </button>
             </div>
           </div>
+          
           <div id="valorant-leaderboard-container">
              <!-- Spinner de carga -->
              <div id="val-loading" style="text-align: center; padding: 3rem; color: var(--text-muted);">
                 Generando Leaderboard...
              </div>
-             <!-- Tabla donde se insertará el leaderboard -->
-             <div id="val-table-wrapper" style="display: none;">
-                 <!-- JS inyectará las filas aquí -->
+             <!-- Contenedor de Tarjetas (Cards) en lugar de tabla -->
+             <div id="ladder-container" class="ladder-list" style="display: none;">
+                 <!-- JS inyectará las tarjetas aquí -->
              </div>
           </div>
         </section>
       </main>
+    </div>
+    
+    <!-- Modal para Añadir Jugador -->
+    <div id="add-player-modal" class="modal">
+      <div class="modal-content" style="border: 1px solid rgba(255,70,85,0.3);">
+        <div class="modal-header">
+          <h2 style="color: #ff4655;">Añadir Jugador Valorant</h2>
+          <span class="close-modal">&times;</span>
+        </div>
+        <form id="add-player-form">
+          <div class="form-group">
+            <label for="region">Región</label>
+            <select id="region" required>
+              <option value="latam">LATAM (Latinoamérica)</option>
+              <option value="na">NA (Norteamérica)</option>
+              <option value="eu">EU (Europa)</option>
+              <option value="ap">AP (Asia Pacific)</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group flex-2">
+              <label for="gameName">Riot ID</label>
+              <input type="text" id="gameName" placeholder="Ej: TenZ" required>
+            </div>
+            <div class="form-group flex-1">
+              <label for="tagLine">Tag</label>
+              <input type="text" id="tagLine" placeholder="Ej: SEN" required>
+            </div>
+          </div>
+          <button type="submit" class="submit-btn-gold" style="background: linear-gradient(135deg, #ff4655 0%, #d42c38 100%); color: white;">Registrar</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal de Perfil de Valorant (Simplificado por ahora) -->
+    <div id="player-details-modal" class="modal">
+      <div class="modal-content details-modal" style="border: 1px solid rgba(255,70,85,0.3);">
+        <div id="details-modal-loader" class="details-modal-loader">
+          <div class="loader-content">
+            <div class="loading-ring" style="border-color: rgba(255,70,85,0.2); border-top-color: #ff4655;"></div>
+            <span class="loading-text" style="color: #ff4655;">OBTENIENDO DATOS DE VALORANT...</span>
+          </div>
+        </div>
+        <div class="modal-header">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <h2 id="detail-name" style="color: white;">PERFIL VALORANT</h2>
+          </div>
+          <span class="close-modal close-details">&times;</span>
+        </div>
+        <div class="modal-body dashboard-layout" style="padding: 20px;">
+           <div class="dash-left-col detail-box" style="width: 100%; border: 1px solid rgba(255,70,85,0.2);">
+             <div class="profile-info-block dash-profile" style="flex-direction: row; align-items: center; gap: 20px;">
+               <img id="detail-profile-icon" src="" alt="Icono" style="width: 80px; height: 80px; border-radius: 50%;" />
+               <div style="display: flex; flex-direction: column;">
+                 <h2 id="detail-player-id" style="margin:0; font-size: 24px;"></h2>
+                 <div id="detail-rank-text" style="color: #ff4655; font-weight: bold; font-size: 18px;"></div>
+               </div>
+               <img id="detail-rank-icon" src="" style="width: 60px; margin-left: auto;">
+             </div>
+           </div>
+           
+           <div class="dash-full-width detail-box dash-history-box" style="grid-column: 1 / -1; margin-top: 20px;">
+             <h4 class="dash-champs-title" style="margin-top: 0; color: #ff4655; text-transform: uppercase; font-size: 1rem; border-bottom: 1px solid rgba(255,70,85,0.2); padding-bottom: 10px; margin-bottom: 15px;">Historial de Partidas (Próximamente)</h4>
+             <div id="detail-match-history" class="match-history-list">
+                 <!-- Historial irá aquí -->
+             </div>
+           </div>
+        </div>
+      </div>
     </div>
     
     <div id="toast-container" class="toast-container"></div>
