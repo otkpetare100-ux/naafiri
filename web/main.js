@@ -1530,7 +1530,7 @@ function openPlayerDetails(player) {
   
   const statusEl = document.getElementById('detail-status');
   if (player.isLive) {
-    statusEl.textContent = 'EN PARTIDA';
+    statusEl.textContent = 'CONECTADO';
     statusEl.className = 'status-badge';
   } else {
     statusEl.textContent = 'DESCONECTADO';
@@ -3314,7 +3314,7 @@ async function pollLiveStatus() {
         const statusEl = document.getElementById('detail-status');
         if (statusEl) {
           statusEl.className = isLive ? 'status-badge' : 'status-badge offline';
-          statusEl.textContent = isLive ? 'EN PARTIDA' : 'DESCONECTADO';
+          statusEl.textContent = isLive ? 'CONECTADO' : 'DESCONECTADO';
         }
       }
     }

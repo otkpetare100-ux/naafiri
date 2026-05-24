@@ -315,6 +315,21 @@ app.post('/api/summoners', async (req, res) => {
     // 5. Top Campeones
     const topChampions = await getTopChampions(accountData.puuid, region, RIOT_API_KEY);
 
+    // 5.5. Verificar si está en partida (Spectator)
+    let isLive = false;
+    let liveGameId = null;
+    try {
+      const spectUrl = `https://${region}.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${accountData.puuid}`;
+      const spectRes = await riotFetch(spectUrl, RIOT_API_KEY);
+      if (spectRes.ok) {
+        const game = await spectRes.json();
+        isLive = true;
+        liveGameId = game.gameId;
+      }
+    } catch (e) {
+      console.error('Error Spectator API manual refresh:', e);
+    }
+
     // 6. Verificar si ya existe en nuestra DB
     const existing = await db.collection('accounts').findOne({ puuid: accountData.puuid });
     
@@ -331,9 +346,18 @@ app.post('/api/summoners', async (req, res) => {
         topChampions, 
         lastUpdated: new Date() 
       };
+
+      const updateOp = { $set: updatedAccount };
+      if (isLive) {
+        updatedAccount.liveGameStartedAt = new Date();
+        updatedAccount.lastLiveGameId = liveGameId;
+      } else {
+        updateOp.$unset = { liveGameStartedAt: "", lastLiveGameId: "" };
+      }
+
       await db.collection('accounts').updateOne(
         { puuid: accountData.puuid },
-        { $set: updatedAccount }
+        updateOp
       );
       refreshCooldowns.set(cooldownKey, Date.now());
       return res.json({ success: true, message: '✅ Datos del jugador actualizados.', account: updatedAccount });
@@ -354,6 +378,11 @@ app.post('/api/summoners', async (req, res) => {
       addedAt: new Date(),
       lastUpdated: new Date()
     };
+
+    if (isLive) {
+      newAccount.liveGameStartedAt = new Date();
+      newAccount.lastLiveGameId = liveGameId;
+    }
 
     await db.collection('accounts').insertOne(newAccount);
     refreshCooldowns.set(cooldownKey, Date.now());
